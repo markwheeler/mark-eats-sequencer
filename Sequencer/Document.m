@@ -7,6 +7,12 @@
 //
 
 #import "Document.h"
+#import "Sequencer+Create.h"
+#import "SequencerPage.h"
+#import "SequencerRowPitch.h"
+#import "SequencerPattern.h"
+#import "SequencerNote.h"
+#import "SequencerPatternRef.h"
 
 @implementation Document
 
@@ -15,6 +21,19 @@
     self = [super init];
     if (self) {
         // Add your subclass-specific initialization here.
+
+        Sequencer *sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
+
+        sequencer.bpm = [NSNumber numberWithInt:89];
+
+        //SequencerPage *page = sequencer.pages[2];
+        //NSLog(@"%@", [page.pitches[3] pitch]);
+        
+        // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
+        
+        // TODO: Implement a category method on Sequencer 'createWithPages:(int)' that sets everything up? Might also need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
+        
+        
     }
     return self;
 }

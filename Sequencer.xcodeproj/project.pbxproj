@@ -15,6 +15,13 @@
 		4D6115E216E431BD00140AF8 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115E016E431BD00140AF8 /* Document.xib */; };
 		4D6115E516E431BD00140AF8 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115E316E431BD00140AF8 /* MainMenu.xib */; };
 		4D6115E816E431BD00140AF8 /* Document.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */; };
+		4D61161416E433A400140AF8 /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61161316E433A400140AF8 /* SequencerNote.m */; };
+		4D61161716E433A400140AF8 /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61161616E433A400140AF8 /* SequencerPage.m */; };
+		4D61161A16E433A400140AF8 /* SequencerPatternRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61161916E433A400140AF8 /* SequencerPatternRef.m */; };
+		4D61161D16E433A400140AF8 /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61161C16E433A400140AF8 /* Sequencer.m */; };
+		4D61162016E433A400140AF8 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61161F16E433A400140AF8 /* SequencerPattern.m */; };
+		4D61162316E433A400140AF8 /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162216E433A400140AF8 /* SequencerRowPitch.m */; };
+		4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Create.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +40,20 @@
 		4D6115E116E431BD00140AF8 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Document.xib; sourceTree = "<group>"; };
 		4D6115E416E431BD00140AF8 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		4D6115E716E431BD00140AF8 /* Document.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Document.xcdatamodel; sourceTree = "<group>"; };
+		4D61161216E433A400140AF8 /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
+		4D61161316E433A400140AF8 /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
+		4D61161516E433A400140AF8 /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
+		4D61161616E433A400140AF8 /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
+		4D61161816E433A400140AF8 /* SequencerPatternRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternRef.h; sourceTree = "<group>"; };
+		4D61161916E433A400140AF8 /* SequencerPatternRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternRef.m; sourceTree = "<group>"; };
+		4D61161B16E433A400140AF8 /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
+		4D61161C16E433A400140AF8 /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
+		4D61161E16E433A400140AF8 /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
+		4D61161F16E433A400140AF8 /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
+		4D61162116E433A400140AF8 /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
+		4D61162216E433A400140AF8 /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
+		4D61162916E4386700140AF8 /* Sequencer+Create.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sequencer+Create.h"; sourceTree = "<group>"; };
+		4D61162A16E4386700140AF8 /* Sequencer+Create.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Sequencer+Create.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +112,21 @@
 				4D6115E016E431BD00140AF8 /* Document.xib */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
+				4D61162916E4386700140AF8 /* Sequencer+Create.h */,
+				4D61162A16E4386700140AF8 /* Sequencer+Create.m */,
+				4D61161B16E433A400140AF8 /* Sequencer.h */,
+				4D61161C16E433A400140AF8 /* Sequencer.m */,
+				4D61161516E433A400140AF8 /* SequencerPage.h */,
+				4D61161616E433A400140AF8 /* SequencerPage.m */,
+				4D61162116E433A400140AF8 /* SequencerRowPitch.h */,
+				4D61162216E433A400140AF8 /* SequencerRowPitch.m */,
+				4D61161E16E433A400140AF8 /* SequencerPattern.h */,
+				4D61161F16E433A400140AF8 /* SequencerPattern.m */,
+				4D61161816E433A400140AF8 /* SequencerPatternRef.h */,
+				4D61161916E433A400140AF8 /* SequencerPatternRef.m */,
+				4D61161216E433A400140AF8 /* SequencerNote.h */,
+				4D61161316E433A400140AF8 /* SequencerNote.m */,
+				4D61162416E433C500140AF8 /* Core Data */,
 				4D6115D216E431BD00140AF8 /* Supporting Files */,
 			);
 			path = Sequencer;
@@ -106,6 +142,13 @@
 				4D6115DA16E431BD00140AF8 /* Credits.rtf */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4D61162416E433C500140AF8 /* Core Data */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Core Data";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -176,6 +219,13 @@
 				4D6115D816E431BD00140AF8 /* main.m in Sources */,
 				4D6115DF16E431BD00140AF8 /* Document.m in Sources */,
 				4D6115E816E431BD00140AF8 /* Document.xcdatamodeld in Sources */,
+				4D61161416E433A400140AF8 /* SequencerNote.m in Sources */,
+				4D61161716E433A400140AF8 /* SequencerPage.m in Sources */,
+				4D61161A16E433A400140AF8 /* SequencerPatternRef.m in Sources */,
+				4D61161D16E433A400140AF8 /* Sequencer.m in Sources */,
+				4D61162016E433A400140AF8 /* SequencerPattern.m in Sources */,
+				4D61162316E433A400140AF8 /* SequencerRowPitch.m in Sources */,
+				4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

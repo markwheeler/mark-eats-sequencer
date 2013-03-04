@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="untitled.xcdatamodel" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
-    <elements/>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2057" systemVersion="12C60" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Sequencer" representedClassName="Sequencer" syncable="YES">
+        <attribute name="bpm" attributeType="Integer 16" minValueString="20" maxValueString="300" defaultValueString="100" syncable="YES"/>
+        <attribute name="patternQuantization" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="pitches" attributeType="Integer 16" minValueString="1" maxValueString="32" defaultValueString="1" syncable="YES"/>
+        <attribute name="stepQuantization" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="steps" attributeType="Integer 16" minValueString="1" maxValueString="32" defaultValueString="1" syncable="YES"/>
+        <relationship name="pages" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPage" inverseName="inSequencer" inverseEntity="SequencerPage" syncable="YES"/>
+    </entity>
+    <entity name="SequencerNote" representedClassName="SequencerNote" syncable="YES">
+        <attribute name="lengthAsPercentage" attributeType="Integer 16" minValueString="0" maxValueString="100" defaultValueString="0" syncable="YES"/>
+        <attribute name="row" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="step" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="velocity" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="64" syncable="YES"/>
+        <relationship name="inPattern" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPattern" inverseName="notes" inverseEntity="SequencerPattern" syncable="YES"/>
+    </entity>
+    <entity name="SequencerPage" representedClassName="SequencerPage" syncable="YES">
+        <attribute name="channel" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="0" syncable="YES"/>
+        <attribute name="currentPattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="currentStep" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="loopEnd" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="loopStart" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" maxValueString="100" syncable="YES"/>
+        <attribute name="nextPattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="nextStep" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="playMode" attributeType="Integer 16" minValueString="0" maxValueString="3" defaultValueString="0" syncable="YES"/>
+        <attribute name="stepLength" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="1" syncable="YES"/>
+        <attribute name="swing" attributeType="Integer 16" minValueString="50" maxValueString="80" defaultValueString="50" syncable="YES"/>
+        <relationship name="inSequencer" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Sequencer" inverseName="pages" inverseEntity="Sequencer" syncable="YES"/>
+        <relationship name="patterns" optional="YES" toMany="YES" maxCount="31" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPattern" inverseName="inPage" inverseEntity="SequencerPattern" syncable="YES"/>
+        <relationship name="pitches" optional="YES" toMany="YES" maxCount="31" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerRowPitch" inverseName="inPage" inverseEntity="SequencerRowPitch" syncable="YES"/>
+        <relationship name="playlist" optional="YES" toMany="YES" maxCount="64" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPatternRef" inverseName="inPlaylist" inverseEntity="SequencerPatternRef" syncable="YES"/>
+    </entity>
+    <entity name="SequencerPattern" representedClassName="SequencerPattern" syncable="YES">
+        <relationship name="inPage" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="patterns" inverseEntity="SequencerPage" syncable="YES"/>
+        <relationship name="notes" optional="YES" toMany="YES" maxCount="512" deletionRule="Nullify" destinationEntity="SequencerNote" inverseName="inPattern" inverseEntity="SequencerNote" syncable="YES"/>
+    </entity>
+    <entity name="SequencerPatternRef" representedClassName="SequencerPatternRef" syncable="YES">
+        <attribute name="pattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <relationship name="inPlaylist" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="playlist" inverseEntity="SequencerPage" syncable="YES"/>
+    </entity>
+    <entity name="SequencerRowPitch" representedClassName="SequencerRowPitch" syncable="YES">
+        <attribute name="pitch" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="0" syncable="YES"/>
+        <relationship name="inPage" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="pitches" inverseEntity="SequencerPage" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="SequencerPatternRef" positionX="-20" positionY="198" width="128" height="73"/>
+        <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="268"/>
+        <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
+        <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="133"/>
+        <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="73"/>
+        <element name="SequencerRowPitch" positionX="-11" positionY="62" width="128" height="73"/>
+    </elements>
 </model>
