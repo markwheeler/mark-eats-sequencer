@@ -16,6 +16,11 @@
 @property EatsMIDIManager   *midiManager;
 @property OSCManager        *oscManager;
 
+@property OSCInPort         *oscInPort;
+@property OSCOutPort        *oscOutPort;
+@property NSString          *oscInputPortLabel;
+@property NSString          *oscOutputPortLabel;
+
 + (id)sharedCommunicationManager;
 
 @end

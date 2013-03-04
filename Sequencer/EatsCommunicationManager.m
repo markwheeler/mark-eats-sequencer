@@ -10,11 +10,6 @@
 
 @interface EatsCommunicationManager ()
 
-@property OSCInPort         *oscInPort;
-@property OSCOutPort        *oscOutPort;
-@property NSString          *oscInputPortLabel;
-@property NSString          *oscOutputPortLabel;
-
 @end
 
 

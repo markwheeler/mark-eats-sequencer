@@ -7,8 +7,16 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "Sequencer+Create.h"
+#import "SequencerPage.h"
+#import "SequencerRowPitch.h"
+#import "SequencerPattern.h"
+#import "SequencerNote.h"
+#import "SequencerPatternRef.h"
 #import "EatsClock.h"
 
 @interface Document : NSPersistentDocument <EatsClockDelegateProtocol>
+
+@property Sequencer *sequencer;
 
 @end

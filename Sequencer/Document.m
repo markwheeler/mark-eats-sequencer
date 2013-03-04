@@ -7,12 +7,6 @@
 //
 
 #import "Document.h"
-#import "Sequencer+Create.h"
-#import "SequencerPage.h"
-#import "SequencerRowPitch.h"
-#import "SequencerPattern.h"
-#import "SequencerNote.h"
-#import "SequencerPatternRef.h"
 #import <VVMIDI/VVMIDI.h>
 #import "EatsCommunicationManager.h"
 #import "EatsExternalClockCalculator.h"
@@ -30,7 +24,6 @@
 @property EatsExternalClockCalculator   *externalClockCalculator;
 
 // Clock stuff
-@property float             bpm;
 @property BOOL              sendMIDIClock;
 @property BOOL              syncToExternalMIDIClock;
 
@@ -55,9 +48,9 @@
         // Add your subclass-specific initialization here.
 
         // Setup the Core Data object
-        Sequencer *sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
+        self.sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
 
-        sequencer.bpm = [NSNumber numberWithInt:89];
+        self.sequencer.bpm = [NSNumber numberWithInt:89];
 
         //SequencerPage *page = sequencer.pages[2];
         //NSLog(@"%@", [page.pitches[3] pitch]);
@@ -70,15 +63,14 @@
         
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         
-        // Defaults being set here for testing
-        self.bpm = 120;
+        // Defaults being set here for testing (replace with NSUserDefaults)
         self.sendMIDIClock = YES;
         self.clockSource = nil;
         
         // Create a Clock and set it up
         self.clock = [[EatsClock alloc] init];
         [self.clock setDelegate:self];
-        [self.clock setBpm:self.bpm];
+        [self.clock setBpm:[self.sequencer.bpm floatValue]];
         [self.clock setPpqn:PPQN];
         [self.clock setQnPerMeasure:QN_PER_MEASURE];
         
@@ -104,6 +96,11 @@
 {
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
+}
+
+- (void)windowWillClose:(NSNotification *)notification
+{
+    [self.clock stopClock];
 }
 
 + (BOOL)autosavesInPlace
@@ -152,7 +149,7 @@
 
 - (void) clockTick:(NSNumber *)ns
 {
-    // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly dicide into the clock ticks
+    // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
     
     //NSLog(@"Tick: %@ Time: %@", self.currentTick, ns);
@@ -285,6 +282,21 @@
         [notesToStop removeAllObjects];
     }
 }
+
+
+
+#pragma mark - Interface actions
+
+- (IBAction)playButton:(NSButton *)sender
+{
+    [self.clock startClock];
+}
+
+- (IBAction)stopButton:(NSButton *)sender
+{
+    [self.clock stopClock];
+}
+
 
 
 @end

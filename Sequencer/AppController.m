@@ -31,6 +31,11 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCOutPortsChangedNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCInPortsChangedNotification object:nil];
         
+        // Create the preferences window (makes it easier to keep it up to date)
+        if(!self.preferencesController) {
+            self.preferencesController = [[PreferencesController alloc] initWithWindowNibName:@"Preferences"];
+        }
+        
         // Fake an outputs-changed notification to make sure my list of destinations updates (in case it refreshes before I'm awake)
         [self oscOutputsChangedNotification:nil];
     }
@@ -45,6 +50,7 @@
 - (void) setupChanged
 {
     NSLog(@"%s", __func__);
+    [self.preferencesController updateMIDI];
 }
 
 - (void) receivedMIDI:(NSArray *)a fromNode:(VVMIDINode *)n
@@ -63,6 +69,7 @@
 - (void) oscOutputsChangedNotification:(NSNotification *)note
 {
     NSLog(@"%s", __func__);
+    [self.preferencesController updateGridControllers];
 }
 
 
@@ -70,9 +77,6 @@
 #pragma mark - Interface actions
 
 - (IBAction)PreferencesMenuItem:(NSMenuItem *)sender {
-    if(!self.preferencesController) {
-        self.preferencesController = [[PreferencesController alloc] initWithWindowNibName:@"Preferences"];
-    }
     [self.preferencesController showWindow:self];
 }
 

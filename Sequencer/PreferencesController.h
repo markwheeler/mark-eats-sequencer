@@ -7,7 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "EatsCommunicationManager.h"
 
 @interface PreferencesController : NSWindowController
+
+@property EatsCommunicationManager *sharedCommunicationManager;
+
+- (void)updateGridControllers;
+- (void)updateMIDI;
 
 @end
