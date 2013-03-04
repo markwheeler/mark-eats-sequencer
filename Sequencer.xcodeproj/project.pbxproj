@@ -22,7 +22,35 @@
 		4D61162016E433A400140AF8 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61161F16E433A400140AF8 /* SequencerPattern.m */; };
 		4D61162316E433A400140AF8 /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162216E433A400140AF8 /* SequencerRowPitch.m */; };
 		4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Create.m */; };
+		4D61163016E43B9600140AF8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162F16E43B9600140AF8 /* AppController.m */; };
+		4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
+		4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
+		4D7515AF16E457C000A8E3F2 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A316E4557000A8E3F2 /* VVOSC.framework */; };
+		4D7515B016E457CC00A8E3F2 /* VVBasics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
+		4D7515B116E457CE00A8E3F2 /* VVMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
+		4D7515B216E457D200A8E3F2 /* VVOSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D7515A316E4557000A8E3F2 /* VVOSC.framework */; };
+		4D7515B516E4583D00A8E3F2 /* EatsMIDIManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */; };
+		4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B716E45EB900A8E3F2 /* EatsClock.m */; };
+		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
+		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
+		4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */; };
+		4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4DCF8E3216E448BC002EDD46 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */,
+				4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */,
+				4D7515AF16E457C000A8E3F2 /* VVOSC.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4D6115C816E431BD00140AF8 /* Sequencer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sequencer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -54,6 +82,22 @@
 		4D61162216E433A400140AF8 /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
 		4D61162916E4386700140AF8 /* Sequencer+Create.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sequencer+Create.h"; sourceTree = "<group>"; };
 		4D61162A16E4386700140AF8 /* Sequencer+Create.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Sequencer+Create.m"; sourceTree = "<group>"; };
+		4D61162E16E43B9600140AF8 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
+		4D61162F16E43B9600140AF8 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
+		4D7515A116E4557000A8E3F2 /* VVBasics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVBasics.framework; sourceTree = "<group>"; };
+		4D7515A216E4557000A8E3F2 /* VVMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVMIDI.framework; sourceTree = "<group>"; };
+		4D7515A316E4557000A8E3F2 /* VVOSC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVOSC.framework; sourceTree = "<group>"; };
+		4D7515B316E4583D00A8E3F2 /* EatsMIDIManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsMIDIManager.h; sourceTree = "<group>"; };
+		4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMIDIManager.m; sourceTree = "<group>"; };
+		4D7515B616E45EB900A8E3F2 /* EatsClock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsClock.h; sourceTree = "<group>"; };
+		4D7515B716E45EB900A8E3F2 /* EatsClock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsClock.m; sourceTree = "<group>"; };
+		4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsExternalClockCalculator.h; sourceTree = "<group>"; };
+		4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsExternalClockCalculator.m; sourceTree = "<group>"; };
+		4DB87FB616E4435A00BA58BC /* Preferences.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Preferences.xib; sourceTree = "<group>"; };
+		4DCF8E2916E446D6002EDD46 /* PreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesController.h; sourceTree = "<group>"; };
+		4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesController.m; sourceTree = "<group>"; };
+		4DCF8E3916E44AD7002EDD46 /* EatsCommunicationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsCommunicationManager.h; sourceTree = "<group>"; };
+		4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsCommunicationManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +106,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */,
+				4D7515B016E457CC00A8E3F2 /* VVBasics.framework in Frameworks */,
+				4D7515B116E457CE00A8E3F2 /* VVMIDI.framework in Frameworks */,
+				4D7515B216E457D200A8E3F2 /* VVOSC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +135,9 @@
 		4D6115CA16E431BD00140AF8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4D7515A116E4557000A8E3F2 /* VVBasics.framework */,
+				4D7515A216E4557000A8E3F2 /* VVMIDI.framework */,
+				4D7515A316E4557000A8E3F2 /* VVOSC.framework */,
 				4D6115CB16E431BD00140AF8 /* Cocoa.framework */,
 				4D6115CD16E431BD00140AF8 /* Other Frameworks */,
 			);
@@ -107,25 +157,23 @@
 		4D6115D116E431BD00140AF8 /* Sequencer */ = {
 			isa = PBXGroup;
 			children = (
+				4DCF8E3916E44AD7002EDD46 /* EatsCommunicationManager.h */,
+				4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */,
+				4D7515B316E4583D00A8E3F2 /* EatsMIDIManager.h */,
+				4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */,
+				4D61162E16E43B9600140AF8 /* AppController.h */,
+				4D61162F16E43B9600140AF8 /* AppController.m */,
 				4D6115DD16E431BD00140AF8 /* Document.h */,
 				4D6115DE16E431BD00140AF8 /* Document.m */,
-				4D6115E016E431BD00140AF8 /* Document.xib */,
+				4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */,
+				4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */,
+				4D7515B616E45EB900A8E3F2 /* EatsClock.h */,
+				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
+				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
+				4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
-				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
-				4D61162916E4386700140AF8 /* Sequencer+Create.h */,
-				4D61162A16E4386700140AF8 /* Sequencer+Create.m */,
-				4D61161B16E433A400140AF8 /* Sequencer.h */,
-				4D61161C16E433A400140AF8 /* Sequencer.m */,
-				4D61161516E433A400140AF8 /* SequencerPage.h */,
-				4D61161616E433A400140AF8 /* SequencerPage.m */,
-				4D61162116E433A400140AF8 /* SequencerRowPitch.h */,
-				4D61162216E433A400140AF8 /* SequencerRowPitch.m */,
-				4D61161E16E433A400140AF8 /* SequencerPattern.h */,
-				4D61161F16E433A400140AF8 /* SequencerPattern.m */,
-				4D61161816E433A400140AF8 /* SequencerPatternRef.h */,
-				4D61161916E433A400140AF8 /* SequencerPatternRef.m */,
-				4D61161216E433A400140AF8 /* SequencerNote.h */,
-				4D61161316E433A400140AF8 /* SequencerNote.m */,
+				4D6115E016E431BD00140AF8 /* Document.xib */,
+				4DB87FB616E4435A00BA58BC /* Preferences.xib */,
 				4D61162416E433C500140AF8 /* Core Data */,
 				4D6115D216E431BD00140AF8 /* Supporting Files */,
 			);
@@ -147,6 +195,21 @@
 		4D61162416E433C500140AF8 /* Core Data */ = {
 			isa = PBXGroup;
 			children = (
+				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
+				4D61162916E4386700140AF8 /* Sequencer+Create.h */,
+				4D61162A16E4386700140AF8 /* Sequencer+Create.m */,
+				4D61161B16E433A400140AF8 /* Sequencer.h */,
+				4D61161C16E433A400140AF8 /* Sequencer.m */,
+				4D61161516E433A400140AF8 /* SequencerPage.h */,
+				4D61161616E433A400140AF8 /* SequencerPage.m */,
+				4D61162116E433A400140AF8 /* SequencerRowPitch.h */,
+				4D61162216E433A400140AF8 /* SequencerRowPitch.m */,
+				4D61161E16E433A400140AF8 /* SequencerPattern.h */,
+				4D61161F16E433A400140AF8 /* SequencerPattern.m */,
+				4D61161816E433A400140AF8 /* SequencerPatternRef.h */,
+				4D61161916E433A400140AF8 /* SequencerPatternRef.m */,
+				4D61161216E433A400140AF8 /* SequencerNote.h */,
+				4D61161316E433A400140AF8 /* SequencerNote.m */,
 			);
 			name = "Core Data";
 			sourceTree = "<group>";
@@ -158,6 +221,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4D6115EB16E431BD00140AF8 /* Build configuration list for PBXNativeTarget "Sequencer" */;
 			buildPhases = (
+				4DCF8E3216E448BC002EDD46 /* CopyFiles */,
 				4D6115C416E431BD00140AF8 /* Sources */,
 				4D6115C516E431BD00140AF8 /* Frameworks */,
 				4D6115C616E431BD00140AF8 /* Resources */,
@@ -206,6 +270,7 @@
 				4D6115DC16E431BD00140AF8 /* Credits.rtf in Resources */,
 				4D6115E216E431BD00140AF8 /* Document.xib in Resources */,
 				4D6115E516E431BD00140AF8 /* MainMenu.xib in Resources */,
+				4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +291,12 @@
 				4D61162016E433A400140AF8 /* SequencerPattern.m in Sources */,
 				4D61162316E433A400140AF8 /* SequencerRowPitch.m in Sources */,
 				4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */,
+				4D61163016E43B9600140AF8 /* AppController.m in Sources */,
+				4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */,
+				4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */,
+				4D7515B516E4583D00A8E3F2 /* EatsMIDIManager.m in Sources */,
+				4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */,
+				4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,6 +365,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -321,6 +393,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
 			};
@@ -330,9 +403,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
 				INFOPLIST_FILE = "Sequencer/Sequencer-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -342,9 +420,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
 				INFOPLIST_FILE = "Sequencer/Sequencer-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -369,6 +452,7 @@
 				4D6115ED16E431BD00140AF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

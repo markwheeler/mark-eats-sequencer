@@ -1,5 +1,5 @@
 //
-//  Document.h
+//  PreferencesController.h
 //  Sequencer
 //
 //  Created by Mark Wheeler on 03/03/2013.
@@ -7,8 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "EatsClock.h"
 
-@interface Document : NSPersistentDocument <EatsClockDelegateProtocol>
+@interface PreferencesController : NSWindowController
 
 @end
