@@ -9,7 +9,9 @@
 #import "Document.h"
 #import <VVMIDI/VVMIDI.h>
 #import "EatsCommunicationManager.h"
+#import "Preferences.h"
 #import "EatsExternalClockCalculator.h"
+#import "EatsGridNavigationController.h"
 
 @interface Document ()
 
@@ -20,13 +22,12 @@
 #define MIN_QUANTIZATION 64
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
+@property Preferences                   *sharedPreferences;
 @property EatsClock                     *clock;
 @property EatsExternalClockCalculator   *externalClockCalculator;
+@property EatsGridNavigationController  *gridNavigationController;
 
 // Clock stuff
-@property BOOL              sendMIDIClock;
-@property BOOL              syncToExternalMIDIClock;
-
 @property NSUInteger        currentTick;
 @property VVMIDINode        *clockSource;
 @property NSMutableArray    *activeNotes;
@@ -62,10 +63,7 @@
         
         
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
-        
-        // Defaults being set here for testing (replace with NSUserDefaults)
-        self.sendMIDIClock = YES;
-        self.clockSource = nil;
+        self.sharedPreferences = [Preferences sharedPreferences];
         
         // Create a Clock and set it up
         self.clock = [[EatsClock alloc] init];
@@ -80,6 +78,8 @@
         self.activeNotes = [NSMutableArray array];
         for(int i = 0; i < MIN_QUANTIZATION; i++)
             [self.activeNotes addObject:[NSMutableSet setWithCapacity:32]];
+        
+        self.gridNavigationController = [[EatsGridNavigationController alloc] init];
         
     }
     return self;
@@ -116,7 +116,7 @@
 {
     self.currentTick = 0;
     
-    if(self.sendMIDIClock) {
+    if(self.sharedPreferences.sendMIDIClock) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :[ns unsignedLongLongValue]];
@@ -135,7 +135,7 @@
 {
     [self.externalClockCalculator resetExternalClock];
     
-    if(self.sendMIDIClock) {
+    if(self.sharedPreferences.sendMIDIClock) {
         // Send stop
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createWithType:VVMIDIStopVal channel:0 timestamp:[ns unsignedLongLongValue]];
@@ -155,7 +155,7 @@
     //NSLog(@"Tick: %@ Time: %@", self.currentTick, ns);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
-    if(self.currentTick % (PPQN / MIDI_CLOCK_PPQN) == 0 && self.sendMIDIClock) {
+    if(self.currentTick % (PPQN / MIDI_CLOCK_PPQN) == 0 && self.sharedPreferences.sendMIDIClock) {
         [self sendMIDIClockPulseAtTime:[ns unsignedLongLongValue]];
     }
     
@@ -297,6 +297,9 @@
     [self.clock stopClock];
 }
 
+- (IBAction)updateGridViewButton:(NSButton *)sender {
+    [self.gridNavigationController updateGridView];
+}
 
 
 @end

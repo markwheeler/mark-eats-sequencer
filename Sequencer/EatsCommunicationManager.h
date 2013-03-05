@@ -20,6 +20,7 @@
 @property OSCOutPort        *oscOutPort;
 @property NSString          *oscInputPortLabel;
 @property NSString          *oscOutputPortLabel;
+@property NSString          *oscPrefix;
 
 + (id)sharedCommunicationManager;
 

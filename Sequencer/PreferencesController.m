@@ -7,17 +7,24 @@
 //
 
 #import "PreferencesController.h"
+#import "EatsMonome.h"
 
 @interface PreferencesController ()
-@property (weak) IBOutlet NSToolbar *preferencesToolbar;
-@property (weak) IBOutlet NSTabView *preferencesTabView;
 
-@property (weak) IBOutlet NSPopUpButton *gridControllerPopup;
-@property (weak) IBOutlet NSPopUpButton *clockSourcePopup;
+@property EatsCommunicationManager          *sharedCommunicationManager;
+@property Preferences                       *sharedPreferences;
 
-@property (weak) IBOutlet NSTableColumn *midiDestinationsEnableColumn;
-@property (weak) IBOutlet NSTableColumn *midiDestinationsNameColumn;
+@property (weak) IBOutlet NSToolbar         *preferencesToolbar;
+@property (weak) IBOutlet NSTabView         *preferencesTabView;
+
+@property (weak) IBOutlet NSPopUpButton     *gridControllerPopup;
+@property (weak) IBOutlet NSTextField       *gridControllerStatus;
+
+@property (weak) IBOutlet NSTableColumn     *midiDestinationsEnableColumn;
+@property (weak) IBOutlet NSTableColumn     *midiDestinationsNameColumn;
 @property (weak) IBOutlet NSArrayController *midiDestinationsArrayController;
+
+@property (weak) IBOutlet NSPopUpButton     *clockSourcePopup;
 
 @end
 
@@ -58,6 +65,7 @@
     
     [self.gridControllerPopup removeAllItems];
     [self.gridControllerPopup addItemWithTitle:@"None"];
+    [self.gridControllerStatus setStringValue:@""];
     
     for (NSString *s in monomePortLabelArray) {
         // Avoid listing the app's port
@@ -97,9 +105,53 @@
     }
 }
 
+- (void)gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
+{
+    //TODO: validate that these numbers are mod8
+    
+    self.sharedPreferences.gridType = EatsGridType_Monome;
+    self.sharedPreferences.gridWidth = w;
+    self.sharedPreferences.gridHeight = h;
+    NSLog(@"w %u", w);
+    NSLog(@"width %u", self.sharedPreferences.gridWidth);
+    
+    NSString *gridName;
+    if(gridType == EatsGridType_Monome) gridName = @"monome";
+    if(gridType == EatsGridType_Launchpad) gridName = @"Launchpad";
+    
+    [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected to %i x %i %@", w, h, gridName]];
+}
+
+
+
+#pragma mark - Interface actions
 
 - (IBAction)preferencesToolbarAction:(NSToolbarItem *)sender {
     [self.preferencesTabView selectTabViewItemAtIndex:[sender tag]];
+}
+
+- (IBAction)gridControllerPopup:(NSPopUpButton *)sender {
+    self.sharedPreferences.gridType = EatsGridType_None;
+    [self.gridControllerStatus setStringValue:@""];
+    OSCOutPort *selectedPort = nil;
+    
+    // Figure out the index of the selected item
+	if ([sender indexOfSelectedItem] <= -1)
+		return;
+    // Find the output port corresponding to the label of the selected item
+    selectedPort = [self.sharedCommunicationManager.oscManager findOutputWithLabel:[sender titleOfSelectedItem]];
+	if (selectedPort == nil)
+		return;
+    
+    // Set the OSC Out Port
+    NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
+    NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
+    [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
+    
+    [self.gridControllerStatus setStringValue:@"Trying to connect..."];
+    [EatsMonome connectToMonomeAtPort:self.sharedCommunicationManager.oscOutPort
+                             fromPort:self.sharedCommunicationManager.oscInPort
+                           withPrefix:self.sharedCommunicationManager.oscPrefix];
 }
 
 

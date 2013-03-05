@@ -41,6 +41,7 @@
         self.oscOutPort = nil;
         self.oscInputPortLabel = @"Mark Eats Sequencer input";
         self.oscOutputPortLabel = @"Mark Eats Sequencer output";
+        self.oscPrefix = @"markeatsseq";
 
         // Create the OSC ports
         uint retries = 0;

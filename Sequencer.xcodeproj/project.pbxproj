@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */; };
+		4D172E8516E5BACF0012C019 /* EatsGridIntroView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */; };
+		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
 		4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D6115CB16E431BD00140AF8 /* Cocoa.framework */; };
 		4D6115D616E431BD00140AF8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115D416E431BD00140AF8 /* InfoPlist.strings */; };
 		4D6115D816E431BD00140AF8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115D716E431BD00140AF8 /* main.m */; };
@@ -32,6 +35,7 @@
 		4D7515B516E4583D00A8E3F2 /* EatsMIDIManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */; };
 		4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B716E45EB900A8E3F2 /* EatsClock.m */; };
 		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
+		4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */; };
 		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
 		4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */; };
 		4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */; };
@@ -53,6 +57,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridNavigationController.h; sourceTree = "<group>"; };
+		4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridNavigationController.m; sourceTree = "<group>"; };
+		4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridIntroView.h; sourceTree = "<group>"; };
+		4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridIntroView.m; sourceTree = "<group>"; };
+		4D172E8616E5BD090012C019 /* Preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Preferences.h; sourceTree = "<group>"; };
+		4D172E8716E5BD090012C019 /* Preferences.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Preferences.m; sourceTree = "<group>"; };
 		4D6115C816E431BD00140AF8 /* Sequencer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sequencer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6115CB16E431BD00140AF8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4D6115CE16E431BD00140AF8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -93,6 +103,8 @@
 		4D7515B716E45EB900A8E3F2 /* EatsClock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsClock.m; sourceTree = "<group>"; };
 		4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsExternalClockCalculator.h; sourceTree = "<group>"; };
 		4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsExternalClockCalculator.m; sourceTree = "<group>"; };
+		4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsMonome.h; sourceTree = "<group>"; };
+		4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMonome.m; sourceTree = "<group>"; };
 		4DB87FB616E4435A00BA58BC /* Preferences.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Preferences.xib; sourceTree = "<group>"; };
 		4DCF8E2916E446D6002EDD46 /* PreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesController.h; sourceTree = "<group>"; };
 		4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesController.m; sourceTree = "<group>"; };
@@ -165,12 +177,20 @@
 				4D61162F16E43B9600140AF8 /* AppController.m */,
 				4D6115DD16E431BD00140AF8 /* Document.h */,
 				4D6115DE16E431BD00140AF8 /* Document.m */,
-				4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */,
-				4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */,
-				4D7515B616E45EB900A8E3F2 /* EatsClock.h */,
-				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
+				4D172E8616E5BD090012C019 /* Preferences.h */,
+				4D172E8716E5BD090012C019 /* Preferences.m */,
 				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
 				4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */,
+				4D7515B616E45EB900A8E3F2 /* EatsClock.h */,
+				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
+				4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */,
+				4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */,
+				4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */,
+				4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */,
+				4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */,
+				4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */,
+				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
+				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
 				4DB87FB616E4435A00BA58BC /* Preferences.xib */,
@@ -297,6 +317,10 @@
 				4D7515B516E4583D00A8E3F2 /* EatsMIDIManager.m in Sources */,
 				4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */,
 				4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */,
+				4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */,
+				4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */,
+				4D172E8516E5BACF0012C019 /* EatsGridIntroView.m in Sources */,
+				4D172E8816E5BD090012C019 /* Preferences.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,6 +433,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/**";
 				INFOPLIST_FILE = "Sequencer/Sequencer-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -426,6 +451,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/**";
 				INFOPLIST_FILE = "Sequencer/Sequencer-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
