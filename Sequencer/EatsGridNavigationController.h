@@ -10,6 +10,13 @@
 #import <VVOSC/VVOSC.h>
 #import <VVMIDI/VVMIDI.h>
 
+typedef enum EatsGridView{
+    EatsGridView_None,
+    EatsGridView_Intro,
+    EatsGridView_Sequencer,
+    EatsGridView_Play
+} EatsGridView;
+
 @protocol EatsGridViewDelegateProtocol
 - (void) updateGridWithArray:(NSArray *)gridArray;
 @end
@@ -19,5 +26,6 @@
 
 - (void) updateGridView;
 - (void) updateGridWithArray:(NSArray *)gridArray;
+- (void) showView:(EatsGridView)gridView;
 
 @end

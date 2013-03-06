@@ -39,6 +39,8 @@
 		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
 		4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */; };
 		4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */; };
+		4DD0B5B616E702250025AB1C /* EatsGridSequencerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerView.m */; };
+		4DD0B5B916E702330025AB1C /* EatsGridPlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -110,6 +112,10 @@
 		4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesController.m; sourceTree = "<group>"; };
 		4DCF8E3916E44AD7002EDD46 /* EatsCommunicationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsCommunicationManager.h; sourceTree = "<group>"; };
 		4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsCommunicationManager.m; sourceTree = "<group>"; };
+		4DD0B5B416E702250025AB1C /* EatsGridSequencerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridSequencerView.h; sourceTree = "<group>"; };
+		4DD0B5B516E702250025AB1C /* EatsGridSequencerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridSequencerView.m; sourceTree = "<group>"; };
+		4DD0B5B716E702320025AB1C /* EatsGridPlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridPlayView.h; sourceTree = "<group>"; };
+		4DD0B5B816E702320025AB1C /* EatsGridPlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPlayView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +195,10 @@
 				4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */,
 				4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */,
 				4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */,
+				4DD0B5B416E702250025AB1C /* EatsGridSequencerView.h */,
+				4DD0B5B516E702250025AB1C /* EatsGridSequencerView.m */,
+				4DD0B5B716E702320025AB1C /* EatsGridPlayView.h */,
+				4DD0B5B816E702320025AB1C /* EatsGridPlayView.m */,
 				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
 				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
@@ -321,6 +331,8 @@
 				4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */,
 				4D172E8516E5BACF0012C019 /* EatsGridIntroView.m in Sources */,
 				4D172E8816E5BD090012C019 /* Preferences.m in Sources */,
+				4DD0B5B616E702250025AB1C /* EatsGridSequencerView.m in Sources */,
+				4DD0B5B916E702330025AB1C /* EatsGridPlayView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

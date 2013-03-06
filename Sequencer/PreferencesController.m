@@ -49,6 +49,7 @@
     [self.preferencesToolbar setSelectedItemIdentifier:@"0"];
     
     self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
+    self.sharedPreferences = [Preferences sharedPreferences];
 
     // Populate
     [self updateGridControllers];
@@ -61,6 +62,10 @@
 
 - (void)updateGridControllers
 {
+    // Should try and reconnect here but for now we're just going to 'none' state
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
+    self.sharedPreferences.gridType = EatsGridType_None;
+    
     NSArray *monomePortLabelArray = [self.sharedCommunicationManager.oscManager outPortLabelArray];
     
     [self.gridControllerPopup removeAllItems];
@@ -107,19 +112,21 @@
 
 - (void)gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
 {
-    //TODO: validate that these numbers are mod8
-    
+   
+    // Set the prefs, making sure the width is divisible by 8
     self.sharedPreferences.gridType = EatsGridType_Monome;
-    self.sharedPreferences.gridWidth = w;
-    self.sharedPreferences.gridHeight = h;
-    NSLog(@"w %u", w);
-    NSLog(@"width %u", self.sharedPreferences.gridWidth);
+    self.sharedPreferences.gridWidth = w - (w % 8);
+    self.sharedPreferences.gridHeight = h - (h % 8);
     
+    // Let everyone know
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
+    
+    // Update the UI
     NSString *gridName;
-    if(gridType == EatsGridType_Monome) gridName = @"monome";
+    if(gridType == EatsGridType_Monome) gridName = [NSString stringWithFormat:@"monome %u", w*h];
     if(gridType == EatsGridType_Launchpad) gridName = @"Launchpad";
     
-    [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected to %i x %i %@", w, h, gridName]];
+    [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected to %@", gridName]];
 }
 
 
@@ -131,7 +138,11 @@
 }
 
 - (IBAction)gridControllerPopup:(NSPopUpButton *)sender {
+    
+    // Set none
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
     self.sharedPreferences.gridType = EatsGridType_None;
+    
     [self.gridControllerStatus setStringValue:@""];
     OSCOutPort *selectedPort = nil;
     
@@ -144,8 +155,8 @@
 		return;
     
     // Set the OSC Out Port
-    NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
-    NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
+    //NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
+    //NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
     [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
     
     [self.gridControllerStatus setStringValue:@"Trying to connect..."];

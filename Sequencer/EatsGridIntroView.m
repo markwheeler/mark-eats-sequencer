@@ -10,6 +10,8 @@
 
 @implementation EatsGridIntroView
 
+#pragma mark - Public methods
+
 - (id) initWithDelegate:(id)delegate width:(uint)w height:(uint)h
 {
     self = [super init];
@@ -27,17 +29,27 @@
 
 - (void) updateView
 {
-    NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.width];
-    int seed = arc4random_uniform(self.width - 1);
+    NSNumber *on = [NSNumber numberWithUnsignedInt:15];;
+    NSNumber *off = [NSNumber numberWithUnsignedInt:0];
+    NSArray *okArray = [NSArray arrayWithObjects:[NSArray arrayWithObjects: on, on, on, off, off, on, off, on, nil],
+                                                   [NSArray arrayWithObjects: on, off, on, off, off, on, on, off, nil],
+                                                   [NSArray arrayWithObjects: on, off, on, off, off, on, off, on, nil],
+                                                   [NSArray arrayWithObjects: on, on, on, off, off, on, off, on, nil],
+                                                   nil];
+    
+    NSMutableArray *gridArray = [NSMutableArray array];
+    
+    long leftMargin = (self.width - [[okArray objectAtIndex:0] count]) / 2;
+    long topMargin = (self.height - [okArray count]) / 2;
     
     // Generate the columns
-    for(NSUInteger x = 0; x < self.width; x++) {
+    for(uint x = 0; x < self.width; x++) {
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
-        for(NSUInteger y = 0; y < self.height; y++) {
+        for(uint y = 0; y < self.height; y++) {
             // Put lights in interesting places
-            if(x % 4 == (seed - y) % 4)
-                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
+            if(x > leftMargin - 1 && x <= self.width - leftMargin - 1 && y > topMargin - 1 && y <= self.height - topMargin - 1)
+                [[gridArray objectAtIndex:x] insertObject:[[okArray objectAtIndex:y - topMargin] objectAtIndex:x - leftMargin] atIndex:y];
             else
                 [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
@@ -46,6 +58,5 @@
     if([self.delegate respondsToSelector:@selector(updateGridWithArray:)])
         [self.delegate performSelector:@selector(updateGridWithArray:) withObject:gridArray];
 }
-
 
 @end

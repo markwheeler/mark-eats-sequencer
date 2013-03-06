@@ -64,6 +64,7 @@
 
 - (void) redrawGridController:(NSArray *)gridArray
 {
+    
     // Cut up the complete 2D array into 8x8 1D arrays ready for sending to the monome
     
     // For each 8-wide block...
@@ -85,6 +86,11 @@
         }
     }
     
+}
+
+- (void) clearGridController
+{
+    [self monomeLEDLevelAll:0];
 }
 
 

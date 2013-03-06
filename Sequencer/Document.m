@@ -297,6 +297,22 @@
     [self.clock stopClock];
 }
 
+- (IBAction)introViewButton:(NSButton *)sender
+{
+        [self.gridNavigationController showView:EatsGridView_Intro];
+}
+
+- (IBAction)sequencerViewButton:(NSButton *)sender
+{
+    [self.gridNavigationController showView:EatsGridView_Sequencer];
+}
+
+- (IBAction)playViewButton:(NSButton *)sender
+{
+    [self.gridNavigationController showView:EatsGridView_Play];
+}
+
+
 - (IBAction)updateGridViewButton:(NSButton *)sender {
     [self.gridNavigationController updateGridView];
 }

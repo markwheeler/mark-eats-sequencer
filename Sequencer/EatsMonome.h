@@ -18,5 +18,6 @@
 
 - (id) initWithOSCPort:(OSCOutPort *)port oscPrefix:(NSString *)prefix;
 - (void) redrawGridController:(NSArray *)gridArray;
+- (void) clearGridController;
 
 @end
