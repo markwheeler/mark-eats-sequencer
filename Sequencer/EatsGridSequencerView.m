@@ -7,6 +7,7 @@
 //
 
 #import "EatsGridSequencerView.h"
+#import "SequencerPage.h"
 #import "SequencerNote.h"
 #import "EatsGridNavigationController.h"
 
@@ -50,22 +51,31 @@
 - (void) updateView
 {
     
+    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == 0"];
+    
+    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
+    int currentStep = [[[pageMatches lastObject] currentStep] intValue];
+    
     NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns
+    // Generate the columns with playhead
     for(uint x = 0; x < self.width; x++) {
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
+            if(x == currentStep)
+                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
+            else
+                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
     }
     
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
     //request.predicate = [NSPredicate predicateWithFormat:@"inPattern IS 0"];
     
-    NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:nil];
-    for(SequencerNote *note in matches) {
+    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+    for(SequencerNote *note in noteMatches) {
         [[gridArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:[note.row intValue] withObject:[NSNumber numberWithInt:15]];
     }
     

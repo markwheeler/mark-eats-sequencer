@@ -95,14 +95,14 @@
 
 - (void) setupChanged
 {
-    NSLog(@"%s", __func__);
+    //NSLog(@"%s", __func__);
     [self.preferencesController updateMIDI];
     [self.preferencesController updateGridControllers];
 }
 
 - (void) receivedMIDI:(NSArray *)a fromNode:(VVMIDINode *)n
 {
-    NSLog(@"%s", __func__);
+    //NSLog(@"%s", __func__);
     
     //uint externalBPM = currentDocument.externalClockCalculator externalClockTick;
     //if(externalBPM)
@@ -115,7 +115,7 @@
 
 - (void) oscOutputsChangedNotification:(NSNotification *)note
 {
-    NSLog(@"%s", __func__);
+    //NSLog(@"%s", __func__);
     [self.preferencesController updateGridControllers];
 }
 

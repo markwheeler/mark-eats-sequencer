@@ -25,16 +25,8 @@
 @synthesize qnPerMeasure = _qnPerMeasure;
 
 
-// TODO: Create a protocol for the clock delegate
 
-// TODO: Convert this to enum
-
-int const CLOCK_STATUS_STOPPED = 0;
-int const CLOCK_STATUS_RUNNING = 1;
-int const CLOCK_STATUS_STOPPING = 2;
-
-
-// Setters and getters
+#pragma mark - Setters and getters
 
 - (void)setBpm:(float)bpm
 {
@@ -67,7 +59,8 @@ int const CLOCK_STATUS_STOPPING = 2;
 }
 
 
-// Public methods
+
+#pragma mark - Public methods
 
 - (id)init
 {
@@ -76,7 +69,7 @@ int const CLOCK_STATUS_STOPPING = 2;
         
         
         
-        self.clockStatus = CLOCK_STATUS_STOPPED;
+        self.clockStatus = EatsClockStatus_Stopped;
         
         self.bufferTimeInNs = 5000000; // 5ms
         
@@ -99,7 +92,7 @@ int const CLOCK_STATUS_STOPPING = 2;
 
 - (void)startClock
 {
-    if(self.clockStatus != CLOCK_STATUS_STOPPED) [self setClockToZero];
+    if(self.clockStatus != EatsClockStatus_Stopped) [self setClockToZero];
     [self continueClock];
     
 }
@@ -115,12 +108,12 @@ int const CLOCK_STATUS_STOPPING = 2;
 - (void)continueClock
 {
     // If someone tries to start a timer while we're stopping, just cancel the stop
-    if(self.clockStatus == CLOCK_STATUS_STOPPING) {
-        self.clockStatus = CLOCK_STATUS_RUNNING;
+    if(self.clockStatus == EatsClockStatus_Stopping) {
+        self.clockStatus = EatsClockStatus_Running;
         return;
         
         // Start one up if need be
-    } else if(self.clockStatus == CLOCK_STATUS_STOPPED) {
+    } else if(self.clockStatus == EatsClockStatus_Stopped) {
         // Set defaults if they haven't been set
         if(self.bpm == 0) self.bpm = 120;
         if(self.ppqn == 0) self.ppqn = 48;
@@ -139,12 +132,13 @@ int const CLOCK_STATUS_STOPPING = 2;
 
 - (void)stopClock
 {
-    if(self.clockStatus == CLOCK_STATUS_RUNNING)
-        self.clockStatus = CLOCK_STATUS_STOPPING;
+    if(self.clockStatus == EatsClockStatus_Running)
+        self.clockStatus = EatsClockStatus_Stopping;
 }
 
 
-// Private methods
+
+#pragma mark - Private methods
 
 - (void)updateInterval {
     self.intervalInNs = 1000000000 / ((self.bpm / 60.0) * self.ppqn); // 1sec / ((bpm / secs in a min) * ppqn)
@@ -154,7 +148,7 @@ int const CLOCK_STATUS_STOPPING = 2;
 
 - (void)timerLoop
 {
-    self.clockStatus = CLOCK_STATUS_RUNNING;
+    self.clockStatus = EatsClockStatus_Running;
     
     // Set the start time
     self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
@@ -166,7 +160,7 @@ int const CLOCK_STATUS_STOPPING = 2;
     
     [self setClockToZero];
     
-    while (self.clockStatus == CLOCK_STATUS_RUNNING) {
+    while (self.clockStatus == EatsClockStatus_Running) {
         // Use autoreleasepool so we clear out everything on each loop
         @autoreleasepool {
             
@@ -195,7 +189,7 @@ int const CLOCK_STATUS_STOPPING = 2;
                                         withObject:[NSNumber numberWithUnsignedLongLong:(uint64_t)(mach_absolute_time() * self.machTimeToNsFactor)]
                                      waitUntilDone:NO];
     
-    self.clockStatus = CLOCK_STATUS_STOPPED;
+    self.clockStatus = EatsClockStatus_Stopped;
 }
 
 @end

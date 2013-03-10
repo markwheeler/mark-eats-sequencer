@@ -8,11 +8,21 @@
 
 #import "Sequencer.h"
 
+typedef enum EatsSequencerPlayMode {
+    EatsSequencerPlayMode_Pause,
+    EatsSequencerPlayMode_Forward,
+    EatsSequencerPlayMode_Reverse,
+    EatsSequencerPlayMode_Random
+} EatsSequencerPlayMode;
+
 @interface Sequencer (Create)
 
-+ (Sequencer *)sequencerWithPages:(uint)numberOfPages
-                     withPatterns:(uint)numberOfPatterns
-                      withPitches:(uint)numberOfPitches
-           inManagedObjectContext:(NSManagedObjectContext *)context;
++ (Sequencer *) sequencerWithPages:(uint)numberOfPages
+                             width:(uint)width
+                            height:(uint)height
+            inManagedObjectContext:(NSManagedObjectContext *)context;
+
++ (void) addDummyDataToSequencer:(Sequencer *)sequencer
+          inManagedObjectContext:(NSManagedObjectContext *)context;
 
 @end

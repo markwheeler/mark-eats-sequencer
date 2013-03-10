@@ -5,6 +5,7 @@
 //  Created by Mark Wheeler on 03/03/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
+//  Fires off 'tick' events at intervals
 
 #import <Foundation/Foundation.h>
 #import <mach/mach_time.h>
@@ -16,6 +17,12 @@
 @optional
 - (void) clockLateBy:(NSNumber *)ns;
 @end
+
+typedef enum EatsClockStatus{
+    EatsClockStatus_Stopped,
+    EatsClockStatus_Running,
+    EatsClockStatus_Stopping
+} EatsClockStatus;
 
 @interface EatsClock : NSObject
 
@@ -31,11 +38,7 @@
 @property double        machTimeToNsFactor;
 @property double        nsToMachTimeFactor;
 
-// TODO: Use a typedef enum here instead
-@property int           clockStatus;
-extern int const        CLOCK_STATUS_STOPPED;
-extern int const        CLOCK_STATUS_RUNNING;
-extern int const        CLOCK_STATUS_STOPPING;
+@property EatsClockStatus clockStatus;
 
 - (void)startClock;
 - (void)setClockToZero;

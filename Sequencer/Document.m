@@ -13,7 +13,6 @@
 #import "Preferences.h"
 #import "EatsExternalClockCalculator.h"
 #import "EatsGridNavigationController.h"
-#import "EatsScaleGenerator.h"
 
 @interface Document ()
 
@@ -46,6 +45,9 @@
 
 @implementation Document
 
+
+#pragma mark - Setters and getters
+
 @synthesize isActive = _isActive;
 
 - (void)setIsActive:(BOOL)isActive
@@ -59,6 +61,9 @@
     return _isActive;
 }
 
+
+
+#pragma mark - Public methods
 
 - (id)init
 {
@@ -114,8 +119,10 @@
     if([matches count]) {
         self.sequencer = [matches lastObject];
     } else {
-        [self addInitialData];
-        [self addDummyData];
+        // Create initial structure
+        self.sequencer = [Sequencer sequencerWithPages:8 width:16 height:8 inManagedObjectContext:self.managedObjectContext];
+        
+        [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
     }
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -147,52 +154,7 @@
 
 #pragma mark - Private methods
 
-- (void) addInitialData
-{
-    // Create empty structure
-    self.sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
-    
-    // Pitches
-    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:48 length:32];
-    
-    NSMutableOrderedSet *rowPitches = [NSMutableOrderedSet orderedSet];
-    for(NSNumber *pitch in pitches) {
-        SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContext];
-        rowPitch.pitch = pitch;
-        [rowPitches addObject:rowPitch];
-    }
-    
-    for(SequencerPage *page in self.sequencer.pages) {
-        page.pitches = rowPitches;
-    }
 
-    
-    //SequencerPage *page = sequencer.pages[2];
-    //NSLog(@"%@", [page.pitches[3] pitch]);
-    
-    // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
-    
-    // TODO: Might need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
-}
-
-- (void) addDummyData
-{
-    NSMutableSet *notes = [NSMutableSet setWithCapacity:16];
-    for(int i = 0; i < 16; i++) {
-        
-        SequencerNote *note = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
-        
-        note.lengthAsPercentage = [NSNumber numberWithFloat:6.25];
-        note.row = [NSNumber numberWithInt:arc4random_uniform(8)];
-        note.step = [NSNumber numberWithInt:i];
-        note.velocity = [NSNumber numberWithInt:96];
-        
-        [notes addObject:note];
-    }
-    SequencerPage *page = self.sequencer.pages[0];
-    SequencerPattern *pattern = page.patterns[0];
-    pattern.notes = notes;
-}
 
 
 
@@ -259,7 +221,40 @@
         [notesToStop removeAllObjects];
         
         
-        // Send notes that need to be sent
+        // Update the sequencer pages and send notes
+        
+        for(SequencerPage *page in self.sequencer.pages) {
+            
+            // Advance sequencer steps
+            
+            //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
+            
+            page.currentStep = [NSNumber numberWithInt:[page.nextStep intValue]];
+            
+            if( [page.playMode intValue] == EatsSequencerPlayMode_Forward ) {
+                
+                int nextStep = [page.currentStep intValue] + 1;
+                if( nextStep > [page.loopEnd intValue])
+                    nextStep = [page.loopStart intValue];
+                page.nextStep = [NSNumber numberWithInt: nextStep];
+                
+            } else if( [page.playMode intValue] == EatsSequencerPlayMode_Reverse ) {
+                int nextStep = [page.currentStep intValue] - 1;
+                if( nextStep < [page.loopStart intValue])
+                    nextStep = [page.loopEnd intValue];
+                page.nextStep = [NSNumber numberWithInt: nextStep];
+                
+            } else if( [page.playMode intValue] == EatsSequencerPlayMode_Random ) {
+                int nextStep = floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
+                page.nextStep = [NSNumber numberWithInt: nextStep];
+                NSLog(@"%@", page.nextStep);
+            }
+
+            // Send notes that need to be sent
+            // Fetch notes for current step, playMode != paused (might be able to do this outside of the for loop?)
+        
+        }
+
         
         // Test send – 1/8 notes
         if(self.currentTick % (TICKS_PER_MEASURE / 8) == 0) {
@@ -299,10 +294,13 @@
             // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time
             
         }
-        
-        // TODO: Update the user interface here ASYNC
-        // Maybe use GCD? http://stackoverflow.com/questions/8854100/objective-c-async-call-a-method-using-ios-4
-        // Or just 'on main thread' as did in other prototype. Should the actual sending of MIDI notes be shifted off the clock thred too or is it good to do that there at high priority?
+    
+    
+        // Update the interface (could use GCD here if it feels like a bottleneck)
+        [self.gridNavigationController performSelectorOnMainThread:@selector(updateGridView)
+                                                        withObject:nil
+                                                     waitUntilDone:NO];
+    
     }
     
     // Increment the tick to the next step
@@ -382,6 +380,30 @@
 {
     [self.clock stopClock];
 }
+
+- (IBAction)sequencerPauseButton:(NSButton *)sender
+{
+    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Pause]];
+}
+
+
+- (IBAction)sequencerForwardButton:(NSButton *)sender
+{
+    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Forward]];
+}
+
+- (IBAction)sequencerReverseButton:(NSButton *)sender
+{
+    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Reverse]];
+}
+
+- (IBAction)sequencerRandomButton:(NSButton *)sender
+{
+    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Random]];
+}
+
+
+
 
 - (IBAction)introViewButton:(NSButton *)sender
 {
