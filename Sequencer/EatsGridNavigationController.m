@@ -46,12 +46,20 @@
                                                  selector:@selector(gridControllerConnected:)
                                                      name:@"GridControllerConnected" object:nil];
         
-        if(self.sharedPreferences.gridType != EatsGridType_None)
+        if(self.sharedPreferences.gridType != EatsGridType_None) {
             self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+            self.currentView = EatsGridView_Sequencer;
+        }
 
     }
     return self;
 }
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+
 
 - (void) updateGridView
 {

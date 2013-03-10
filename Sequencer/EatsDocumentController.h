@@ -11,7 +11,7 @@
 
 @interface EatsDocumentController : NSDocumentController
 
-@property Document *lastActiveDocument;
+@property (weak) Document *lastActiveDocument;
 
 - (void)setActiveDocument:(Document *)document;
 
