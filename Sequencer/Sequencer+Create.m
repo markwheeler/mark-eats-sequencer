@@ -20,7 +20,7 @@
     Sequencer *sequencer = [NSEntityDescription insertNewObjectForEntityForName:@"Sequencer" inManagedObjectContext:context];
     
     // Create the empty SequencerPages
-    NSMutableOrderedSet *setOfPages = [NSMutableOrderedSet orderedSetWithCapacity:numberOfPages];;
+    NSMutableOrderedSet *setOfPages = [NSMutableOrderedSet orderedSetWithCapacity:numberOfPages];
     for( int i = 0; i < numberOfPages; i++) {
         
         // Create a page and setup the channels (make this a method on SequencerPage)

@@ -11,7 +11,7 @@
 @interface EatsGridIntroView ()
 
 #define FRAMERATE 60
-#define TRAIL_LENGTH 4 // Won't show past 15
+#define TRAIL_LENGTH 6 // Won't show past 15
 #define PAUSE_AT_END 10
 
 @property NSTimer               *animationTimer;
@@ -63,11 +63,21 @@
         self.particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2)], @"y", nil];
         self.particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
         self.particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
-        
+
         [self startAnimation];
         
     }
     return self;
+}
+
+- (void) updateView
+{
+    [self updateAnimation:nil];
+}
+
+- (void) stopAnimation
+{
+    [self.animationTimer invalidate];
 }
 
 
@@ -101,14 +111,30 @@
     if(self.particleB)
         [[gridArray objectAtIndex:[[self.particleB valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[self.particleB valueForKey:@"y"] unsignedIntValue]
                                                                                                   withObject:[NSNumber numberWithUnsignedInt:15]];
-    
     // Draw trails
-    for(uint i = 0; i < [self.particleATrail count]; i++) {
-        uint endFix = 0;
-        if(!self.particleA)
-            endFix = TRAIL_LENGTH - (uint)[self.particleATrail count];
-        [[gridArray objectAtIndex:[[[self.particleATrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[[self.particleATrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue] withObject:[NSNumber numberWithUnsignedInt:15 - i - endFix]];
-        [[gridArray objectAtIndex:[[[self.particleBTrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[[self.particleBTrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue] withObject:[NSNumber numberWithUnsignedInt:15 - i - endFix]];
+    for(int i = 0; i < [self.particleATrail count]; i++) {
+        // startFix ensure the trails are correct when they first appear (before they are full length)
+        int startFix = 0;
+        if([self.particleATrail count] < TRAIL_LENGTH && self.particleA)
+            startFix = TRAIL_LENGTH - (int)[self.particleATrail count];
+        
+        // The +1s in this maths make sure we don't end up setting 0 brightness
+        NSNumber *brightness = [NSNumber numberWithFloat:floor((15.0 / (TRAIL_LENGTH + 1) ) * (i + 1 + startFix))];
+        
+        // Draw A
+        uint x = [[[self.particleATrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue];
+        uint y = [[[self.particleATrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue];
+        if([[[gridArray objectAtIndex:x] objectAtIndex:y] integerValue] < [brightness integerValue]){
+            [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:brightness];
+        }
+        
+        // Draw B
+        x = [[[self.particleBTrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue];
+        y = [[[self.particleBTrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue];
+        if([[[gridArray objectAtIndex:x] objectAtIndex:y] integerValue] < [brightness integerValue]){
+            [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:brightness];
+        }
+
     }
     
     // Update via delegate
@@ -119,12 +145,16 @@
     self.currentFrame++;
     
     // Save trail info
-    if(self.particleA) [self.particleATrail insertObject:[self.particleA copy] atIndex:0];
-    if(self.particleB) [self.particleBTrail insertObject:[self.particleB copy] atIndex:0];
+    //if(self.particleA) [self.particleATrail insertObject:[self.particleA copy] atIndex:0];
+    //if(self.particleB) [self.particleBTrail insertObject:[self.particleB copy] atIndex:0];
+    if(self.particleA) [self.particleATrail addObject:[self.particleA copy]];
+    if(self.particleB) [self.particleBTrail addObject:[self.particleB copy]];
     
     if([self.particleATrail count] > TRAIL_LENGTH || (!self.particleA && [self.particleATrail count] > 0) ) {
-        [self.particleATrail removeLastObject];
-        [self.particleBTrail removeLastObject];
+        //[self.particleATrail removeLastObject];
+        //[self.particleBTrail removeLastObject];
+        [self.particleATrail removeObjectAtIndex:0];
+        [self.particleBTrail removeObjectAtIndex:0];
     }
     
     // Move the particles
@@ -161,9 +191,5 @@
 
 }
 
-- (void) stopAnimation
-{
-    [self.animationTimer invalidate];   
-}
 
 @end

@@ -274,6 +274,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
+						<string key="label">documentWindow</string>
+						<reference key="source" ref="512844837"/>
+						<reference key="destination" ref="275939982"/>
+					</object>
+					<int key="connectionID">100146</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="275939982"/>
 						<reference key="destination" ref="512844837"/>
@@ -842,7 +850,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">100145</int>
+			<int key="maxID">100146</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -883,6 +891,17 @@
 							<string key="candidateClassName">NSButton</string>
 						</object>
 					</dictionary>
+					<object class="NSMutableDictionary" key="outlets">
+						<string key="NS.key.0">documentWindow</string>
+						<string key="NS.object.0">NSWindow</string>
+					</object>
+					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<string key="NS.key.0">documentWindow</string>
+						<object class="IBToOneOutletInfo" key="NS.object.0">
+							<string key="name">documentWindow</string>
+							<string key="candidateClassName">NSWindow</string>
+						</object>
+					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/Document.h</string>

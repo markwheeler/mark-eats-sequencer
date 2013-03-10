@@ -7,6 +7,7 @@
 //
 
 #import "EatsGridNavigationController.h"
+#import "EatsDocumentController.h"
 #import "EatsCommunicationManager.h"
 #import "Preferences.h"
 #import "EatsMonome.h"
@@ -28,11 +29,13 @@
 
 #pragma mark - public methods
 
-- (id) init
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context
 {
     self = [super init];
     if (self) {
         
+        self.isActive = NO;
+        self.managedObjectContext = context;
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedPreferences = [Preferences sharedPreferences];
         
@@ -42,6 +45,9 @@
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridControllerConnected:)
                                                      name:@"GridControllerConnected" object:nil];
+        
+        if(self.sharedPreferences.gridType != EatsGridType_None)
+            self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
 
     }
     return self;
@@ -59,12 +65,23 @@
     if(gridView == self.currentView) return;
     
     if(gridView == EatsGridView_Intro) {
+        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
+            [self.currentViewObject performSelector:@selector(stopAnimation)];
         self.currentViewObject = [[EatsGridIntroView alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        
     } else if(gridView == EatsGridView_Sequencer) {
-        self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
+            [self.currentViewObject performSelector:@selector(stopAnimation)];
+        self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        
     } else if(gridView == EatsGridView_Play) {
-        self.currentViewObject = [[EatsGridPlayView alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
+            [self.currentViewObject performSelector:@selector(stopAnimation)];
+        self.currentViewObject = [[EatsGridPlayView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        
     } else {
+        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
+            [self.currentViewObject performSelector:@selector(stopAnimation)];
         self.currentViewObject = nil;
         if([self.deviceInterface respondsToSelector:@selector(clearGridController)])
             [self.deviceInterface performSelector:@selector(clearGridController)];
@@ -91,6 +108,9 @@
 
 - (void) updateGridWithArray:(NSArray *)gridArray
 {
+    // Only send msgs to the grid controller if we're the active document
+    if( !self.isActive ) return;
+    
     if(self.sharedPreferences.gridType == EatsGridType_Monome && self.sharedCommunicationManager.oscOutPort) {
         if(![self.deviceInterface isKindOfClass:[EatsMonome class]])
             self.deviceInterface = [[EatsMonome alloc] initWithOSCPort:self.sharedCommunicationManager.oscOutPort oscPrefix:self.sharedCommunicationManager.oscPrefix];

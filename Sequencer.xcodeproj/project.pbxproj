@@ -10,6 +10,7 @@
 		4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */; };
 		4D172E8516E5BACF0012C019 /* EatsGridIntroView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */; };
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
+		4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */; };
 		4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D6115CB16E431BD00140AF8 /* Cocoa.framework */; };
 		4D6115D616E431BD00140AF8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115D416E431BD00140AF8 /* InfoPlist.strings */; };
 		4D6115D816E431BD00140AF8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115D716E431BD00140AF8 /* main.m */; };
@@ -65,6 +66,8 @@
 		4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridIntroView.m; sourceTree = "<group>"; };
 		4D172E8616E5BD090012C019 /* Preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Preferences.h; sourceTree = "<group>"; };
 		4D172E8716E5BD090012C019 /* Preferences.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Preferences.m; sourceTree = "<group>"; };
+		4D1B31A216EBDB9E00140B51 /* EatsDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDocumentController.h; sourceTree = "<group>"; };
+		4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDocumentController.m; sourceTree = "<group>"; };
 		4D6115C816E431BD00140AF8 /* Sequencer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sequencer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6115CB16E431BD00140AF8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4D6115CE16E431BD00140AF8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -181,6 +184,8 @@
 				4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */,
 				4D61162E16E43B9600140AF8 /* AppController.h */,
 				4D61162F16E43B9600140AF8 /* AppController.m */,
+				4D1B31A216EBDB9E00140B51 /* EatsDocumentController.h */,
+				4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */,
 				4D6115DD16E431BD00140AF8 /* Document.h */,
 				4D6115DE16E431BD00140AF8 /* Document.m */,
 				4D172E8616E5BD090012C019 /* Preferences.h */,
@@ -333,6 +338,7 @@
 				4D172E8816E5BD090012C019 /* Preferences.m in Sources */,
 				4DD0B5B616E702250025AB1C /* EatsGridSequencerView.m in Sources */,
 				4DD0B5B916E702330025AB1C /* EatsGridPlayView.m in Sources */,
+				4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

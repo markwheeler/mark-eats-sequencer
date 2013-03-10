@@ -18,5 +18,6 @@
 @interface Document : NSPersistentDocument <EatsClockDelegateProtocol>
 
 @property Sequencer *sequencer;
+@property BOOL      isActive;
 
 @end

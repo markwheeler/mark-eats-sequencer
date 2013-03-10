@@ -12,12 +12,13 @@
 
 #pragma mark - Public methods
 
-- (id) initWithDelegate:(id)delegate width:(uint)w height:(uint)h
+- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h
 {
     self = [super init];
     if (self) {
         
         self.delegate = delegate;
+        self.managedObjectContext = context;
         self.width = w;
         self.height = h;
         

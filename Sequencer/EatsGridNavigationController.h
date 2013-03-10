@@ -24,6 +24,10 @@ typedef enum EatsGridView{
 
 @interface EatsGridNavigationController : NSObject <EatsGridViewDelegateProtocol>
 
+@property BOOL                      isActive;
+@property NSManagedObjectContext    *managedObjectContext;
+
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
 - (void) updateGridView;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(EatsGridView)gridView;

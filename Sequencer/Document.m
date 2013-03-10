@@ -8,6 +8,7 @@
 
 #import "Document.h"
 #import <VVMIDI/VVMIDI.h>
+#import "EatsDocumentController.h"
 #import "EatsCommunicationManager.h"
 #import "Preferences.h"
 #import "EatsExternalClockCalculator.h"
@@ -27,6 +28,8 @@
 @property EatsExternalClockCalculator   *externalClockCalculator;
 @property EatsGridNavigationController  *gridNavigationController;
 
+@property (strong) IBOutlet NSWindow *documentWindow;
+
 // Clock stuff
 @property NSUInteger        currentTick;
 @property VVMIDINode        *clockSource;
@@ -42,25 +45,27 @@
 
 @implementation Document
 
+@synthesize isActive = _isActive;
+
+- (void)setIsActive:(BOOL)isActive
+{
+    _isActive = isActive;
+    if(self.gridNavigationController) self.gridNavigationController.isActive = isActive;
+}
+
+- (BOOL)isActive
+{
+    return _isActive;
+}
+
+
 - (id)init
 {
     self = [super init];
     if (self) {
         // Add your subclass-specific initialization here.
 
-        // Setup the Core Data object
-        self.sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
-
-        self.sequencer.bpm = [NSNumber numberWithInt:89];
-
-        //SequencerPage *page = sequencer.pages[2];
-        //NSLog(@"%@", [page.pitches[3] pitch]);
-        
-        // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
-        
-        // TODO: Implement a category method on Sequencer 'createWithPages:(int)' that sets everything up? Might also need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
-        
-        
+        self.isActive = NO;
         
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedPreferences = [Preferences sharedPreferences];
@@ -79,8 +84,7 @@
         for(int i = 0; i < MIN_QUANTIZATION; i++)
             [self.activeNotes addObject:[NSMutableSet setWithCapacity:32]];
         
-        self.gridNavigationController = [[EatsGridNavigationController alloc] init];
-        
+        self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
     }
     return self;
 }
@@ -96,6 +100,33 @@
 {
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
+    
+    // Setup the Core Data object
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+    NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:nil];
+    
+    if([matches count]) {
+        self.sequencer = [matches lastObject];
+    } else {
+        // Initialise
+        self.sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
+        self.sequencer.bpm = [NSNumber numberWithInt:89];
+        
+        [self addDummyData];
+    }
+    
+    //SequencerPage *page = sequencer.pages[2];
+    //NSLog(@"%@", [page.pitches[3] pitch]);
+    
+    // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
+    
+    // TODO: Implement a category method on Sequencer 'createWithPages:(int)' that sets everything up? Might also need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
+
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(didBecomeMain:)
+                                                 name:NSWindowDidBecomeMainNotification
+                                               object:[aController window]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -106,6 +137,39 @@
 + (BOOL)autosavesInPlace
 {
     return YES;
+}
+
+- (void)didBecomeMain:(NSNotification *)notification
+{
+    EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
+    if( documentController.lastActiveDocument != self ) {
+        [documentController setActiveDocument:self];
+    }
+        [self.gridNavigationController updateGridView];
+    //}
+}
+
+
+
+#pragma mark - Private methods
+
+- (void) addDummyData
+{
+    NSMutableSet *notes = [NSMutableSet setWithCapacity:16];
+    for(int i = 0; i < 16; i++) {
+        
+        SequencerNote *note = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+        
+        note.lengthAsPercentage = [NSNumber numberWithFloat:6.25];
+        note.row = [NSNumber numberWithInt:arc4random_uniform(8)];
+        note.step = [NSNumber numberWithInt:i];
+        note.velocity = [NSNumber numberWithInt:96];
+        
+        [notes addObject:note];
+    }
+    SequencerPage *page = self.sequencer.pages[0];
+    SequencerPattern *pattern = page.patterns[0];
+    pattern.notes = notes;
 }
 
 

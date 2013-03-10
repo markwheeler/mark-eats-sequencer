@@ -7,20 +7,23 @@
 //
 
 #import "EatsGridSequencerView.h"
+#import "SequencerNote.h"
 
 @implementation EatsGridSequencerView
 
 #pragma mark - Public methods
 
-- (id) initWithDelegate:(id)delegate width:(uint)w height:(uint)h
+- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h
 {
     self = [super init];
     if (self) {
         
         self.delegate = delegate;
+        self.managedObjectContext = context;
         self.width = w;
         self.height = h;
         
+
         [self updateView];
         
     }
@@ -31,21 +34,25 @@
 {
     
     NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.width];
-    int seed = arc4random_uniform(self.width - 1);
     
     // Generate the columns
     for(uint x = 0; x < self.width; x++) {
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            // Put lights in interesting places
-            if(x % 4 == (seed - y) % 4)
-                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
-            else
-                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
+            [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
     }
     
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+    //request.predicate = [NSPredicate predicateWithFormat:@"inPattern IS 0"];
+    
+    NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:nil];
+    for(SequencerNote *note in matches) {
+        [[gridArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:[note.row intValue] withObject:[NSNumber numberWithInt:15]];
+    }
+    
+    // Send msg to delegate
     if([self.delegate respondsToSelector:@selector(updateGridWithArray:)])
         [self.delegate performSelector:@selector(updateGridWithArray:) withObject:gridArray];
 }

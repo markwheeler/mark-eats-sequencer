@@ -11,11 +11,12 @@
 @interface EatsGridPlayView : NSObject
 
 @property (weak) id delegate;
+@property NSManagedObjectContext *managedObjectContext;
 
 @property uint width;
 @property uint height;
 
-- (id) initWithDelegate:(id)delegate width:(uint)w height:(uint)h;
+- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h;
 - (void) updateView;
 
 @end

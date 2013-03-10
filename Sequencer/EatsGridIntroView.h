@@ -16,5 +16,7 @@
 @property uint height;
 
 - (id) initWithDelegate:(id)delegate width:(uint)w height:(uint)h;
+- (void) updateView;
+- (void) stopAnimation;
 
 @end
