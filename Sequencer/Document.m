@@ -89,6 +89,11 @@
     return self;
 }
 
+- (void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (NSString *)windowNibName
 {
     // Override returning the nib file name of the document
@@ -120,7 +125,7 @@
     
     // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
     
-    // TODO: Implement a category method on Sequencer 'createWithPages:(int)' that sets everything up? Might also need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
+    // TODO: Might need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
 
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -144,9 +149,8 @@
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     if( documentController.lastActiveDocument != self ) {
         [documentController setActiveDocument:self];
-    }
         [self.gridNavigationController updateGridView];
-    //}
+    }
 }
 
 
