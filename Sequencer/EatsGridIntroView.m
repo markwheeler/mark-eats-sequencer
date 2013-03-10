@@ -7,12 +7,12 @@
 //
 
 #import "EatsGridIntroView.h"
+#import "EatsGridNavigationController.h"
 
 @interface EatsGridIntroView ()
 
 #define FRAMERATE 60
 #define TRAIL_LENGTH 6 // Won't show past 15
-#define PAUSE_AT_END 10
 
 @property NSTimer               *animationTimer;
 @property uint                  currentFrame;
@@ -64,10 +64,22 @@
         self.particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
         self.particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
 
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(gridInput:)
+                                                     name:@"GridInput"
+                                                   object:nil];
+        
+        
         [self startAnimation];
         
     }
     return self;
+}
+
+- (void) dealloc
+{
+    [self stopAnimation];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void) updateView
@@ -172,7 +184,7 @@
         self.particleB = nil;
     }
     
-    if (self.currentFrame > self.width + self.height - 2 + TRAIL_LENGTH + PAUSE_AT_END) [self stopAnimation];
+    if (self.currentFrame > self.width + self.height - 2 + TRAIL_LENGTH) [self stopAnimation];
 }
 
 - (void) startAnimation
@@ -189,6 +201,19 @@
     [runloop addTimer:self.animationTimer forMode: NSRunLoopCommonModes];
     [runloop addTimer:self.animationTimer forMode: NSEventTrackingRunLoopMode];
 
+}
+
+- (void) gridInput:(NSNotification *)notification
+{
+    // Ignore input if we're not active
+    if( ![self.delegate performSelector:@selector(isActive)] )
+        return;
+    
+    if( ![[notification.userInfo valueForKey:@"down"] boolValue] ) {
+        // Tell the delegate we're done
+        if([self.delegate respondsToSelector:@selector(showView:)])
+            [self.delegate performSelector:@selector(showView:) withObject:[NSNumber numberWithInt:EatsGridView_Sequencer]];
+    }
 }
 
 @end

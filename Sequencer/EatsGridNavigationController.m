@@ -41,10 +41,12 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridControllerNone:)
-                                                     name:@"GridControllerNone" object:nil];
+                                                     name:@"GridControllerNone"
+                                                   object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridControllerConnected:)
-                                                     name:@"GridControllerConnected" object:nil];
+                                                     name:@"GridControllerConnected"
+                                                   object:nil];
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
             self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
@@ -63,39 +65,31 @@
 
 - (void) updateGridView
 {
-    if([self.currentViewObject respondsToSelector:@selector(updateView)]) {
+    if([self.currentViewObject respondsToSelector:@selector(updateView)] && self.isActive) {
         [self.currentViewObject performSelector:@selector(updateView)];
     }
 }
 
-- (void) showView:(EatsGridView)gridView
-{
-    if(gridView == self.currentView) return;
+- (void) showView:(NSNumber *)gridView
+{    
+    if([gridView intValue] == self.currentView) return;
     
-    if(gridView == EatsGridView_Intro) {
-        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
-            [self.currentViewObject performSelector:@selector(stopAnimation)];
+    if([gridView intValue] == EatsGridView_Intro) {
         self.currentViewObject = [[EatsGridIntroView alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
-    } else if(gridView == EatsGridView_Sequencer) {
-        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
-            [self.currentViewObject performSelector:@selector(stopAnimation)];
+    } else if([gridView intValue] == EatsGridView_Sequencer) {
         self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
-    } else if(gridView == EatsGridView_Play) {
-        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
-            [self.currentViewObject performSelector:@selector(stopAnimation)];
+    } else if([gridView intValue] == EatsGridView_Play) {
         self.currentViewObject = [[EatsGridPlayView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else {
-        if([self.currentViewObject respondsToSelector:@selector(stopAnimation)])
-            [self.currentViewObject performSelector:@selector(stopAnimation)];
         self.currentViewObject = nil;
         if([self.deviceInterface respondsToSelector:@selector(clearGridController)])
             [self.deviceInterface performSelector:@selector(clearGridController)];
     }
     
-    self.currentView = gridView;
+    self.currentView = [gridView intValue];
 }
 
 
@@ -103,12 +97,12 @@
 
 - (void)gridControllerNone:(NSNotification *)notification
 {
-    [self showView:EatsGridView_None];
+    [self showView:[NSNumber numberWithInt:EatsGridView_None]];
 }
 
 - (void)gridControllerConnected:(NSNotification *)notification
 {
-    [self showView:EatsGridView_Intro];
+    [self showView:[NSNumber numberWithInt:EatsGridView_Intro]];
 }
 
 

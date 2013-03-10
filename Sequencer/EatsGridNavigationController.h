@@ -18,7 +18,9 @@ typedef enum EatsGridView{
 } EatsGridView;
 
 @protocol EatsGridViewDelegateProtocol
+@property BOOL isActive;
 - (void) updateGridWithArray:(NSArray *)gridArray;
+- (void) showView:(NSNumber *)gridView;
 @end
 
 
@@ -30,6 +32,6 @@ typedef enum EatsGridView{
 - (id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
 - (void) updateGridView;
 - (void) updateGridWithArray:(NSArray *)gridArray;
-- (void) showView:(EatsGridView)gridView;
+- (void) showView:(NSNumber *)gridView;
 
 @end

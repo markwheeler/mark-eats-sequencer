@@ -385,17 +385,17 @@
 
 - (IBAction)introViewButton:(NSButton *)sender
 {
-        [self.gridNavigationController showView:EatsGridView_Intro];
+        [self.gridNavigationController showView:[NSNumber numberWithInt:EatsGridView_Intro]];
 }
 
 - (IBAction)sequencerViewButton:(NSButton *)sender
 {
-    [self.gridNavigationController showView:EatsGridView_Sequencer];
+    [self.gridNavigationController showView:[NSNumber numberWithInt:EatsGridView_Sequencer]];
 }
 
 - (IBAction)playViewButton:(NSButton *)sender
 {
-    [self.gridNavigationController showView:EatsGridView_Play];
+    [self.gridNavigationController showView:[NSNumber numberWithInt:EatsGridView_Play]];
 }
 
 

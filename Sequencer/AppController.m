@@ -56,6 +56,41 @@
 
 
 
+#pragma mark - Methods for sending input notifications
+
+- (void) sendGridInputNotificationX:(uint)x Y:(uint)y down:(BOOL)down
+{
+    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                                                         [NSNumber numberWithUnsignedInt:y], @"y",
+                                                                         [NSNumber numberWithBool:down], @"down",
+                                                                         nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridInput"
+                                                        object:self
+                                                      userInfo:inputInfo];
+}
+
+- (void) sendButtonInputNotificationId:(uint)id down:(BOOL)down
+{
+    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:id], @"id",
+                                                                         [NSNumber numberWithBool:down], @"down",
+                                                                         nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ButtonInput"
+                                                        object:self
+                                                      userInfo:inputInfo];
+}
+
+- (void) sendValueInputNotificationId:(uint)id value:(float)value
+{
+    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:id], @"id",
+                                                                         [NSNumber numberWithFloat:value], @"value",
+                                                                         nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ValueInput"
+                                                        object:self
+                                                      userInfo:inputInfo];
+}
+
+
+
 #pragma mark - MIDI Manager delegate methods
 
 - (void) setupChanged
@@ -120,25 +155,33 @@
         
     } else if([[o address] isEqualTo:[NSString stringWithFormat:@"/%@/grid/key", self.sharedCommunicationManager.oscPrefix]]) {
         NSMutableArray *keyValues = [[NSMutableArray alloc] initWithCapacity:3];
-        for (id i in [o valueArray]) {
+        for (NSString *i in [o valueArray]) {
             [keyValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", i]]];
         }
         
-        // SEND NOTI
+        [self sendGridInputNotificationX:[keyValues[0] intValue]
+                                       Y:[keyValues[1] intValue]
+                                    down:[keyValues[2] intValue]];
+        
+    
+    // Other OSC input addressed to us
+        
+    } else if([[o address] hasPrefix:[NSString stringWithFormat:@"/%@/", self.sharedCommunicationManager.oscPrefix]]) {
+        if([o valueCount] > 1) {
+            NSMutableString *miscValues = [[NSMutableString alloc] init];
+            for (NSString *s in [o valueArray]) {
+                [miscValues appendFormat:@"%@ ", [self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
+            }
+            NSLog(@"OSC received %@ %@", [o address], miscValues);
+        } else if([o valueCount]) {
+            NSLog(@"OSC received %@ %@", [o address], [self stripOSCValue:[NSString stringWithFormat:@"%@", [o value]]]);
+        }
+        
+        // TODO: send buttonInput and valueInput notifications using methods above.
         
         
-        //NSLog(@"Received key x:%@ y:%@ s:%@", keyValues[0], keyValues[1], keyValues[2]);
         
-        // Key down
-        /*if([keyValues[2] intValue]) {
-            [self testAnimationStart];
-            // Key up
-        } else {
-            [self testAnimationStop];
-        }*/
-        
-        
-    // Anything else just gets logged
+    // Anything else just gets logged (can probably ignore it)
         
     } else {
         if([o valueCount] > 1) {
@@ -154,11 +197,11 @@
     
 }
 
-- (id) stripOSCValue:(NSString *)s
+- (NSString *) stripOSCValue:(NSString *)s
 {
     // Find the value in the string
     NSArray *valueItems = [s componentsSeparatedByCharactersInSet: [NSCharacterSet characterSetWithCharactersInString:@" >"]];
-    return [(NSString *)valueItems[2] stringByTrimmingCharactersInSet: [NSCharacterSet characterSetWithCharactersInString:@"\""]];
+    return [valueItems[2] stringByTrimmingCharactersInSet: [NSCharacterSet characterSetWithCharactersInString:@"\""]];
 }
 
 
