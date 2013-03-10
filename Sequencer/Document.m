@@ -13,6 +13,7 @@
 #import "Preferences.h"
 #import "EatsExternalClockCalculator.h"
 #import "EatsGridNavigationController.h"
+#import "EatsScaleGenerator.h"
 
 @interface Document ()
 
@@ -113,20 +114,9 @@
     if([matches count]) {
         self.sequencer = [matches lastObject];
     } else {
-        // Initialise
-        self.sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
-        self.sequencer.bpm = [NSNumber numberWithInt:89];
-        
+        [self addInitialData];
         [self addDummyData];
     }
-    
-    //SequencerPage *page = sequencer.pages[2];
-    //NSLog(@"%@", [page.pitches[3] pitch]);
-    
-    // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
-    
-    // TODO: Might need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
-
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didBecomeMain:)
@@ -156,6 +146,34 @@
 
 
 #pragma mark - Private methods
+
+- (void) addInitialData
+{
+    // Create empty structure
+    self.sequencer = [Sequencer sequencerWithPages:8 withPatterns:16 withPitches:8 inManagedObjectContext:self.managedObjectContext];
+    
+    // Pitches
+    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:48 length:32];
+    
+    NSMutableOrderedSet *rowPitches = [NSMutableOrderedSet orderedSet];
+    for(NSNumber *pitch in pitches) {
+        SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContext];
+        rowPitch.pitch = pitch;
+        [rowPitches addObject:rowPitch];
+    }
+    
+    for(SequencerPage *page in self.sequencer.pages) {
+        page.pitches = rowPitches;
+    }
+
+    
+    //SequencerPage *page = sequencer.pages[2];
+    //NSLog(@"%@", [page.pitches[3] pitch]);
+    
+    // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
+    
+    // TODO: Might need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
+}
 
 - (void) addDummyData
 {

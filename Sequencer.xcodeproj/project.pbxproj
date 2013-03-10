@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D08357916EC2D1000700EEA /* EatsScaleGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */; };
 		4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */; };
 		4D172E8516E5BACF0012C019 /* EatsGridIntroView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */; };
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
@@ -60,6 +61,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D08357716EC2D1000700EEA /* EatsScaleGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsScaleGenerator.h; sourceTree = "<group>"; };
+		4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsScaleGenerator.m; sourceTree = "<group>"; };
 		4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridNavigationController.h; sourceTree = "<group>"; };
 		4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridNavigationController.m; sourceTree = "<group>"; };
 		4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridIntroView.h; sourceTree = "<group>"; };
@@ -196,6 +199,8 @@
 				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
 				4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */,
 				4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */,
+				4D08357716EC2D1000700EEA /* EatsScaleGenerator.h */,
+				4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */,
 				4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */,
 				4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */,
 				4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */,
@@ -339,6 +344,7 @@
 				4DD0B5B616E702250025AB1C /* EatsGridSequencerView.m in Sources */,
 				4DD0B5B916E702330025AB1C /* EatsGridPlayView.m in Sources */,
 				4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */,
+				4D08357916EC2D1000700EEA /* EatsScaleGenerator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

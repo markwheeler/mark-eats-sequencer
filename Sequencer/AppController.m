@@ -123,6 +123,10 @@
         for (id i in [o valueArray]) {
             [keyValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", i]]];
         }
+        
+        // SEND NOTI
+        
+        
         //NSLog(@"Received key x:%@ y:%@ s:%@", keyValues[0], keyValues[1], keyValues[2]);
         
         // Key down

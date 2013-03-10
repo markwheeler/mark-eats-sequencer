@@ -31,6 +31,7 @@
 @property double        machTimeToNsFactor;
 @property double        nsToMachTimeFactor;
 
+// TODO: Use a typedef enum here instead
 @property int           clockStatus;
 extern int const        CLOCK_STATUS_STOPPED;
 extern int const        CLOCK_STATUS_RUNNING;
