@@ -7,6 +7,8 @@
 //
 
 #import "EatsGridPlayView.h"
+#import "SequencerPage.h"
+#import "SequencerNote.h"
 #import "EatsGridNavigationController.h"
 
 @implementation EatsGridPlayView
@@ -42,20 +44,41 @@
 - (void) updateView
 {
     
+    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == 0"];
+    
+    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
+    SequencerPage *page = [pageMatches lastObject];
+    
     NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns
+    // Generate the columns with playhead
     for(uint x = 0; x < self.width; x++) {
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
+            if(x >= [page.loopStart intValue] && x <= [page.loopEnd intValue] && y == self.height / 2 - 1)
+                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
+            else if(x == [page.currentStep intValue] && y > self.height / 2 - 1)
+                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:8] atIndex:y];
+            else
+                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
     }
     
-    // Put some buttons in
-    [[gridArray objectAtIndex:self.width - 1] replaceObjectAtIndex:0 withObject:[NSNumber numberWithInt:15]];
+    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+    // TODO //request.predicate = [NSPredicate predicateWithFormat:@"inPattern == 0"];
     
+    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+    for(SequencerNote *note in noteMatches) {
+        [[gridArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:floor([note.row intValue] / 2) + self.height / 2 withObject:[NSNumber numberWithInt:15]];
+    }
+    
+    // Put some buttons in
+    [[gridArray objectAtIndex:self.width - 1] replaceObjectAtIndex:0 withObject:[NSNumber numberWithInt:8]]; // Exit
+    [[gridArray objectAtIndex:self.width - 2] replaceObjectAtIndex:0 withObject:[NSNumber numberWithInt:8]]; // Clear
+    
+    // Send msg to delegate
     if([self.delegate respondsToSelector:@selector(updateGridWithArray:)])
         [self.delegate performSelector:@selector(updateGridWithArray:) withObject:gridArray];
 }

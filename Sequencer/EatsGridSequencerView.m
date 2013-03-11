@@ -72,7 +72,7 @@
     }
     
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    //request.predicate = [NSPredicate predicateWithFormat:@"inPattern IS 0"];
+    // TODO //request.predicate = [NSPredicate predicateWithFormat:@"inPattern == 0"];
     
     NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
     for(SequencerNote *note in noteMatches) {
