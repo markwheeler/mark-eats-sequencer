@@ -65,7 +65,7 @@
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
             if(x == currentStep)
-                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
+                [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:8] atIndex:y];
             else
                 [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }

@@ -109,7 +109,7 @@
 #pragma mark - GridView delegate methods
 
 - (void) updateGridWithArray:(NSArray *)gridArray
-{
+{        
     // Only send msgs to the grid controller if we're the active document
     if( !self.isActive ) return;
     
@@ -125,6 +125,7 @@
     
     if(self.sharedPreferences.gridType != EatsGridType_None && [self.deviceInterface respondsToSelector:@selector(redrawGridController:)])
         [self.deviceInterface performSelector:@selector(redrawGridController:) withObject:gridArray];
+
 }
 
 @end

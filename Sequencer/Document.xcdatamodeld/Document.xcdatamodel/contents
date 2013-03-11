@@ -2,7 +2,7 @@
 <model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2057" systemVersion="12C60" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Sequencer" representedClassName="Sequencer" syncable="YES">
         <attribute name="bpm" attributeType="Integer 16" minValueString="20" maxValueString="300" defaultValueString="100" syncable="YES"/>
-        <attribute name="patternQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>
+        <attribute name="patternQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="4" syncable="YES"/>
         <attribute name="stepQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>
         <relationship name="pages" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPage" inverseName="inSequencer" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
@@ -24,7 +24,7 @@
         <attribute name="nextPattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="nextStep" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="playMode" attributeType="Integer 16" minValueString="0" maxValueString="3" defaultValueString="0" syncable="YES"/>
-        <attribute name="stepLength" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="1" syncable="YES"/>
+        <attribute name="stepLength" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>
         <attribute name="swing" attributeType="Integer 16" minValueString="50" maxValueString="80" defaultValueString="50" syncable="YES"/>
         <relationship name="inSequencer" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Sequencer" inverseName="pages" inverseEntity="Sequencer" syncable="YES"/>
         <relationship name="patterns" optional="YES" toMany="YES" maxCount="32" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPattern" inverseName="inPage" inverseEntity="SequencerPattern" syncable="YES"/>

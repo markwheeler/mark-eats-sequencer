@@ -21,6 +21,7 @@
 #define TICKS_PER_MEASURE (PPQN * QN_PER_MEASURE)
 #define MIDI_CLOCK_PPQN 24
 #define MIN_QUANTIZATION 64
+#define MAX_QUANTIZATION 1
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
@@ -28,12 +29,19 @@
 @property EatsExternalClockCalculator   *externalClockCalculator;
 @property EatsGridNavigationController  *gridNavigationController;
 
-@property (strong) IBOutlet NSWindow *documentWindow;
+@property NSMutableArray                *quantizationArray;
+@property NSMutableArray                *quantizationTitlesArray;
 
 // Clock stuff
 @property NSUInteger        currentTick;
 @property VVMIDINode        *clockSource;
 @property NSMutableArray    *activeNotes;
+
+@property (strong) IBOutlet NSWindow *documentWindow;
+
+@property (weak) IBOutlet NSPopUpButton *stepQuantizationPopup;
+@property (weak) IBOutlet NSPopUpButton *patternQuantizationPopup;
+@property (weak) IBOutlet NSPopUpButton *stepLengthPopup;
 
 - (void) clockSongStart:(NSNumber *)ns;
 - (void) clockSongStop:(NSNumber *)ns;
@@ -90,6 +98,20 @@
         for(int i = 0; i < MIN_QUANTIZATION; i++)
             [self.activeNotes addObject:[NSMutableSet setWithCapacity:32]];
         
+        // Create the quantization settings
+        self.quantizationArray = [NSMutableArray array];
+        self.quantizationTitlesArray = [NSMutableArray array];
+        int quantizationSetting = MIN_QUANTIZATION;
+        while ( quantizationSetting >= MAX_QUANTIZATION ) {
+            [self.quantizationArray insertObject:[NSNumber numberWithInt:quantizationSetting] atIndex:0];
+            if( quantizationSetting == 1)
+                [self.quantizationTitlesArray insertObject:[NSString stringWithFormat:@"1 bar"] atIndex:0];
+            else
+                [self.quantizationTitlesArray insertObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] atIndex:0];
+            quantizationSetting = quantizationSetting / 2;
+        }
+        
+        // Create the gridNavigationController
         self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
     }
     return self;
@@ -124,11 +146,25 @@
         
         [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
     }
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didBecomeMain:)
                                                  name:NSWindowDidBecomeMainNotification
                                                object:[aController window]];
+    
+    // Populate UI
+    
+    [self.stepQuantizationPopup removeAllItems];
+    [self.stepQuantizationPopup addItemsWithTitles:self.quantizationTitlesArray];
+    [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.sequencer.stepQuantization]];
+    
+    [self.patternQuantizationPopup removeAllItems];
+    [self.patternQuantizationPopup addItemsWithTitles:self.quantizationTitlesArray];
+    [self.patternQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.sequencer.patternQuantization]];
+    
+    [self.stepLengthPopup removeAllItems];
+    [self.stepLengthPopup addItemsWithTitles:self.quantizationTitlesArray];
+    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObject:[[self.sequencer.pages objectAtIndex:0] stepLength]]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -154,7 +190,10 @@
 
 #pragma mark - Private methods
 
-
+- (uint) randomStepForPage:(SequencerPage *)page
+{
+    return floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
+}
 
 
 
@@ -227,76 +266,71 @@
             
             // Advance sequencer steps
             
-            //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
+            if( self.currentTick % (TICKS_PER_MEASURE / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
             
-            page.currentStep = [NSNumber numberWithInt:[page.nextStep intValue]];
-            
-            if( [page.playMode intValue] == EatsSequencerPlayMode_Forward ) {
+                //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
                 
-                int nextStep = [page.currentStep intValue] + 1;
-                if( nextStep > [page.loopEnd intValue])
-                    nextStep = [page.loopStart intValue];
-                page.nextStep = [NSNumber numberWithInt: nextStep];
+                page.currentStep = [page.nextStep copy];
                 
-            } else if( [page.playMode intValue] == EatsSequencerPlayMode_Reverse ) {
-                int nextStep = [page.currentStep intValue] - 1;
-                if( nextStep < [page.loopStart intValue])
-                    nextStep = [page.loopEnd intValue];
-                page.nextStep = [NSNumber numberWithInt: nextStep];
+                if( [page.playMode intValue] == EatsSequencerPlayMode_Forward ) {
+                    int nextStep = [page.currentStep intValue] + 1;
+                    if( nextStep > [page.loopEnd intValue])
+                        nextStep = [page.loopStart intValue];
+                    page.nextStep = [NSNumber numberWithInt: nextStep];
+                    
+                } else if( [page.playMode intValue] == EatsSequencerPlayMode_Reverse ) {
+                    int nextStep = [page.currentStep intValue] - 1;
+                    if( nextStep < [page.loopStart intValue])
+                        nextStep = [page.loopEnd intValue];
+                    page.nextStep = [NSNumber numberWithInt: nextStep];
+                    
+                } else if( [page.playMode intValue] == EatsSequencerPlayMode_Random ) {
+                    int nextStep = [self randomStepForPage:page];
+                    page.nextStep = [NSNumber numberWithInt: nextStep];
+                }
+
+                // Send notes that need to be sent
+                // Fetch notes for current step, playMode != paused (might be able to do this outside of the for loop?)
                 
-            } else if( [page.playMode intValue] == EatsSequencerPlayMode_Random ) {
-                int nextStep = floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
-                page.nextStep = [NSNumber numberWithInt: nextStep];
-                NSLog(@"%@", page.nextStep);
+                NSFetchRequest *notesRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+                notesRequest.predicate = [NSPredicate predicateWithFormat:@"(step == %@) AND (inPattern == %@) AND (inPattern.inPage == %@)", page.currentStep, page.patterns[0], page];
+                
+                NSArray *notesMatches = [self.managedObjectContext executeFetchRequest:notesRequest error:nil];
+                
+                for( SequencerNote *note in notesMatches ) {
+
+                    //Set note properties
+                    int channel = [page.channel intValue];
+                    int velocity = [note.velocity intValue];
+                    int pitch = [[[page.pitches objectAtIndex:[note.row intValue]] pitch] intValue];
+                    //NSLog(@"Pitch: %i Step: %i", [note.row intValue], [note.step intValue]);
+                    
+                    // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
+                    int endStep = ((int)self.currentTick / (TICKS_PER_MEASURE / MIN_QUANTIZATION)) + 2; // TODO: base this on note.length
+                    if(endStep >= MIN_QUANTIZATION) endStep -= MIN_QUANTIZATION;
+
+                    // Send MIDI note
+                    [self startMIDINote:pitch
+                              onChannel:channel
+                           withVelocity:velocity
+                                 atTime:[ns unsignedLongLongValue]];
+
+                    // Add to activeNotes so we know when to stop it
+                    [[self.activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                                                                         [NSNumber numberWithInt:channel], @"channel",
+                                                                         [NSNumber numberWithInt:velocity], @"velocity",
+                                                                         nil]];
+                    
+                    // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time
+
+                }
+                    
             }
-
-            // Send notes that need to be sent
-            // Fetch notes for current step, playMode != paused (might be able to do this outside of the for loop?)
         
-        }
-
-        
-        // Test send – 1/8 notes
-        if(self.currentTick % (TICKS_PER_MEASURE / 8) == 0) {
-            // Key note
-            int pitch = 60;
-            
-            // A simple diatonic scale generator for testing (intervals are 2–2–1–2–2–2–1)
-            NSUInteger eighthStep = self.currentTick / (TICKS_PER_MEASURE / 8);
-            if(eighthStep == 2)
-                pitch += 4;
-            else if(eighthStep == 7)
-                pitch += 12;
-            else if(eighthStep < 2)
-                pitch += 2 * (int)eighthStep;
-            else
-                pitch += (2 * (int)eighthStep) - 1;
-            
-            // Set note properties
-            int channel = 0;
-            int velocity = 96;
-            // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
-            int endStep = ((int)self.currentTick / (TICKS_PER_MEASURE / MIN_QUANTIZATION)) + 2;
-            if(endStep >= MIN_QUANTIZATION) endStep -= MIN_QUANTIZATION;
-            
-            // Send MIDI note
-            [self startMIDINote:pitch
-                      onChannel:channel
-                   withVelocity:velocity
-                         atTime:[ns unsignedLongLongValue]];
-            
-            // Add to activeNotes so we know when to stop it
-            [[self.activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                                                 [NSNumber numberWithInt:channel], @"channel",
-                                                                 [NSNumber numberWithInt:velocity], @"velocity",
-                                                                 nil]];
-            
-            // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time
-            
         }
     
     
-        // Update the interface (could use GCD here if it feels like a bottleneck)
+        // Update the interface
         [self.gridNavigationController performSelectorOnMainThread:@selector(updateGridView)
                                                         withObject:nil
                                                      waitUntilDone:NO];
@@ -383,47 +417,50 @@
 
 - (IBAction)sequencerPauseButton:(NSButton *)sender
 {
-    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Pause]];
+    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
+    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+    page.nextStep = [page.currentStep copy];
 }
 
 
 - (IBAction)sequencerForwardButton:(NSButton *)sender
 {
-    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Forward]];
+    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
+    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+    page.nextStep = [NSNumber numberWithInt:[page.currentStep intValue] + 1];
 }
 
 - (IBAction)sequencerReverseButton:(NSButton *)sender
 {
-    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Reverse]];
+    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
+    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+    page.nextStep = [NSNumber numberWithInt:[page.currentStep intValue] - 1];
 }
 
 - (IBAction)sequencerRandomButton:(NSButton *)sender
 {
-    [[self.sequencer.pages objectAtIndex:0] setPlayMode:[NSNumber numberWithInt:EatsSequencerPlayMode_Random]];
+    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
+    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
+    page.nextStep = [NSNumber numberWithInt:[self randomStepForPage:page]];
 }
 
 
-
-
-- (IBAction)introViewButton:(NSButton *)sender
+- (IBAction)stepQuantizationPopup:(NSPopUpButton *)sender
 {
-        [self.gridNavigationController showView:[NSNumber numberWithInt:EatsGridView_Intro]];
+    self.sequencer.stepQuantization = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
 }
 
-- (IBAction)sequencerViewButton:(NSButton *)sender
+- (IBAction)patternQuantizationPopup:(NSPopUpButton *)sender
 {
-    [self.gridNavigationController showView:[NSNumber numberWithInt:EatsGridView_Sequencer]];
+    self.sequencer.patternQuantization = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
 }
 
-- (IBAction)playViewButton:(NSButton *)sender
+- (IBAction)stepLengthPopup:(NSPopUpButton *)sender
 {
-    [self.gridNavigationController showView:[NSNumber numberWithInt:EatsGridView_Play]];
+    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
+    page.stepLength = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
 }
 
-
-- (IBAction)updateGridViewButton:(NSButton *)sender {
-    [self.gridNavigationController updateGridView];
-}
 
 
 @end

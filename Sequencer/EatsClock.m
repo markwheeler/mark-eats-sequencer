@@ -119,7 +119,7 @@
         if(self.ppqn == 0) self.ppqn = 48;
         if(self.qnPerMeasure == 0) self.qnPerMeasure = 4;
         
-        //self.timerStatus = CLOCK_STATUS_STOPPED;
+        //self.timerStatus = EatsClockStatus_Stopped;
         
         // Create a thread to run the clock on
         NSThread* timerThread = [[NSThread alloc] initWithTarget:self

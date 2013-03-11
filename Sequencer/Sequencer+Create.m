@@ -25,20 +25,16 @@
     Sequencer *sequencer = [NSEntityDescription insertNewObjectForEntityForName:@"Sequencer" inManagedObjectContext:context];
     
     // Generate pitches (Default C Major)
-    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:72 - ( 12 * (height / 8) ) length:32];
-    
-    NSMutableOrderedSet *rowPitches = [NSMutableOrderedSet orderedSet];
-    for(NSNumber *pitch in pitches) {
-        SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:context];
-        rowPitch.pitch = pitch;
-        [rowPitches addObject:rowPitch];
-    }
+    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:36 - ( 12 * (height / 8) ) length:32];
+    // Reverse the array
+    pitches = [[pitches reverseObjectEnumerator] allObjects];
     
     // Create the empty SequencerPages
     NSMutableOrderedSet *setOfPages = [NSMutableOrderedSet orderedSetWithCapacity:numberOfPages];
     for( int i = 0; i < numberOfPages; i++) {
         
         // Create a page and setup the channels (make this a method on SequencerPage)
+        
         SequencerPage *page = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerPage" inManagedObjectContext:context];
         uint channel = i;
         if (channel >= numberOfPages - 2 && numberOfPages < 10) // Make the last two channels drums (10 & 11) on small grids
@@ -47,10 +43,22 @@
         page.id = [NSNumber numberWithInt:i];
         page.name = [NSString stringWithFormat:@"Sequencer %i", i];
         page.loopEnd = [NSNumber numberWithUnsignedInt: width - 1];
-        page.pitches = rowPitches;
+       
         
+        // Create the default pitches
+        
+        NSMutableOrderedSet *setOfRowPitches = [NSMutableOrderedSet orderedSetWithCapacity:32];
+        for( NSNumber *pitch in pitches ) {
+            SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:context];
+            rowPitch.pitch = pitch;
+            [setOfRowPitches addObject:rowPitch];
+        }
+        page.pitches = setOfRowPitches;
+        
+
         // Create the empty SequencerPatterns
-        NSMutableOrderedSet *setOfPatterns = [NSMutableOrderedSet orderedSetWithCapacity:32];;
+        
+        NSMutableOrderedSet *setOfPatterns = [NSMutableOrderedSet orderedSetWithCapacity:32];
         for( int j = 0; j < 32; j++) {
             SequencerPattern *pattern = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerPattern" inManagedObjectContext:context];
             pattern.id = [NSNumber numberWithInt:j];
@@ -58,10 +66,10 @@
         }
         page.patterns = setOfPatterns;
         
+        // Add everything
         [setOfPages addObject:page];
     }
     sequencer.pages = setOfPages;
-    
 
     
     //SequencerPage *page = sequencer.pages[2];
