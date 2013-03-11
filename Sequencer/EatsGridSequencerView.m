@@ -8,12 +8,15 @@
 
 #import "EatsGridSequencerView.h"
 #import "SequencerPage.h"
+#import "SequencerPattern.h"
 #import "SequencerNote.h"
 #import "EatsGridNavigationController.h"
 
 @interface EatsGridSequencerView ()
 
-@property NSDictionary *lastPressedKey;
+@property SequencerPage     *page;
+
+@property NSDictionary      *lastPressedKey;
 
 @end
 
@@ -31,6 +34,12 @@
         self.width = w;
         self.height = h;
         
+        // Get the page
+        NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+        pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == 0"];
+        
+        NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
+        self.page = [pageMatches lastObject];
 
         [self updateView];
         
@@ -50,13 +59,7 @@
 
 - (void) updateView
 {
-    
-    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
-    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == 0"];
-    
-    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
-    int currentStep = [[[pageMatches lastObject] currentStep] intValue];
-    
+
     NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.width];
     
     // Generate the columns with playhead
@@ -64,7 +67,7 @@
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            if(x == currentStep)
+            if(x == [self.page.currentStep intValue])
                 [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:8] atIndex:y];
             else
                 [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -72,7 +75,7 @@
     }
     
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    // TODO //request.predicate = [NSPredicate predicateWithFormat:@"inPattern == 0"];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"inPattern == %@", [self.page.patterns objectAtIndex:0]];     // TODO
     
     NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
     for(SequencerNote *note in noteMatches) {
@@ -90,14 +93,47 @@
     if( ![self.delegate performSelector:@selector(isActive)] )
         return;
     
+    NSNumber *x = [notification.userInfo valueForKey:@"x"];
+    NSNumber *y = [notification.userInfo valueForKey:@"y"];
+    
+    // Down
+    if([[notification.userInfo valueForKey:@"down"] boolValue]) {
+        
+        SequencerPattern *pattern = [self.page.patterns objectAtIndex:0];
+        NSMutableSet *newNotesSet = [pattern.notes mutableCopy];
+        
+        // See if there's a note there
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %@) AND (row == %@)", [self.page.patterns objectAtIndex:0], x, y];
+        
+        NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 
-    if(![[notification.userInfo valueForKey:@"down"] boolValue]) {
+        if( [noteMatches count] ) {
+                        
+            // Remove a note
+            [newNotesSet removeObject:[noteMatches lastObject]];
+            
+        } else {
+            
+            // Add a note
+            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+            newNote.step = x;
+            newNote.row = y;
+            [newNotesSet addObject:newNote];
+            
+        }
+        
+        pattern.notes = newNotesSet;
+        [self updateView];
+        
+    // Release
+    } else {
         
         // Check for double presses
         if(self.lastPressedKey
            && [[self.lastPressedKey valueForKey:@"time"] timeIntervalSinceNow] > -0.4
-           && [[self.lastPressedKey valueForKey:@"x"] isEqualTo:[notification.userInfo valueForKey:@"x"]]
-           && [[self.lastPressedKey valueForKey:@"y"] isEqualTo:[notification.userInfo valueForKey:@"y"]]) {
+           && [[self.lastPressedKey valueForKey:@"x"] isEqualTo:x]
+           && [[self.lastPressedKey valueForKey:@"y"] isEqualTo:y]) {
             
             // Tell the delegate we're done
             if([self.delegate respondsToSelector:@selector(showView:)])
@@ -106,8 +142,8 @@
         }
         
         // Log the last press
-        self.lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:[notification.userInfo valueForKey:@"x"], @"x",
-                                                                         [notification.userInfo valueForKey:@"y"], @"y",
+        self.lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:x, @"x",
+                                                                         y, @"y",
                                                                          [NSDate date], @"time",
                                                                          nil];
     }
