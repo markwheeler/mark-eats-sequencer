@@ -139,9 +139,10 @@
 
 #pragma mark - Private methods
 
-- (void)updateInterval {
+- (void)updateInterval
+{    
     self.intervalInNs = 1000000000 / ((self.bpm / 60.0) * self.ppqn); // 1sec / ((bpm / secs in a min) * ppqn)
-    
+
     //NSLog(@"Interval set to: %fms", self.intervalInNs / 1000000.0);
 }
 
@@ -150,7 +151,8 @@
     self.clockStatus = EatsClockStatus_Running;
     
     // Set the start time
-    self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor) + self.bufferTimeInNs;
+    self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
+    self.tickTimeInNs += self.bufferTimeInNs;
     
     mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
     
