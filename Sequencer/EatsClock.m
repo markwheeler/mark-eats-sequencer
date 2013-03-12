@@ -67,11 +67,9 @@
     self = [super init];
     if (self) {
         
-        
-        
         self.clockStatus = EatsClockStatus_Stopped;
         
-        self.bufferTimeInNs = 5000000; // 5ms
+        self.bufferTimeInNs = 20000000; // 20ms
         
         kern_return_t kernError;
         mach_timebase_info_data_t timebaseInfo;
@@ -122,11 +120,12 @@
         //self.timerStatus = EatsClockStatus_Stopped;
         
         // Create a thread to run the clock on
-        NSThread* timerThread = [[NSThread alloc] initWithTarget:self
+        NSThread* clockThread = [[NSThread alloc] initWithTarget:self
                                                         selector:@selector(timerLoop)
                                                           object:nil];
-        [timerThread setThreadPriority:1.0];
-        [timerThread start];
+        [clockThread setThreadPriority:1.0];
+        [clockThread setName:@"clock"];
+        [clockThread start];
     }
 }
 
@@ -151,9 +150,8 @@
     self.clockStatus = EatsClockStatus_Running;
     
     // Set the start time
-    self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
+    self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor) + self.bufferTimeInNs;
     
-    self.tickTimeInNs += self.intervalInNs;
     mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
     
     Float64 timeDifferenceInNs;
@@ -165,20 +163,34 @@
         @autoreleasepool {
             
             // Send tick
-            if([self.delegate respondsToSelector:@selector(clockTick:)])
-                [self.delegate performSelectorOnMainThread:@selector(clockTick:)
-                                                withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]
-                                             waitUntilDone:NO];
+            //[self.delegate performSelector:@selector(clockTick:)
+            //                    withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
+            
+            [self.delegate performSelectorOnMainThread:@selector(clockTick:)
+                                            withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]
+                                         waitUntilDone:NO];
             
             // Detect late ticks
             timeDifferenceInNs = (((Float64)(mach_absolute_time() * self.machTimeToNsFactor)) - self.tickTimeInNs);
-            if(timeDifferenceInNs > 0 && [self.delegate respondsToSelector:@selector(clockLateBy:)])
+            if( timeDifferenceInNs > 0 && [self.delegate respondsToSelector:@selector(clockLateBy:)] ) {
+                
+                //[self.delegate performSelector:@selector(clockLateBy:)
+                //                    withObject:[NSNumber numberWithFloat:timeDifferenceInNs]];
+                
                 [self.delegate performSelectorOnMainThread:@selector(clockLateBy:)
                                                 withObject:[NSNumber numberWithFloat:timeDifferenceInNs]
                                              waitUntilDone:NO];
+            }
             
             // Wait until the next tick
             self.tickTimeInNs += self.intervalInNs;
+            
+            // Tried using nanosleep() instead but results seemed identical to mach_wait_until
+            //struct timespec req = {0};
+            //req.tv_sec = 0;
+            //req.tv_nsec = (((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor) - (mach_absolute_time() * self.machTimeToNsFactor);
+            //nanosleep(&req, (struct timespec *)NULL);
+            
             mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
         }
         

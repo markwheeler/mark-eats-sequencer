@@ -152,6 +152,8 @@
                                                  name:NSWindowDidBecomeMainNotification
                                                object:[aController window]];
     
+    self.clock.bpm = [self.sequencer.bpm floatValue];
+    
     // Populate UI
     
     [self.stepQuantizationPopup removeAllItems];
@@ -240,6 +242,7 @@
     // Could re-work it in future to allow other time signatures
     
     //NSLog(@"Tick: %@ Time: %@", self.currentTick, ns);
+    //if( [NSThread isMainThread] ) NSLog(@"Main thread %s", __func__);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
     if(self.currentTick % (PPQN / MIDI_CLOCK_PPQN) == 0 && self.sharedPreferences.sendMIDIClock) {
@@ -331,9 +334,10 @@
     
     
         // Update the interface
-        [self.gridNavigationController performSelectorOnMainThread:@selector(updateGridView)
-                                                        withObject:nil
-                                                     waitUntilDone:NO];
+        [self.gridNavigationController updateGridView];
+        //[self.gridNavigationController performSelectorOnMainThread:@selector(updateGridView)
+        //                                                withObject:nil
+        //                                             waitUntilDone:NO];
     
     }
     

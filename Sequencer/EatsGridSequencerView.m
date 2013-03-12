@@ -100,30 +100,31 @@
     if([[notification.userInfo valueForKey:@"down"] boolValue]) {
         
         SequencerPattern *pattern = [self.page.patterns objectAtIndex:0];
-        NSMutableSet *newNotesSet = [pattern.notes mutableCopy];
         
         // See if there's a note there
         NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %@) AND (row == %@)", [self.page.patterns objectAtIndex:0], x, y];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step == %@) AND (row == %@)", x, y]; //
+        //noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %@) AND (row == %@)", [self.page.patterns objectAtIndex:0], x, y]; // TODO
         
         NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 
         if( [noteMatches count] ) {
                         
             // Remove a note
-            [newNotesSet removeObject:[noteMatches lastObject]];
+            [self.managedObjectContext deleteObject:[noteMatches lastObject]];
             
         } else {
             
             // Add a note
+            NSMutableSet *newNotesSet = [pattern.notes mutableCopy];
             SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
             newNote.step = x;
             newNote.row = y;
             [newNotesSet addObject:newNote];
+            pattern.notes = newNotesSet;
             
         }
         
-        pattern.notes = newNotesSet;
         [self updateView];
         
     // Release
@@ -138,14 +139,12 @@
             // Tell the delegate we're done
             if([self.delegate respondsToSelector:@selector(showView:)])
                 [self.delegate performSelector:@selector(showView:) withObject:[NSNumber numberWithInt:EatsGridView_Play]];
+            return;
             
+        } else {
+            // Log the last press
+            self.lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:x, @"x", y, @"y", [NSDate date], @"time", nil];
         }
-        
-        // Log the last press
-        self.lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:x, @"x",
-                                                                         y, @"y",
-                                                                         [NSDate date], @"time",
-                                                                         nil];
     }
 }
 
