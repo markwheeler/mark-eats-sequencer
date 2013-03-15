@@ -37,11 +37,15 @@
 @property VVMIDINode        *clockSource;
 @property NSMutableArray    *activeNotes;
 
-@property (strong) IBOutlet NSWindow *documentWindow;
+@property (weak) IBOutlet NSWindow *documentWindow;
+@property (weak) IBOutlet NSArrayController *pitchesArrayController;
+@property (weak) IBOutlet NSObjectController *pageObjectController;
 
+@property (weak) IBOutlet NSTableView   *rowPitchesTableView;
 @property (weak) IBOutlet NSPopUpButton *stepQuantizationPopup;
 @property (weak) IBOutlet NSPopUpButton *patternQuantizationPopup;
 @property (weak) IBOutlet NSPopUpButton *stepLengthPopup;
+@property (weak) IBOutlet NSPopUpButton *currentPagePopup;
 
 - (void) clockSongStart:(NSNumber *)ns;
 - (void) clockSongStop:(NSNumber *)ns;
@@ -57,6 +61,7 @@
 #pragma mark - Setters and getters
 
 @synthesize isActive = _isActive;
+@synthesize currentPage = _currentPage;
 
 - (void)setIsActive:(BOOL)isActive
 {
@@ -67,6 +72,19 @@
 - (BOOL)isActive
 {
     return _isActive;
+}
+
+- (void) setCurrentPage:(SequencerPage *)currentPage
+{
+    _currentPage = currentPage;
+    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@", currentPage];
+    self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self == %@", currentPage];
+    [self updateSequencerPageUI];
+}
+
+- (SequencerPage *) currentPage
+{
+    return _currentPage;
 }
 
 
@@ -87,7 +105,6 @@
         // Create a Clock and set it up
         self.clock = [[EatsClock alloc] init];
         [self.clock setDelegate:self];
-        [self.clock setBpm:[self.sequencer.bpm floatValue]];
         [self.clock setPpqn:PPQN];
         [self.clock setQnPerMeasure:QN_PER_MEASURE];
         
@@ -113,13 +130,16 @@
         
         // Create the gridNavigationController
         self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
+        
     }
     return self;
 }
 
 - (void) dealloc
 {
+    NSLog(@"%s", __func__);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self.sequencer removeObserver:self forKeyPath:@"bpm"];
 }
 
 - (NSString *)windowNibName
@@ -146,16 +166,23 @@
         
         [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
     }
+    
+    // Set the current page to the first one
+    self.currentPage = [self.sequencer.pages objectAtIndex:0];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didBecomeMain:)
                                                  name:NSWindowDidBecomeMainNotification
                                                object:[aController window]];
     
-    self.clock.bpm = [self.sequencer.bpm floatValue];
+    // BPM
+    [self updateClockBPM];
+    [self.sequencer addObserver:self
+                     forKeyPath:@"bpm"
+                        options:NSKeyValueObservingOptionNew
+                         context:NULL];
     
-    // Populate UI
-    
+    // Setup the UI
     [self.stepQuantizationPopup removeAllItems];
     [self.stepQuantizationPopup addItemsWithTitles:self.quantizationTitlesArray];
     [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.sequencer.stepQuantization]];
@@ -166,7 +193,18 @@
     
     [self.stepLengthPopup removeAllItems];
     [self.stepLengthPopup addItemsWithTitles:self.quantizationTitlesArray];
-    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObject:[[self.sequencer.pages objectAtIndex:0] stepLength]]];
+    
+    [self.currentPagePopup removeAllItems];
+    for(SequencerPage *page in self.sequencer.pages) {
+        [self.currentPagePopup addItemWithTitle:[NSString stringWithFormat:@"%@", page.id]];
+    }
+    
+    // Table view default sort
+    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: YES];
+    [self.rowPitchesTableView setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
+    [self updateSequencerPageUI];
+
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -195,6 +233,26 @@
 - (uint) randomStepForPage:(SequencerPage *)page
 {
     return floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
+}
+
+
+- (void) updateSequencerPageUI
+{
+    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.currentPage.stepLength]];
+}
+
+- (void) updateClockBPM
+{
+    self.clock.bpm = [self.sequencer.bpm floatValue];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    
+    if ( [keyPath isEqual:@"bpm"] )
+        [self updateClockBPM];
 }
 
 
@@ -241,7 +299,7 @@
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
     
-    //NSLog(@"Tick: %@ Time: %@", self.currentTick, ns);
+    NSLog(@"Tick: %lu Time: %@", (unsigned long)self.currentTick, ns);
     //if( [NSThread isMainThread] ) NSLog(@"Main thread %s", __func__);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
@@ -461,10 +519,13 @@
 
 - (IBAction)stepLengthPopup:(NSPopUpButton *)sender
 {
-    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
-    page.stepLength = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
+    self.currentPage.stepLength = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
 }
 
+- (IBAction)currentPagePopup:(NSPopUpButton *)sender
+{
+    self.currentPage = [self.sequencer.pages objectAtIndex:[sender indexOfSelectedItem]];
+}
 
 
 @end

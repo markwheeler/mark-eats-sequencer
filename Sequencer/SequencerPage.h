@@ -2,7 +2,7 @@
 //  SequencerPage.h
 //  Sequencer
 //
-//  Created by Mark Wheeler on 10/03/2013.
+//  Created by Mark Wheeler on 12/03/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
@@ -16,6 +16,7 @@
 @property (nonatomic, retain) NSNumber * channel;
 @property (nonatomic, retain) NSNumber * currentPattern;
 @property (nonatomic, retain) NSNumber * currentStep;
+@property (nonatomic, retain) NSNumber * id;
 @property (nonatomic, retain) NSNumber * loopEnd;
 @property (nonatomic, retain) NSNumber * loopStart;
 @property (nonatomic, retain) NSString * name;
@@ -24,7 +25,6 @@
 @property (nonatomic, retain) NSNumber * playMode;
 @property (nonatomic, retain) NSNumber * stepLength;
 @property (nonatomic, retain) NSNumber * swing;
-@property (nonatomic, retain) NSNumber * id;
 @property (nonatomic, retain) Sequencer *inSequencer;
 @property (nonatomic, retain) NSOrderedSet *patterns;
 @property (nonatomic, retain) NSOrderedSet *pitches;

@@ -42,6 +42,7 @@
     </entity>
     <entity name="SequencerRowPitch" representedClassName="SequencerRowPitch" syncable="YES">
         <attribute name="pitch" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="0" syncable="YES"/>
+        <attribute name="row" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
         <relationship name="inPage" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="pitches" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
     <elements>
@@ -50,6 +51,6 @@
         <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="283"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>
         <element name="SequencerPatternRef" positionX="-20" positionY="198" width="128" height="73"/>
-        <element name="SequencerRowPitch" positionX="-11" positionY="62" width="128" height="73"/>
+        <element name="SequencerRowPitch" positionX="-11" positionY="62" width="128" height="88"/>
     </elements>
 </model>

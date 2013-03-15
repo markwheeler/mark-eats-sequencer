@@ -431,7 +431,7 @@
 												<string key="NSFrame">{{121, 32}, {203, 18}}</string>
 												<reference key="NSSuperview" ref="503426890"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView" ref="88330845"/>
+												<reference key="NSNextKeyView"/>
 												<string key="NSReuseIdentifierKey">_NS:9</string>
 												<bool key="NSEnabled">YES</bool>
 												<object class="NSButtonCell" key="NSCell" id="736683332">
@@ -2384,6 +2384,7 @@
 						<int key="objectID">623</int>
 						<reference key="object" ref="323091537"/>
 						<reference key="parent" ref="0"/>
+						<string key="objectName">MIDIDestinationsArrayController</string>
 					</object>
 				</array>
 			</object>
@@ -2606,6 +2607,20 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">PreferencesController</string>
 					<string key="superclassName">NSWindowController</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="gridControllerPopup:">NSPopUpButton</string>
+						<string key="preferencesToolbarAction:">NSToolbarItem</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="gridControllerPopup:">
+							<string key="name">gridControllerPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="preferencesToolbarAction:">
+							<string key="name">preferencesToolbarAction:</string>
+							<string key="candidateClassName">NSToolbarItem</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="clockSourcePopup">NSPopUpButton</string>
 						<string key="gridControllerPopup">NSPopUpButton</string>

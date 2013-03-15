@@ -158,6 +158,11 @@
     
     Float64 timeDifferenceInNs;
     
+    // GCD
+    NSLog(@"Create queue");
+    dispatch_queue_t tickQueue = dispatch_queue_create("com.MarkEats.ClockTick", NULL);
+    
+
     [self setClockToZero];
     
     while (self.clockStatus == EatsClockStatus_Running) {
@@ -165,23 +170,36 @@
         @autoreleasepool {
             
             // Send tick
+            if( [self.delegate respondsToSelector:@selector(clockTick:)] ) {
+                NSLog(@"tick to q: %@", tickQueue);
+                dispatch_async(tickQueue, ^{
+                    [self.delegate clockTick:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
+                });
+            }
+            
             //[self.delegate performSelector:@selector(clockTick:)
             //                    withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
             
-            [self.delegate performSelectorOnMainThread:@selector(clockTick:)
-                                            withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]
-                                         waitUntilDone:NO];
+            //[self.delegate performSelectorOnMainThread:@selector(clockTick:)
+            //                                withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]
+            //                             waitUntilDone:NO];
+            
+            
             
             // Detect late ticks
             timeDifferenceInNs = (((Float64)(mach_absolute_time() * self.machTimeToNsFactor)) - self.tickTimeInNs);
             if( timeDifferenceInNs > 0 && [self.delegate respondsToSelector:@selector(clockLateBy:)] ) {
                 
+                dispatch_async(tickQueue, ^{
+                    [self.delegate clockLateBy:[NSNumber numberWithFloat:timeDifferenceInNs]];
+                });
+                
                 //[self.delegate performSelector:@selector(clockLateBy:)
                 //                    withObject:[NSNumber numberWithFloat:timeDifferenceInNs]];
                 
-                [self.delegate performSelectorOnMainThread:@selector(clockLateBy:)
-                                                withObject:[NSNumber numberWithFloat:timeDifferenceInNs]
-                                             waitUntilDone:NO];
+                //[self.delegate performSelectorOnMainThread:@selector(clockLateBy:)
+                //                                withObject:[NSNumber numberWithFloat:timeDifferenceInNs]
+                //                             waitUntilDone:NO];
             }
             
             // Wait until the next tick

@@ -33,7 +33,7 @@
     NSMutableOrderedSet *setOfPages = [NSMutableOrderedSet orderedSetWithCapacity:numberOfPages];
     for( int i = 0; i < numberOfPages; i++) {
         
-        // Create a page and setup the channels (make this a method on SequencerPage)
+        // Create a page and setup the channels (TODO: make this a method on SequencerPage)
         
         SequencerPage *page = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerPage" inManagedObjectContext:context];
         uint channel = i;
@@ -41,17 +41,23 @@
             channel = i + (12 - numberOfPages);
         page.channel = [NSNumber numberWithUnsignedInt: channel];
         page.id = [NSNumber numberWithInt:i];
-        page.name = [NSString stringWithFormat:@"Sequencer %i", i];
+        if (channel == 10 || channel == 11)
+            page.name = [NSString stringWithFormat:@"Drums page %i", channel - 9];
+        else
+            page.name = [NSString stringWithFormat:@"Sequencer page %i", i];
         page.loopEnd = [NSNumber numberWithUnsignedInt: width - 1];
        
         
         // Create the default pitches
         
         NSMutableOrderedSet *setOfRowPitches = [NSMutableOrderedSet orderedSetWithCapacity:32];
+        int r = 0;
         for( NSNumber *pitch in pitches ) {
             SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:context];
+            rowPitch.row = [NSNumber numberWithInt:r];
             rowPitch.pitch = pitch;
             [setOfRowPitches addObject:rowPitch];
+            r++;
         }
         page.pitches = setOfRowPitches;
         
