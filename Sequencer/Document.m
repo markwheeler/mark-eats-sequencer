@@ -30,21 +30,23 @@
 @property EatsGridNavigationController  *gridNavigationController;
 
 @property NSMutableArray                *quantizationArray;
-@property NSMutableArray                *quantizationTitlesArray;
+@property NSArray                       *swingArray;
 
 // Clock stuff
 @property NSUInteger        currentTick;
 @property VVMIDINode        *clockSource;
 @property NSMutableArray    *activeNotes;
 
-@property (weak) IBOutlet NSWindow *documentWindow;
-@property (weak) IBOutlet NSArrayController *pitchesArrayController;
-@property (weak) IBOutlet NSObjectController *pageObjectController;
+@property (weak) IBOutlet NSWindow              *documentWindow;
+@property (weak) IBOutlet NSWindow              *scaleGeneratorSheet;
+@property (weak) IBOutlet NSArrayController     *pitchesArrayController;
+@property (weak) IBOutlet NSObjectController    *pageObjectController;
 
 @property (weak) IBOutlet NSTableView   *rowPitchesTableView;
 @property (weak) IBOutlet NSPopUpButton *stepQuantizationPopup;
 @property (weak) IBOutlet NSPopUpButton *patternQuantizationPopup;
 @property (weak) IBOutlet NSPopUpButton *stepLengthPopup;
+@property (weak) IBOutlet NSPopUpButton *swingPopup;
 @property (weak) IBOutlet NSPopUpButton *currentPagePopup;
 
 - (void) clockSongStart:(NSNumber *)ns;
@@ -117,16 +119,28 @@
         
         // Create the quantization settings
         self.quantizationArray = [NSMutableArray array];
-        self.quantizationTitlesArray = [NSMutableArray array];
         int quantizationSetting = MIN_QUANTIZATION;
         while ( quantizationSetting >= MAX_QUANTIZATION ) {
-            [self.quantizationArray insertObject:[NSNumber numberWithInt:quantizationSetting] atIndex:0];
+            
+            NSMutableDictionary *quantization = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:quantizationSetting], @"quantization", nil];
+            
             if( quantizationSetting == 1)
-                [self.quantizationTitlesArray insertObject:[NSString stringWithFormat:@"1 bar"] atIndex:0];
+                [quantization setObject:[NSString stringWithFormat:@"1 bar"] forKey:@"label"];
             else
-                [self.quantizationTitlesArray insertObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] atIndex:0];
+                [quantization setObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] forKey:@"label"];
+            
+            [self.quantizationArray insertObject:quantization atIndex:0];
             quantizationSetting = quantizationSetting / 2;
         }
+        
+        // Create the swing settings
+        self.swingArray = [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:50], @"swing", @"50 (Straight)", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:54], @"swing", @"54", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:58], @"swing", @"58", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:63], @"swing", @"63", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:67], @"swing", @"67 (Triplets)", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:71], @"swing", @"71", @"label", nil],
+                                                    nil];
         
         // Create the gridNavigationController
         self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
@@ -184,15 +198,27 @@
     
     // Setup the UI
     [self.stepQuantizationPopup removeAllItems];
-    [self.stepQuantizationPopup addItemsWithTitles:self.quantizationTitlesArray];
-    [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.sequencer.stepQuantization]];
-    
     [self.patternQuantizationPopup removeAllItems];
-    [self.patternQuantizationPopup addItemsWithTitles:self.quantizationTitlesArray];
-    [self.patternQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.sequencer.patternQuantization]];
-    
     [self.stepLengthPopup removeAllItems];
-    [self.stepLengthPopup addItemsWithTitles:self.quantizationTitlesArray];
+    
+    for( NSDictionary *quantization in self.quantizationArray) {
+        [self.stepQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+        [self.patternQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+        [self.stepLengthPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+    }
+
+    [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.stepQuantization];
+    }]];
+    
+    [self.patternQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.patternQuantization];
+    }]];
+    
+    [self.swingPopup removeAllItems];
+    for( NSDictionary *swing in self.swingArray) {
+        [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
+    }
     
     [self.currentPagePopup removeAllItems];
     for(SequencerPage *page in self.sequencer.pages) {
@@ -238,7 +264,13 @@
 
 - (void) updateSequencerPageUI
 {
-    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObject:self.currentPage.stepLength]];
+    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
+    }]];
+    
+    [self.swingPopup selectItemAtIndex:[self.swingArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"swing"] isEqualTo:self.currentPage.swing];
+    }]];
 }
 
 - (void) updateClockBPM
@@ -255,6 +287,14 @@
         [self updateClockBPM];
 }
 
+- (void)scaleGeneratorSheetDidEnd:(NSWindow *)sheet
+         returnCode:(NSInteger)returnCode
+        contextInfo:(void *)contextInfo
+{
+    if(returnCode == NSOKButton) {
+        NSLog(@"Sheet info: %@", contextInfo);
+    }
+}
 
 
 #pragma mark - Clock delegate methods
@@ -506,20 +546,48 @@
     page.nextStep = [NSNumber numberWithInt:[self randomStepForPage:page]];
 }
 
+- (IBAction)scalesOpenSheetButton:(NSButton *)sender { 
+    if (!self.scaleGeneratorSheet)
+        [NSBundle loadNibNamed:@"ScaleGeneratorSheet" owner:self];
+    [NSApp beginSheet:self.scaleGeneratorSheet
+       modalForWindow:self.documentWindow
+        modalDelegate:self
+       didEndSelector:@selector(scaleGeneratorSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:NULL];
+}
+
+- (IBAction)cancelScalesButton:(NSButton *)sender
+{
+    [NSApp endSheet: self.scaleGeneratorSheet returnCode:NSCancelButton];
+    [self.scaleGeneratorSheet close];
+    self.scaleGeneratorSheet = nil;
+}
+
+- (IBAction)generateScalesButton:(NSButton *)sender
+{
+    [NSApp endSheet: self.scaleGeneratorSheet returnCode:NSOKButton];
+    [self.scaleGeneratorSheet close];
+    self.scaleGeneratorSheet = nil;
+}
 
 - (IBAction)stepQuantizationPopup:(NSPopUpButton *)sender
 {
-    self.sequencer.stepQuantization = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
+    self.sequencer.stepQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
 }
 
 - (IBAction)patternQuantizationPopup:(NSPopUpButton *)sender
 {
-    self.sequencer.patternQuantization = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
+    self.sequencer.patternQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
 }
 
 - (IBAction)stepLengthPopup:(NSPopUpButton *)sender
 {
-    self.currentPage.stepLength = [self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]];
+    self.currentPage.stepLength = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+}
+
+- (IBAction)swingPopup:(NSPopUpButton *)sender
+{
+    self.currentPage.swing = [[self.swingArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"swing"];
 }
 
 - (IBAction)currentPagePopup:(NSPopUpButton *)sender

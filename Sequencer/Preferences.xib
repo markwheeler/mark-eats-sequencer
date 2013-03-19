@@ -57,7 +57,7 @@
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{196, 240}, {480, 200}}</string>
 				<int key="NSWTFlags">544735232</int>
-				<string key="NSWindowTitle">Preferences</string>
+				<string key="NSWindowTitle">Sequencer Preferences</string>
 				<string key="NSWindowClass">NSWindow</string>
 				<object class="NSToolbar" key="NSViewClass" id="263149873">
 					<object class="NSMutableString" key="NSToolbarIdentifier">
@@ -2607,20 +2607,6 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">PreferencesController</string>
 					<string key="superclassName">NSWindowController</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="gridControllerPopup:">NSPopUpButton</string>
-						<string key="preferencesToolbarAction:">NSToolbarItem</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="gridControllerPopup:">
-							<string key="name">gridControllerPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="preferencesToolbarAction:">
-							<string key="name">preferencesToolbarAction:</string>
-							<string key="candidateClassName">NSToolbarItem</string>
-						</object>
-					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="clockSourcePopup">NSPopUpButton</string>
 						<string key="gridControllerPopup">NSPopUpButton</string>
