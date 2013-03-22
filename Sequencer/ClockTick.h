@@ -25,6 +25,6 @@
 @property int midiClockPPQN;
 @property int minQuantization;
 
-@property Sequencer *sequencer;
+@property (weak) Sequencer *sequencer;
 
 @end
