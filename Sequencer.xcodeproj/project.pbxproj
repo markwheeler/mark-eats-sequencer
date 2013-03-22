@@ -28,7 +28,6 @@
 		4D6115E816E431BD00140AF8 /* Document.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */; };
 		4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Create.m */; };
 		4D61163016E43B9600140AF8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162F16E43B9600140AF8 /* AppController.m */; };
-		4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */; };
 		4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
 		4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
 		4D7515AF16E457C000A8E3F2 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A316E4557000A8E3F2 /* VVOSC.framework */; };
@@ -103,7 +102,6 @@
 		4D61162A16E4386700140AF8 /* Sequencer+Create.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Sequencer+Create.m"; sourceTree = "<group>"; };
 		4D61162E16E43B9600140AF8 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		4D61162F16E43B9600140AF8 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
-		4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScaleGeneratorSheet.xib; sourceTree = "<group>"; };
 		4D7515A116E4557000A8E3F2 /* VVBasics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVBasics.framework; sourceTree = "<group>"; };
 		4D7515A216E4557000A8E3F2 /* VVMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVMIDI.framework; sourceTree = "<group>"; };
 		4D7515A316E4557000A8E3F2 /* VVOSC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVOSC.framework; sourceTree = "<group>"; };
@@ -215,7 +213,6 @@
 				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
-				4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */,
 				4DB87FB616E4435A00BA58BC /* Preferences.xib */,
 				4D61162416E433C500140AF8 /* Core Data */,
 				4D6115D216E431BD00140AF8 /* Supporting Files */,
@@ -314,7 +311,6 @@
 				4D6115E216E431BD00140AF8 /* Document.xib in Resources */,
 				4D6115E516E431BD00140AF8 /* MainMenu.xib in Resources */,
 				4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */,
-				4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

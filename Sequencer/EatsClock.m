@@ -148,30 +148,31 @@
 
 - (void)timerLoop
 {
+    self.clockStatus = EatsClockStatus_Running;
     
-    @autoreleasepool {
+    // Set the start time
+    self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
+    self.tickTimeInNs += self.bufferTimeInNs;
     
-        self.clockStatus = EatsClockStatus_Running;
-        
-        // Set the start time
-        self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
-        self.tickTimeInNs += self.bufferTimeInNs;
-        
-        mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
-        
-        Float64 timeDifferenceInNs;
-        
-        // GCD
-        dispatch_queue_t tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTick", NULL);
+    mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
+    
+    Float64 timeDifferenceInNs;
+    
+    // GCD
+    NSLog(@"Create queue");
+    dispatch_queue_t tickQueue = dispatch_queue_create("com.MarkEats.ClockTick", NULL);
+    
 
-        [self setClockToZero];
-        
-        while (self.clockStatus == EatsClockStatus_Running) {
+    [self setClockToZero];
+    
+    while (self.clockStatus == EatsClockStatus_Running) {
+        // Use autoreleasepool so we clear out everything on each loop
+        @autoreleasepool {
             
             // Send tick
             if( [self.delegate respondsToSelector:@selector(clockTick:)] ) {
-                //dispatch_debug(tickQueue, "TICK QUEUE");
-                dispatch_async(tickQueue, ^{ // TODO: This doesn't always execute, I think the queue is getting into deadlock due to some threading code happening within the block (probably in vvmidi)
+                NSLog(@"tick to q: %@", tickQueue);
+                dispatch_async(tickQueue, ^{
                     [self.delegate clockTick:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
                 });
             }
@@ -211,18 +212,16 @@
             //nanosleep(&req, (struct timespec *)NULL);
             
             mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
-            
         }
-
-        
-        if([self.delegate respondsToSelector:@selector(clockSongStop:)])
-            [self.delegate performSelectorOnMainThread:@selector(clockSongStop:)
-                                            withObject:[NSNumber numberWithUnsignedLongLong:(uint64_t)(mach_absolute_time() * self.machTimeToNsFactor)]
-                                         waitUntilDone:NO];
-        
-        self.clockStatus = EatsClockStatus_Stopped;
         
     }
+    
+    if([self.delegate respondsToSelector:@selector(clockSongStop:)])
+        [self.delegate performSelectorOnMainThread:@selector(clockSongStop:)
+                                        withObject:[NSNumber numberWithUnsignedLongLong:(uint64_t)(mach_absolute_time() * self.machTimeToNsFactor)]
+                                     waitUntilDone:NO];
+    
+    self.clockStatus = EatsClockStatus_Stopped;
 }
 
 @end
