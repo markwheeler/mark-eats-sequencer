@@ -203,10 +203,7 @@
 
 - (void)windowWillClose:(NSNotification *)notification
 {
-    //NSLog(@"%s", __func__);
     [self.clock stopClock];
-    self.clock = nil;
-    self.clockTick = nil;
 }
 
 + (BOOL)autosavesInPlace

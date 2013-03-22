@@ -98,7 +98,7 @@
     [self stopAllActiveMIDINotes:ns];
 }
 
-- (void) clockTick:(NSNumber *)ns
+- (void) clockTick:(NSNumber *)ns // TODO: Something in this method is causeing a retain cycle if it's running when we close the document
 {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
@@ -138,9 +138,8 @@
             // Play notes for current step, playMode != paused
             if( self.currentTick % (self.ticksPerMeasure / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
                 
-                NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
+                //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
                 
-                // TODO: Something in these lines is causing a memory leak if it's running when we close the document. Seems to be anything that sets the page's properties.
                 page.currentStep = [page.nextStep copy];
                 
                 if( [page.playMode intValue] == EatsSequencerPlayMode_Forward ) {
@@ -166,6 +165,7 @@
                 //NSFetchRequest *notesRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
                 //notesRequest.predicate = [NSPredicate predicateWithFormat:@"(step == %@) AND (inPattern == %@) AND (inPattern.inPage == %@)", page.currentStep, page.patterns[0], page];
                 //NSArray *notesMatches = [managedObjectContextForThread executeFetchRequest:notesRequest error:nil];
+                
                 
                 for( SequencerNote *note in [[page.patterns objectAtIndex:[page.currentPattern intValue]] notes] ) {
                     
@@ -200,6 +200,7 @@
             }
             
         }
+        
         
         // Tell the delegate to update the interface (doing this on main thread because it uses non-thread-safe NSManagedObjectContext
         if([self.delegate respondsToSelector:@selector(updateUI)])
