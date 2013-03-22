@@ -100,7 +100,6 @@
         note.lengthAsPercentage = [NSNumber numberWithFloat:6.25];
         note.row = [NSNumber numberWithInt:arc4random_uniform(8)];
         note.step = [NSNumber numberWithInt:i];
-        note.velocity = [NSNumber numberWithInt:96];
         
         [notes addObject:note];
     }

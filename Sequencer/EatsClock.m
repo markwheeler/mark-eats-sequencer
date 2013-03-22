@@ -117,8 +117,6 @@
         if(self.ppqn == 0) self.ppqn = 48;
         if(self.qnPerMeasure == 0) self.qnPerMeasure = 4;
         
-        //self.timerStatus = EatsClockStatus_Stopped;
-        
         // Create a thread to run the clock on
         NSThread* clockThread = [[NSThread alloc] initWithTarget:self
                                                         selector:@selector(timerLoop)
@@ -171,19 +169,10 @@
             // Send tick
             if( [self.delegate respondsToSelector:@selector(clockTick:)] ) {
                 //dispatch_debug(tickQueue, "TICK QUEUE");
-                dispatch_async(tickQueue, ^{ // TODO: This doesn't always execute, I think the queue is getting into deadlock due to some threading code happening within the block (probably in vvmidi)
+                dispatch_async(tickQueue, ^{
                     [self.delegate clockTick:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
                 });
             }
-            
-            //[self.delegate performSelector:@selector(clockTick:)
-            //                    withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
-            
-            //[self.delegate performSelectorOnMainThread:@selector(clockTick:)
-            //                                withObject:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]
-            //                             waitUntilDone:NO];
-            
-            
             
             // Detect late ticks
             timeDifferenceInNs = (((Float64)(mach_absolute_time() * self.machTimeToNsFactor)) - self.tickTimeInNs);
@@ -192,13 +181,6 @@
                 dispatch_async(tickQueue, ^{
                     [self.delegate clockLateBy:[NSNumber numberWithFloat:timeDifferenceInNs]];
                 });
-                
-                //[self.delegate performSelector:@selector(clockLateBy:)
-                //                    withObject:[NSNumber numberWithFloat:timeDifferenceInNs]];
-                
-                //[self.delegate performSelectorOnMainThread:@selector(clockLateBy:)
-                //                                withObject:[NSNumber numberWithFloat:timeDifferenceInNs]
-                //                             waitUntilDone:NO];
             }
             
             // Wait until the next tick
