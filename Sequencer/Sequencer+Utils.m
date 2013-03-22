@@ -1,12 +1,12 @@
 //
-//  Sequencer+Create.m
+//  Sequencer+Utils.m
 //  Sequencer
 //
 //  Created by Mark Wheeler on 03/03/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
-#import "Sequencer+Create.h"
+#import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerRowPitch.h"
 #import "SequencerPattern.h"
@@ -14,7 +14,7 @@
 #import "SequencerNote.h"
 #import "EatsScaleGenerator.h"
 
-@implementation Sequencer (Create)
+@implementation Sequencer (Utils)
 
 + (Sequencer *)sequencerWithPages:(uint)numberOfPages
                             width:(uint)width
@@ -106,6 +106,12 @@
     SequencerPage *page = sequencer.pages[0];
     SequencerPattern *pattern = page.patterns[0];
     pattern.notes = notes;
+}
+
+
++ (uint) randomStepForPage:(SequencerPage *)page
+{
+    return floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
 }
 
 
