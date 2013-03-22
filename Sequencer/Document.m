@@ -140,7 +140,11 @@
                                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:63], @"swing", @"63", @"label", nil],
                                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:67], @"swing", @"67 (Triplets)", @"label", nil],
                                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:71], @"swing", @"71", @"label", nil],
-                                                    nil];        
+                                                    nil];
+        
+        // Create the gridNavigationController
+        self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
+        
     }
     return self;
 }
@@ -217,9 +221,6 @@
                        forKeyPath:@"swing"
                           options:NSKeyValueObservingOptionNew
                           context:NULL];
-    
-    // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -393,10 +394,8 @@
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
     
-    // TODO: Only fire on MIN_QUANTIZATION. Schedule more than 1 clock pulse if need be
-    
-    //NSLog(@"Tick: %lu Time: %@", (unsigned long)self.currentTick, ns);
-    //if( [NSThread isMainThread] ) NSLog(@"%s is running on main thread", __func__);
+    NSLog(@"Tick: %lu Time: %@", (unsigned long)self.currentTick, ns);
+    //if( [NSThread isMainThread] ) NSLog(@"Main thread %s", __func__);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
     if(self.currentTick % (PPQN / MIDI_CLOCK_PPQN) == 0 && self.sharedPreferences.sendMIDIClock) {
@@ -416,16 +415,13 @@
         }
         [notesToStop removeAllObjects];
         
-        // Update the sequencer pages and send notes
-
-        // Create a managedObjectContext so we stay thread safe
-        //NSManagedObjectContext *managedObjectContextForThread = [[NSManagedObjectContext alloc] init];
-        //[managedObjectContextForThread setPersistentStoreCoordinator:self.managedObjectContext.persistentStoreCoordinator];
         
-        // For each page...
+        // Update the sequencer pages and send notes
+        
         for(SequencerPage *page in self.sequencer.pages) {
             
-            // Fetch notes for current step, playMode != paused (might be able to do this outside of the for loop?)
+            // Advance sequencer steps
+            
             if( self.currentTick % (TICKS_PER_MEASURE / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
             
                 //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
@@ -450,52 +446,51 @@
                 }
 
                 // Send notes that need to be sent
+                // Fetch notes for current step, playMode != paused (might be able to do this outside of the for loop?)
                 
-                // Using fetch requests (commented this out because the thread-specific MOC doesn't have the latest changes, seems easier to just look through the set)
-                //NSFetchRequest *notesRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-                //notesRequest.predicate = [NSPredicate predicateWithFormat:@"(step == %@) AND (inPattern == %@) AND (inPattern.inPage == %@)", page.currentStep, page.patterns[0], page];
-                //NSArray *notesMatches = [managedObjectContextForThread executeFetchRequest:notesRequest error:nil];
+                NSFetchRequest *notesRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+                notesRequest.predicate = [NSPredicate predicateWithFormat:@"(step == %@) AND (inPattern == %@) AND (inPattern.inPage == %@)", page.currentStep, page.patterns[0], page];
+                
+                NSArray *notesMatches = [self.managedObjectContext executeFetchRequest:notesRequest error:nil];
+                
+                for( SequencerNote *note in notesMatches ) {
 
-
-                for( SequencerNote *note in [[page.patterns objectAtIndex:[page.currentPattern intValue]] notes] ) {
-
-                    if( note.step == page.currentStep ) {
+                    //Set note properties
+                    int channel = [page.channel intValue];
+                    int velocity = [note.velocity intValue];
+                    int pitch = [[[page.pitches objectAtIndex:[note.row intValue]] pitch] intValue];
+                    //NSLog(@"Pitch: %i Step: %i", [note.row intValue], [note.step intValue]);
                     
-                        //Set note properties
-                        int channel = [page.channel intValue];
-                        int velocity = [note.velocity intValue];
-                        int pitch = [[[page.pitches objectAtIndex:[note.row intValue]] pitch] intValue];
-                        
-                        // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
-                        int endStep = ((int)self.currentTick / (TICKS_PER_MEASURE / MIN_QUANTIZATION)) + 2; // TODO: base this on note.length
-                        if(endStep >= MIN_QUANTIZATION) endStep -= MIN_QUANTIZATION;
+                    // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
+                    int endStep = ((int)self.currentTick / (TICKS_PER_MEASURE / MIN_QUANTIZATION)) + 2; // TODO: base this on note.length
+                    if(endStep >= MIN_QUANTIZATION) endStep -= MIN_QUANTIZATION;
 
-                        // Send MIDI note
-                        [self startMIDINote:pitch
-                                  onChannel:channel
-                               withVelocity:velocity
-                                     atTime:[ns unsignedLongLongValue]];
+                    // Send MIDI note
+                    [self startMIDINote:pitch
+                              onChannel:channel
+                           withVelocity:velocity
+                                 atTime:[ns unsignedLongLongValue]];
 
-                        // Add to activeNotes so we know when to stop it
-                        [[self.activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                                                             [NSNumber numberWithInt:channel], @"channel",
-                                                                             [NSNumber numberWithInt:velocity], @"velocity",
-                                                                             nil]];
-                        
-                        // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time
-                    }
+                    // Add to activeNotes so we know when to stop it
+                    [[self.activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                                                                         [NSNumber numberWithInt:channel], @"channel",
+                                                                         [NSNumber numberWithInt:velocity], @"velocity",
+                                                                         nil]];
+                    
+                    // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time
 
                 }
                     
             }
-    
+        
         }
     
     
-        // Update the interface (doing this on main thread because it uses non-thread-safe MOC
-        [self.gridNavigationController performSelectorOnMainThread:@selector(updateGridView)
-                                                        withObject:nil
-                                                     waitUntilDone:NO];
+        // Update the interface
+        [self.gridNavigationController updateGridView];
+        //[self.gridNavigationController performSelectorOnMainThread:@selector(updateGridView)
+        //                                                withObject:nil
+        //                                             waitUntilDone:NO];
     
     }
     

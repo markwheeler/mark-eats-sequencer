@@ -123,10 +123,8 @@
     
     // Update the UI
     NSString *gridName;
-    if(gridType == EatsGridType_Monome)
-        gridName = [NSString stringWithFormat:@"monome %u", w*h];
-    else if(gridType == EatsGridType_Launchpad)
-        gridName = @"Launchpad";
+    if(gridType == EatsGridType_Monome) gridName = [NSString stringWithFormat:@"monome %u", w*h];
+    if(gridType == EatsGridType_Launchpad) gridName = @"Launchpad";
     
     [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected OK to %@", gridName]];
 }
