@@ -31,8 +31,6 @@
         
         // Create MIDI manager
         self.midiManager = [[EatsMIDIManager alloc] init];
-        NSLog(@"MIDI source: %@", self.midiManager.virtualSource.name);
-        NSLog(@"MIDI destination: %@", self.midiManager.virtualDest.name);
         
         // Create OSC manager
         self.oscManager = [[OSCManager alloc] initWithServiceType:@"_monome-osc._udp"];
@@ -51,21 +49,16 @@
             self.oscInPort = [self.oscManager createNewInputForPort:12234 + retries withLabel:self.oscInputPortLabel];
             retries++;
         }
-        if (self.oscInPort)
-            NSLog(@"OSC in port: %hu", self.oscInPort.port);
-        else
+        if (self.oscInPort == nil)
             NSLog(@"Error creating OSC in port");
         retries = 0;
         while (self.oscOutPort == nil && retries < 50) {
             self.oscOutPort = [self.oscManager createNewOutputToAddress:@"local" atPort:12234 + retries withLabel:self.oscOutputPortLabel];
             retries++;
         }
-        if (self.oscOutPort)
-            NSLog(@"OSC out port: %hu", self.oscOutPort.port);
-        else
+        if (self.oscOutPort == nil)
             NSLog(@"Error creating OSC out port");
 
-        NSLog(@"OSC prefix: %@", self.oscPrefix);
     }
     
     return self;

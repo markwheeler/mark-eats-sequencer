@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12D78</string>
+		<string key="IBDocument.SystemVersion">12C60</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.37</string>
-		<string key="IBDocument.HIToolboxVersion">626.00</string>
+		<string key="IBDocument.AppKitVersion">1187.34</string>
+		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">3084</string>
@@ -248,7 +248,7 @@
 						<object class="NSPopUpButton" id="960291715">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{482, 111}, {119, 26}}</string>
+							<string key="NSFrame">{{481, 111}, {120, 26}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="302041503"/>
@@ -361,7 +361,7 @@
 						<object class="NSPopUpButton" id="287506022">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{482, 41}, {119, 26}}</string>
+							<string key="NSFrame">{{481, 41}, {120, 26}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
@@ -516,7 +516,7 @@
 										<object class="NSPopUpButton" id="365303050">
 											<reference key="NSNextResponder" ref="544882349"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{75, 55}, {83, 26}}</string>
+											<string key="NSFrame">{{74, 55}, {84, 26}}</string>
 											<reference key="NSSuperview" ref="544882349"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="757941174"/>
@@ -607,7 +607,7 @@
 										<object class="NSPopUpButton" id="161537714">
 											<reference key="NSNextResponder" ref="544882349"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{75, 17}, {82, 26}}</string>
+											<string key="NSFrame">{{74, 17}, {83, 26}}</string>
 											<reference key="NSSuperview" ref="544882349"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="412542225"/>
@@ -772,7 +772,7 @@
 						<object class="NSTextField" id="18873628">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{428, 223}, {198, 17}}</string>
+							<string key="NSFrame">{{424, 223}, {198, 17}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="469155443"/>
@@ -797,7 +797,7 @@
 						<object class="NSPopUpButton" id="995292857">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{577, 246}, {44, 26}}</string>
+							<string key="NSFrame">{{576, 246}, {45, 26}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="18873628"/>
@@ -1842,7 +1842,7 @@
 								<float key="scoringTypeFloat">24</float>
 								<int key="contentType">2</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="56796685">
+							<object class="IBNSLayoutConstraint" id="714426940">
 								<reference key="firstItem" ref="568628114"/>
 								<int key="firstAttribute">6</int>
 								<int key="relation">0</int>
@@ -1850,7 +1850,7 @@
 								<int key="secondAttribute">6</int>
 								<float key="multiplier">1</float>
 								<object class="IBLayoutConstant" key="constant">
-									<double key="value">15</double>
+									<double key="value">19</double>
 								</object>
 								<float key="priority">1000</float>
 								<reference key="containingView" ref="568628114"/>
@@ -3323,6 +3323,11 @@
 						<reference key="parent" ref="568628114"/>
 					</object>
 					<object class="IBObjectRecord">
+						<int key="objectID">100701</int>
+						<reference key="object" ref="737033709"/>
+						<reference key="parent" ref="568628114"/>
+					</object>
+					<object class="IBObjectRecord">
 						<int key="objectID">100909</int>
 						<reference key="object" ref="893254840"/>
 						<reference key="parent" ref="568628114"/>
@@ -3500,6 +3505,11 @@
 						<reference key="parent" ref="568628114"/>
 					</object>
 					<object class="IBObjectRecord">
+						<int key="objectID">101161</int>
+						<reference key="object" ref="714426940"/>
+						<reference key="parent" ref="568628114"/>
+					</object>
+					<object class="IBObjectRecord">
 						<int key="objectID">101162</int>
 						<reference key="object" ref="122158014"/>
 						<reference key="parent" ref="960291715"/>
@@ -3537,16 +3547,6 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">101190</int>
 						<reference key="object" ref="489579002"/>
-						<reference key="parent" ref="568628114"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">101196</int>
-						<reference key="object" ref="737033709"/>
-						<reference key="parent" ref="568628114"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">101200</int>
-						<reference key="object" ref="56796685"/>
 						<reference key="parent" ref="568628114"/>
 					</object>
 				</array>
@@ -3715,6 +3715,7 @@
 				<boolean value="NO" key="100689.IBNSViewMetadataTranslatesAutoresizingMaskIntoConstraints"/>
 				<string key="100689.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="100690.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="100701.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="100704.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="100705.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="100706.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3771,6 +3772,7 @@
 				<string key="101019.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101023.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101159.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="101161.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101162.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101163.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101185.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3779,8 +3781,6 @@
 				<string key="101188.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101189.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="101190.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="101196.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="101200.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="5.IBWindowTemplateEditedContentRect">{{133, 170}, {507, 413}}</string>
 				<array class="NSMutableArray" key="6.IBNSViewMetadataConstraints">
@@ -3811,7 +3811,7 @@
 					<reference ref="42298527"/>
 					<reference ref="893254840"/>
 					<reference ref="737033709"/>
-					<reference ref="56796685"/>
+					<reference ref="714426940"/>
 					<reference ref="570677289"/>
 					<reference ref="489579002"/>
 					<reference ref="947786661"/>
@@ -3840,13 +3840,87 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">101201</int>
+			<int key="maxID">101193</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">Document</string>
 					<string key="superclassName">NSPersistentDocument</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="cancelScalesButton:">NSButton</string>
+						<string key="currentPagePopup:">NSPopUpButton</string>
+						<string key="generateScalesButton:">NSButton</string>
+						<string key="patternQuantizationPopup:">NSPopUpButton</string>
+						<string key="playButton:">NSButton</string>
+						<string key="scalesOpenSheetButton:">NSButton</string>
+						<string key="sequencerForwardButton:">NSButton</string>
+						<string key="sequencerPauseButton:">NSButton</string>
+						<string key="sequencerRandomButton:">NSButton</string>
+						<string key="sequencerReverseButton:">NSButton</string>
+						<string key="stepLengthPopup:">NSPopUpButton</string>
+						<string key="stepQuantizationPopup:">NSPopUpButton</string>
+						<string key="stopButton:">NSButton</string>
+						<string key="swingPopup:">NSPopUpButton</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="cancelScalesButton:">
+							<string key="name">cancelScalesButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="currentPagePopup:">
+							<string key="name">currentPagePopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="generateScalesButton:">
+							<string key="name">generateScalesButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="patternQuantizationPopup:">
+							<string key="name">patternQuantizationPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="playButton:">
+							<string key="name">playButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="scalesOpenSheetButton:">
+							<string key="name">scalesOpenSheetButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="sequencerForwardButton:">
+							<string key="name">sequencerForwardButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="sequencerPauseButton:">
+							<string key="name">sequencerPauseButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="sequencerRandomButton:">
+							<string key="name">sequencerRandomButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="sequencerReverseButton:">
+							<string key="name">sequencerReverseButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="stepLengthPopup:">
+							<string key="name">stepLengthPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="stepQuantizationPopup:">
+							<string key="name">stepQuantizationPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="stopButton:">
+							<string key="name">stopButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="swingPopup:">
+							<string key="name">swingPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="currentPagePopup">NSPopUpButton</string>
 						<string key="documentWindow">NSWindow</string>

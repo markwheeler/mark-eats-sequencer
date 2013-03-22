@@ -154,10 +154,6 @@
     NSLog(@"%s", __func__);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.sequencer removeObserver:self forKeyPath:@"bpm"];
-    [self.sequencer removeObserver:self forKeyPath:@"stepQuantization"];
-    [self.sequencer removeObserver:self forKeyPath:@"patternQuantization"];
-    [self.currentPage removeObserver:self forKeyPath:@"stepLength"];
-    [self.currentPage removeObserver:self forKeyPath:@"swing"];
 }
 
 - (NSString *)windowNibName
@@ -195,32 +191,46 @@
     
     // BPM
     [self updateClockBPM];
-    
-    // Setup UI
-    [self setupUI];
-    [self updateSequencerPageUI];
-    
-    // KVO
     [self.sequencer addObserver:self
                      forKeyPath:@"bpm"
                         options:NSKeyValueObservingOptionNew
                          context:NULL];
-    [self.sequencer addObserver:self
-                     forKeyPath:@"stepQuantization"
-                        options:NSKeyValueObservingOptionNew
-                        context:NULL];
-    [self.sequencer addObserver:self
-                     forKeyPath:@"patternQuantization"
-                        options:NSKeyValueObservingOptionNew
-                        context:NULL];
-    [self.currentPage addObserver:self
-                      forKeyPath:@"stepLength"
-                         options:NSKeyValueObservingOptionNew
-                         context:NULL];
-    [self.currentPage addObserver:self
-                       forKeyPath:@"swing"
-                          options:NSKeyValueObservingOptionNew
-                          context:NULL];
+    
+    // Setup the UI
+    [self.stepQuantizationPopup removeAllItems];
+    [self.patternQuantizationPopup removeAllItems];
+    [self.stepLengthPopup removeAllItems];
+    
+    for( NSDictionary *quantization in self.quantizationArray) {
+        [self.stepQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+        [self.patternQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+        [self.stepLengthPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+    }
+
+    [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.stepQuantization];
+    }]];
+    
+    [self.patternQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.patternQuantization];
+    }]];
+    
+    [self.swingPopup removeAllItems];
+    for( NSDictionary *swing in self.swingArray) {
+        [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
+    }
+    
+    [self.currentPagePopup removeAllItems];
+    for(SequencerPage *page in self.sequencer.pages) {
+        [self.currentPagePopup addItemWithTitle:[NSString stringWithFormat:@"%@", page.id]];
+    }
+    
+    // Table view default sort
+    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: YES];
+    [self.rowPitchesTableView setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
+    [self updateSequencerPageUI];
+
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -244,96 +254,6 @@
 
 
 
-#pragma mark - Setup and update UI
-
-- (void) setupUI
-{
-    [self.stepQuantizationPopup removeAllItems];
-    [self.patternQuantizationPopup removeAllItems];
-    [self.stepLengthPopup removeAllItems];
-    
-    for( NSDictionary *quantization in self.quantizationArray) {
-        [self.stepQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
-        [self.patternQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
-        [self.stepLengthPopup addItemWithTitle:[quantization valueForKey:@"label"]];
-    }
-    
-    [self updateStepQuantizationPopup];
-    [self updatePatternQuantizationPopup];
-    
-    [self.swingPopup removeAllItems];
-    for( NSDictionary *swing in self.swingArray) {
-        [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
-    }
-    
-    [self.currentPagePopup removeAllItems];
-    for(SequencerPage *page in self.sequencer.pages) {
-        [self.currentPagePopup addItemWithTitle:[NSString stringWithFormat:@"%@", page.id]];
-    }
-    
-    // Table view default sort
-    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: YES];
-    [self.rowPitchesTableView setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
-}
-
-- (void) updateSequencerPageUI
-{
-    [self updateStepLengthPopup];
-    [self updateSwingPopup];
-}
-
-- (void) updateClockBPM
-{
-    self.clock.bpm = [self.sequencer.bpm floatValue];
-}
-
-- (void) updateStepQuantizationPopup
-{
-    [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.stepQuantization];
-    }]];
-}
-
-- (void) updatePatternQuantizationPopup
-{
-    [self.patternQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.patternQuantization];
-    }]];
-}
-
-- (void) updateStepLengthPopup
-{
-    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
-    }]];
-}
-
-- (void) updateSwingPopup
-{
-    [self.swingPopup selectItemAtIndex:[self.swingArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"swing"] isEqualTo:self.currentPage.swing];
-    }]];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context {
-    
-    if ( object == self.sequencer && [keyPath isEqual:@"bpm"] )
-        [self updateClockBPM];
-    else if ( object == self.sequencer && [keyPath isEqual:@"stepQuantization"] )
-        [self updateStepQuantizationPopup];
-    else if ( object == self.sequencer && [keyPath isEqual:@"patternQuantization"] )
-        [self updatePatternQuantizationPopup];
-    else if ( object == self.currentPage && [keyPath isEqual:@"stepLength"] )
-        [self updateStepLengthPopup];
-    else if ( object == self.currentPage && [keyPath isEqual:@"swing"] )
-        [self updateSwingPopup];
-}
-
-
-
 #pragma mark - Private methods
 
 - (uint) randomStepForPage:(SequencerPage *)page
@@ -341,15 +261,40 @@
     return floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
 }
 
+
+- (void) updateSequencerPageUI
+{
+    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
+    }]];
+    
+    [self.swingPopup selectItemAtIndex:[self.swingArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        return [[obj valueForKey:@"swing"] isEqualTo:self.currentPage.swing];
+    }]];
+}
+
+- (void) updateClockBPM
+{
+    self.clock.bpm = [self.sequencer.bpm floatValue];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    
+    if ( [keyPath isEqual:@"bpm"] )
+        [self updateClockBPM];
+}
+
 - (void)scaleGeneratorSheetDidEnd:(NSWindow *)sheet
-                       returnCode:(NSInteger)returnCode
-                      contextInfo:(void *)contextInfo
+         returnCode:(NSInteger)returnCode
+        contextInfo:(void *)contextInfo
 {
     if(returnCode == NSOKButton) {
         NSLog(@"Sheet info: %@", contextInfo);
     }
 }
-
 
 
 #pragma mark - Clock delegate methods
