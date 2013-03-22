@@ -1,5 +1,5 @@
 //
-//  Sequencer+Utils.h
+//  Sequencer+Create.h
 //  Sequencer
 //
 //  Created by Mark Wheeler on 03/03/2013.
@@ -15,7 +15,7 @@ typedef enum EatsSequencerPlayMode {
     EatsSequencerPlayMode_Random
 } EatsSequencerPlayMode;
 
-@interface Sequencer (Utils)
+@interface Sequencer (Create)
 
 + (Sequencer *) sequencerWithPages:(uint)numberOfPages
                              width:(uint)width
@@ -24,7 +24,5 @@ typedef enum EatsSequencerPlayMode {
 
 + (void) addDummyDataToSequencer:(Sequencer *)sequencer
           inManagedObjectContext:(NSManagedObjectContext *)context;
-
-+ (uint) randomStepForPage:(SequencerPage *)page;
 
 @end

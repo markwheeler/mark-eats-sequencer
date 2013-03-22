@@ -18,7 +18,6 @@
 		4D172E8516E5BACF0012C019 /* EatsGridIntroView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */; };
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
 		4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */; };
-		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D6115CB16E431BD00140AF8 /* Cocoa.framework */; };
 		4D6115D616E431BD00140AF8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115D416E431BD00140AF8 /* InfoPlist.strings */; };
 		4D6115D816E431BD00140AF8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115D716E431BD00140AF8 /* main.m */; };
@@ -27,7 +26,7 @@
 		4D6115E216E431BD00140AF8 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115E016E431BD00140AF8 /* Document.xib */; };
 		4D6115E516E431BD00140AF8 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115E316E431BD00140AF8 /* MainMenu.xib */; };
 		4D6115E816E431BD00140AF8 /* Document.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */; };
-		4D61162B16E4386700140AF8 /* Sequencer+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Utils.m */; };
+		4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Create.m */; };
 		4D61163016E43B9600140AF8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162F16E43B9600140AF8 /* AppController.m */; };
 		4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */; };
 		4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
@@ -85,8 +84,6 @@
 		4D172E8716E5BD090012C019 /* Preferences.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Preferences.m; sourceTree = "<group>"; };
 		4D1B31A216EBDB9E00140B51 /* EatsDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDocumentController.h; sourceTree = "<group>"; };
 		4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDocumentController.m; sourceTree = "<group>"; };
-		4D36B25416FBB32C008057FC /* ClockTick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClockTick.h; sourceTree = "<group>"; };
-		4D36B25516FBB32C008057FC /* ClockTick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ClockTick.m; sourceTree = "<group>"; };
 		4D6115C816E431BD00140AF8 /* Sequencer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sequencer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6115CB16E431BD00140AF8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4D6115CE16E431BD00140AF8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -102,8 +99,8 @@
 		4D6115E116E431BD00140AF8 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Document.xib; sourceTree = "<group>"; };
 		4D6115E416E431BD00140AF8 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		4D6115E716E431BD00140AF8 /* Document.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Document.xcdatamodel; sourceTree = "<group>"; };
-		4D61162916E4386700140AF8 /* Sequencer+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sequencer+Utils.h"; sourceTree = "<group>"; };
-		4D61162A16E4386700140AF8 /* Sequencer+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Sequencer+Utils.m"; sourceTree = "<group>"; };
+		4D61162916E4386700140AF8 /* Sequencer+Create.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sequencer+Create.h"; sourceTree = "<group>"; };
+		4D61162A16E4386700140AF8 /* Sequencer+Create.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Sequencer+Create.m"; sourceTree = "<group>"; };
 		4D61162E16E43B9600140AF8 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		4D61162F16E43B9600140AF8 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScaleGeneratorSheet.xib; sourceTree = "<group>"; };
@@ -144,23 +141,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4D36B25716FBCE1A008057FC /* Grid Controllers */ = {
-			isa = PBXGroup;
-			children = (
-				4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */,
-				4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */,
-				4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */,
-				4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */,
-				4DD0B5B416E702250025AB1C /* EatsGridSequencerView.h */,
-				4DD0B5B516E702250025AB1C /* EatsGridSequencerView.m */,
-				4DD0B5B716E702320025AB1C /* EatsGridPlayView.h */,
-				4DD0B5B816E702320025AB1C /* EatsGridPlayView.m */,
-				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
-				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
-			);
-			name = "Grid Controllers";
-			sourceTree = "<group>";
-		};
 		4D6115BF16E431BD00140AF8 = {
 			isa = PBXGroup;
 			children = (
@@ -213,23 +193,30 @@
 				4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */,
 				4D6115DD16E431BD00140AF8 /* Document.h */,
 				4D6115DE16E431BD00140AF8 /* Document.m */,
-				4D7515B616E45EB900A8E3F2 /* EatsClock.h */,
-				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
-				4D36B25416FBB32C008057FC /* ClockTick.h */,
-				4D36B25516FBB32C008057FC /* ClockTick.m */,
 				4D172E8616E5BD090012C019 /* Preferences.h */,
 				4D172E8716E5BD090012C019 /* Preferences.m */,
 				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
 				4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */,
+				4D7515B616E45EB900A8E3F2 /* EatsClock.h */,
+				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
 				4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */,
 				4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */,
 				4D08357716EC2D1000700EEA /* EatsScaleGenerator.h */,
 				4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */,
+				4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */,
+				4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */,
+				4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */,
+				4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */,
+				4DD0B5B416E702250025AB1C /* EatsGridSequencerView.h */,
+				4DD0B5B516E702250025AB1C /* EatsGridSequencerView.m */,
+				4DD0B5B716E702320025AB1C /* EatsGridPlayView.h */,
+				4DD0B5B816E702320025AB1C /* EatsGridPlayView.m */,
+				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
+				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
 				4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */,
 				4DB87FB616E4435A00BA58BC /* Preferences.xib */,
-				4D36B25716FBCE1A008057FC /* Grid Controllers */,
 				4D61162416E433C500140AF8 /* Core Data */,
 				4D6115D216E431BD00140AF8 /* Supporting Files */,
 			);
@@ -252,8 +239,8 @@
 			isa = PBXGroup;
 			children = (
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
-				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
-				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
+				4D61162916E4386700140AF8 /* Sequencer+Create.h */,
+				4D61162A16E4386700140AF8 /* Sequencer+Create.m */,
 				4D12AAA316F02E3C008F6323 /* SequencerRowPitch.h */,
 				4D12AAA416F02E3C008F6323 /* SequencerRowPitch.m */,
 				4D12AAA016F02E3C008F6323 /* SequencerPage.h */,
@@ -341,7 +328,7 @@
 				4D6115D816E431BD00140AF8 /* main.m in Sources */,
 				4D6115DF16E431BD00140AF8 /* Document.m in Sources */,
 				4D6115E816E431BD00140AF8 /* Document.xcdatamodeld in Sources */,
-				4D61162B16E4386700140AF8 /* Sequencer+Utils.m in Sources */,
+				4D61162B16E4386700140AF8 /* Sequencer+Create.m in Sources */,
 				4D61163016E43B9600140AF8 /* AppController.m in Sources */,
 				4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */,
 				4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */,
@@ -362,7 +349,6 @@
 				4D12AA9F16F02E3C008F6323 /* SequencerNote.m in Sources */,
 				4D12AAA216F02E3C008F6323 /* SequencerPage.m in Sources */,
 				4D12AAA516F02E3C008F6323 /* SequencerRowPitch.m in Sources */,
-				4D36B25616FBB32C008057FC /* ClockTick.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

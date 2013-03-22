@@ -7,21 +7,18 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "Sequencer+Utils.h"
+#import "Sequencer+Create.h"
 #import "SequencerPage.h"
 #import "SequencerRowPitch.h"
 #import "SequencerPattern.h"
 #import "SequencerNote.h"
 #import "SequencerPatternRef.h"
 #import "EatsClock.h"
-#import "ClockTick.h"
 
-@interface Document : NSPersistentDocument <ClockTickDelegateProtocol>
+@interface Document : NSPersistentDocument <EatsClockDelegateProtocol>
 
 @property Sequencer         *sequencer;
 @property SequencerPage     *currentPage;
 @property BOOL              isActive;
-
-- (void) updateUI;
 
 @end
