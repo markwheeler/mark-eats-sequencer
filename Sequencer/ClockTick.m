@@ -138,9 +138,10 @@
             // Play notes for current step, playMode != paused
             if( self.currentTick % (self.ticksPerMeasure / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
                 
-                NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
+                //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
                 
-                // TODO: Something in these lines is causing a memory leak if it's running when we close the document. Seems to be anything that sets the page's properties.
+                // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
+                //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
                 page.currentStep = [page.nextStep copy];
                 
                 if( [page.playMode intValue] == EatsSequencerPlayMode_Forward ) {

@@ -203,8 +203,9 @@
 
 - (void)windowWillClose:(NSNotification *)notification
 {
-    //NSLog(@"%s", __func__);
     [self.clock stopClock];
+    
+    // TODO: These following two lines shouldn't be nesecary once the dealloc bug in ClockTick is fixed.
     self.clock = nil;
     self.clockTick = nil;
 }

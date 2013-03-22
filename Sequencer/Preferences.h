@@ -31,6 +31,8 @@ typedef enum EatsGridType{
 
 @property BOOL              emulateSP1200NoteVelocity;
 
-+ (id)sharedPreferences;
++ (id) sharedPreferences;
+- (void) loadPreferences;
+- (void) savePreferences;
 
 @end

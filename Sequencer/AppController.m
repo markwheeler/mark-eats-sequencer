@@ -25,13 +25,7 @@
     if (self) {
         
         self.sharedPreferences = [Preferences sharedPreferences];
-        
-        // Defaults being set here for testing (replace with NSUserDefaults)
-        self.sharedPreferences.sendMIDIClock = YES;
-        self.sharedPreferences.midiClockSource = nil;
-        self.sharedPreferences.gridWidth = 8;
-        self.sharedPreferences.gridHeight = 8;
-        
+        [self.sharedPreferences loadPreferences];
         
         // Get the comms manager for MIDI & OSC
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
@@ -49,9 +43,17 @@
         
         // Fake an outputs-changed notification to make sure my list of destinations updates (in case it refreshes before I'm awake)
         [self oscOutputsChangedNotification:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
     
     return self;
+}
+
+- (void) applicationWillTerminate:(NSNotification *)notification
+{
+    [self.sharedPreferences savePreferences];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
