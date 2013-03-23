@@ -40,6 +40,11 @@
 		4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B716E45EB900A8E3F2 /* EatsClock.m */; };
 		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
 		4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */; };
+		4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */; };
+		4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */; };
+		4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589516FD10EE00BC36E6 /* EatsGridUtils.m */; };
+		4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589816FD129100BC36E6 /* EatsGridView.m */; };
+		4DB0589C16FD1AE000BC36E6 /* EatsGridHorizontalSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */; };
 		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
 		4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */; };
 		4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */; };
@@ -118,6 +123,16 @@
 		4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsExternalClockCalculator.m; sourceTree = "<group>"; };
 		4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsMonome.h; sourceTree = "<group>"; };
 		4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMonome.m; sourceTree = "<group>"; };
+		4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridPatternView.h; sourceTree = "<group>"; };
+		4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPatternView.m; sourceTree = "<group>"; };
+		4DB0589116FCC82F00BC36E6 /* EatsGridSubView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridSubView.h; sourceTree = "<group>"; };
+		4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridSubView.m; sourceTree = "<group>"; };
+		4DB0589416FD10EE00BC36E6 /* EatsGridUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridUtils.h; sourceTree = "<group>"; };
+		4DB0589516FD10EE00BC36E6 /* EatsGridUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridUtils.m; sourceTree = "<group>"; };
+		4DB0589716FD129100BC36E6 /* EatsGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridView.h; sourceTree = "<group>"; };
+		4DB0589816FD129100BC36E6 /* EatsGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridView.m; sourceTree = "<group>"; };
+		4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalSliderView.h; sourceTree = "<group>"; };
+		4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalSliderView.m; sourceTree = "<group>"; };
 		4DB87FB616E4435A00BA58BC /* Preferences.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Preferences.xib; sourceTree = "<group>"; };
 		4DCF8E2916E446D6002EDD46 /* PreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesController.h; sourceTree = "<group>"; };
 		4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesController.m; sourceTree = "<group>"; };
@@ -147,14 +162,24 @@
 		4D36B25716FBCE1A008057FC /* Grid Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				4DB0589416FD10EE00BC36E6 /* EatsGridUtils.h */,
+				4DB0589516FD10EE00BC36E6 /* EatsGridUtils.m */,
 				4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */,
 				4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */,
 				4D172E8316E5BACF0012C019 /* EatsGridIntroView.h */,
 				4D172E8416E5BACF0012C019 /* EatsGridIntroView.m */,
+				4DB0589716FD129100BC36E6 /* EatsGridView.h */,
+				4DB0589816FD129100BC36E6 /* EatsGridView.m */,
 				4DD0B5B416E702250025AB1C /* EatsGridSequencerView.h */,
 				4DD0B5B516E702250025AB1C /* EatsGridSequencerView.m */,
 				4DD0B5B716E702320025AB1C /* EatsGridPlayView.h */,
 				4DD0B5B816E702320025AB1C /* EatsGridPlayView.m */,
+				4DB0589116FCC82F00BC36E6 /* EatsGridSubView.h */,
+				4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */,
+				4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */,
+				4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */,
+				4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */,
+				4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */,
 				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
 				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
 			);
@@ -363,6 +388,11 @@
 				4D12AAA216F02E3C008F6323 /* SequencerPage.m in Sources */,
 				4D12AAA516F02E3C008F6323 /* SequencerRowPitch.m in Sources */,
 				4D36B25616FBB32C008057FC /* ClockTick.m in Sources */,
+				4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */,
+				4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */,
+				4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */,
+				4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */,
+				4DB0589C16FD1AE000BC36E6 /* EatsGridHorizontalSliderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,16 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EatsGridView.h"
+#import "EatsGridNavigationController.h"
 
-@interface EatsGridSequencerView : NSObject
+@interface EatsGridSequencerView : EatsGridView <EatsGridSubViewDelegateProtocol>
 
-@property (weak) id delegate;
-@property NSManagedObjectContext *managedObjectContext;
-
-@property uint width;
-@property uint height;
-
-- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h;
-- (void) updateView;
+- (void) enterNoteEditMode;
+- (void) exitNoteEditMode;
 
 @end

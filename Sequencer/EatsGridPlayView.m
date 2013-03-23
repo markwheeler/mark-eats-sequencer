@@ -41,6 +41,13 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (void) showView:(NSNumber *)gridView
+{
+    // Pass the message up
+    if([self.delegate respondsToSelector:@selector(showView:)])
+        [self.delegate performSelector:@selector(showView:) withObject:gridView];
+}
+
 - (void) updateView
 {
     
@@ -95,7 +102,7 @@
        && [[notification.userInfo valueForKey:@"y"] intValue] == 0) {
         // Tell the delegate we're done
         if([self.delegate respondsToSelector:@selector(showView:)])
-            [self.delegate performSelector:@selector(showView:) withObject:[NSNumber numberWithInt:EatsGridView_Sequencer]];
+            [self.delegate performSelector:@selector(showView:) withObject:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
     }
 }
 

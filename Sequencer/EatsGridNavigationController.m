@@ -19,7 +19,7 @@
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
-@property EatsGridView                  currentView;
+@property EatsGridViewType              currentView;
 @property NSObject                      *currentViewObject;
 @property id                            deviceInterface;
 
@@ -50,7 +50,7 @@
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
             self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
-            self.currentView = EatsGridView_Sequencer;
+            self.currentView = EatsGridViewType_Sequencer;
         }
 
     }
@@ -74,13 +74,13 @@
 {    
     if([gridView intValue] == self.currentView) return;
     
-    if([gridView intValue] == EatsGridView_Intro) {
+    if([gridView intValue] == EatsGridViewType_Intro) {
         self.currentViewObject = [[EatsGridIntroView alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
-    } else if([gridView intValue] == EatsGridView_Sequencer) {
+    } else if([gridView intValue] == EatsGridViewType_Sequencer) {
         self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
-    } else if([gridView intValue] == EatsGridView_Play) {
+    } else if([gridView intValue] == EatsGridViewType_Play) {
         self.currentViewObject = [[EatsGridPlayView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else {
@@ -97,12 +97,12 @@
 
 - (void)gridControllerNone:(NSNotification *)notification
 {
-    [self showView:[NSNumber numberWithInt:EatsGridView_None]];
+    [self showView:[NSNumber numberWithInt:EatsGridViewType_None]];
 }
 
 - (void)gridControllerConnected:(NSNotification *)notification
 {
-    [self showView:[NSNumber numberWithInt:EatsGridView_Intro]];
+    [self showView:[NSNumber numberWithInt:EatsGridViewType_Intro]];
 }
 
 

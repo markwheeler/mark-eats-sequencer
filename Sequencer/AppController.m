@@ -52,6 +52,7 @@
 
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
     [self.sharedPreferences savePreferences];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }

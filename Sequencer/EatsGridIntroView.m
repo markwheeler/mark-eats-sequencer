@@ -212,7 +212,7 @@
     if( ![[notification.userInfo valueForKey:@"down"] boolValue] ) {
         // Tell the delegate we're done
         if([self.delegate respondsToSelector:@selector(showView:)])
-            [self.delegate performSelector:@selector(showView:) withObject:[NSNumber numberWithInt:EatsGridView_Sequencer]];
+            [self.delegate performSelector:@selector(showView:) withObject:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
     }
 }
 
