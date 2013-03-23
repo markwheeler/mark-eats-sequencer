@@ -1,5 +1,5 @@
 //
-//  EatsGridIntroView.h
+//  EatsGridIntroViewController.h
 //  Sequencer
 //
 //  Created by Mark Wheeler on 04/03/2013.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface EatsGridIntroView : NSObject
+@interface EatsGridIntroViewController : NSObject
 
 @property (weak) id delegate;
 

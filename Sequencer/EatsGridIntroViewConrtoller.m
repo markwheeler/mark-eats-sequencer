@@ -1,15 +1,15 @@
 //
-//  EatsGridIntroView.m
+//  EatsGridIntroViewController.m
 //  Sequencer
 //
 //  Created by Mark Wheeler on 04/03/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
-#import "EatsGridIntroView.h"
+#import "EatsGridIntroViewController.h"
 #import "EatsGridNavigationController.h"
 
-@interface EatsGridIntroView ()
+@interface EatsGridIntroViewController ()
 
 #define FRAMERATE 60
 #define TRAIL_LENGTH 6 // Won't show past 15
@@ -27,7 +27,7 @@
 
 @end
 
-@implementation EatsGridIntroView
+@implementation EatsGridIntroViewController
 
 #pragma mark - Public methods
 

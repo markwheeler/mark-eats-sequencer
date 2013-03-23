@@ -1,17 +1,17 @@
 //
-//  EatsGridPlayView.m
+//  EatsGridPlayViewController.m
 //  Sequencer
 //
 //  Created by Mark Wheeler on 05/03/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
-#import "EatsGridPlayView.h"
+#import "EatsGridPlayViewController.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
 #import "EatsGridNavigationController.h"
 
-@implementation EatsGridPlayView
+@implementation EatsGridPlayViewController
 
 #pragma mark - Public methods
 

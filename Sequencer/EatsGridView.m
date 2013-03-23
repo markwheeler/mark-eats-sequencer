@@ -8,6 +8,7 @@
 
 #import "EatsGridView.h"
 #import "EatsGridSubView.h"
+#import "EatsGridUtils.h"
 
 
 @implementation EatsGridView
@@ -56,18 +57,8 @@
 {
     // Over-ride this
     
-    // Displays all lights on
-    
-    NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.width];
-    
-    // Generate the columns
-    for(uint x = 0; x < self.width; x++) {
-        [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
-        // Generate the rows
-        for(uint y = 0; y < self.height; y++) {
-            [[gridArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
-        }
-    }
+    // Generate and combine all the sub views
+    NSArray *gridArray = [EatsGridUtils combineSubViews:self.subViews gridWidth:self.width gridHeight:self.height];
     
     // Send msg to delegate
     if([self.delegate respondsToSelector:@selector(updateGridWithArray:)])

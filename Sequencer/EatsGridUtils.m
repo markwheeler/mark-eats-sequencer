@@ -7,6 +7,7 @@
 //
 
 #import "EatsGridUtils.h"
+#import "EatsGridSubView.h"
 
 @implementation EatsGridUtils
 
@@ -24,18 +25,12 @@
             
             BOOL foundView = NO;
             NSEnumerator *enumerator = [views objectEnumerator];
-            NSDictionary *view;
+            EatsGridSubView *view;
             
             while ( (view = [enumerator nextObject]) && !foundView) {
                 
-                NSArray *viewArray = [view valueForKey:@"viewArray"];
-                uint viewX = [[view valueForKey:@"x"] intValue];
-                uint viewY = [[view valueForKey:@"y"] intValue];
-                uint viewWidth = [[view valueForKey:@"width"] intValue];
-                uint viewHeight = [[view valueForKey:@"height"] intValue];
-                
-                if(x >= viewX && x < viewX + viewWidth && y >= viewY && y < viewY + viewHeight) {
-                    [[gridArray objectAtIndex:x] insertObject:[[viewArray objectAtIndex:x - viewX] objectAtIndex:y - viewY ] atIndex:y];
+                if( view.visible && x >= view.x && x < view.x + view.width && y >= view.y && y < view.y + view.height ) {
+                    [[gridArray objectAtIndex:x] insertObject:[[[view viewArray] objectAtIndex:x - view.x] objectAtIndex:y - view.y ] atIndex:y];
                     foundView = YES;
                 }
             }

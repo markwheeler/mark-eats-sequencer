@@ -1,5 +1,5 @@
 //
-//  EatsGridPlayView.h
+//  EatsGridPlayViewController.h
 //  Sequencer
 //
 //  Created by Mark Wheeler on 05/03/2013.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface EatsGridPlayView : NSObject
+@interface EatsGridPlayViewController : NSObject
 
 @property (weak) id delegate;
 @property NSManagedObjectContext *managedObjectContext;

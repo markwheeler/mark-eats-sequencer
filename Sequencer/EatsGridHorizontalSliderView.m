@@ -42,10 +42,9 @@
     if( down ) {
         
         self.percentage = ( x / (self.width - 1.0) ) * 100.0;
-        //NSLog(@"%f", self.percentage);
         
-        if([self.delegate respondsToSelector:@selector(updateView)])
-            [self.delegate performSelector:@selector(updateView)];
+        if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
+            [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];
     }
 }
 

@@ -11,6 +11,13 @@
 #import "EatsGridSubView.h"
 #import "SequencerPattern.h"
 
+@class EatsGridPatternView;
+
+@protocol EatsGridPatternViewDelegateProtocol
+- (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
+- (void) eatsGridPatternViewDoublePressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender;
+@end
+
 typedef enum EatsPatternViewMode {
     EatsPatternViewMode_Edit,
     EatsPatternViewMode_NoteEdit,
@@ -19,8 +26,9 @@ typedef enum EatsPatternViewMode {
 
 @interface EatsGridPatternView : EatsGridSubView
 
-@property SequencerPattern      *pattern;
 @property uint                  currentStep;
+@property SequencerPattern      *pattern;
+@property SequencerNote         *activeEditNote;
 @property EatsPatternViewMode   mode;
 @property uint                  wipe; // 0-100
 

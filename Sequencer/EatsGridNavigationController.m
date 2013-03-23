@@ -11,16 +11,16 @@
 #import "EatsCommunicationManager.h"
 #import "Preferences.h"
 #import "EatsMonome.h"
-#import "EatsGridIntroView.h"
-#import "EatsGridSequencerView.h"
-#import "EatsGridPlayView.h"
+#import "EatsGridIntroViewController.h"
+#import "EatsGridSequencerViewController.h"
+#import "EatsGridPlayViewController.h"
 
 @interface EatsGridNavigationController ()
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
 @property EatsGridViewType              currentView;
-@property NSObject                      *currentViewObject;
+@property NSObject                      *currentViewController;
 @property id                            deviceInterface;
 
 @end
@@ -49,7 +49,7 @@
                                                    object:nil];
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
-            self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+            self.currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
             self.currentView = EatsGridViewType_Sequencer;
         }
 
@@ -65,8 +65,8 @@
 
 - (void) updateGridView
 {
-    if([self.currentViewObject respondsToSelector:@selector(updateView)] && self.isActive) {
-        [self.currentViewObject performSelector:@selector(updateView)];
+    if([self.currentViewController respondsToSelector:@selector(updateView)] && self.isActive) {
+        [self.currentViewController performSelector:@selector(updateView)];
     }
 }
 
@@ -75,16 +75,16 @@
     if([gridView intValue] == self.currentView) return;
     
     if([gridView intValue] == EatsGridViewType_Intro) {
-        self.currentViewObject = [[EatsGridIntroView alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        self.currentViewController = [[EatsGridIntroViewController alloc] initWithDelegate:self width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else if([gridView intValue] == EatsGridViewType_Sequencer) {
-        self.currentViewObject = [[EatsGridSequencerView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        self.currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else if([gridView intValue] == EatsGridViewType_Play) {
-        self.currentViewObject = [[EatsGridPlayView alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        self.currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self managedObjectContext:self.managedObjectContext width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else {
-        self.currentViewObject = nil;
+        self.currentViewController = nil;
         if([self.deviceInterface respondsToSelector:@selector(clearGridController)])
             [self.deviceInterface performSelector:@selector(clearGridController)];
     }
@@ -93,17 +93,19 @@
 }
 
 
+
 #pragma mark - notifications
 
-- (void)gridControllerNone:(NSNotification *)notification
+- (void) gridControllerNone:(NSNotification *)notification
 {
     [self showView:[NSNumber numberWithInt:EatsGridViewType_None]];
 }
 
-- (void)gridControllerConnected:(NSNotification *)notification
+- (void) gridControllerConnected:(NSNotification *)notification
 {
     [self showView:[NSNumber numberWithInt:EatsGridViewType_Intro]];
 }
+
 
 
 #pragma mark - GridView delegate methods

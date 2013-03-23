@@ -8,7 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface EatsGridView : NSObject
+
+@protocol EatsGridSubViewDelegateProtocol
+- (void) showView:(NSNumber *)gridView;
+@end
+
+@interface EatsGridView : NSObject <EatsGridSubViewDelegateProtocol>
 
 @property (weak) id                 delegate;
 
@@ -16,7 +21,7 @@
 @property uint                      height;
 
 @property NSManagedObjectContext    *managedObjectContext;
-@property NSMutableSet              *subViews;
+@property NSSet                     *subViews;
 
 - (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h;
 - (void) showView:(NSNumber *)gridView;

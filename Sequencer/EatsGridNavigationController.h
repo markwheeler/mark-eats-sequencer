@@ -23,11 +23,6 @@ typedef enum EatsGridViewType{
 - (void) showView:(NSNumber *)gridView;
 @end
 
-@protocol EatsGridSubViewDelegateProtocol
-- (void) updateView;
-- (void) showView:(NSNumber *)gridView;
-@end
-
 
 @interface EatsGridNavigationController : NSObject <EatsGridViewDelegateProtocol>
 
