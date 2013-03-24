@@ -14,6 +14,8 @@
 {
     self = [super init];
     if (self) {
+        self.width = 1;
+        self.height = 1;
         self.opacity = 1;
         self.visible = YES;
     }

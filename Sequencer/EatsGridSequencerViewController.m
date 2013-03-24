@@ -50,7 +50,7 @@
     self.patternView.width = self.width;
     self.patternView.height = self.height;
     self.patternView.mode = EatsPatternViewMode_Edit;
-    self.patternView.pattern = self.pattern; // TODO
+    self.patternView.pattern = self.pattern;
     
     self.velocityView = [[EatsGridHorizontalSliderView alloc] init];
     self.velocityView.delegate = self;
@@ -121,7 +121,7 @@
 
 
 
-#pragma mark - sub view delegate methods
+#pragma mark - Sub view delegate methods
 
 // Both sliders
 - (void) eatsGridHorizontalSliderViewUpdated:(EatsGridHorizontalSliderView *)sender
@@ -182,11 +182,6 @@
         
         [self exitNoteEditMode];
        
-    // Play mode
-    } else if ( sender.mode == EatsPatternViewMode_Play ) {
-        
-        NSLog(@"Scrub to %@", [xyDown valueForKey:@"x"]);
-        
     }
 }
 

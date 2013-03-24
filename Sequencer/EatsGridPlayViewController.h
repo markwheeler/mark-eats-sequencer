@@ -7,17 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EatsGridView.h"
+#import "EatsGridPatternView.h"
+#import "EatsGridButtonView.h"
 
-@interface EatsGridPlayViewController : NSObject
+@interface EatsGridPlayViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridPatternViewDelegateProtocol, EatsGridButtonViewDelegateProtocol>
 
-@property (weak) id delegate;
-@property NSManagedObjectContext *managedObjectContext;
-
-@property uint width;
-@property uint height;
-
-- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h;
-- (void) showView:(NSNumber *)gridView;
-- (void) updateView;
+- (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
+- (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender;
 
 @end

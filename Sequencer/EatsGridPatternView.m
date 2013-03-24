@@ -58,9 +58,9 @@
 {
     self = [super init];
     if (self) {
-        self.playheadBrightness = 8;
-        self.noteBrightness = 10;
-        self.noteLengthBrightness = 8;
+        self.playheadBrightness = EDIT_MODE_PLAYHEAD_BRIGHTNESS;
+        self.noteBrightness = EDIT_MODE_NOTE_BRIGHTNESS;
+        self.noteLengthBrightness = EDIT_MODE_NOTE_LENGTH_BRIGHTNESS;
     }
     return self;
 }

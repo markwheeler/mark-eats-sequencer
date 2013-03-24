@@ -8,6 +8,12 @@
 
 #import "EatsGridSubView.h"
 
+@class EatsGridHorizontalSliderView;
+
+@protocol EatsGridHorizontalSliderViewDelegateProtocol
+- (void) eatsGridHorizontalSliderViewUpdated:(EatsGridHorizontalSliderView *)sender;
+@end
+
 @interface EatsGridHorizontalSliderView : EatsGridSubView
 
 @property float percentage;

@@ -11,7 +11,7 @@
 #import "EatsGridPatternView.h"
 #import "EatsGridHorizontalSliderView.h"
 
-@interface EatsGridSequencerViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridPatternViewDelegateProtocol>
+@interface EatsGridSequencerViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridPatternViewDelegateProtocol, EatsGridHorizontalSliderViewDelegateProtocol>
 
 - (void) eatsGridHorizontalSliderViewUpdated:(EatsGridHorizontalSliderView *)sender;
 

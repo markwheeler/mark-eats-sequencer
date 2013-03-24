@@ -44,6 +44,7 @@
 		4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */; };
 		4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */; };
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
+		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
 		4DF8D32416FE4C3E00E7FB09 /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32316FE4C3E00E7FB09 /* SequencerPage.m */; };
 		4DF8D32716FE4C3E00E7FB09 /* SequencerPatternRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32616FE4C3E00E7FB09 /* SequencerPatternRef.m */; };
 		4DF8D32A16FE4C3F00E7FB09 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32916FE4C3F00E7FB09 /* SequencerPattern.m */; };
@@ -130,6 +131,8 @@
 		4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridSequencerViewController.m; sourceTree = "<group>"; };
 		4DD0B5B716E702320025AB1C /* EatsGridPlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridPlayViewController.h; sourceTree = "<group>"; };
 		4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPlayViewController.m; sourceTree = "<group>"; };
+		4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridButtonView.h; sourceTree = "<group>"; };
+		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
 		4DF8D32216FE4C3E00E7FB09 /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
 		4DF8D32316FE4C3E00E7FB09 /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
 		4DF8D32516FE4C3E00E7FB09 /* SequencerPatternRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternRef.h; sourceTree = "<group>"; };
@@ -176,6 +179,8 @@
 				4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */,
 				4DB0589116FCC82F00BC36E6 /* EatsGridSubView.h */,
 				4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */,
+				4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */,
+				4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */,
 				4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */,
 				4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */,
 				4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */,
@@ -393,6 +398,7 @@
 				4DF8D32D16FE4C3F00E7FB09 /* SequencerRowPitch.m in Sources */,
 				4DF8D33016FE4C3F00E7FB09 /* SequencerNote.m in Sources */,
 				4DF8D33316FE4C4000E7FB09 /* Sequencer.m in Sources */,
+				4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

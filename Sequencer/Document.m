@@ -199,6 +199,9 @@
     
     // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
+    
+    // Start the clock right away
+    [self.clock startClock];
 }
 
 - (void)windowWillClose:(NSNotification *)notification

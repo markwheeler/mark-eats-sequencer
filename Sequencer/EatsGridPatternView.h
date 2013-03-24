@@ -15,6 +15,7 @@
 
 @protocol EatsGridPatternViewDelegateProtocol
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
+@optional
 - (void) eatsGridPatternViewDoublePressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender;
 @end
 
