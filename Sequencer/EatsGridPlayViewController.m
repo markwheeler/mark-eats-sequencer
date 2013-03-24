@@ -12,6 +12,8 @@
 #import "SequencerPage.h"
 #import "SequencerNote.h"
 
+#define ANIMATION_FRAMERATE 20
+
 @interface EatsGridPlayViewController ()
 
 @property SequencerPage                 *page;
@@ -29,6 +31,9 @@
 @property EatsGridButtonView            *exitButton;
 
 @property NSArray                       *playModeButtons;
+
+@property NSTimer                       *animationTimer;
+@property uint                          animationFrame;
 
 @end
 
@@ -55,9 +60,10 @@
     self.patternView = [[EatsGridPatternView alloc] init];
     self.patternView.delegate = self;
     self.patternView.x = 0;
-    self.patternView.y = self.height / 2;
+    self.patternView.y = 1;
     self.patternView.width = self.width;
-    self.patternView.height = self.height / 2;
+    self.patternView.height = self.height - 1;
+    self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
     self.patternView.mode = EatsPatternViewMode_Play;
     self.patternView.pattern = self.pattern;
     self.patternView.patternHeight = self.height;
@@ -69,47 +75,55 @@
     self.pauseButton.delegate = self;
     self.pauseButton.x = self.width - 8;
     self.pauseButton.y = buttonRow;
-    self.clearButton.inactiveBrightness = 5;
+    self.pauseButton.inactiveBrightness = 5;
+    self.pauseButton.visible = NO;
     
     self.forwardButton = [[EatsGridButtonView alloc] init];
     self.forwardButton.delegate = self;
     self.forwardButton.x = self.width - 7;
     self.forwardButton.y = buttonRow;
-    self.clearButton.inactiveBrightness = 5;
+    self.forwardButton.inactiveBrightness = 5;
+    self.forwardButton.visible = NO;
     
     self.reverseButton = [[EatsGridButtonView alloc] init];
     self.reverseButton.delegate = self;
     self.reverseButton.x = self.width - 6;
     self.reverseButton.y = buttonRow;
-    self.clearButton.inactiveBrightness = 5;
+    self.reverseButton.inactiveBrightness = 5;
+    self.reverseButton.visible = NO;
     
     self.randomButton = [[EatsGridButtonView alloc] init];
     self.randomButton.delegate = self;
     self.randomButton.x = self.width - 5;
     self.randomButton.y = buttonRow;
-    self.clearButton.inactiveBrightness = 5;
+    self.randomButton.inactiveBrightness = 5;
+    self.randomButton.visible = NO;
     
     self.bpmDecrementButton = [[EatsGridButtonView alloc] init];
     self.bpmDecrementButton.delegate = self;
     self.bpmDecrementButton.x = self.width - 4;
     self.bpmDecrementButton.y = buttonRow;
+    self.bpmDecrementButton.visible = NO;
     
     self.bpmIncrementButton = [[EatsGridButtonView alloc] init];
     self.bpmIncrementButton.delegate = self;
     self.bpmIncrementButton.x = self.width - 3;
     self.bpmIncrementButton.y = buttonRow;
+    self.bpmIncrementButton.visible = NO;
     
     self.clearButton = [[EatsGridButtonView alloc] init];
     self.clearButton.delegate = self;
     self.clearButton.x = self.width - 2;
     self.clearButton.y = buttonRow;
     self.clearButton.inactiveBrightness = 5;
+    self.clearButton.visible = NO;
     
     self.exitButton = [[EatsGridButtonView alloc] init];
     self.exitButton.delegate = self;
     self.exitButton.x = self.width - 1;
     self.exitButton.y = buttonRow;
     self.exitButton.inactiveBrightness = 8;
+    self.exitButton.visible = NO;
     
     // Make the correct playMode button active and listen for changes to keep it correct
     self.playModeButtons = [[NSArray alloc] initWithObjects:self.pauseButton, self.forwardButton, self.reverseButton, self.randomButton, nil];
@@ -126,6 +140,15 @@
                                                    self.clearButton,
                                                    self.exitButton,
                                                    nil];
+    
+    // Start animateIn
+    self.animationFrame = 0;
+    int speedMultiplier = 8 / self.height;
+    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:( 1.0 * speedMultiplier ) / ANIMATION_FRAMERATE
+                                                           target:self
+                                                         selector:@selector(animateIn:)
+                                                         userInfo:nil
+                                                          repeats:YES];
 }
 
 - (void) dealloc
@@ -169,6 +192,51 @@
     
     if ( [keyPath isEqual:@"playMode"] )
         [self setPlayMode:[[change valueForKey:@"new"] intValue]];
+}
+
+- (void) animateIn:(NSTimer *)timer
+{
+    self.animationFrame ++;
+    
+    self.patternView.y ++;
+    self.patternView.height --;
+    
+    [self updateView];
+    
+    if( self.patternView.height == self.height / 2 ) { // Final frame
+
+        self.pauseButton.visible = YES;
+        self.forwardButton.visible = YES;
+        self.reverseButton.visible = YES;
+        self.randomButton.visible = YES;
+        self.bpmDecrementButton.visible = YES;
+        self.bpmIncrementButton.visible = YES;
+        self.clearButton.visible = YES;
+        self.exitButton.visible = YES;
+        
+        [timer invalidate];
+        self.animationTimer = nil;
+    }
+    
+}
+
+- (void) animateOut:(NSTimer *)timer
+{
+    self.animationFrame ++;
+    
+    self.patternView.y --;
+    self.patternView.height ++;
+    
+    [self updateView];
+    
+    if( self.patternView.height == self.height - 1 ) { // Final frame
+        
+        [timer invalidate];
+        self.animationTimer = nil;
+        
+        [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
+    }
+    
 }
 
 
@@ -252,7 +320,27 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
         } else {
-            [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
+                        
+            // Start animateOut
+            self.pauseButton.visible = NO;
+            self.forwardButton.visible = NO;
+            self.reverseButton.visible = NO;
+            self.randomButton.visible = NO;
+            self.bpmDecrementButton.visible = NO;
+            self.bpmIncrementButton.visible = NO;
+            self.clearButton.visible = NO;
+            self.exitButton.visible = NO;
+            
+            self.patternView.y --;
+            self.patternView.height ++;
+            
+            self.animationFrame = 0;
+            int speedMultiplier = 8 / self.height;
+            self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:( 1.0 * speedMultiplier ) / ANIMATION_FRAMERATE
+                                                                   target:self
+                                                                 selector:@selector(animateOut:)
+                                                                 userInfo:nil
+                                                                  repeats:YES];
             return;
         }
     }

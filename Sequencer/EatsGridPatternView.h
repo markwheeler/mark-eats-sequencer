@@ -41,4 +41,8 @@ typedef enum EatsPatternViewFoldFrom {
 @property EatsPatternViewFoldFrom   foldFrom;
 @property uint                      wipe; // 0-100
 
+@property uint                  playheadBrightness;
+@property uint                  noteBrightness;
+@property uint                  noteLengthBrightness;
+
 @end

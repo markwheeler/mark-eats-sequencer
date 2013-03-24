@@ -11,6 +11,9 @@
 #import "SequencerPage.h"
 #import "SequencerNote.h"
 
+#define ANIMATION_FRAMERATE 15
+#define NOTE_EDIT_FADE_AMOUNT 6
+
 @interface EatsGridSequencerViewController ()
 
 @property SequencerPage                 *page;
@@ -20,6 +23,9 @@
 @property EatsGridPatternView           *patternView;
 @property EatsGridHorizontalSliderView  *velocityView;
 @property EatsGridHorizontalSliderView  *lengthView;
+
+@property NSTimer                       *animationTimer;
+@property uint                          animationFrame;
 
 @end
 
@@ -77,47 +83,144 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
+    if( self.animationTimer ) return;
+    self.animationFrame = 0;
+    
     // Display sliders at bottom
     if( [note.row intValue] < self.height / 2 ) {
         self.patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
-        self.velocityView.y = self.height - 2;
-        self.lengthView.y = self.height - 1;
+        self.velocityView.y = self.height - 1;
+        self.velocityView.visible = YES;
 
     // Display sliders at top
     } else {
         self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-        self.patternView.y = 2;
-        self.velocityView.y = 0;
-        self.lengthView.y = 1;
+        self.patternView.y = 1;
+        self.lengthView.y = 0;
+        self.lengthView.visible = YES;
     }
     
-    self.velocityView.visible = YES;
-    self.lengthView.visible = YES;
-    
-    self.patternView.height = self.height - 2;
+    self.patternView.height = self.height - 1;
     self.patternView.activeEditNote = note;
     self.patternView.mode = EatsPatternViewMode_NoteEdit;
+    
+    self.patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    self.patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
     
     self.activeEditNote = note;
     self.velocityView.percentage = ([note.velocity floatValue] / 127) * 100;
     self.lengthView.percentage = [note.lengthAsPercentage floatValue];
     
     [self updateView];
+    
+    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                           target:self
+                                                         selector:@selector(animateInNoteEditMode:)
+                                                         userInfo:nil
+                                                          repeats:YES];
 }
 
 - (void) exitNoteEditMode
 {
-    self.velocityView.visible = NO;
-    self.lengthView.visible = NO;
+    if( self.animationTimer ) return;
+    self.animationFrame = 0;
     
-    self.patternView.y = 0;
-    self.patternView.height = self.height;
+    // To bottom
+    if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+        
+        self.velocityView.y ++;
+        self.lengthView.visible = NO;
+        
+    // To top
+    } else {
+        
+        self.patternView.y --;
+        self.velocityView.visible = NO;
+        self.lengthView.y --;
+        
+    }
+    
+    self.patternView.height = self.height - 1;
+    
+    self.patternView.noteBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
+    self.patternView.noteLengthBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
+    
+    [self updateView];
+    
+    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                           target:self
+                                                         selector:@selector(animateOutNoteEditMode:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+}
+
+- (void) animateInNoteEditMode:(NSTimer *)timer
+{
+    self.animationFrame ++;
+    
+    // From bottom
+    if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+
+        self.velocityView.y --;
+        self.lengthView.y = self.height - 1;
+        self.lengthView.visible = YES;
+
+    // From top
+    } else {
+        
+        self.patternView.y ++;
+        self.velocityView.y = 0;
+        self.lengthView.y ++;
+        self.velocityView.visible = YES;
+        
+    }
+    
+    self.patternView.height --;
+    
+    self.patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    self.patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    
+    [self updateView];
+    
+    if( self.animationFrame == 1 ) { // Final frame
+        [timer invalidate];
+        self.animationTimer = nil;
+    }
+}
+
+- (void) animateOutNoteEditMode:(NSTimer *)timer
+{
+    self.animationFrame ++;
+    
+    // To bottom
+    if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+        
+        self.velocityView.visible = NO;
+        
+    // To top
+    } else {
+        
+        self.patternView.y --;
+        self.lengthView.visible = NO;
+        
+    }
+    
+    self.patternView.height ++;
+    
+    self.patternView.noteBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
+    self.patternView.noteLengthBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
+    
     self.patternView.activeEditNote = nil;
     self.patternView.mode = EatsPatternViewMode_Edit;
     
     self.activeEditNote = nil;
     
     [self updateView];
+
+    if( self.animationFrame == 1 ) { // Final frame
+        [timer invalidate];
+        self.animationTimer = nil;
+    }
 }
 
 - (void) updateView

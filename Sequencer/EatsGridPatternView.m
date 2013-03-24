@@ -11,56 +11,25 @@
 #import "EatsGridNavigationController.h"
 
 
-#define EDIT_MODE_PLAYHEAD_BRIGHTNESS 8
-#define EDIT_MODE_NOTE_BRIGHTNESS 15
-#define EDIT_MODE_NOTE_LENGTH_BRIGHTNESS 10
-
-#define EDIT_NOTE_MODE_PLAYHEAD_BRIGHTNESS 10
-#define EDIT_NOTE_MODE_NOTE_BRIGHTNESS 8 // TODO: Set to 7 once done debugging
-#define EDIT_NOTE_MODE_NOTE_LENGTH_BRIGHTNESS 2
+#define PLAYHEAD_BRIGHTNESS 8
+#define NOTE_BRIGHTNESS 15
+#define NOTE_LENGTH_BRIGHTNESS 10
 
 @interface EatsGridPatternView ()
 
 @property NSDictionary          *lastPressedKey;
-@property uint                  playheadBrightness;
-@property uint                  noteBrightness;
-@property uint                  noteLengthBrightness;
 
 @end
 
 @implementation EatsGridPatternView
 
-@synthesize mode = _mode;
-
-- (EatsPatternViewMode ) mode
-{
-    return _mode;
-}
-
-- (void) setMode:(EatsPatternViewMode)mode
-{
-    _mode = mode;
-    
-    if( mode == EatsPatternViewMode_NoteEdit ) {
-        self.playheadBrightness = EDIT_NOTE_MODE_PLAYHEAD_BRIGHTNESS;
-        self.noteBrightness = EDIT_NOTE_MODE_NOTE_BRIGHTNESS;
-        self.noteLengthBrightness = EDIT_NOTE_MODE_NOTE_LENGTH_BRIGHTNESS;
-    } else {
-        self.playheadBrightness = EDIT_MODE_PLAYHEAD_BRIGHTNESS;
-        self.noteBrightness = EDIT_MODE_NOTE_BRIGHTNESS;
-        self.noteLengthBrightness = EDIT_MODE_NOTE_LENGTH_BRIGHTNESS;
-    }
-}
-
-
-
 - (id) init
 {
     self = [super init];
     if (self) {
-        self.playheadBrightness = EDIT_MODE_PLAYHEAD_BRIGHTNESS;
-        self.noteBrightness = EDIT_MODE_NOTE_BRIGHTNESS;
-        self.noteLengthBrightness = EDIT_MODE_NOTE_LENGTH_BRIGHTNESS;
+        self.playheadBrightness = PLAYHEAD_BRIGHTNESS;
+        self.noteBrightness = NOTE_BRIGHTNESS;
+        self.noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
     }
     return self;
 }
@@ -86,6 +55,7 @@
     // Work out how much we need to fold
     int scaleDifference = self.patternHeight - self.height;
     if( scaleDifference < 0 ) scaleDifference = 0;
+
     
     for(SequencerNote *note in self.pattern.notes) {
         if( [note.step intValue] < self.width && [note.row intValue] < self.patternHeight ) {
@@ -102,7 +72,8 @@
             // Fold from bottom
             } else if( self.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
                 if( row >= self.patternHeight - (scaleDifference * 2) )
-                    row = row / 2 + scaleDifference;
+                    row = (row / 2) + ((self.patternHeight - (scaleDifference * 2)) / 2);
+                
             }
 
             // Put in the active note while editing
