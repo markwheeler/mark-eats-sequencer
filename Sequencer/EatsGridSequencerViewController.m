@@ -19,6 +19,7 @@
 @property SequencerPage                 *page;
 @property SequencerPattern              *pattern;
 @property SequencerNote                 *activeEditNote;
+@property NSDictionary                  *lastRemovedNoteInfo;
 
 @property EatsGridPatternView           *patternView;
 @property EatsGridHorizontalSliderView  *velocityView;
@@ -108,6 +109,7 @@
     self.patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
     
     self.activeEditNote = note;
+
     self.velocityView.percentage = ([note.velocity floatValue] / 127) * 100;
     self.lengthView.percentage = [note.lengthAsPercentage floatValue];
     
@@ -246,12 +248,11 @@
     // Velocity
     if(sender == self.velocityView) {
         self.activeEditNote.velocity = [NSNumber numberWithInt: (127 - (127 / sender.width) ) * (sender.percentage / 100) + (127 / sender.width) ];
-        NSLog(@"velocity %@", self.activeEditNote.velocity);
     
     // Length
     } else if(sender == self.lengthView) {
         self.activeEditNote.lengthAsPercentage = [NSNumber numberWithFloat:(100 - (100 / sender.width) ) * (sender.percentage / 100) + (100 / sender.width)];
-        NSLog(@"length %@", self.activeEditNote.lengthAsPercentage);
+        NSLog(@"Length %@", self.activeEditNote.lengthAsPercentage);
     }
     
     [self updateView];
@@ -277,6 +278,15 @@
             if( [noteMatches count] ) {
 
                 // Remove a note
+                SequencerNote *noteToRemove = [noteMatches lastObject];
+                
+                // Make a record of it first in case it's a double tap
+                self.lastRemovedNoteInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"step",
+                                                                                      [NSNumber numberWithUnsignedInt:y], @"row",
+                                                                                      noteToRemove.velocity, @"velocity",
+                                                                                      noteToRemove.lengthAsPercentage, @"lengthAsPercentage",
+                                                                                      nil];
+                
                 [self.managedObjectContext deleteObject:[noteMatches lastObject]];
 
             } else {
@@ -315,8 +325,24 @@
 
         NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 
-        if( [noteMatches count] ) {
-            [self enterNoteEditModeFor:[noteMatches lastObject]];
+        if( [noteMatches count] && self.lastRemovedNoteInfo ) {
+            
+            // Put the old note back in
+            [self.managedObjectContext deleteObject:[noteMatches lastObject]];
+            NSMutableSet *newNotesSet = [self.pattern.notes mutableCopy];
+            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+            
+            newNote.step = [self.lastRemovedNoteInfo valueForKey:@"step"];
+            newNote.row = [self.lastRemovedNoteInfo valueForKey:@"row"];
+            newNote.velocity = [self.lastRemovedNoteInfo valueForKey:@"velocity"];
+            newNote.lengthAsPercentage = [self.lastRemovedNoteInfo valueForKey:@"lengthAsPercentage"];
+            
+            [newNotesSet addObject:newNote];
+            self.pattern.notes = newNotesSet;
+            self.lastRemovedNoteInfo = nil;
+            
+            [self enterNoteEditModeFor:newNote];
+            
         } else {
             [self showView:[NSNumber numberWithInt:EatsGridViewType_Play]];
         }

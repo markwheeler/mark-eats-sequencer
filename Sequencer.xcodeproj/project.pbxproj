@@ -24,6 +24,12 @@
 		4D61162B16E4386700140AF8 /* Sequencer+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Utils.m */; };
 		4D61163016E43B9600140AF8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162F16E43B9600140AF8 /* AppController.m */; };
 		4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */; };
+		4D741B0316FFC81D00679710 /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B0216FFC81D00679710 /* SequencerNote.m */; };
+		4D741B0616FFC81D00679710 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B0516FFC81D00679710 /* SequencerPattern.m */; };
+		4D741B0916FFC81D00679710 /* SequencerPatternRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B0816FFC81D00679710 /* SequencerPatternRef.m */; };
+		4D741B0C16FFC81D00679710 /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B0B16FFC81D00679710 /* SequencerRowPitch.m */; };
+		4D741B0F16FFC81D00679710 /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B0E16FFC81D00679710 /* Sequencer.m */; };
+		4D741B1216FFC81D00679710 /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B1116FFC81D00679710 /* SequencerPage.m */; };
 		4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
 		4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
 		4D7515AF16E457C000A8E3F2 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A316E4557000A8E3F2 /* VVOSC.framework */; };
@@ -45,12 +51,6 @@
 		4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */; };
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
-		4DF8D32416FE4C3E00E7FB09 /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32316FE4C3E00E7FB09 /* SequencerPage.m */; };
-		4DF8D32716FE4C3E00E7FB09 /* SequencerPatternRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32616FE4C3E00E7FB09 /* SequencerPatternRef.m */; };
-		4DF8D32A16FE4C3F00E7FB09 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32916FE4C3F00E7FB09 /* SequencerPattern.m */; };
-		4DF8D32D16FE4C3F00E7FB09 /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32C16FE4C3F00E7FB09 /* SequencerRowPitch.m */; };
-		4DF8D33016FE4C3F00E7FB09 /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D32F16FE4C3F00E7FB09 /* SequencerNote.m */; };
-		4DF8D33316FE4C4000E7FB09 /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8D33216FE4C4000E7FB09 /* Sequencer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -101,6 +101,18 @@
 		4D61162E16E43B9600140AF8 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		4D61162F16E43B9600140AF8 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScaleGeneratorSheet.xib; sourceTree = "<group>"; };
+		4D741B0116FFC81D00679710 /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
+		4D741B0216FFC81D00679710 /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
+		4D741B0416FFC81D00679710 /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
+		4D741B0516FFC81D00679710 /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
+		4D741B0716FFC81D00679710 /* SequencerPatternRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternRef.h; sourceTree = "<group>"; };
+		4D741B0816FFC81D00679710 /* SequencerPatternRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternRef.m; sourceTree = "<group>"; };
+		4D741B0A16FFC81D00679710 /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
+		4D741B0B16FFC81D00679710 /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
+		4D741B0D16FFC81D00679710 /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
+		4D741B0E16FFC81D00679710 /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
+		4D741B1016FFC81D00679710 /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
+		4D741B1116FFC81D00679710 /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
 		4D7515A116E4557000A8E3F2 /* VVBasics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVBasics.framework; sourceTree = "<group>"; };
 		4D7515A216E4557000A8E3F2 /* VVMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVMIDI.framework; sourceTree = "<group>"; };
 		4D7515A316E4557000A8E3F2 /* VVOSC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVOSC.framework; sourceTree = "<group>"; };
@@ -133,18 +145,6 @@
 		4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPlayViewController.m; sourceTree = "<group>"; };
 		4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridButtonView.h; sourceTree = "<group>"; };
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
-		4DF8D32216FE4C3E00E7FB09 /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
-		4DF8D32316FE4C3E00E7FB09 /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
-		4DF8D32516FE4C3E00E7FB09 /* SequencerPatternRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternRef.h; sourceTree = "<group>"; };
-		4DF8D32616FE4C3E00E7FB09 /* SequencerPatternRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternRef.m; sourceTree = "<group>"; };
-		4DF8D32816FE4C3F00E7FB09 /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
-		4DF8D32916FE4C3F00E7FB09 /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
-		4DF8D32B16FE4C3F00E7FB09 /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
-		4DF8D32C16FE4C3F00E7FB09 /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
-		4DF8D32E16FE4C3F00E7FB09 /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
-		4DF8D32F16FE4C3F00E7FB09 /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
-		4DF8D33116FE4C4000E7FB09 /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
-		4DF8D33216FE4C4000E7FB09 /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,18 +284,18 @@
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
 				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
 				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
-				4DF8D33116FE4C4000E7FB09 /* Sequencer.h */,
-				4DF8D33216FE4C4000E7FB09 /* Sequencer.m */,
-				4DF8D32E16FE4C3F00E7FB09 /* SequencerNote.h */,
-				4DF8D32F16FE4C3F00E7FB09 /* SequencerNote.m */,
-				4DF8D32B16FE4C3F00E7FB09 /* SequencerRowPitch.h */,
-				4DF8D32C16FE4C3F00E7FB09 /* SequencerRowPitch.m */,
-				4DF8D32816FE4C3F00E7FB09 /* SequencerPattern.h */,
-				4DF8D32916FE4C3F00E7FB09 /* SequencerPattern.m */,
-				4DF8D32516FE4C3E00E7FB09 /* SequencerPatternRef.h */,
-				4DF8D32616FE4C3E00E7FB09 /* SequencerPatternRef.m */,
-				4DF8D32216FE4C3E00E7FB09 /* SequencerPage.h */,
-				4DF8D32316FE4C3E00E7FB09 /* SequencerPage.m */,
+				4D741B1016FFC81D00679710 /* SequencerPage.h */,
+				4D741B1116FFC81D00679710 /* SequencerPage.m */,
+				4D741B0D16FFC81D00679710 /* Sequencer.h */,
+				4D741B0E16FFC81D00679710 /* Sequencer.m */,
+				4D741B0A16FFC81D00679710 /* SequencerRowPitch.h */,
+				4D741B0B16FFC81D00679710 /* SequencerRowPitch.m */,
+				4D741B0716FFC81D00679710 /* SequencerPatternRef.h */,
+				4D741B0816FFC81D00679710 /* SequencerPatternRef.m */,
+				4D741B0416FFC81D00679710 /* SequencerPattern.h */,
+				4D741B0516FFC81D00679710 /* SequencerPattern.m */,
+				4D741B0116FFC81D00679710 /* SequencerNote.h */,
+				4D741B0216FFC81D00679710 /* SequencerNote.m */,
 			);
 			name = "Core Data";
 			sourceTree = "<group>";
@@ -392,13 +392,13 @@
 				4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */,
 				4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */,
 				4DB0589C16FD1AE000BC36E6 /* EatsGridHorizontalSliderView.m in Sources */,
-				4DF8D32416FE4C3E00E7FB09 /* SequencerPage.m in Sources */,
-				4DF8D32716FE4C3E00E7FB09 /* SequencerPatternRef.m in Sources */,
-				4DF8D32A16FE4C3F00E7FB09 /* SequencerPattern.m in Sources */,
-				4DF8D32D16FE4C3F00E7FB09 /* SequencerRowPitch.m in Sources */,
-				4DF8D33016FE4C3F00E7FB09 /* SequencerNote.m in Sources */,
-				4DF8D33316FE4C4000E7FB09 /* Sequencer.m in Sources */,
 				4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */,
+				4D741B0316FFC81D00679710 /* SequencerNote.m in Sources */,
+				4D741B0616FFC81D00679710 /* SequencerPattern.m in Sources */,
+				4D741B0916FFC81D00679710 /* SequencerPatternRef.m in Sources */,
+				4D741B0C16FFC81D00679710 /* SequencerRowPitch.m in Sources */,
+				4D741B0F16FFC81D00679710 /* Sequencer.m in Sources */,
+				4D741B1216FFC81D00679710 /* SequencerPage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
