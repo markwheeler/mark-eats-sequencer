@@ -60,6 +60,7 @@
     self.patternView.height = self.height / 2;
     self.patternView.mode = EatsPatternViewMode_Play;
     self.patternView.pattern = self.pattern;
+    self.patternView.patternHeight = self.height;
     
     uint buttonRow = 0;
     if( self.width < 16 ) buttonRow = 1;

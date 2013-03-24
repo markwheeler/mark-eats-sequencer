@@ -51,6 +51,7 @@
     self.patternView.height = self.height;
     self.patternView.mode = EatsPatternViewMode_Edit;
     self.patternView.pattern = self.pattern;
+    self.patternView.patternHeight = self.height;
     
     self.velocityView = [[EatsGridHorizontalSliderView alloc] init];
     self.velocityView.delegate = self;
@@ -76,10 +77,23 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
+    // Display sliders at bottom
+    if( [note.row intValue] < self.height / 2 ) {
+        self.patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
+        self.velocityView.y = self.height - 2;
+        self.lengthView.y = self.height - 1;
+
+    // Display sliders at top
+    } else {
+        self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+        self.patternView.y = 2;
+        self.velocityView.y = 0;
+        self.lengthView.y = 1;
+    }
+    
     self.velocityView.visible = YES;
     self.lengthView.visible = YES;
     
-    self.patternView.y = 2;
     self.patternView.height = self.height - 2;
     self.patternView.activeEditNote = note;
     self.patternView.mode = EatsPatternViewMode_NoteEdit;

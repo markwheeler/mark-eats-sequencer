@@ -15,9 +15,9 @@
 #define EDIT_MODE_NOTE_BRIGHTNESS 15
 #define EDIT_MODE_NOTE_LENGTH_BRIGHTNESS 10
 
-#define EDIT_NOTE_MODE_PLAYHEAD_BRIGHTNESS 8
-#define EDIT_NOTE_MODE_NOTE_BRIGHTNESS 8
-#define EDIT_NOTE_MODE_NOTE_LENGTH_BRIGHTNESS 5
+#define EDIT_NOTE_MODE_PLAYHEAD_BRIGHTNESS 10
+#define EDIT_NOTE_MODE_NOTE_BRIGHTNESS 8 // TODO: Set to 7 once done debugging
+#define EDIT_NOTE_MODE_NOTE_LENGTH_BRIGHTNESS 2
 
 @interface EatsGridPatternView ()
 
@@ -83,15 +83,35 @@
         }
     }
     
+    // Work out how much we need to fold
+    int scaleDifference = self.patternHeight - self.height;
+    if( scaleDifference < 0 ) scaleDifference = 0;
+    
     for(SequencerNote *note in self.pattern.notes) {
-        if( [note.step intValue] < self.width && [note.row intValue] < self.height ) {
+        if( [note.step intValue] < self.width && [note.row intValue] < self.patternHeight ) {
+                        
+            uint row = [note.row unsignedIntValue];
+
+            // Fold from top
+            if( self.foldFrom == EatsPatternViewFoldFrom_Top ) {
+                if( row < scaleDifference * 2 )
+                   row = row / 2;
+               else
+                   row -= scaleDifference;
+               
+            // Fold from bottom
+            } else if( self.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+                if( row >= self.patternHeight - (scaleDifference * 2) )
+                    row = row / 2 + scaleDifference;
+            }
+
             // Put in the active note while editing
             if( note == self.activeEditNote && self.mode == EatsPatternViewMode_NoteEdit )
-                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:[note.row intValue] withObject:[NSNumber numberWithInt:15 * self.opacity]];
+                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
             
             // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:[note.step intValue]] objectAtIndex:[note.row intValue]] intValue] < self.noteBrightness * self.opacity )
-                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:[note.row intValue] withObject:[NSNumber numberWithInt:self.noteBrightness * self.opacity]];
+            else if( [[[viewArray objectAtIndex:[note.step intValue]] objectAtIndex:row] intValue] < self.noteBrightness * self.opacity )
+                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:self.noteBrightness * self.opacity]];
         }
     }
     

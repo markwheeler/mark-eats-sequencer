@@ -25,12 +25,20 @@ typedef enum EatsPatternViewMode {
     EatsPatternViewMode_Play
 } EatsPatternViewMode;
 
+typedef enum EatsPatternViewFoldFrom {
+    EatsPatternViewFoldFrom_Top,
+    EatsPatternViewFoldFrom_Bottom
+} EatsPatternViewFoldFrom;
+
+
 @interface EatsGridPatternView : EatsGridSubView
 
-@property uint                  currentStep;
-@property SequencerPattern      *pattern;
-@property SequencerNote         *activeEditNote;
-@property EatsPatternViewMode   mode;
-@property uint                  wipe; // 0-100
+@property uint                      currentStep;
+@property SequencerPattern          *pattern;
+@property uint                      patternHeight;
+@property SequencerNote             *activeEditNote;
+@property EatsPatternViewMode       mode;
+@property EatsPatternViewFoldFrom   foldFrom;
+@property uint                      wipe; // 0-100
 
 @end
