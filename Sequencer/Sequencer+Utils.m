@@ -24,7 +24,7 @@
     // Create an empty Sequencer
     Sequencer *sequencer = [NSEntityDescription insertNewObjectForEntityForName:@"Sequencer" inManagedObjectContext:context];
     
-    // Generate pitches (Default C Major)
+    // Generate pitches (Default C Major) TODO Make the first note line up with the bottom of the grid??
     NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:36 - ( 12 * (height / 8) ) length:32];
     // Reverse the array
     pitches = [[pitches reverseObjectEnumerator] allObjects];

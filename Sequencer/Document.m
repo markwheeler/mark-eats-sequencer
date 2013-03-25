@@ -26,7 +26,7 @@
 #define MIN_QUANTIZATION 64
 #define MAX_QUANTIZATION 1
 
-@property Preferences                   *sharedPreferences; // TODO: See if we really need this here
+@property Preferences                   *sharedPreferences;
 @property EatsClock                     *clock;
 @property ClockTick                     *clockTick;
 @property EatsExternalClockCalculator   *externalClockCalculator;
@@ -210,9 +210,10 @@
 {
     [self.clock stopClock];
     
-    // TODO: These following two lines shouldn't be nesecary once the dealloc bug in ClockTick is fixed.
+    // TODO: These following lines shouldn't be nesecary once the dealloc bug in ClockTick is fixed.
     self.clock = nil;
     self.clockTick = nil;
+    self.gridNavigationController = nil;
 }
 
 + (BOOL)autosavesInPlace

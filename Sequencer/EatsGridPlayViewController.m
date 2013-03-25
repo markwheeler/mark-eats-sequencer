@@ -16,6 +16,7 @@
 
 @interface EatsGridPlayViewController ()
 
+@property Sequencer                     *sequencer;
 @property SequencerPage                 *page;
 @property SequencerPattern              *pattern;
 
@@ -32,6 +33,8 @@
 
 @property NSArray                       *playModeButtons;
 
+@property NSTimer                       *bpmRepeatTimer;
+
 @property NSTimer                       *animationTimer;
 @property uint                          animationFrame;
 
@@ -41,20 +44,16 @@
 
 - (void) setupView
 {
+    // Get the sequencer
+    NSFetchRequest *sequencerRequest = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+    NSArray *sequencerMatches = [self.managedObjectContext executeFetchRequest:sequencerRequest error:nil];
+    self.sequencer = [sequencerMatches lastObject];
     
     // Get the page
-    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
-    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == 0"];
-    
-    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
-    self.page = [pageMatches lastObject];
+    self.page = [self.sequencer.pages objectAtIndex:0];
     
     // Get the pattern
-    NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-    patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage == %@) AND (id == 0)", self.page];
-    
-    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
-    self.pattern = [patternMatches lastObject];
+    self.pattern = [self.page.patterns objectAtIndex:0];
     
     // Create the sub views
     self.patternView = [[EatsGridPatternView alloc] init];
@@ -151,6 +150,12 @@
 - (void) dealloc
 {
     [self.page removeObserver:self forKeyPath:@"playMode"];
+    
+    if( self.animationTimer )
+        [self.animationTimer invalidate];
+    
+    if( self.bpmRepeatTimer )
+        [self.bpmRepeatTimer invalidate];
 }
 
 - (void) updateView
@@ -236,6 +241,32 @@
     
 }
 
+- (void) decrementBPM:(NSTimer *)timer
+{
+    [timer invalidate];
+    self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                                           target:self
+                                                         selector:@selector(decrementBPM:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+    
+    if( [self.sequencer.bpm intValue] > 20 )
+        self.sequencer.bpm = [NSNumber numberWithInt:[self.sequencer.bpm intValue] - 1];
+}
+
+- (void) incrementBPM:(NSTimer *)timer
+{
+    [timer invalidate];
+    self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                                           target:self
+                                                         selector:@selector(incrementBPM:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+    
+    if( [self.sequencer.bpm intValue] < 300 )
+    self.sequencer.bpm = [NSNumber numberWithInt:[self.sequencer.bpm intValue] + 1];
+}
+
 
 
 #pragma mark - Sub view delegate methods
@@ -288,18 +319,54 @@
     // TODO: BPM- button
     } else if( sender == self.bpmDecrementButton ) {
         if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            NSLog(@"BPM-");
+            
+            if( !self.bpmRepeatTimer ) {
+                
+                sender.buttonState = EatsButtonViewState_Down;
+                if( [self.sequencer.bpm intValue] > 20 )
+                    self.sequencer.bpm = [NSNumber numberWithInt:[self.sequencer.bpm intValue] - 1];
+                
+                self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                                       target:self
+                                                                     selector:@selector(decrementBPM:)
+                                                                     userInfo:nil
+                                                                      repeats:YES];
+            }
+            
         } else {
+            
+            if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                [self.bpmRepeatTimer invalidate];
+                self.bpmRepeatTimer = nil;
+            }
+            
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         
     // TODO: BPM+ button
     } else if( sender == self.bpmIncrementButton ) {
         if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            NSLog(@"BPM+");
+            
+            if( !self.bpmRepeatTimer ) {
+                
+                sender.buttonState = EatsButtonViewState_Down;
+                if( [self.sequencer.bpm intValue] < 300 )
+                    self.sequencer.bpm = [NSNumber numberWithInt:[self.sequencer.bpm intValue] + 1];
+                
+                self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                                       target:self
+                                                                     selector:@selector(incrementBPM:)
+                                                                     userInfo:nil
+                                                                      repeats:YES];
+            }
+            
         } else {
+            
+            if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                [self.bpmRepeatTimer invalidate];
+                self.bpmRepeatTimer = nil;
+            }
+            
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         

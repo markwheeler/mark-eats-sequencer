@@ -3854,7 +3854,6 @@
 						<string key="patternQuantizationPopup">NSPopUpButton</string>
 						<string key="pitchesArrayController">NSArrayController</string>
 						<string key="rowPitchesTableView">NSTableView</string>
-						<string key="scaleGeneratorSheet">NSWindow</string>
 						<string key="stepLengthPopup">NSPopUpButton</string>
 						<string key="stepQuantizationPopup">NSPopUpButton</string>
 						<string key="swingPopup">NSPopUpButton</string>
@@ -3883,10 +3882,6 @@
 						<object class="IBToOneOutletInfo" key="rowPitchesTableView">
 							<string key="name">rowPitchesTableView</string>
 							<string key="candidateClassName">NSTableView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="scaleGeneratorSheet">
-							<string key="name">scaleGeneratorSheet</string>
-							<string key="candidateClassName">NSWindow</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="stepLengthPopup">
 							<string key="name">stepLengthPopup</string>

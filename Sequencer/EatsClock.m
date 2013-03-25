@@ -120,7 +120,7 @@
         self.clockStatus = EatsClockStatus_Running;
         return;
         
-        // Start one up if need be
+    // Start one up if need be
     } else if(self.clockStatus == EatsClockStatus_Stopped) {
         // Set defaults if they haven't been set
         if(self.bpm == 0) self.bpm = 120;

@@ -167,7 +167,6 @@
 							<string key="NSFrame">{{316, 13}, {100, 32}}</string>
 							<reference key="NSSuperview" ref="1006"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="323706147">
@@ -180,7 +179,7 @@
 								<int key="NSButtonFlags">-2038284288</int>
 								<int key="NSButtonFlags2">129</int>
 								<string key="NSAlternateContents"/>
-								<string key="NSKeyEquivalent"/>
+								<string type="base64-UTF8" key="NSKeyEquivalent">DQ</string>
 								<int key="NSPeriodicDelay">200</int>
 								<int key="NSPeriodicInterval">25</int>
 							</object>
@@ -197,10 +196,9 @@
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="600247708">
 								<int key="NSCellFlags">-1804599231</int>
-								<int key="NSCellFlags2">-1874852864</int>
-								<string key="NSContents"/>
+								<int key="NSCellFlags2">272630784</int>
 								<reference key="NSSupport" ref="460914894"/>
-								<object class="NSNumberFormatter" key="NSFormatter" id="919078922">
+								<object class="NSNumberFormatter" key="NSFormatter" id="1039113893">
 									<dictionary class="NSMutableDictionary" key="NS.attributes">
 										<boolean value="NO" key="allowsFloats"/>
 										<integer value="1040" key="formatterBehavior"/>
@@ -334,7 +332,7 @@
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
-			<object class="NSUserDefaultsController" id="272746171">
+			<object class="NSUserDefaultsController" id="852387281">
 				<bool key="NSSharedInstance">YES</bool>
 			</object>
 		</array>
@@ -387,6 +385,14 @@
 						<reference key="destination" ref="177372425"/>
 					</object>
 					<int key="connectionID">429</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">generateButton</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="646222229"/>
+					</object>
+					<int key="connectionID">438</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -654,9 +660,9 @@
 							<reference ref="246973638"/>
 							<reference ref="177372425"/>
 							<reference ref="88024197"/>
-							<reference ref="172456146"/>
 							<reference ref="646222229"/>
 							<reference ref="234649098"/>
+							<reference ref="172456146"/>
 						</array>
 						<reference key="parent" ref="1005"/>
 					</object>
@@ -823,7 +829,7 @@
 						<int key="objectID">49</int>
 						<reference key="object" ref="600247708"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="919078922"/>
+							<reference ref="1039113893"/>
 						</array>
 						<reference key="parent" ref="172456146"/>
 					</object>
@@ -957,12 +963,12 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">428</int>
-						<reference key="object" ref="919078922"/>
+						<reference key="object" ref="1039113893"/>
 						<reference key="parent" ref="600247708"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">431</int>
-						<reference key="object" ref="272746171"/>
+						<reference key="object" ref="852387281"/>
 						<reference key="parent" ref="0"/>
 					</object>
 				</array>
@@ -1056,7 +1062,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">435</int>
+			<int key="maxID">438</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

@@ -111,9 +111,11 @@
     self.patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
     
     self.activeEditNote = note;
-
-    self.velocityView.percentage = [note.velocityAsPercentage floatValue];
-    self.lengthView.percentage = [note.lengthAsPercentage floatValue];
+    
+    float stepPercentage = ( 100.0 / self.velocityView.width );
+    self.velocityView.percentage = ( ( [note.velocityAsPercentage floatValue] - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    stepPercentage = ( 100.0 / self.lengthView.width );
+    self.lengthView.percentage = ( ( [note.lengthAsPercentage floatValue] - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
     
     [self updateView];
     
@@ -255,7 +257,7 @@
     // Length
     } else if(sender == self.lengthView) {
         self.activeEditNote.lengthAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
-        NSLog(@"Length %@", self.activeEditNote.lengthAsPercentage);
+        //NSLog(@"Length %@", self.activeEditNote.lengthAsPercentage);
     }
     
     [self updateView];

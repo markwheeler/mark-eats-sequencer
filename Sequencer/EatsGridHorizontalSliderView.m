@@ -24,8 +24,6 @@
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
             
-            
-            
             if( x == percentageAsStep )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
             else if ( x < percentageAsStep && self.fillBar )
@@ -44,6 +42,7 @@
     if( down ) {
         
         self.percentage = ( x / (self.width - 1.0) ) * 100.0;
+        NSLog(@"slider percentage %f", self.percentage);
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
             [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];

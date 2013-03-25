@@ -46,8 +46,7 @@
     if( [sender indexOfSelectedItem] == EatsScaleType_DrumMap ) {
         self.previousTonicNote = [NSNumber numberWithInt:[self.tonicNoteTextField intValue]];
         self.tonicNote = 35;
-        self.tonicNoteTextField.editable = NO;
-        self.tonicNoteTextField.textColor = [NSColor disabledControlTextColor];
+        self.tonicNoteTextField.enabled = NO;
         
     } else {
         // Puts back the revious tonic if we're returning from a drum map
@@ -55,8 +54,7 @@
             self.tonicNote = [self.previousTonicNote unsignedIntValue];
             self.previousTonicNote = nil;
         }
-        self.tonicNoteTextField.editable = YES;
-        self.tonicNoteTextField.textColor = [NSColor textColor];
+        self.tonicNoteTextField.enabled = YES;
     }
 }
 
