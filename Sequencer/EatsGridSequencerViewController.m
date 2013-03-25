@@ -78,7 +78,7 @@
     self.lengthView.fillBar = YES;
     self.lengthView.visible = NO;
     
-    self.subViews = [[NSSet alloc] initWithObjects:self.patternView,
+    self.subViews = [[NSMutableSet alloc] initWithObjects:self.patternView,
                                                           self.velocityView,
                                                           self.lengthView,
                                                           nil];

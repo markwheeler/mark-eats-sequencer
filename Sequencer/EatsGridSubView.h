@@ -13,8 +13,8 @@
 
 @property (weak) id                 delegate;
 
-@property uint                      x;
-@property uint                      y;
+@property int                       x;
+@property int                       y;
 @property uint                      width;
 @property uint                      height;
 @property float                     opacity; // 0 - 1

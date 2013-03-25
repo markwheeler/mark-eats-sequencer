@@ -22,6 +22,11 @@
 
 @property EatsGridPatternView           *patternView;
 
+@property NSMutableArray                *pageButtons;
+@property NSMutableArray                *patternButtons;
+@property NSArray                       *playModeButtons;
+@property NSArray                       *controlButtons;
+
 @property EatsGridButtonView            *pauseButton;
 @property EatsGridButtonView            *forwardButton;
 @property EatsGridButtonView            *reverseButton;
@@ -30,8 +35,6 @@
 @property EatsGridButtonView            *bpmIncrementButton;
 @property EatsGridButtonView            *clearButton;
 @property EatsGridButtonView            *exitButton;
-
-@property NSArray                       *playModeButtons;
 
 @property NSTimer                       *bpmRepeatTimer;
 
@@ -56,6 +59,8 @@
     self.pattern = [self.page.patterns objectAtIndex:0];
     
     // Create the sub views
+    
+    // Pattern view
     self.patternView = [[EatsGridPatternView alloc] init];
     self.patternView.delegate = self;
     self.patternView.x = 0;
@@ -66,76 +71,94 @@
     self.patternView.mode = EatsPatternViewMode_Play;
     self.patternView.pattern = self.pattern;
     self.patternView.patternHeight = self.height;
-
+    
+    // Page buttons
+    self.pageButtons = [[NSMutableArray alloc] initWithCapacity:8];
+    for( int i = 0; i < 8; i ++ ) {
+        EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+        button.delegate = self;
+        button.x = i;
+        button.y = - (self.height / 2) + 1;
+        if( self.width < 16 )
+            button.y ++;
+        button.visible = NO;
+        [self.pageButtons addObject:button];
+    }
+    
+    // Pattern buttons
+    uint numberOfPatterns = self.width;
+    if( numberOfPatterns > 16 )
+        numberOfPatterns = 16;
+    
+    self.patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+    for( int i = 0; i < numberOfPatterns; i ++ ) {
+        EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+        button.delegate = self;
+        button.x = i;
+        button.y = - (self.height / 2) + 3;
+        button.visible = NO;
+        [self.patternButtons addObject:button];
+    }
+    
+    // Play mode buttons
     self.pauseButton = [[EatsGridButtonView alloc] init];
-    self.pauseButton.delegate = self;
     self.pauseButton.x = self.width - 8;
-    self.pauseButton.y = 0;
-    self.pauseButton.inactiveBrightness = 5;
-    self.pauseButton.visible = NO;
     
     self.forwardButton = [[EatsGridButtonView alloc] init];
-    self.forwardButton.delegate = self;
     self.forwardButton.x = self.width - 7;
-    self.forwardButton.y = 0;
-    self.forwardButton.inactiveBrightness = 5;
-    self.forwardButton.visible = NO;
     
     self.reverseButton = [[EatsGridButtonView alloc] init];
-    self.reverseButton.delegate = self;
     self.reverseButton.x = self.width - 6;
-    self.reverseButton.y = 0;
-    self.reverseButton.inactiveBrightness = 5;
-    self.reverseButton.visible = NO;
     
     self.randomButton = [[EatsGridButtonView alloc] init];
-    self.randomButton.delegate = self;
     self.randomButton.x = self.width - 5;
-    self.randomButton.y = 0;
-    self.randomButton.inactiveBrightness = 5;
-    self.randomButton.visible = NO;
     
+    self.playModeButtons = [NSArray arrayWithObjects:self.pauseButton, self.forwardButton, self.reverseButton, self.randomButton, nil];
+    
+    for( EatsGridButtonView *button in self.playModeButtons ) {
+        button.delegate = self;
+        button.y = - (self.height / 2) + 1;
+        button.inactiveBrightness = 5;
+        button.visible = NO;
+    }
+    
+    // Control buttons
     self.bpmDecrementButton = [[EatsGridButtonView alloc] init];
-    self.bpmDecrementButton.delegate = self;
     self.bpmDecrementButton.x = self.width - 4;
-    self.bpmDecrementButton.y = 0;
-    self.bpmDecrementButton.visible = NO;
     
     self.bpmIncrementButton = [[EatsGridButtonView alloc] init];
-    self.bpmIncrementButton.delegate = self;
     self.bpmIncrementButton.x = self.width - 3;
-    self.bpmIncrementButton.y = 0;
-    self.bpmIncrementButton.visible = NO;
     
     self.clearButton = [[EatsGridButtonView alloc] init];
-    self.clearButton.delegate = self;
     self.clearButton.x = self.width - 2;
-    self.clearButton.y = 0;
     self.clearButton.inactiveBrightness = 5;
-    self.clearButton.visible = NO;
     
     self.exitButton = [[EatsGridButtonView alloc] init];
-    self.exitButton.delegate = self;
     self.exitButton.x = self.width - 1;
-    self.exitButton.y = 0;
     self.exitButton.inactiveBrightness = 8;
-    self.exitButton.visible = NO;
+    
+    self.controlButtons = [NSArray arrayWithObjects:self.bpmDecrementButton, self.bpmIncrementButton, self.clearButton, self.exitButton, nil];
+    
+    for( EatsGridButtonView *button in self.controlButtons ) {
+        button.delegate = self;
+        button.y = - (self.height / 2) + 1;
+        button.visible = NO;
+    }
     
     // Make the correct playMode button active and listen for changes to keep it correct
-    self.playModeButtons = [[NSArray alloc] initWithObjects:self.pauseButton, self.forwardButton, self.reverseButton, self.randomButton, nil];
     [self setPlayMode:[self.page.playMode intValue]];
     [self.page addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
     
-    self.subViews = [[NSSet alloc] initWithObjects:self.patternView,
-                                                   self.pauseButton,
-                                                   self.forwardButton,
-                                                   self.reverseButton,
-                                                   self.randomButton,
-                                                   self.bpmDecrementButton,
-                                                   self.bpmIncrementButton,
-                                                   self.clearButton,
-                                                   self.exitButton,
-                                                   nil];
+    // Set the other buttons
+    [self setActivePageButton];
+    [self setActivePatternButton];
+    
+    // Add everything to sub views
+    self.subViews = [[NSMutableSet alloc] initWithObjects:self.patternView, nil];
+    [self.subViews addObjectsFromArray:self.pageButtons];
+    [self.subViews addObjectsFromArray:self.patternButtons];
+    [self.subViews addObjectsFromArray:self.playModeButtons];
+    [self.subViews addObjectsFromArray:self.controlButtons];
     
     // Start animateIn
     self.animationFrame = 0;
@@ -171,12 +194,40 @@
     [super updateView];
 }
 
-// Actives the playMode button
+// Activates the playMode button
 - (void) setPlayMode:(EatsSequencerPlayMode)playMode
 {
     uint i = 0;
     for ( EatsGridButtonView *button in self.playModeButtons ) {
         if( i == playMode )
+            button.buttonState = EatsButtonViewState_Active;
+        else
+            button.buttonState = EatsButtonViewState_Inactive;
+        i++;
+    }
+    
+    [self updateView];
+}
+
+- (void) setActivePageButton
+{
+    uint i = 0;
+    for ( EatsGridButtonView *button in self.pageButtons ) {
+        if( i == [self.page.id intValue] )
+            button.buttonState = EatsButtonViewState_Active;
+        else
+            button.buttonState = EatsButtonViewState_Inactive;
+        i++;
+    }
+    
+    [self updateView];
+}
+
+- (void) setActivePatternButton
+{
+    uint i = 0;
+    for ( EatsGridButtonView *button in self.patternButtons ) {
+        if( i == [self.page.id intValue] )
             button.buttonState = EatsButtonViewState_Active;
         else
             button.buttonState = EatsButtonViewState_Inactive;
@@ -200,37 +251,22 @@
 {
     self.animationFrame ++;
     
-    self.patternView.y ++;
-    self.patternView.height --;
+    [self animateIncrement:1];
     
-    if( self.patternView.height == self.height / 2 ) { // Final frame
-
-        self.pauseButton.visible = YES;
-        self.forwardButton.visible = YES;
-        self.reverseButton.visible = YES;
-        self.randomButton.visible = YES;
-        self.bpmDecrementButton.visible = YES;
-        self.bpmIncrementButton.visible = YES;
-        self.clearButton.visible = YES;
-        self.exitButton.visible = YES;
-        
+    [self updateView];
+    
+    // Final frame
+    if( self.animationFrame == (self.height / 2) - 1 ) { 
         [timer invalidate];
         self.animationTimer = nil;
     }
-    
-    [self updateView];
     
 }
 
 - (void) animateOut:(NSTimer *)timer
 {
     self.animationFrame ++;
-    
-    self.patternView.y --;
-    self.patternView.height ++;
-    
-    [self updateView];
-    
+        
     if( self.patternView.height == self.height - 1 ) { // Final frame
         
         [timer invalidate];
@@ -239,6 +275,45 @@
         [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
     }
     
+    
+    [self animateIncrement:-1];
+    
+    [self updateView];
+}
+
+- (void) animateIncrement:(int)amount
+{
+    self.patternView.y += amount;
+    self.patternView.height += amount * -1;
+    
+    for (EatsGridButtonView *button in self.pageButtons) {
+        button.y += amount;
+        if( button.y < 0 )
+            button.visible = NO;
+        else
+            button.visible = YES;
+    }
+    for (EatsGridButtonView *button in self.patternButtons) {
+        button.y += amount;
+        if( button.y < 0 )
+            button.visible = NO;
+        else
+            button.visible = YES;
+    }
+    for (EatsGridButtonView *button in self.playModeButtons) {
+        button.y += amount;
+        if( button.y < 0 )
+            button.visible = NO;
+        else
+            button.visible = YES;
+    }
+    for (EatsGridButtonView *button in self.controlButtons) {
+        button.y += amount;
+        if( button.y < 0 )
+            button.visible = NO;
+        else
+            button.visible = YES;
+    }
 }
 
 - (void) decrementBPM:(NSTimer *)timer
@@ -287,6 +362,26 @@
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender
 {
     BOOL buttonDown = [down boolValue];
+    
+    // Page buttons
+    if ( [self.pageButtons containsObject:sender] ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            // Change the page
+            [self setActivePageButton];
+            NSLog(@"Page button %lu", [self.pageButtons indexOfObject:sender]);
+        }
+    }
+    
+    // Pattern buttons
+    if ( [self.patternButtons containsObject:sender] ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            // Change the pattern
+            [self setActivePatternButton];
+            NSLog(@"Pattern button %lu", [self.patternButtons indexOfObject:sender]);
+        }
+    }
     
     // Play mode pause button
     if( sender == self.pauseButton ) {
@@ -386,17 +481,7 @@
         } else {
                         
             // Start animateOut
-            self.pauseButton.visible = NO;
-            self.forwardButton.visible = NO;
-            self.reverseButton.visible = NO;
-            self.randomButton.visible = NO;
-            self.bpmDecrementButton.visible = NO;
-            self.bpmIncrementButton.visible = NO;
-            self.clearButton.visible = NO;
-            self.exitButton.visible = NO;
-            
-            self.patternView.y --;
-            self.patternView.height ++;
+            [self animateIncrement:-1];
             
             self.animationFrame = 0;
             int speedMultiplier = 8 / self.height;

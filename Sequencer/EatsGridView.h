@@ -21,7 +21,7 @@
 @property uint                      height;
 
 @property NSManagedObjectContext    *managedObjectContext;
-@property NSSet                     *subViews;
+@property NSMutableSet              *subViews;
 
 - (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h;
 - (void) showView:(NSNumber *)gridView;
