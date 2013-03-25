@@ -8,7 +8,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "JCSSheetController.h"
+#import "EatsScaleGenerator.h"
+#import "SequencerPage.h"
 
 @interface ScaleGeneratorSheetController : JCSSheetController
+
+@property EatsScaleType             scaleType;
+@property uint                      tonicNote;
 
 @end

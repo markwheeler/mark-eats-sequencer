@@ -30,6 +30,7 @@ typedef enum EatsScaleType{
 
 @interface EatsScaleGenerator : NSObject
 
++ (NSArray *) scaleTypeNames;
 + (NSArray *) generateScaleType:(EatsScaleType)type tonicNote:(uint)tonic length:(uint)length;
 
 @end

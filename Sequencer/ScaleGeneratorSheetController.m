@@ -7,12 +7,14 @@
 //
 
 #import "ScaleGeneratorSheetController.h"
-#import "EatsScaleGenerator.h"
+#import "SequencerRowPitch.h"
 
 @interface ScaleGeneratorSheetController ()
 
 @property (weak) IBOutlet NSPopUpButton *scaleTypePopup;
 @property (weak) IBOutlet NSTextField *tonicNoteTextField;
+
+@property NSNumber                  *previousTonicNote;
 
 @end
 
@@ -30,14 +32,33 @@
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
+    // Populate UI
     [self.scaleTypePopup removeAllItems];
-    [self.scaleTypePopup addItemWithTitle:@"Hello"];
-    
+    [self.scaleTypePopup addItemsWithTitles:[EatsScaleGenerator scaleTypeNames]];
+    self.tonicNote = 60;
 }
 
 
 
 #pragma Mark - Action methods
+
+- (IBAction)scaleTypePopup:(NSPopUpButton *)sender {
+    if( [sender indexOfSelectedItem] == EatsScaleType_DrumMap ) {
+        self.previousTonicNote = [NSNumber numberWithInt:[self.tonicNoteTextField intValue]];
+        self.tonicNote = 35;
+        self.tonicNoteTextField.editable = NO;
+        self.tonicNoteTextField.textColor = [NSColor disabledControlTextColor];
+        
+    } else {
+        // Puts back the revious tonic if we're returning from a drum map
+        if( self.previousTonicNote ) {
+            self.tonicNote = [self.previousTonicNote unsignedIntValue];
+            self.previousTonicNote = nil;
+        }
+        self.tonicNoteTextField.editable = YES;
+        self.tonicNoteTextField.textColor = [NSColor textColor];
+    }
+}
 
 - (IBAction)generateButton:(NSButton *)sender {
     [self endSheetWithReturnCode:NSOKButton];

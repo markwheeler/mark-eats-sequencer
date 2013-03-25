@@ -10,6 +10,27 @@
 
 @implementation EatsScaleGenerator
 
++ (NSArray *) scaleTypeNames
+{
+    // Order matches type def
+    return [NSArray arrayWithObjects:@"Ionian (Major)",
+                                     @"Dorian",
+                                     @"Phrygian",
+                                     @"Lydian",
+                                     @"Mixolydian",
+                                     @"Aeolian (Natural minor)",
+                                     @"Locrian",
+                                     @"Harmonic Minor",
+                                     @"Major Pentatonic",
+                                     @"Minor Pentatonic",
+                                     @"Whole Tone",
+                                     @"Diminished",
+                                     @"Octatonic",
+                                     @"Chromatic",
+                                     @"Drum Map",
+                                     nil];
+}
+
 + (NSArray *) generateScaleType:(EatsScaleType)type tonicNote:(uint)tonic length:(uint)length
 {
     NSArray *intervalsArray = nil;

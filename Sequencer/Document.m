@@ -15,6 +15,7 @@
 #import "ScaleGeneratorSheetController.h"
 #import "EatsExternalClockCalculator.h"
 #import "EatsGridNavigationController.h"
+#import "EatsScaleGenerator.h"
 
 @interface Document ()
 
@@ -376,11 +377,31 @@
             
             // Generate the scale
             if (returnCode == NSOKButton) {
-                NSLog(@"Generate!");
+                
+                uint numberToGenerate = self.sharedPreferences.gridHeight;
+                if( !numberToGenerate )
+                    numberToGenerate = 32;
+                
+                // Generate pitches
+                NSArray *pitches = [EatsScaleGenerator generateScaleType:self.scaleGeneratorSheetController.scaleType
+                                                               tonicNote:self.scaleGeneratorSheetController.tonicNote
+                                                                  length:numberToGenerate];
+                // Reverse the array
+                pitches = [[pitches reverseObjectEnumerator] allObjects];
+                
+                // Put them into the page
+                //NSMutableOrderedSet *setOfRowPitches = [self.currentPage.pitches mutableCopy];
+                int r = 0;
+                
+                for( NSNumber *pitch in pitches ) {
+                    SequencerRowPitch *rowPitch = [self.currentPage.pitches objectAtIndex:r];
+                    rowPitch.pitch = pitch;
+                    r++;
+                }
                 
             // Cancel
             } else if (returnCode == NSCancelButton) {
-                NSLog(@"Cancelled");
+                // Do nothing
                 
             } else {
                 NSLog(@"Unknown return code received from ScaleGeneratorSheetController");

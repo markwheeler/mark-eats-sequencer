@@ -67,61 +67,58 @@
     self.patternView.mode = EatsPatternViewMode_Play;
     self.patternView.pattern = self.pattern;
     self.patternView.patternHeight = self.height;
-    
-    uint buttonRow = 0;
-    if( self.width < 16 ) buttonRow = 1;
 
     self.pauseButton = [[EatsGridButtonView alloc] init];
     self.pauseButton.delegate = self;
     self.pauseButton.x = self.width - 8;
-    self.pauseButton.y = buttonRow;
+    self.pauseButton.y = 0;
     self.pauseButton.inactiveBrightness = 5;
     self.pauseButton.visible = NO;
     
     self.forwardButton = [[EatsGridButtonView alloc] init];
     self.forwardButton.delegate = self;
     self.forwardButton.x = self.width - 7;
-    self.forwardButton.y = buttonRow;
+    self.forwardButton.y = 0;
     self.forwardButton.inactiveBrightness = 5;
     self.forwardButton.visible = NO;
     
     self.reverseButton = [[EatsGridButtonView alloc] init];
     self.reverseButton.delegate = self;
     self.reverseButton.x = self.width - 6;
-    self.reverseButton.y = buttonRow;
+    self.reverseButton.y = 0;
     self.reverseButton.inactiveBrightness = 5;
     self.reverseButton.visible = NO;
     
     self.randomButton = [[EatsGridButtonView alloc] init];
     self.randomButton.delegate = self;
     self.randomButton.x = self.width - 5;
-    self.randomButton.y = buttonRow;
+    self.randomButton.y = 0;
     self.randomButton.inactiveBrightness = 5;
     self.randomButton.visible = NO;
     
     self.bpmDecrementButton = [[EatsGridButtonView alloc] init];
     self.bpmDecrementButton.delegate = self;
     self.bpmDecrementButton.x = self.width - 4;
-    self.bpmDecrementButton.y = buttonRow;
+    self.bpmDecrementButton.y = 0;
     self.bpmDecrementButton.visible = NO;
     
     self.bpmIncrementButton = [[EatsGridButtonView alloc] init];
     self.bpmIncrementButton.delegate = self;
     self.bpmIncrementButton.x = self.width - 3;
-    self.bpmIncrementButton.y = buttonRow;
+    self.bpmIncrementButton.y = 0;
     self.bpmIncrementButton.visible = NO;
     
     self.clearButton = [[EatsGridButtonView alloc] init];
     self.clearButton.delegate = self;
     self.clearButton.x = self.width - 2;
-    self.clearButton.y = buttonRow;
+    self.clearButton.y = 0;
     self.clearButton.inactiveBrightness = 5;
     self.clearButton.visible = NO;
     
     self.exitButton = [[EatsGridButtonView alloc] init];
     self.exitButton.delegate = self;
     self.exitButton.x = self.width - 1;
-    self.exitButton.y = buttonRow;
+    self.exitButton.y = 0;
     self.exitButton.inactiveBrightness = 8;
     self.exitButton.visible = NO;
     
