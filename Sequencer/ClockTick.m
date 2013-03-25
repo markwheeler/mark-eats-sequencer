@@ -174,7 +174,7 @@
                         
                         //Set note properties
                         int channel = [page.channel intValue];
-                        int velocity = [note.velocity intValue];
+                        int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
                         int pitch = [[[page.pitches objectAtIndex:[note.row intValue]] pitch] intValue];
                         
                         // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
@@ -218,7 +218,7 @@
 - (void) clockLateBy:(NSNumber *)ns
 {
     // TODO: Create a visual indicator for this
-    NSLog(@"\nClock tick was late by: %fms", [ns floatValue] / 1000000.0);
+    //NSLog(@"\nClock tick was late by: %fms", [ns floatValue] / 1000000.0);
 }
 
 

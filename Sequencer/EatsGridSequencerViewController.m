@@ -66,6 +66,7 @@
     self.velocityView.y = 0;
     self.velocityView.width = self.width;
     self.velocityView.height = 1;
+    self.velocityView.fillBar = YES;
     self.velocityView.visible = NO;
     
     self.lengthView = [[EatsGridHorizontalSliderView alloc] init];
@@ -74,6 +75,7 @@
     self.lengthView.y = 1;
     self.lengthView.width = self.width;
     self.lengthView.height = 1;
+    self.lengthView.fillBar = YES;
     self.lengthView.visible = NO;
     
     self.subViews = [[NSSet alloc] initWithObjects:self.patternView,
@@ -110,7 +112,7 @@
     
     self.activeEditNote = note;
 
-    self.velocityView.percentage = ([note.velocity floatValue] / 127) * 100;
+    self.velocityView.percentage = [note.velocityAsPercentage floatValue];
     self.lengthView.percentage = [note.lengthAsPercentage floatValue];
     
     [self updateView];
@@ -247,11 +249,12 @@
 {
     // Velocity
     if(sender == self.velocityView) {
-        self.activeEditNote.velocity = [NSNumber numberWithInt: (127 - (127 / sender.width) ) * (sender.percentage / 100) + (127 / sender.width) ];
+        self.activeEditNote.velocityAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
+        NSLog(@"Velocity %@", self.activeEditNote.velocityAsPercentage);
     
     // Length
     } else if(sender == self.lengthView) {
-        self.activeEditNote.lengthAsPercentage = [NSNumber numberWithFloat:(100 - (100 / sender.width) ) * (sender.percentage / 100) + (100 / sender.width)];
+        self.activeEditNote.lengthAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
         NSLog(@"Length %@", self.activeEditNote.lengthAsPercentage);
     }
     
@@ -283,7 +286,7 @@
                 // Make a record of it first in case it's a double tap
                 self.lastRemovedNoteInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"step",
                                                                                       [NSNumber numberWithUnsignedInt:y], @"row",
-                                                                                      noteToRemove.velocity, @"velocity",
+                                                                                      noteToRemove.velocityAsPercentage, @"velocityAsPercentage",
                                                                                       noteToRemove.lengthAsPercentage, @"lengthAsPercentage",
                                                                                       nil];
                 
@@ -296,6 +299,7 @@
                 SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                 newNote.step = [NSNumber numberWithUnsignedInt:x];
                 newNote.row = [NSNumber numberWithUnsignedInt:y];
+                newNote.lengthAsPercentage = [NSNumber numberWithFloat:100.0 / self.width];
                 [newNotesSet addObject:newNote];
                 self.pattern.notes = newNotesSet;
                 
@@ -334,7 +338,7 @@
             
             newNote.step = [self.lastRemovedNoteInfo valueForKey:@"step"];
             newNote.row = [self.lastRemovedNoteInfo valueForKey:@"row"];
-            newNote.velocity = [self.lastRemovedNoteInfo valueForKey:@"velocity"];
+            newNote.velocityAsPercentage = [self.lastRemovedNoteInfo valueForKey:@"velocityAsPercentage"];
             newNote.lengthAsPercentage = [self.lastRemovedNoteInfo valueForKey:@"lengthAsPercentage"];
             
             [newNotesSet addObject:newNote];

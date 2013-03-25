@@ -12,6 +12,7 @@
 #import "EatsCommunicationManager.h"
 #import "Preferences.h"
 #import "ClockTick.h"
+#import "ScaleGeneratorSheetController.h"
 #import "EatsExternalClockCalculator.h"
 #import "EatsGridNavigationController.h"
 
@@ -29,12 +30,12 @@
 @property ClockTick                     *clockTick;
 @property EatsExternalClockCalculator   *externalClockCalculator;
 @property EatsGridNavigationController  *gridNavigationController;
+@property ScaleGeneratorSheetController *scaleGeneratorSheetController;
 
 @property NSMutableArray                *quantizationArray;
 @property NSArray                       *swingArray;
 
 @property (weak) IBOutlet NSWindow              *documentWindow;
-@property (weak) IBOutlet NSWindow              *scaleGeneratorSheet;
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
 
@@ -325,15 +326,6 @@
 
 #pragma mark - Private methods
 
-- (void)scaleGeneratorSheetDidEnd:(NSWindow *)sheet
-                       returnCode:(NSInteger)returnCode
-                      contextInfo:(void *)contextInfo
-{
-    if(returnCode == NSOKButton) {
-        NSLog(@"Sheet info: %@", contextInfo);
-    }
-}
-
 
 
 #pragma mark - Interface actions
@@ -377,28 +369,28 @@
     page.nextStep = [NSNumber numberWithInt:[Sequencer randomStepForPage:page]];
 }
 
-- (IBAction)scalesOpenSheetButton:(NSButton *)sender { 
-    if (!self.scaleGeneratorSheet)
-        [NSBundle loadNibNamed:@"ScaleGeneratorSheet" owner:self];
-    [NSApp beginSheet:self.scaleGeneratorSheet
-       modalForWindow:self.documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(scaleGeneratorSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:NULL];
-}
-
-- (IBAction)cancelScalesButton:(NSButton *)sender
-{
-    [NSApp endSheet: self.scaleGeneratorSheet returnCode:NSCancelButton];
-    [self.scaleGeneratorSheet close];
-    self.scaleGeneratorSheet = nil;
-}
-
-- (IBAction)generateScalesButton:(NSButton *)sender
-{
-    [NSApp endSheet: self.scaleGeneratorSheet returnCode:NSOKButton];
-    [self.scaleGeneratorSheet close];
-    self.scaleGeneratorSheet = nil;
+- (IBAction)scalesOpenSheetButton:(NSButton *)sender {
+    if (!self.scaleGeneratorSheetController) {
+        self.scaleGeneratorSheetController = [[ScaleGeneratorSheetController alloc] init];
+        [self.scaleGeneratorSheetController beginSheetModalForWindow:self.documentWindow completionHandler:^(NSUInteger returnCode) {
+            
+            // Generate the scale
+            if (returnCode == NSOKButton) {
+                NSLog(@"Generate!");
+                
+            // Cancel
+            } else if (returnCode == NSCancelButton) {
+                NSLog(@"Cancelled");
+                
+            } else {
+                NSLog(@"Unknown return code received from ScaleGeneratorSheetController");
+            }
+            
+            // Clear up
+            self.scaleGeneratorSheetController = nil;
+            
+        }];
+    }
 }
 
 - (IBAction)stepQuantizationPopup:(NSPopUpButton *)sender

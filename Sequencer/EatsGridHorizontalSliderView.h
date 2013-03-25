@@ -16,6 +16,7 @@
 
 @interface EatsGridHorizontalSliderView : EatsGridSubView
 
-@property float percentage;
+@property float     percentage;
+@property BOOL      fillBar;
 
 @end

@@ -33,7 +33,7 @@
 		</object>
 		<array class="NSMutableArray" key="IBDocument.RootObjects" id="1000">
 			<object class="NSCustomObject" id="1001">
-				<string key="NSClassName">Document</string>
+				<string key="NSClassName">ScaleGeneratorSheetController</string>
 			</object>
 			<object class="NSCustomObject" id="1003">
 				<string key="NSClassName">FirstResponder</string>
@@ -165,7 +165,6 @@
 							<string key="NSFrame">{{316, 13}, {100, 32}}</string>
 							<reference key="NSSuperview" ref="1006"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="323706147">
@@ -297,28 +296,44 @@
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<array class="NSMutableArray" key="connectionRecords">
 				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">scaleGeneratorSheet</string>
-						<reference key="source" ref="1001"/>
-						<reference key="destination" ref="1005"/>
-					</object>
-					<int key="connectionID">93</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">cancelScalesButton:</string>
-						<reference key="source" ref="1001"/>
-						<reference key="destination" ref="234649098"/>
-					</object>
-					<int key="connectionID">94</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">generateScalesButton:</string>
+						<string key="label">generateButton:</string>
 						<reference key="source" ref="1001"/>
 						<reference key="destination" ref="646222229"/>
 					</object>
-					<int key="connectionID">95</int>
+					<int key="connectionID">423</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">cancelButton:</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="234649098"/>
+					</object>
+					<int key="connectionID">424</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">scaleTypePopup</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="177372425"/>
+					</object>
+					<int key="connectionID">425</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">tonicNoteTextField</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="172456146"/>
+					</object>
+					<int key="connectionID">426</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">window</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="1005"/>
+					</object>
+					<int key="connectionID">427</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -939,70 +954,16 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">422</int>
+			<int key="maxID">427</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
-					<string key="className">Document</string>
-					<string key="superclassName">NSPersistentDocument</string>
-					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="currentPagePopup">NSPopUpButton</string>
-						<string key="documentWindow">NSWindow</string>
-						<string key="pageObjectController">NSObjectController</string>
-						<string key="patternQuantizationPopup">NSPopUpButton</string>
-						<string key="pitchesArrayController">NSArrayController</string>
-						<string key="rowPitchesTableView">NSTableView</string>
-						<string key="scaleGeneratorSheet">NSWindow</string>
-						<string key="stepLengthPopup">NSPopUpButton</string>
-						<string key="stepQuantizationPopup">NSPopUpButton</string>
-						<string key="swingPopup">NSPopUpButton</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="currentPagePopup">
-							<string key="name">currentPagePopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="documentWindow">
-							<string key="name">documentWindow</string>
-							<string key="candidateClassName">NSWindow</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="pageObjectController">
-							<string key="name">pageObjectController</string>
-							<string key="candidateClassName">NSObjectController</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="patternQuantizationPopup">
-							<string key="name">patternQuantizationPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="pitchesArrayController">
-							<string key="name">pitchesArrayController</string>
-							<string key="candidateClassName">NSArrayController</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="rowPitchesTableView">
-							<string key="name">rowPitchesTableView</string>
-							<string key="candidateClassName">NSTableView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="scaleGeneratorSheet">
-							<string key="name">scaleGeneratorSheet</string>
-							<string key="candidateClassName">NSWindow</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="stepLengthPopup">
-							<string key="name">stepLengthPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="stepQuantizationPopup">
-							<string key="name">stepQuantizationPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="swingPopup">
-							<string key="name">swingPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-					</dictionary>
+					<string key="className">JCSSheetController</string>
+					<string key="superclassName">NSWindowController</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/Document.h</string>
+						<string key="minorKey">./Classes/JCSSheetController.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -1011,6 +972,28 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/NSLayoutConstraint.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">ScaleGeneratorSheetController</string>
+					<string key="superclassName">JCSSheetController</string>
+					<dictionary class="NSMutableDictionary" key="outlets">
+						<string key="scaleTypePopup">NSPopUpButton</string>
+						<string key="tonicNoteTextField">NSTextField</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<object class="IBToOneOutletInfo" key="scaleTypePopup">
+							<string key="name">scaleTypePopup</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="tonicNoteTextField">
+							<string key="name">tonicNoteTextField</string>
+							<string key="candidateClassName">NSTextField</string>
+						</object>
+					</dictionary>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/ScaleGeneratorSheetController.h</string>
 					</object>
 				</object>
 			</array>

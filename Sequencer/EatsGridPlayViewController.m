@@ -201,8 +201,6 @@
     self.patternView.y ++;
     self.patternView.height --;
     
-    [self updateView];
-    
     if( self.patternView.height == self.height / 2 ) { // Final frame
 
         self.pauseButton.visible = YES;
@@ -217,6 +215,8 @@
         [timer invalidate];
         self.animationTimer = nil;
     }
+    
+    [self updateView];
     
 }
 

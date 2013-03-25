@@ -14,6 +14,8 @@
 {
     if( !self.visible ) return nil;
     
+    uint percentageAsStep = roundf(((self.width - 1) / 100.0) * self.percentage);
+    
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
     // Generate the columns with playhead
@@ -22,11 +24,11 @@
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
             
-            uint percentageAsStep = (self.width / 100.0) * self.percentage;
+            
             
             if( x == percentageAsStep )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( x < percentageAsStep )
+            else if ( x < percentageAsStep && self.fillBar )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];

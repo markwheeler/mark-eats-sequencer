@@ -10,7 +10,7 @@
         <attribute name="lengthAsPercentage" attributeType="Float" minValueString="0" maxValueString="100" defaultValueString="0" syncable="YES"/>
         <attribute name="row" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="step" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
-        <attribute name="velocity" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="63" syncable="YES"/>
+        <attribute name="velocityAsPercentage" attributeType="Float" minValueString="0" maxValueString="100" defaultValueString="50" syncable="YES"/>
         <relationship name="inPattern" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPattern" inverseName="notes" inverseEntity="SequencerPattern" syncable="YES"/>
     </entity>
     <entity name="SequencerPage" representedClassName="SequencerPage" syncable="YES">

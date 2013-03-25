@@ -15,7 +15,7 @@
 @dynamic lengthAsPercentage;
 @dynamic row;
 @dynamic step;
-@dynamic velocity;
+@dynamic velocityAsPercentage;
 @dynamic inPattern;
 
 @end

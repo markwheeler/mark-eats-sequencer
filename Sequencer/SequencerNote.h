@@ -16,7 +16,7 @@
 @property (nonatomic, retain) NSNumber * lengthAsPercentage;
 @property (nonatomic, retain) NSNumber * row;
 @property (nonatomic, retain) NSNumber * step;
-@property (nonatomic, retain) NSNumber * velocity;
+@property (nonatomic, retain) NSNumber * velocityAsPercentage;
 @property (nonatomic, retain) SequencerPattern *inPattern;
 
 @end
