@@ -213,7 +213,7 @@
     // TODO: These following lines shouldn't be nesecary once the dealloc bug in ClockTick is fixed.
     self.clock = nil;
     self.clockTick = nil;
-    self.gridNavigationController = nil;
+    //self.gridNavigationController = nil;
 }
 
 + (BOOL)autosavesInPlace

@@ -24,6 +24,7 @@
 		4D61162B16E4386700140AF8 /* Sequencer+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Utils.m */; };
 		4D61163016E43B9600140AF8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162F16E43B9600140AF8 /* AppController.m */; };
 		4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */; };
+		4D6D735A170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */; };
 		4D741B1516FFCAC300679710 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B1416FFCAC300679710 /* SequencerPattern.m */; };
 		4D741B1816FFCAC300679710 /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B1716FFCAC300679710 /* Sequencer.m */; };
 		4D741B1B16FFCAC300679710 /* SequencerPatternRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D741B1A16FFCAC300679710 /* SequencerPatternRef.m */; };
@@ -103,6 +104,8 @@
 		4D61162E16E43B9600140AF8 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		4D61162F16E43B9600140AF8 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScaleGeneratorSheet.xib; sourceTree = "<group>"; };
+		4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalSelectionView.h; sourceTree = "<group>"; };
+		4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalSelectionView.m; sourceTree = "<group>"; };
 		4D741B1316FFCAC300679710 /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
 		4D741B1416FFCAC300679710 /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
 		4D741B1616FFCAC300679710 /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
@@ -189,6 +192,8 @@
 				4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */,
 				4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */,
 				4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */,
+				4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */,
+				4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */,
 				4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */,
 				4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */,
 				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
@@ -419,6 +424,7 @@
 				4D741B2416FFCAC300679710 /* SequencerNote.m in Sources */,
 				4DC940A9170064B6005FD88D /* ScaleGeneratorSheetController.m in Sources */,
 				4DC940AE170068E9005FD88D /* JCSSheetController.m in Sources */,
+				4D6D735A170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

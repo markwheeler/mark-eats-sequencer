@@ -8,12 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "EatsGridView.h"
-#import "EatsGridPatternView.h"
 #import "EatsGridButtonView.h"
+#import "EatsGridHorizontalSelectionView.h"
+#import "EatsGridPatternView.h"
 
-@interface EatsGridPlayViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridPatternViewDelegateProtocol, EatsGridButtonViewDelegateProtocol>
+@interface EatsGridPlayViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridButtonViewDelegateProtocol, EatsGridHorizontalSelectionViewDelegateProtocol, EatsGridPatternViewDelegateProtocol>
 
-- (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender;
+- (void) eatsGridHorizontalSelectionViewUpdated:(EatsGridHorizontalSelectionView *)sender;
+- (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
 
 @end

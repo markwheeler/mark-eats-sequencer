@@ -12,34 +12,35 @@
 #import "SequencerPage.h"
 #import "SequencerNote.h"
 
-#define ANIMATION_FRAMERATE 20
+#define ANIMATION_FRAMERATE 15
 
 @interface EatsGridPlayViewController ()
 
-@property Sequencer                     *sequencer;
-@property SequencerPage                 *page;
-@property SequencerPattern              *pattern;
+@property Sequencer                         *sequencer;
+@property SequencerPage                     *page;
+@property SequencerPattern                  *pattern;
 
-@property EatsGridPatternView           *patternView;
+@property EatsGridHorizontalSelectionView   *loopLengthSelection;
+@property EatsGridPatternView               *patternView;
 
-@property NSMutableArray                *pageButtons;
-@property NSMutableArray                *patternButtons;
-@property NSArray                       *playModeButtons;
-@property NSArray                       *controlButtons;
+@property NSMutableArray                    *pageButtons;
+@property NSMutableArray                    *patternButtons;
+@property NSArray                           *playModeButtons;
+@property NSArray                           *controlButtons;
 
-@property EatsGridButtonView            *pauseButton;
-@property EatsGridButtonView            *forwardButton;
-@property EatsGridButtonView            *reverseButton;
-@property EatsGridButtonView            *randomButton;
-@property EatsGridButtonView            *bpmDecrementButton;
-@property EatsGridButtonView            *bpmIncrementButton;
-@property EatsGridButtonView            *clearButton;
-@property EatsGridButtonView            *exitButton;
+@property EatsGridButtonView                *pauseButton;
+@property EatsGridButtonView                *forwardButton;
+@property EatsGridButtonView                *reverseButton;
+@property EatsGridButtonView                *randomButton;
+@property EatsGridButtonView                *bpmDecrementButton;
+@property EatsGridButtonView                *bpmIncrementButton;
+@property EatsGridButtonView                *clearButton;
+@property EatsGridButtonView                *exitButton;
 
-@property NSTimer                       *bpmRepeatTimer;
+@property NSTimer                           *bpmRepeatTimer;
 
-@property NSTimer                       *animationTimer;
-@property uint                          animationFrame;
+@property NSTimer                           *animationTimer;
+@property uint                              animationFrame;
 
 @end
 
@@ -59,18 +60,6 @@
     self.pattern = [self.page.patterns objectAtIndex:0];
     
     // Create the sub views
-    
-    // Pattern view
-    self.patternView = [[EatsGridPatternView alloc] init];
-    self.patternView.delegate = self;
-    self.patternView.x = 0;
-    self.patternView.y = 1;
-    self.patternView.width = self.width;
-    self.patternView.height = self.height - 1;
-    self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-    self.patternView.mode = EatsPatternViewMode_Play;
-    self.patternView.pattern = self.pattern;
-    self.patternView.patternHeight = self.height;
     
     // Page buttons
     self.pageButtons = [[NSMutableArray alloc] initWithCapacity:8];
@@ -145,6 +134,30 @@
         button.visible = NO;
     }
     
+    // Loop length selection view
+    self.loopLengthSelection = [[EatsGridHorizontalSelectionView alloc] init];
+    self.loopLengthSelection.delegate = self;
+    self.loopLengthSelection.x = 0;
+    self.loopLengthSelection.y = - (self.height / 2) + 4;
+    self.loopLengthSelection.width = self.width;
+    self.loopLengthSelection.height = 1;
+    self.loopLengthSelection.fillBar = YES;
+    self.loopLengthSelection.visible = NO;
+    self.loopLengthSelection.startPercentage = 0; // TODO
+    self.loopLengthSelection.endPercentage = 100;
+    
+    // Pattern view
+    self.patternView = [[EatsGridPatternView alloc] init];
+    self.patternView.delegate = self;
+    self.patternView.x = 0;
+    self.patternView.y = 1;
+    self.patternView.width = self.width;
+    self.patternView.height = self.height - 1;
+    self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+    self.patternView.mode = EatsPatternViewMode_Play;
+    self.patternView.pattern = self.pattern;
+    self.patternView.patternHeight = self.height;
+    
     // Make the correct playMode button active and listen for changes to keep it correct
     [self setPlayMode:[self.page.playMode intValue]];
     [self.page addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
@@ -154,7 +167,7 @@
     [self setActivePatternButton];
     
     // Add everything to sub views
-    self.subViews = [[NSMutableSet alloc] initWithObjects:self.patternView, nil];
+    self.subViews = [[NSMutableSet alloc] initWithObjects:self.loopLengthSelection, self.patternView, nil];
     [self.subViews addObjectsFromArray:self.pageButtons];
     [self.subViews addObjectsFromArray:self.patternButtons];
     [self.subViews addObjectsFromArray:self.playModeButtons];
@@ -283,6 +296,12 @@
 
 - (void) animateIncrement:(int)amount
 {
+    self.loopLengthSelection.y += amount;
+    if( self.loopLengthSelection.y < 0 )
+        self.loopLengthSelection.visible = NO;
+    else
+        self.loopLengthSelection.visible = YES;
+    
     self.patternView.y += amount;
     self.patternView.height += amount * -1;
     
@@ -345,19 +364,6 @@
 
 
 #pragma mark - Sub view delegate methods
-
-- (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
-{
-    uint x = [[xyDown valueForKey:@"x"] unsignedIntValue];
-    BOOL down = [[xyDown valueForKey:@"down"] boolValue];
-    
-    if( down ) {
-        // Scrub the loop
-        self.page.nextStep = [NSNumber numberWithUnsignedInt:x];
-        if( [self.page.playMode intValue] == EatsSequencerPlayMode_Pause )
-            self.page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-    }
-}
 
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender
 {
@@ -496,6 +502,25 @@
     
     [self updateView];
 
+}
+
+- (void) eatsGridHorizontalSelectionViewUpdated:(EatsGridHorizontalSelectionView *)sender
+{
+    NSLog(@"start: %f end: %f", sender.startPercentage, sender.endPercentage );
+    [self updateView];
+}
+
+- (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
+{
+    uint x = [[xyDown valueForKey:@"x"] unsignedIntValue];
+    BOOL down = [[xyDown valueForKey:@"down"] boolValue];
+    
+    if( down ) {
+        // Scrub the loop
+        self.page.nextStep = [NSNumber numberWithUnsignedInt:x];
+        if( [self.page.playMode intValue] == EatsSequencerPlayMode_Pause )
+            self.page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+    }
 }
 
 @end
