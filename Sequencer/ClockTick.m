@@ -34,8 +34,8 @@
 {
     self = [super init];
     if (self) {
-        self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
-        self.sharedPreferences = [Preferences sharedPreferences];
+        _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
+        _sharedPreferences = [Preferences sharedPreferences];
     }
     return self;
 }
@@ -49,70 +49,70 @@
 
 #pragma mark - Clock delegate methods
 
-- (void) clockSongStart:(Float64)ns
+- (void) clockSongStart:(uint64_t)ns
 {
     
     // Create the objects needed for keeping track of active notes
-    if(!self.activeNotes) {
-        self.activeNotes = [NSMutableArray array];
-        for(int i = 0; i < self.minQuantization; i++)
-            [self.activeNotes addObject:[NSMutableSet setWithCapacity:32]];
+    if(!_activeNotes) {
+        _activeNotes = [NSMutableArray array];
+        for(int i = 0; i < _minQuantization; i++)
+            [_activeNotes addObject:[NSMutableSet setWithCapacity:32]];
     }
     
-    self.currentTick = 0;
+    _currentTick = 0;
     
-    if(self.sharedPreferences.sendMIDIClock) {
+    if(_sharedPreferences.sendMIDIClock) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :ns];
         if (msg != nil)
-            [self.sharedCommunicationManager.midiManager sendMsg:msg];
+            [_sharedCommunicationManager.midiManager sendMsg:msg];
         
         // Send start
         msg = nil;
         msg = [VVMIDIMessage createWithType:VVMIDIStartVal channel:0 timestamp:ns];
         if (msg != nil)
-            [self.sharedCommunicationManager.midiManager sendMsg:msg];
+            [_sharedCommunicationManager.midiManager sendMsg:msg];
     }
 }
 
-- (void) clockSongStop:(Float64)ns
+- (void) clockSongStop:(uint64_t)ns
 {
     
-    // [self.externalClockCalculator resetExternalClock]; TODO: Add external clock support back in (AppController? Or at Document level?)
+    // [_externalClockCalculator resetExternalClock]; TODO: Add external clock support back in (AppController? Or at Document level?)
     
-    if(self.sharedPreferences.sendMIDIClock) {
+    if(_sharedPreferences.sendMIDIClock) {
         // Send stop
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createWithType:VVMIDIStopVal channel:0 timestamp:ns];
         if (msg != nil) {
-            [self.sharedCommunicationManager.midiManager sendMsg:msg];
+            [_sharedCommunicationManager.midiManager sendMsg:msg];
         }
     }
     
     [self stopAllActiveMIDINotes:ns];
 }
 
-- (void) clockTick:(Float64)ns
+- (void) clockTick:(uint64_t)ns
 {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
     
     // TODO: Only fire on MIN_QUANTIZATION. Schedule more than 1 clock pulse if need be
     
-    //NSLog(@"Tick: %lu Time: %@", (unsigned long)self.currentTick, ns);
+    //NSLog(@"Tick: %lu Time: %@", (unsigned long)_currentTick, ns);
     //if( [NSThread isMainThread] ) NSLog(@"%s is running on main thread", __func__);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
-    if(self.currentTick % (self.ppqn / self.midiClockPPQN) == 0 && self.sharedPreferences.sendMIDIClock) {
+    if(_currentTick % (_ppqn / _midiClockPPQN) == 0 && _sharedPreferences.sendMIDIClock) {
         [self sendMIDIClockPulseAtTime:ns];
     }
     
     // Every third tick – 1/64 notes (smallest quantization possible)
-    if( self.currentTick % (self.ticksPerMeasure / self.minQuantization) == 0 ) {
+    if( _currentTick % (_ticksPerMeasure / _minQuantization) == 0 ) {
         
         // Check if any of the active notes need to be stopped this tick
-        NSMutableSet *notesToStop = [self.activeNotes objectAtIndex:self.currentTick / (self.ticksPerMeasure / self.minQuantization)];
+        NSMutableSet *notesToStop = [_activeNotes objectAtIndex:_currentTick / (_ticksPerMeasure / _minQuantization)];
         for( NSDictionary *note in notesToStop ) {
             [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                      onChannel:[[note objectForKey:@"channel"] intValue]
@@ -123,15 +123,11 @@
         
         // Update the sequencer pages and send notes
         
-        // Create a managedObjectContext so we stay thread safe
-        //NSManagedObjectContext *managedObjectContextForThread = [[NSManagedObjectContext alloc] init];
-        //[managedObjectContextForThread setPersistentStoreCoordinator:self.managedObjectContext.persistentStoreCoordinator];
-        
         // For each page...
-        for(SequencerPage *page in self.sequencer.pages) {
+        for(SequencerPage *page in _sequencer.pages) {
             
             // Play notes for current step, playMode != paused
-            if( self.currentTick % (self.ticksPerMeasure / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
+            if( _currentTick % (_ticksPerMeasure / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
                 
                 //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
                 
@@ -158,11 +154,6 @@
                 
                 // Send notes that need to be sent
                 
-                // Using fetch requests (commented this out because the thread-specific MOC doesn't have the latest changes, seems easier to just look through the set)
-                //NSFetchRequest *notesRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-                //notesRequest.predicate = [NSPredicate predicateWithFormat:@"(step == %@) AND (inPattern == %@) AND (inPattern.inPage == %@)", page.currentStep, page.patterns[0], page];
-                //NSArray *notesMatches = [managedObjectContextForThread executeFetchRequest:notesRequest error:nil];
-                
                 for( SequencerNote *note in [[page.patterns objectAtIndex:[page.currentPattern intValue]] notes] ) {
                     
                     if( note.step == page.currentStep ) {
@@ -173,8 +164,9 @@
                         int pitch = [[[page.pitches objectAtIndex:[note.row intValue]] pitch] intValue];
                         
                         // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
-                        int endStep = ((int)self.currentTick / ( self.ticksPerMeasure / self.minQuantization )) + 2; // TODO: base this on note.length
-                        if(endStep >= self.minQuantization) endStep -= self.minQuantization;
+                        int endStep = ((int)_currentTick / ( _ticksPerMeasure / _minQuantization )) + 2; // TODO: base this on note.length
+                        if(endStep >= _minQuantization)
+                            endStep -= _minQuantization;
                         
                         // Send MIDI note
                         [self startMIDINote:pitch
@@ -183,12 +175,12 @@
                                      atTime:ns];
                         
                         // Add to activeNotes so we know when to stop it
-                        [[self.activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                        [[_activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
                                                                              [NSNumber numberWithInt:channel], @"channel",
                                                                              [NSNumber numberWithInt:velocity], @"velocity",
                                                                              nil]];
                         
-                        // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time
+                        // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time?
                     }
                     
                 }
@@ -198,22 +190,22 @@
         }
         
         // Tell the delegate to update the interface (doing this on main thread because it uses non-thread-safe NSManagedObjectContext
-        if([self.delegate respondsToSelector:@selector(updateUI)])
-            [self.delegate performSelectorOnMainThread:@selector(updateUI)
+        if([_delegate respondsToSelector:@selector(updateUI)])
+            [_delegate performSelectorOnMainThread:@selector(updateUI)
                                             withObject:nil
                                          waitUntilDone:NO];
         
     }
     
     // Increment the tick to the next step
-    self.currentTick++;
-    if(self.currentTick >= self.ticksPerMeasure) self.currentTick = 0;
+    _currentTick++;
+    if(_currentTick >= _ticksPerMeasure) _currentTick = 0;
 }
 
-- (void) clockLateBy:(Float64)ns
+- (void) clockLateBy:(uint64_t)ns
 {
     // TODO: Create a visual indicator for this
-    NSLog(@"\nClock tick was late by: %fms", ns / 1000000.0);
+    NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
 }
 
 
@@ -230,7 +222,7 @@
 	msg = [VVMIDIMessage createFromVals:VVMIDINoteOnVal :c :n :v :ns];
     // Send it
 	if (msg != nil)
-		[self.sharedCommunicationManager.midiManager sendMsg:msg];
+		[_sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
 - (void) stopMIDINote:(int)n
@@ -243,7 +235,7 @@
 	msg = [VVMIDIMessage createFromVals:VVMIDINoteOffVal :c :n :v :ns];
     // Send it
 	if (msg != nil)
-		[self.sharedCommunicationManager.midiManager sendMsg:msg];
+		[_sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
 - (void) sendMIDIClockPulseAtTime:(uint64_t)ns
@@ -253,12 +245,12 @@
 	msg = [VVMIDIMessage createWithType:VVMIDIClockVal channel:0 timestamp:ns];
     // Send it
 	if (msg != nil)
-		[self.sharedCommunicationManager.midiManager sendMsg:msg];
+		[_sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
 - (void) stopAllActiveMIDINotes:(Float64)ns
 {
-    for( NSMutableSet *notesToStop in self.activeNotes ) {
+    for( NSMutableSet *notesToStop in _activeNotes ) {
         for( NSDictionary *note in notesToStop ) {
             [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                      onChannel:[[note objectForKey:@"channel"] intValue]

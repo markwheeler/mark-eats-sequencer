@@ -11,10 +11,10 @@
 #import <mach/mach_time.h>
 
 @protocol EatsClockDelegateProtocol
-- (void) clockSongStart:(Float64)ns;
-- (void) clockSongStop:(Float64)ns;
-- (void) clockTick:(Float64)ns;
-- (void) clockLateBy:(Float64)ns;
+- (void) clockSongStart:(uint64_t)ns;
+- (void) clockSongStop:(uint64_t)ns;
+- (void) clockTick:(uint64_t)ns;
+- (void) clockLateBy:(uint64_t)ns;
 @end
 
 typedef enum EatsClockStatus{
@@ -28,8 +28,8 @@ typedef enum EatsClockStatus{
 @property (weak) id delegate;
 
 @property float         bpm;
-@property NSUInteger    ppqn; // MIDI clock sends 24. Setting to 48 means we can do that and also 16ppqn triggers.
-@property NSUInteger    qnPerMeasure; // Use this to work out when a bar starts/ends (ie, effects count)
+@property uint          ppqn; // MIDI clock sends 24. Setting to 48 means we can do that and also 16ppqn triggers.
+@property uint          qnPerMeasure; // Use this to work out when a bar starts/ends (ie, effects count)
 
 // The amount of time before the tick that the code is going to schedule MIDI notes etc. This will also be how early the UI starts to update
 @property uint64_t      bufferTimeInNs;

@@ -40,23 +40,23 @@
     return _bpm;
 }
 
-- (void)setPpqn:(NSUInteger)ppqn
+- (void)setPpqn:(uint)ppqn
 {
     _ppqn = ppqn;
     [self updateInterval];
 }
 
-- (NSUInteger)ppqn {
+- (uint)ppqn {
     return _ppqn;
 }
 
-- (void)setQnPerMeasure:(NSUInteger)qnPerMeasure
+- (void)setQnPerMeasure:(uint)qnPerMeasure
 {
     _qnPerMeasure = qnPerMeasure;
     [self updateInterval];
 }
 
-- (NSUInteger)qnPerMeasure {
+- (uint)qnPerMeasure {
     return _qnPerMeasure;
 }
 
@@ -69,11 +69,11 @@
     self = [super init];
     if (self) {
         
-        self.clockStatus = EatsClockStatus_Stopped;
+        _clockStatus = EatsClockStatus_Stopped;
         
-        self.bufferTimeInNs = 20000000; // 20ms
+        _bufferTimeInNs = 20000000; // 20ms
         
-        self.tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTick", NULL);
+        _tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTick", NULL);
         
         kern_return_t kernError;
         mach_timebase_info_data_t timebaseInfo;
@@ -83,8 +83,8 @@
             NSLog(@"Error getting mach_timebase");
         } else {
             // Set the time factors so we can work in ns
-            self.machTimeToNsFactor = (double)timebaseInfo.numer / timebaseInfo.denom;
-            self.nsToMachTimeFactor = 1.0 / self.machTimeToNsFactor;
+            _machTimeToNsFactor = (double)timebaseInfo.numer / timebaseInfo.denom;
+            _nsToMachTimeFactor = 1.0 / _machTimeToNsFactor;
         }
         
     }
@@ -99,31 +99,31 @@
 
 - (void) startClock
 {
-    if(self.clockStatus != EatsClockStatus_Stopped) [self setClockToZero];
+    if(_clockStatus != EatsClockStatus_Stopped) [self setClockToZero];
     [self continueClock];
     
 }
 
 - (void) setClockToZero
 {
-    dispatch_async(self.tickQueue, ^{
-        [self.delegate clockSongStart:self.tickTimeInNs];
+    dispatch_async(_tickQueue, ^{
+        [_delegate clockSongStart:self.tickTimeInNs];
     });
 }
 
 - (void) continueClock
 {
     // If someone tries to start a timer while we're stopping, just cancel the stop
-    if(self.clockStatus == EatsClockStatus_Stopping) {
-        self.clockStatus = EatsClockStatus_Running;
+    if(_clockStatus == EatsClockStatus_Stopping) {
+        _clockStatus = EatsClockStatus_Running;
         return;
         
     // Start one up if need be
     } else if(self.clockStatus == EatsClockStatus_Stopped) {
         // Set defaults if they haven't been set
-        if(self.bpm == 0) self.bpm = 120;
-        if(self.ppqn == 0) self.ppqn = 48;
-        if(self.qnPerMeasure == 0) self.qnPerMeasure = 4;
+        if(_bpm == 0) self.bpm = 120;
+        if(_ppqn == 0) self.ppqn = 48;
+        if(_qnPerMeasure == 0) self.qnPerMeasure = 4;
         
         // Create a thread to run the clock on
         NSThread* clockThread = [[NSThread alloc] initWithTarget:self
@@ -137,8 +137,8 @@
 
 - (void) stopClock
 {
-    if(self.clockStatus == EatsClockStatus_Running)
-        self.clockStatus = EatsClockStatus_Stopping;
+    if(_clockStatus == EatsClockStatus_Running)
+        _clockStatus = EatsClockStatus_Stopping;
 }
 
 
@@ -148,57 +148,53 @@
 - (void) updateInterval
 {
     // 1sec / ((bpm / secs in a min) * ppqn)
-    self.intervalInNs = 1000000000 / ((self.bpm / 60.0) * self.ppqn);
+    _intervalInNs = 1000000000 / ((_bpm / 60.0) * _ppqn);
 }
 
 - (void) timerLoop
 {
+    _clockStatus = EatsClockStatus_Running;
     
-    // Trying to avoid assigning anything in this loop so taken out the autoreleasepool for now
-    //@autoreleasepool {
+    Float64 timeDifferenceInNs;
     
-        self.clockStatus = EatsClockStatus_Running;
-        
-        // Set the start time
-        self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
-        self.tickTimeInNs += self.bufferTimeInNs;
-        
-        mach_wait_until((self.tickTimeInNs - self.bufferTimeInNs) * self.nsToMachTimeFactor);
-        
-        Float64 timeDifferenceInNs;
+    // Set the start time
+    _tickTimeInNs = (uint64_t)(mach_absolute_time() * _machTimeToNsFactor);
+    _tickTimeInNs += _bufferTimeInNs;
+    
+    mach_wait_until( ( _tickTimeInNs - _bufferTimeInNs ) * _nsToMachTimeFactor );
 
-        [self setClockToZero];
-    
-        // Clock loop
-        while (self.clockStatus == EatsClockStatus_Running) {
-            
-            // Send tick
-            //dispatch_debug(tickQueue, "TICK QUEUE");
-            dispatch_async(self.tickQueue, ^{
-                [self.delegate clockTick:self.tickTimeInNs];
-            });
-            
-            // Detect late ticks
-            timeDifferenceInNs = (((Float64)(mach_absolute_time() * self.machTimeToNsFactor)) - self.tickTimeInNs);
-            if( timeDifferenceInNs > 0 ) {
-                dispatch_async(self.tickQueue, ^{
-                    [self.delegate clockLateBy:timeDifferenceInNs];
-                });
-            }
-            
-            // Wait until the next tick
-            self.tickTimeInNs += self.intervalInNs;
-            mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
-            
-        }
-    
-        dispatch_async(self.tickQueue, ^{
-            [self.delegate clockSongStop:mach_absolute_time() * self.machTimeToNsFactor];
+    [self setClockToZero];
+
+    // Clock loop
+    while (_clockStatus == EatsClockStatus_Running) {
+        
+        // Send tick
+        dispatch_async(_tickQueue, ^{
+            [_delegate clockTick:_tickTimeInNs];
         });
         
-        self.clockStatus = EatsClockStatus_Stopped;
         
-    //}
+        // Detect late ticks
+        timeDifferenceInNs = ( (Float64)mach_absolute_time() * (Float64)_machTimeToNsFactor ) - (Float64)_tickTimeInNs;
+        if( timeDifferenceInNs > _bufferTimeInNs ) {
+            dispatch_async(_tickQueue, ^{
+                [_delegate clockLateBy:(uint64_t)timeDifferenceInNs];
+            });
+        }
+        
+        // Wait until the next tick
+        _tickTimeInNs += _intervalInNs;
+        mach_wait_until( ( _tickTimeInNs - _bufferTimeInNs ) * _nsToMachTimeFactor );
+        
+    }
+
+    // Stop
+    dispatch_async(_tickQueue, ^{
+        [_delegate clockSongStop:mach_absolute_time() * _machTimeToNsFactor];
+    });
+
+    _clockStatus = EatsClockStatus_Stopped;
+    
 }
 
 @end

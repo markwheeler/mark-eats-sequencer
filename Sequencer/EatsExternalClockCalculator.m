@@ -24,7 +24,7 @@
 {
     self = [super init];
     if (self) {
-        self.externalClockIntervals = [NSMutableSet setWithCapacity:MIDI_CLOCK_PPQN];
+        _externalClockIntervals = [NSMutableSet setWithCapacity:MIDI_CLOCK_PPQN];
     }
     
     return self;
@@ -36,16 +36,16 @@
     
     uint bpm = 0;
     
-    if(self.externalPulsePreviousTimestamp > 0) {
-        [self.externalClockIntervals addObject:[NSNumber numberWithLongLong:timestamp - self.externalPulsePreviousTimestamp]];
+    if(_externalPulsePreviousTimestamp > 0) {
+        [_externalClockIntervals addObject:[NSNumber numberWithLongLong:timestamp - _externalPulsePreviousTimestamp]];
     }
     
-    if([self.externalClockIntervals count] < 24) { // This number defines how many pulses to average out before setting the BPM
-        self.externalPulsePreviousTimestamp = timestamp;
+    if([_externalClockIntervals count] < 24) { // This number defines how many pulses to average out before setting the BPM
+        _externalPulsePreviousTimestamp = timestamp;
         
     } else {
         // Average out the last pulses
-        float rangedAverageIntervalInNs = [self rangedAverage:self.externalClockIntervals range:0.7]; // Range defines how extreme a peak has to be to consider it noise
+        float rangedAverageIntervalInNs = [self rangedAverage:_externalClockIntervals range:0.7]; // Range defines how extreme a peak has to be to consider it noise
         
         // Convert it into a BPM and return it
         // Secs in a min  ((interview in ns * MIDI standard ppqn / ns in a sec)
@@ -60,8 +60,8 @@
 
 - (void) resetExternalClock
 {
-    [self.externalClockIntervals removeAllObjects];
-    self.externalPulsePreviousTimestamp = 0;
+    [_externalClockIntervals removeAllObjects];
+    _externalPulsePreviousTimestamp = 0;
 }
 
 - (float) rangedAverage:(NSMutableSet *)valueSet range:(float)r
