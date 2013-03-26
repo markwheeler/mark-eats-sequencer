@@ -11,11 +11,10 @@
 #import <mach/mach_time.h>
 
 @protocol EatsClockDelegateProtocol
-- (void) clockSongStart:(NSNumber *)ns;
-- (void) clockSongStop:(NSNumber *)ns;
-- (void) clockTick:(NSNumber *)ns;
-@optional
-- (void) clockLateBy:(NSNumber *)ns;
+- (void) clockSongStart:(Float64)ns;
+- (void) clockSongStop:(Float64)ns;
+- (void) clockTick:(Float64)ns;
+- (void) clockLateBy:(Float64)ns;
 @end
 
 typedef enum EatsClockStatus{

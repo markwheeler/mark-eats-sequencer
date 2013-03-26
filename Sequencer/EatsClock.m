@@ -106,11 +106,9 @@
 
 - (void) setClockToZero
 {
-    if([self.delegate respondsToSelector:@selector(clockSongStart:)]) {
-        dispatch_async(self.tickQueue, ^{
-            [self.delegate clockSongStart:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
-        });
-    }
+    dispatch_async(self.tickQueue, ^{
+        [self.delegate clockSongStart:self.tickTimeInNs];
+    });
 }
 
 - (void) continueClock
@@ -148,16 +146,16 @@
 #pragma mark - Private methods
 
 - (void) updateInterval
-{    
-    self.intervalInNs = 1000000000 / ((self.bpm / 60.0) * self.ppqn); // 1sec / ((bpm / secs in a min) * ppqn)
-
-    //NSLog(@"Interval set to: %fms", self.intervalInNs / 1000000.0);
+{
+    // 1sec / ((bpm / secs in a min) * ppqn)
+    self.intervalInNs = 1000000000 / ((self.bpm / 60.0) * self.ppqn);
 }
 
 - (void) timerLoop
 {
     
-    @autoreleasepool {
+    // Trying to avoid assigning anything in this loop so taken out the autoreleasepool for now
+    //@autoreleasepool {
     
         self.clockStatus = EatsClockStatus_Running;
         
@@ -165,53 +163,42 @@
         self.tickTimeInNs = (uint64_t)(mach_absolute_time() * self.machTimeToNsFactor);
         self.tickTimeInNs += self.bufferTimeInNs;
         
-        mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
+        mach_wait_until((self.tickTimeInNs - self.bufferTimeInNs) * self.nsToMachTimeFactor);
         
         Float64 timeDifferenceInNs;
 
         [self setClockToZero];
-        
+    
+        // Clock loop
         while (self.clockStatus == EatsClockStatus_Running) {
             
             // Send tick
-            if( [self.delegate respondsToSelector:@selector(clockTick:)] ) {
-                //dispatch_debug(tickQueue, "TICK QUEUE");
-                dispatch_async(self.tickQueue, ^{
-                    [self.delegate clockTick:[NSNumber numberWithUnsignedLongLong:self.tickTimeInNs]];
-                });
-            }
+            //dispatch_debug(tickQueue, "TICK QUEUE");
+            dispatch_async(self.tickQueue, ^{
+                [self.delegate clockTick:self.tickTimeInNs];
+            });
             
             // Detect late ticks
             timeDifferenceInNs = (((Float64)(mach_absolute_time() * self.machTimeToNsFactor)) - self.tickTimeInNs);
-            if( timeDifferenceInNs > 0 && [self.delegate respondsToSelector:@selector(clockLateBy:)] ) {
-                
+            if( timeDifferenceInNs > 0 ) {
                 dispatch_async(self.tickQueue, ^{
-                    [self.delegate clockLateBy:[NSNumber numberWithFloat:timeDifferenceInNs]];
+                    [self.delegate clockLateBy:timeDifferenceInNs];
                 });
             }
             
             // Wait until the next tick
             self.tickTimeInNs += self.intervalInNs;
-            
-            // Tried using nanosleep() instead but results seemed identical to mach_wait_until
-            //struct timespec req = {0};
-            //req.tv_sec = 0;
-            //req.tv_nsec = (((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor) - (mach_absolute_time() * self.machTimeToNsFactor);
-            //nanosleep(&req, (struct timespec *)NULL);
-            
             mach_wait_until(((self.tickTimeInNs) - self.bufferTimeInNs) * self.nsToMachTimeFactor);
             
         }
-        
-        if([self.delegate respondsToSelector:@selector(clockSongStop:)]) {
-            dispatch_async(self.tickQueue, ^{
-                [self.delegate clockSongStop:[NSNumber numberWithUnsignedLongLong:(uint64_t)(mach_absolute_time() * self.machTimeToNsFactor)]];
-            });
-        }
+    
+        dispatch_async(self.tickQueue, ^{
+            [self.delegate clockSongStop:mach_absolute_time() * self.machTimeToNsFactor];
+        });
         
         self.clockStatus = EatsClockStatus_Stopped;
         
-    }
+    //}
 }
 
 @end

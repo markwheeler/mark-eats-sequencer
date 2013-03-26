@@ -50,13 +50,16 @@
     if( down ) {
         
         if( self.lastDownKey ) {
+            
             self.startPercentage = ( [[self.lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
             self.endPercentage = ( x / (self.width - 1.0) ) * 100.0;
+            
             // Maintain order
             if ( self.startPercentage > self.endPercentage ) {
                 self.endPercentage = self.startPercentage;
                 self.startPercentage = ( x / (self.width - 1.0) ) * 100.0;
             }
+            
             self.setSelection = YES;
             
         } else {
@@ -70,7 +73,7 @@
     // Release
     } else {
         
-        // Remove lastDownKey and put a 1step selection if it's this one
+        // Remove lastDownKey if it's this one and put a 1 step selection haven't already drawn a selection
         if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
             if (!self.setSelection ) {    
                 self.startPercentage = ( x / (self.width - 1.0) ) * 100.0;

@@ -23,11 +23,6 @@
 @property NSUInteger        currentTick;
 @property NSMutableArray    *activeNotes;
 
-- (void) clockSongStart:(NSNumber *)ns;
-- (void) clockSongStop:(NSNumber *)ns;
-- (void) clockTick:(NSNumber *)ns;
-- (void) clockLateBy:(NSNumber *)ns;
-
 @end
 
 @implementation ClockTick
@@ -54,7 +49,7 @@
 
 #pragma mark - Clock delegate methods
 
-- (void) clockSongStart:(NSNumber *)ns
+- (void) clockSongStart:(Float64)ns
 {
     
     // Create the objects needed for keeping track of active notes
@@ -69,19 +64,19 @@
     if(self.sharedPreferences.sendMIDIClock) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
-        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :[ns unsignedLongLongValue]];
+        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :ns];
         if (msg != nil)
             [self.sharedCommunicationManager.midiManager sendMsg:msg];
         
         // Send start
         msg = nil;
-        msg = [VVMIDIMessage createWithType:VVMIDIStartVal channel:0 timestamp:[ns unsignedLongLongValue]];
+        msg = [VVMIDIMessage createWithType:VVMIDIStartVal channel:0 timestamp:ns];
         if (msg != nil)
             [self.sharedCommunicationManager.midiManager sendMsg:msg];
     }
 }
 
-- (void) clockSongStop:(NSNumber *)ns
+- (void) clockSongStop:(Float64)ns
 {
     
     // [self.externalClockCalculator resetExternalClock]; TODO: Add external clock support back in (AppController? Or at Document level?)
@@ -89,7 +84,7 @@
     if(self.sharedPreferences.sendMIDIClock) {
         // Send stop
         VVMIDIMessage *msg = nil;
-        msg = [VVMIDIMessage createWithType:VVMIDIStopVal channel:0 timestamp:[ns unsignedLongLongValue]];
+        msg = [VVMIDIMessage createWithType:VVMIDIStopVal channel:0 timestamp:ns];
         if (msg != nil) {
             [self.sharedCommunicationManager.midiManager sendMsg:msg];
         }
@@ -98,7 +93,7 @@
     [self stopAllActiveMIDINotes:ns];
 }
 
-- (void) clockTick:(NSNumber *)ns
+- (void) clockTick:(Float64)ns
 {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
@@ -110,7 +105,7 @@
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
     if(self.currentTick % (self.ppqn / self.midiClockPPQN) == 0 && self.sharedPreferences.sendMIDIClock) {
-        [self sendMIDIClockPulseAtTime:[ns unsignedLongLongValue]];
+        [self sendMIDIClockPulseAtTime:ns];
     }
     
     // Every third tick – 1/64 notes (smallest quantization possible)
@@ -122,7 +117,7 @@
             [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                      onChannel:[[note objectForKey:@"channel"] intValue]
                   withVelocity:[[note objectForKey:@"velocity"] intValue]
-                        atTime:[ns unsignedLongLongValue]];
+                        atTime:ns];
         }
         [notesToStop removeAllObjects];
         
@@ -185,7 +180,7 @@
                         [self startMIDINote:pitch
                                   onChannel:channel
                                withVelocity:velocity
-                                     atTime:[ns unsignedLongLongValue]];
+                                     atTime:ns];
                         
                         // Add to activeNotes so we know when to stop it
                         [[self.activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
@@ -215,10 +210,10 @@
     if(self.currentTick >= self.ticksPerMeasure) self.currentTick = 0;
 }
 
-- (void) clockLateBy:(NSNumber *)ns
+- (void) clockLateBy:(Float64)ns
 {
     // TODO: Create a visual indicator for this
-    //NSLog(@"\nClock tick was late by: %fms", [ns floatValue] / 1000000.0);
+    NSLog(@"\nClock tick was late by: %fms", ns / 1000000.0);
 }
 
 
@@ -261,14 +256,14 @@
 		[self.sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
-- (void) stopAllActiveMIDINotes:(NSNumber *)ns
+- (void) stopAllActiveMIDINotes:(Float64)ns
 {
     for( NSMutableSet *notesToStop in self.activeNotes ) {
         for( NSDictionary *note in notesToStop ) {
             [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                      onChannel:[[note objectForKey:@"channel"] intValue]
                   withVelocity:[[note objectForKey:@"velocity"] intValue]
-                        atTime:[ns unsignedLongLongValue]];
+                        atTime:ns];
         }
         [notesToStop removeAllObjects];
     }

@@ -25,6 +25,11 @@
 @property int midiClockPPQN;
 @property int minQuantization;
 
+- (void) clockSongStart:(Float64)ns;
+- (void) clockSongStop:(Float64)ns;
+- (void) clockTick:(Float64)ns;
+- (void) clockLateBy:(Float64)ns;
+
 @property (weak) Sequencer *sequencer;
 
 @end
