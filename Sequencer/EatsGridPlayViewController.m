@@ -20,7 +20,7 @@
 @property SequencerPage                     *page;
 @property SequencerPattern                  *pattern;
 
-@property EatsGridHorizontalSelectionView   *loopLengthSelection;
+@property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
 
 @property NSMutableArray                    *pageButtons;
@@ -135,16 +135,16 @@
     }
     
     // Loop length selection view
-    self.loopLengthSelection = [[EatsGridHorizontalSelectionView alloc] init];
-    self.loopLengthSelection.delegate = self;
-    self.loopLengthSelection.x = 0;
-    self.loopLengthSelection.y = - (self.height / 2) + 4;
-    self.loopLengthSelection.width = self.width;
-    self.loopLengthSelection.height = 1;
-    self.loopLengthSelection.fillBar = YES;
-    self.loopLengthSelection.visible = NO;
-    self.loopLengthSelection.startPercentage = 0; // TODO
-    self.loopLengthSelection.endPercentage = 100;
+    self.loopBraceView = [[EatsGridLoopBraceView alloc] init];
+    self.loopBraceView.delegate = self;
+    self.loopBraceView.x = 0;
+    self.loopBraceView.y = - (self.height / 2) + 4;
+    self.loopBraceView.width = self.width;
+    self.loopBraceView.height = 1;
+    self.loopBraceView.fillBar = YES;
+    self.loopBraceView.visible = NO;
+    self.loopBraceView.startPercentage = 0; // TODO
+    self.loopBraceView.endPercentage = 100;
     
     // Pattern view
     self.patternView = [[EatsGridPatternView alloc] init];
@@ -167,7 +167,7 @@
     [self setActivePatternButton];
     
     // Add everything to sub views
-    self.subViews = [[NSMutableSet alloc] initWithObjects:self.loopLengthSelection, self.patternView, nil];
+    self.subViews = [[NSMutableSet alloc] initWithObjects:self.loopBraceView, self.patternView, nil];
     [self.subViews addObjectsFromArray:self.pageButtons];
     [self.subViews addObjectsFromArray:self.patternButtons];
     [self.subViews addObjectsFromArray:self.playModeButtons];
@@ -296,11 +296,11 @@
 
 - (void) animateIncrement:(int)amount
 {
-    self.loopLengthSelection.y += amount;
-    if( self.loopLengthSelection.y < 0 )
-        self.loopLengthSelection.visible = NO;
+    self.loopBraceView.y += amount;
+    if( self.loopBraceView.y < 0 )
+        self.loopBraceView.visible = NO;
     else
-        self.loopLengthSelection.visible = YES;
+        self.loopBraceView.visible = YES;
     
     self.patternView.y += amount;
     self.patternView.height += amount * -1;
@@ -504,7 +504,7 @@
 
 }
 
-- (void) eatsGridHorizontalSelectionViewUpdated:(EatsGridHorizontalSelectionView *)sender
+- (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
 {
     NSLog(@"start: %f end: %f", sender.startPercentage, sender.endPercentage );
     [self updateView];

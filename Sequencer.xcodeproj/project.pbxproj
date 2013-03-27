@@ -54,6 +54,7 @@
 		4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */; };
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
+		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -154,6 +155,8 @@
 		4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPlayViewController.m; sourceTree = "<group>"; };
 		4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridButtonView.h; sourceTree = "<group>"; };
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
+		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
+		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +197,8 @@
 				4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */,
 				4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */,
 				4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */,
+				4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */,
+				4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */,
 				4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */,
 				4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */,
 				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
@@ -425,6 +430,7 @@
 				4DC940A9170064B6005FD88D /* ScaleGeneratorSheetController.m in Sources */,
 				4DC940AE170068E9005FD88D /* JCSSheetController.m in Sources */,
 				4D6D735A170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m in Sources */,
+				4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
