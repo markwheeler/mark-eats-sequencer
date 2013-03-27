@@ -143,8 +143,8 @@
     _loopBraceView.height = 1;
     _loopBraceView.fillBar = YES;
     _loopBraceView.visible = NO;
-    _loopBraceView.startPercentage = 0; // TODO
-    _loopBraceView.endPercentage = 100;
+    _loopBraceView.startPercentage = ( _page.loopStart.floatValue / (self.width - 1.0) ) * 100.0;
+    _loopBraceView.endPercentage = ( _page.loopEnd.floatValue / (self.width - 1.0) ) * 100.0;
     
     // Pattern view
     _patternView = [[EatsGridPatternView alloc] init];
@@ -506,7 +506,9 @@
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
 {
-    NSLog(@"start: %f end: %f", sender.startPercentage, sender.endPercentage );
+    _page.loopStart = [NSNumber numberWithUnsignedInt:roundf(((self.width - 1) / 100.0) * sender.startPercentage)];
+    _page.loopEnd = [NSNumber numberWithUnsignedInt:roundf(((self.width - 1) / 100.0) * sender.endPercentage)];
+    
     [self updateView];
 }
 

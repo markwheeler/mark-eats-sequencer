@@ -129,29 +129,56 @@
             // Play notes for current step, playMode != paused
             if( _currentTick % (_ticksPerMeasure / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
                 
-                //NSLog(@"playMode: %@ currentStep: %@ nextStep: %@", page.playMode, page.currentStep, page.nextStep);
-                
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
-                page.currentStep = [page.nextStep copy];
                 
-                if( [page.playMode intValue] == EatsSequencerPlayMode_Forward ) {
-                    int nextStep = [page.currentStep intValue] + 1;
-                    if( nextStep > [page.loopEnd intValue])
-                        nextStep = [page.loopStart intValue];
-                    page.nextStep = [NSNumber numberWithInt: nextStep];
+                // If page has been scrubbed
+                if( page.nextStep ) {
+                    page.currentStep = [page.nextStep copy];
                     
-                } else if( [page.playMode intValue] == EatsSequencerPlayMode_Reverse ) {
-                    int nextStep = [page.currentStep intValue] - 1;
-                    if( nextStep < [page.loopStart intValue])
-                        nextStep = [page.loopEnd intValue];
-                    page.nextStep = [NSNumber numberWithInt: nextStep];
+                } else {
                     
-                } else if( [page.playMode intValue] == EatsSequencerPlayMode_Random ) {
-                    int nextStep = [Sequencer randomStepForPage:page];
-                    page.nextStep = [NSNumber numberWithInt: nextStep];
+                    int playNow = page.currentStep.intValue;
+                    
+                    // Forward
+                    if( page.playMode.intValue == EatsSequencerPlayMode_Forward ) {
+                        playNow ++;
+                        if( page.loopStart.intValue <= page.loopEnd.intValue ) {
+                            if( playNow == page.loopEnd.intValue + 1 && !page.nextStep )
+                                playNow = page.loopStart.intValue;
+                            
+                        } else {
+                            if( playNow == page.loopEnd.intValue + 1 && !page.nextStep )
+                                playNow = page.loopStart.intValue;
+                        }
+                        if( playNow >= _sharedPreferences.gridWidth )
+                            playNow = 0;
+                    
+                    // Reverse
+                    } else if( page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+                        playNow --;
+                        if( page.loopStart.intValue <= page.loopEnd.intValue ) {
+                            if( playNow == page.loopStart.intValue -1 && !page.nextStep )
+                                playNow = page.loopEnd.intValue;
+                        } else {
+                            if( playNow == page.loopStart.intValue - 1 && !page.nextStep )
+                                playNow = page.loopEnd.intValue;
+                        }
+                        if( playNow < 0 )
+                            playNow = _sharedPreferences.gridWidth - 1;
+                     
+                    // Random
+                    } else if( page.playMode.intValue == EatsSequencerPlayMode_Random ) {
+                        playNow = [Sequencer randomStepForPage:page ofWidth:_sharedPreferences.gridWidth];
+                    }
+                    
+                    page.currentStep = [NSNumber numberWithInt: playNow];
                 }
                 
+                page.nextStep = nil;
+                
+                
+
                 // Send notes that need to be sent
                 
                 for( SequencerNote *note in [[page.patterns objectAtIndex:[page.currentPattern intValue]] notes] ) {

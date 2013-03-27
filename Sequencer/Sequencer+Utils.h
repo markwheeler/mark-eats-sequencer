@@ -25,6 +25,6 @@ typedef enum EatsSequencerPlayMode {
 + (void) addDummyDataToSequencer:(Sequencer *)sequencer
           inManagedObjectContext:(NSManagedObjectContext *)context;
 
-+ (uint) randomStepForPage:(SequencerPage *)page;
++ (uint) randomStepForPage:(SequencerPage *)page ofWidth:(uint)width;
 
 @end

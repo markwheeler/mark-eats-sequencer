@@ -109,9 +109,22 @@
 }
 
 
-+ (uint) randomStepForPage:(SequencerPage *)page
++ (uint) randomStepForPage:(SequencerPage *)page ofWidth:(uint)width
 {
-    return floor(arc4random_uniform([page.loopEnd intValue] + 1 - [page.loopStart intValue]) + [page.loopStart intValue]);
+    int loopEnd;
+    if( page.loopEnd >= page.loopStart )
+        loopEnd = page.loopEnd.intValue;
+    else
+        loopEnd = page.loopEnd.intValue + width;
+    
+    int range = loopEnd + 1 - page.loopStart.intValue;
+    NSLog(@"range %i", range);
+    
+    int result = floor(arc4random_uniform(range) + page.loopStart.intValue);
+    if( result >= width )
+        result -= width;
+    
+    return result;
 }
 
 

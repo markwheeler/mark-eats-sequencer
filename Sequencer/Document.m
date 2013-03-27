@@ -346,7 +346,7 @@
 {
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-    page.nextStep = [page.currentStep copy];
+    page.nextStep = nil;
 }
 
 
@@ -354,21 +354,21 @@
 {
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-    page.nextStep = [NSNumber numberWithInt:[page.currentStep intValue] + 1];
+    page.nextStep = nil;
 }
 
 - (IBAction)sequencerReverseButton:(NSButton *)sender
 {
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
-    page.nextStep = [NSNumber numberWithInt:[page.currentStep intValue] - 1];
+    page.nextStep = nil;
 }
 
 - (IBAction)sequencerRandomButton:(NSButton *)sender
 {
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
-    page.nextStep = [NSNumber numberWithInt:[Sequencer randomStepForPage:page]];
+    page.nextStep = nil;
 }
 
 - (IBAction)scalesOpenSheetButton:(NSButton *)sender {
