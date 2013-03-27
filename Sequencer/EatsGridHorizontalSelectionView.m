@@ -21,8 +21,8 @@
 {
     if( !self.visible ) return nil;
     
-    uint startPercentageAsStep = roundf(((self.width - 1) / 100.0) * self.startPercentage);
-    uint endPercentageAsStep = roundf(((self.width - 1) / 100.0) * self.endPercentage);
+    uint startPercentageAsStep = roundf(((self.width - 1) / 100.0) * _startPercentage);
+    uint endPercentageAsStep = roundf(((self.width - 1) / 100.0) * _endPercentage);
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -34,7 +34,7 @@
             
             if( x == startPercentageAsStep || x == endPercentageAsStep)
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( x > startPercentageAsStep && x < endPercentageAsStep && self.fillBar )
+            else if ( x > startPercentageAsStep && x < endPercentageAsStep && _fillBar )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -49,22 +49,22 @@
     // Down
     if( down ) {
         
-        if( self.lastDownKey ) {
+        if( _lastDownKey ) {
             
-            self.startPercentage = ( [[self.lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
-            self.endPercentage = ( x / (self.width - 1.0) ) * 100.0;
+            _startPercentage = ( [[_lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
+            _endPercentage = ( x / (self.width - 1.0) ) * 100.0;
             
             // Maintain order
-            if ( self.startPercentage > self.endPercentage ) {
-                self.endPercentage = self.startPercentage;
-                self.startPercentage = ( x / (self.width - 1.0) ) * 100.0;
+            if ( _startPercentage > _endPercentage ) {
+                _endPercentage = _startPercentage;
+                _startPercentage = ( x / (self.width - 1.0) ) * 100.0;
             }
             
-            self.setSelection = YES;
+            _setSelection = YES;
             
         } else {
             // Log the last press
-            self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSelectionViewUpdated:)])
@@ -74,13 +74,13 @@
     } else {
         
         // Remove lastDownKey if it's this one and put a 1 step selection haven't already drawn a selection
-        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
-            if (!self.setSelection ) {    
-                self.startPercentage = ( x / (self.width - 1.0) ) * 100.0;
-                self.endPercentage = ( x / (self.width - 1.0) ) * 100.0;
+        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if (!_setSelection ) {    
+                _startPercentage = ( x / (self.width - 1.0) ) * 100.0;
+                _endPercentage = ( x / (self.width - 1.0) ) * 100.0;
             }
-            self.lastDownKey = nil;
-            self.setSelection = NO;
+            _lastDownKey = nil;
+            _setSelection = NO;
         }
 
     }

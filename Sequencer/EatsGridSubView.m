@@ -14,10 +14,10 @@
 {
     self = [super init];
     if (self) {
-        self.width = 1;
-        self.height = 1;
-        self.opacity = 1;
-        self.visible = YES;
+        _width = 1;
+        _height = 1;
+        _opacity = 1;
+        _visible = YES;
     }
     return self;
 }
@@ -28,15 +28,15 @@
     
     // Displays all lights on
 
-    if( !self.visible ) return nil;
+    if( !_visible ) return nil;
     
-    NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
+    NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_width];
     
     // Generate the columns with playhead
-    for(uint x = 0; x < self.width; x++) {
-        [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
+    for(uint x = 0; x < _width; x++) {
+        [viewArray insertObject:[NSMutableArray arrayWithCapacity:_height] atIndex:x];
         // Generate the rows
-        for(uint y = 0; y < self.height; y++) {
+        for(uint y = 0; y < _height; y++) {
             [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
         }
     }

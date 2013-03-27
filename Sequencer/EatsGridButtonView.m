@@ -14,9 +14,9 @@
 {
     self = [super init];
     if (self) {
-        self.inactiveBrightness = 0;
-        self.downBrightness = 15;
-        self.activeBrightness = 10;
+        _inactiveBrightness = 0;
+        _downBrightness = 15;
+        _activeBrightness = 10;
     }
     return self;
 }
@@ -35,14 +35,14 @@
             
             uint currentBrightness;
 
-            if( self.buttonState == EatsButtonViewState_Down )
-                currentBrightness = self.downBrightness;
+            if( _buttonState == EatsButtonViewState_Down )
+                currentBrightness = _downBrightness;
             
-            else if( self.buttonState == EatsButtonViewState_Active )
-                currentBrightness = self.activeBrightness;
+            else if( _buttonState == EatsButtonViewState_Active )
+                currentBrightness = _activeBrightness;
             
             else
-                currentBrightness = self.inactiveBrightness;
+                currentBrightness = _inactiveBrightness;
             
             [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:currentBrightness * self.opacity] atIndex:y];
         }

@@ -25,8 +25,8 @@
     self = [super init];
     if (self) {
         
-        self.oscOutPort = port;
-        self.oscPrefix = prefix;
+        _oscOutPort = port;
+        _oscPrefix = prefix;
         
     }
     return self;
@@ -102,11 +102,11 @@
     NSUInteger level;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if(self.monomeSupportsVariableBrightness) {
-        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/set", self.oscPrefix];
+    if(_monomeSupportsVariableBrightness) {
+        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/set", _oscPrefix];
         level = l;
     } else {
-        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/set", self.oscPrefix];
+        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/set", _oscPrefix];
         if(l > BRIGHTNESS_CUTOFF) level = 1;
         else level = 0;
     }
@@ -116,7 +116,7 @@
     [newMsg addInt:(unsigned)x];
     [newMsg addInt:(unsigned)y];
     [newMsg addInt:(unsigned)level];
-    [self.oscOutPort sendThisMessage:newMsg];
+    [_oscOutPort sendThisMessage:newMsg];
 }
 
 - (void) monomeLEDLevelAll:(NSUInteger)l
@@ -125,11 +125,11 @@
     NSUInteger level;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if(self.monomeSupportsVariableBrightness) {
-        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/all", self.oscPrefix];
+    if(_monomeSupportsVariableBrightness) {
+        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/all", _oscPrefix];
         level = l;
     } else {
-        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/all", self.oscPrefix];
+        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/all", _oscPrefix];
         if(l > BRIGHTNESS_CUTOFF) level = 1;
         else level = 0;
     }
@@ -137,7 +137,7 @@
     // Create and send the OSC message
     OSCMessage *newMsg = [OSCMessage createWithAddress:oscAddress];
     [newMsg addInt:(unsigned)level];
-    [self.oscOutPort sendThisMessage:newMsg];
+    [_oscOutPort sendThisMessage:newMsg];
 }
 
 - (void) monomeLEDLevelMapXOffset:(NSUInteger)x yOffset:(NSUInteger)y levels:(NSArray *)l;
@@ -146,12 +146,12 @@
     NSMutableArray *levels;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if(self.monomeSupportsVariableBrightness) {
-        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/map", self.oscPrefix];
+    if(_monomeSupportsVariableBrightness) {
+        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/map", _oscPrefix];
         levels = [NSMutableArray arrayWithArray:l];
         
     } else {
-        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/map", self.oscPrefix];
+        oscAddress = [NSString stringWithFormat:@"/%@/grid/led/map", _oscPrefix];
         
         // Go through and make everything binary in a new array 'levels'
         levels = [NSMutableArray arrayWithCapacity:64];
@@ -174,7 +174,7 @@
         [newMsg addInt:[level intValue]];
     }
     
-    [self.oscOutPort sendThisMessage:newMsg];
+    [_oscOutPort sendThisMessage:newMsg];
 }
 
 - (NSMutableArray *) convertBinaryArrayToBitmask:(NSArray *)binaryArray

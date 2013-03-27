@@ -14,7 +14,7 @@
 {
     if( !self.visible ) return nil;
     
-    uint percentageAsStep = roundf(((self.width - 1) / 100.0) * self.percentage);
+    uint percentageAsStep = roundf(((self.width - 1) / 100.0) * _percentage);
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -26,7 +26,7 @@
             
             if( x == percentageAsStep )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( x < percentageAsStep && self.fillBar )
+            else if ( x < percentageAsStep && _fillBar )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -41,8 +41,8 @@
     // Down
     if( down ) {
         
-        self.percentage = ( x / (self.width - 1.0) ) * 100.0;
-        NSLog(@"slider percentage %f", self.percentage);
+        _percentage = ( x / (self.width - 1.0) ) * 100.0;
+        NSLog(@"slider percentage %f", _percentage);
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
             [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];

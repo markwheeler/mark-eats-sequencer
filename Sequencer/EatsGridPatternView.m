@@ -27,9 +27,9 @@
 {
     self = [super init];
     if (self) {
-        self.playheadBrightness = PLAYHEAD_BRIGHTNESS;
-        self.noteBrightness = NOTE_BRIGHTNESS;
-        self.noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
+        _playheadBrightness = PLAYHEAD_BRIGHTNESS;
+        _noteBrightness = NOTE_BRIGHTNESS;
+        _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
     }
     return self;
 }
@@ -45,44 +45,44 @@
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            if(x == self.currentStep)
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:self.playheadBrightness * self.opacity] atIndex:y];
+            if(x == _currentStep)
+                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:_playheadBrightness * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
     }
     
     // Work out how much we need to fold
-    int scaleDifference = self.patternHeight - self.height;
+    int scaleDifference = _patternHeight - self.height;
     if( scaleDifference < 0 ) scaleDifference = 0;
 
     
-    for(SequencerNote *note in self.pattern.notes) {
-        if( [note.step intValue] < self.width && [note.row intValue] < self.patternHeight ) {
+    for(SequencerNote *note in _pattern.notes) {
+        if( [note.step intValue] < self.width && [note.row intValue] < _patternHeight ) {
                         
             uint row = [note.row unsignedIntValue];
 
             // Fold from top
-            if( self.foldFrom == EatsPatternViewFoldFrom_Top ) {
+            if( _foldFrom == EatsPatternViewFoldFrom_Top ) {
                 if( row < scaleDifference * 2 )
                    row = row / 2;
                else
                    row -= scaleDifference;
                
             // Fold from bottom
-            } else if( self.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-                if( row >= self.patternHeight - (scaleDifference * 2) )
-                    row = (row / 2) + ((self.patternHeight - (scaleDifference * 2)) / 2);
+            } else if( _foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+                if( row >= _patternHeight - (scaleDifference * 2) )
+                    row = (row / 2) + ((_patternHeight - (scaleDifference * 2)) / 2);
                 
             }
 
             // Put in the active note while editing
-            if( note == self.activeEditNote && self.mode == EatsPatternViewMode_NoteEdit )
+            if( note == _activeEditNote && _mode == EatsPatternViewMode_NoteEdit )
                 [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
             
             // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:[note.step intValue]] objectAtIndex:row] intValue] < self.noteBrightness * self.opacity )
-                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:self.noteBrightness * self.opacity]];
+            else if( [[[viewArray objectAtIndex:[note.step intValue]] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
+                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:_noteBrightness * self.opacity]];
         }
     }
     
@@ -101,13 +101,13 @@
 
     
     // Check for double presses on release, in edit mode
-    if( self.mode == EatsPatternViewMode_Edit && !down ) {
+    if( _mode == EatsPatternViewMode_Edit && !down ) {
            
         // Check for double presses
-        if(self.lastPressedKey
-           && [[self.lastPressedKey valueForKey:@"time"] timeIntervalSinceNow] > -0.4
-           && [[self.lastPressedKey valueForKey:@"x"] intValue] == x
-           && [[self.lastPressedKey valueForKey:@"y"] intValue] == y) {
+        if(_lastPressedKey
+           && [[_lastPressedKey valueForKey:@"time"] timeIntervalSinceNow] > -0.4
+           && [[_lastPressedKey valueForKey:@"x"] intValue] == x
+           && [[_lastPressedKey valueForKey:@"y"] intValue] == y) {
             
             // Send the double press to delegate
             NSDictionary *xy = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
@@ -118,7 +118,7 @@
 
         } else {
             // Log the last press
-            self.lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+            _lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
                                                                              [NSNumber numberWithUnsignedInt:y], @"y",
                                                                              [NSDate date], @"time",
                                                                              nil];

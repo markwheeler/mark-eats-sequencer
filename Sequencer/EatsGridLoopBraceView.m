@@ -21,8 +21,8 @@
 {
     if( !self.visible ) return nil;
     
-    uint startPercentageAsStep = roundf(((self.width - 1) / 100.0) * self.startPercentage);
-    uint endPercentageAsStep = roundf(((self.width - 1) / 100.0) * self.endPercentage);
+    uint startPercentageAsStep = roundf(((self.width - 1) / 100.0) * _startPercentage);
+    uint endPercentageAsStep = roundf(((self.width - 1) / 100.0) * _endPercentage);
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -34,9 +34,9 @@
             
             if( x == startPercentageAsStep || x == endPercentageAsStep)
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( ( startPercentageAsStep < endPercentageAsStep &&  x > startPercentageAsStep && x < endPercentageAsStep && self.fillBar )
-                     || ( startPercentageAsStep > endPercentageAsStep &&  x > startPercentageAsStep && self.fillBar )
-                     || ( startPercentageAsStep > endPercentageAsStep && x < endPercentageAsStep && self.fillBar ) )
+            else if ( ( startPercentageAsStep < endPercentageAsStep &&  x > startPercentageAsStep && x < endPercentageAsStep && _fillBar )
+                     || ( startPercentageAsStep > endPercentageAsStep &&  x > startPercentageAsStep && _fillBar )
+                     || ( startPercentageAsStep > endPercentageAsStep && x < endPercentageAsStep && _fillBar ) )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -51,24 +51,24 @@
     // Down
     if( down ) {
         
-        if( self.lastDownKey ) {
+        if( _lastDownKey ) {
             
             int loopEndX = x - 1;
             if( loopEndX < 0 )
                 loopEndX += self.width;
             
             // Set a selection
-            self.startPercentage = ( [[self.lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
-            self.endPercentage = ( loopEndX / (self.width - 1.0) ) * 100.0;
+            _startPercentage = ( [[_lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
+            _endPercentage = ( loopEndX / (self.width - 1.0) ) * 100.0;
             
-            self.setSelection = YES;
+            _setSelection = YES;
             
             if([self.delegate respondsToSelector:@selector(eatsGridLoopBraceViewUpdated:)])
                 [self.delegate performSelector:@selector(eatsGridLoopBraceViewUpdated:) withObject:self];
             
         } else {
             // Log the last press
-            self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
         
@@ -77,17 +77,17 @@
     } else {
         
         // Remove lastDownKey if it's this one and set the selection to all
-        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
-            if (!self.setSelection ) {
+        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if (!_setSelection ) {
                 
-                self.startPercentage = 0;
-                self.endPercentage = 100;
+                _startPercentage = 0;
+                _endPercentage = 100;
                 
                 if([self.delegate respondsToSelector:@selector(eatsGridLoopBraceViewUpdated:)])
                     [self.delegate performSelector:@selector(eatsGridLoopBraceViewUpdated:) withObject:self];
             }
-            self.lastDownKey = nil;
-            self.setSelection = NO;
+            _lastDownKey = nil;
+            _setSelection = NO;
         }
         
     }
