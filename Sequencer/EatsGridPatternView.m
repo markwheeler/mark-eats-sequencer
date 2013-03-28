@@ -7,8 +7,9 @@
 //
 
 #import "EatsGridPatternView.h"
-#import "SequencerNote.h"
 #import "EatsGridNavigationController.h"
+#import "Preferences.h"
+#import "SequencerNote.h"
 
 
 #define PLAYHEAD_BRIGHTNESS 8
@@ -17,7 +18,12 @@
 
 @interface EatsGridPatternView ()
 
-@property NSDictionary          *lastPressedKey;
+@property Preferences           *sharedPreferences;
+
+@property NSDictionary          *lastReleasedKey;
+
+@property NSDictionary          *lastDownKey;
+@property BOOL                  setSelection;
 
 @end
 
@@ -27,6 +33,8 @@
 {
     self = [super init];
     if (self) {
+        _sharedPreferences = [Preferences sharedPreferences];
+        
         _playheadBrightness = PLAYHEAD_BRIGHTNESS;
         _noteBrightness = NOTE_BRIGHTNESS;
         _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
@@ -91,40 +99,123 @@
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
 {
-    // Send the press to delegate
-    NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                                                      [NSNumber numberWithUnsignedInt:y], @"y",
-                                                                      [NSNumber numberWithBool:down], @"down",
-                                                                      nil];
-    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
-        [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
-
+    // In play mode we check for selections
+    if( _mode == EatsPatternViewMode_Play ) {
     
-    // Check for double presses on release, in edit mode
-    if( _mode == EatsPatternViewMode_Edit && !down ) {
-           
-        // Check for double presses
-        if(_lastPressedKey
-           && [[_lastPressedKey valueForKey:@"time"] timeIntervalSinceNow] > -0.4
-           && [[_lastPressedKey valueForKey:@"x"] intValue] == x
-           && [[_lastPressedKey valueForKey:@"y"] intValue] == y) {
+        // Down
+        if( down ) {
             
-            // Send the double press to delegate
-            NSDictionary *xy = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                                                          [NSNumber numberWithUnsignedInt:y], @"y",
-                                                                          nil];
-            if([self.delegate respondsToSelector:@selector(eatsGridPatternViewDoublePressAt: sender:)])
-                [self.delegate performSelector:@selector(eatsGridPatternViewDoublePressAt: sender:) withObject:xy withObject:self];
+            if( _sharedPreferences.loopFromScrubArea && _lastDownKey ) {
 
+                // Set a selection
+                int loopEndX = x - 1;
+                if( loopEndX < 0 )
+                    loopEndX += self.width;
+                
+                _setSelection = YES;
+                
+                NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[_lastDownKey valueForKey:@"x"], @"start",
+                                                                                     [NSNumber numberWithInt:loopEndX], @"end",
+                                                                                     nil];
+                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
+                    [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                
+            } else {
+                
+                // Send the press to delegate
+                NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                        [NSNumber numberWithUnsignedInt:y], @"y",
+                                        [NSNumber numberWithBool:down], @"down",
+                                        nil];
+                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
+                    [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+                
+                if( _sharedPreferences.loopFromScrubArea ) {
+                    // Log the last press
+                    _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+                }
+            }
+            
+            
+            
+        // Release
         } else {
-            // Log the last press
-            _lastPressedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                                                             [NSNumber numberWithUnsignedInt:y], @"y",
-                                                                             [NSDate date], @"time",
-                                                                             nil];
+            
+            // Remove lastDownKey if it's this one and set the selection to all
+            if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
+                if (!_setSelection ) {
+                    
+                    NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"start",
+                                                                                         [NSNumber numberWithUnsignedInt:self.width], @"end",
+                                                                                         nil];
+                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
+                        [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                    
+                }
+                _lastDownKey = nil;
+                _setSelection = NO;
+            }
+            
+            // Send the press to delegate
+            NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                    [NSNumber numberWithUnsignedInt:y], @"y",
+                                    [NSNumber numberWithBool:down], @"down",
+                                    nil];
+            if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
+                [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+            
         }
     
     }
+    
+    // Clear up after tracking selection
+    if( _mode != EatsPatternViewMode_Play ) {
+        _lastDownKey = nil;
+        _setSelection = NO;
+    }
+
+    // In edit mode we check for double presses
+    if ( _mode == EatsPatternViewMode_Edit ) {
+        
+        if( !down ) {
+            
+            // Check for double presses
+            if(_lastReleasedKey
+               && [[_lastReleasedKey valueForKey:@"time"] timeIntervalSinceNow] > -0.4
+               && [[_lastReleasedKey valueForKey:@"x"] intValue] == x
+               && [[_lastReleasedKey valueForKey:@"y"] intValue] == y) {
+                
+                // Send the double press to delegate
+                NSDictionary *xy = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                    [NSNumber numberWithUnsignedInt:y], @"y",
+                                    nil];
+                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewDoublePressAt: sender:)])
+                    [self.delegate performSelector:@selector(eatsGridPatternViewDoublePressAt: sender:) withObject:xy withObject:self];
+                
+            } else {
+                // Log the last release
+                _lastReleasedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                    [NSNumber numberWithUnsignedInt:y], @"y",
+                                    [NSDate date], @"time",
+                                    nil];
+            }
+            
+        }
+    }
+    
+    // These two modes always receive all presses
+    if( _mode == EatsPatternViewMode_Edit || _mode == EatsPatternViewMode_NoteEdit ) {
+
+        // Send the press to delegate
+        NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                [NSNumber numberWithUnsignedInt:y], @"y",
+                                [NSNumber numberWithBool:down], @"down",
+                                nil];
+        if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
+        [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+
+    }
+
 }
 
 

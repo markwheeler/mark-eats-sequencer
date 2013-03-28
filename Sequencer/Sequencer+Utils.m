@@ -46,7 +46,7 @@
         else
             page.name = [NSString stringWithFormat:@"Sequencer page %i", i];
         page.loopEnd = [NSNumber numberWithUnsignedInt: width - 1];
-       
+        page.currentStep = [page.loopEnd copy];
         
         // Create the default pitches
         
@@ -118,7 +118,6 @@
         loopEnd = page.loopEnd.intValue + width;
     
     int range = loopEnd + 1 - page.loopStart.intValue;
-    NSLog(@"range %i", range);
     
     int result = floor(arc4random_uniform(range) + page.loopStart.intValue);
     if( result >= width )

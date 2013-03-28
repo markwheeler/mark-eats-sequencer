@@ -43,4 +43,14 @@
     return gridArray;
 }
 
++ (float) stepsToPercentage:(int)steps width:(uint)width
+{
+    return ( (float)steps / (width - 1) ) * 100.0;
+}
+
++ (uint) percentageToSteps:(float)percentage width:(uint)width
+{
+    return roundf( ((width - 1) / 100.0) * percentage );
+}
+
 @end

@@ -11,5 +11,7 @@
 @interface EatsGridUtils : NSObject
 
 + (NSArray *) combineSubViews:(NSSet *)views gridWidth:(uint)width gridHeight:(uint)height;
++ (float) stepsToPercentage:(int)steps width:(uint)width;
++ (uint) percentageToSteps:(float)percentage width:(uint)width;
 
 @end

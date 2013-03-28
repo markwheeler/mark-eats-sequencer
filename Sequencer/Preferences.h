@@ -30,6 +30,7 @@ typedef enum EatsGridType{
 @property BOOL              sendMIDIClock;
 
 @property BOOL              emulateSP1200NoteVelocity;
+@property BOOL              loopFromScrubArea;
 
 + (id) sharedPreferences;
 - (void) loadPreferences;

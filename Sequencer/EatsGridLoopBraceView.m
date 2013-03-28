@@ -7,6 +7,7 @@
 //
 
 #import "EatsGridLoopBraceView.h"
+#import "EatsGridUtils.h"
 
 @interface EatsGridLoopBraceView ()
 
@@ -21,8 +22,8 @@
 {
     if( !self.visible ) return nil;
     
-    uint startPercentageAsStep = roundf(((self.width - 1) / 100.0) * _startPercentage);
-    uint endPercentageAsStep = roundf(((self.width - 1) / 100.0) * _endPercentage);
+    uint startPercentageAsStep = [EatsGridUtils percentageToSteps:_startPercentage width:self.width];
+    uint endPercentageAsStep = [EatsGridUtils percentageToSteps:_endPercentage width:self.width];
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -58,8 +59,8 @@
                 loopEndX += self.width;
             
             // Set a selection
-            _startPercentage = ( [[_lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
-            _endPercentage = ( loopEndX / (self.width - 1.0) ) * 100.0;
+            _startPercentage = [EatsGridUtils stepsToPercentage:[[_lastDownKey valueForKey:@"x"] intValue] width:self.width];
+            _endPercentage = [EatsGridUtils stepsToPercentage:loopEndX width:self.width];
             
             _setSelection = YES;
             
@@ -73,7 +74,7 @@
         
         
         
-        // Release
+    // Release
     } else {
         
         // Remove lastDownKey if it's this one and set the selection to all

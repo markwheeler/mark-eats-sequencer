@@ -7,6 +7,7 @@
 //
 
 #import "EatsGridHorizontalSliderView.h"
+#import "EatsGridUtils.h"
 
 @implementation EatsGridHorizontalSliderView
 
@@ -14,7 +15,7 @@
 {
     if( !self.visible ) return nil;
     
-    uint percentageAsStep = roundf(((self.width - 1) / 100.0) * _percentage);
+    uint percentageAsStep = [EatsGridUtils percentageToSteps:_percentage width:self.width];
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -40,8 +41,8 @@
 {
     // Down
     if( down ) {
-        
-        _percentage = ( x / (self.width - 1.0) ) * 100.0;
+
+        _percentage = [EatsGridUtils stepsToPercentage:x width:self.width];
         NSLog(@"slider percentage %f", _percentage);
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])

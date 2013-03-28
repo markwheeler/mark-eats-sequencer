@@ -7,6 +7,7 @@
 //
 
 #import "EatsGridHorizontalSelectionView.h"
+#import "EatsGridUtils.h"
 
 @interface EatsGridHorizontalSelectionView ()
 
@@ -21,8 +22,8 @@
 {
     if( !self.visible ) return nil;
     
-    uint startPercentageAsStep = roundf(((self.width - 1) / 100.0) * _startPercentage);
-    uint endPercentageAsStep = roundf(((self.width - 1) / 100.0) * _endPercentage);
+    uint startPercentageAsStep = [EatsGridUtils percentageToSteps:_startPercentage width:self.width];
+    uint endPercentageAsStep = [EatsGridUtils percentageToSteps:_endPercentage width:self.width];
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -51,13 +52,13 @@
         
         if( _lastDownKey ) {
             
-            _startPercentage = ( [[_lastDownKey valueForKey:@"x"] intValue] / (self.width - 1.0) ) * 100.0;
-            _endPercentage = ( x / (self.width - 1.0) ) * 100.0;
+            _startPercentage = [EatsGridUtils stepsToPercentage:[[_lastDownKey valueForKey:@"x"] intValue] width:self.width];
+            _endPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
             
             // Maintain order
             if ( _startPercentage > _endPercentage ) {
                 _endPercentage = _startPercentage;
-                _startPercentage = ( x / (self.width - 1.0) ) * 100.0;
+                _startPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
             }
             
             _setSelection = YES;
@@ -76,8 +77,8 @@
         // Remove lastDownKey if it's this one and put a 1 step selection haven't already drawn a selection
         if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
             if (!_setSelection ) {    
-                _startPercentage = ( x / (self.width - 1.0) ) * 100.0;
-                _endPercentage = ( x / (self.width - 1.0) ) * 100.0;
+                _startPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
+                _endPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
             }
             _lastDownKey = nil;
             _setSelection = NO;

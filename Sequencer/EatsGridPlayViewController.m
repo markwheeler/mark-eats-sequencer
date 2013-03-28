@@ -8,6 +8,7 @@
 
 #import "EatsGridPlayViewController.h"
 #import "EatsGridNavigationController.h"
+#import "EatsGridUtils.h"
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
@@ -48,6 +49,7 @@
 
 - (void) setupView
 {
+    
     // Get the sequencer
     NSFetchRequest *sequencerRequest = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
     NSArray *sequencerMatches = [self.managedObjectContext executeFetchRequest:sequencerRequest error:nil];
@@ -143,8 +145,8 @@
     _loopBraceView.height = 1;
     _loopBraceView.fillBar = YES;
     _loopBraceView.visible = NO;
-    _loopBraceView.startPercentage = ( _page.loopStart.floatValue / (self.width - 1.0) ) * 100.0;
-    _loopBraceView.endPercentage = ( _page.loopEnd.floatValue / (self.width - 1.0) ) * 100.0;
+    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_page.loopStart.intValue width:self.width];
+    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_page.loopEnd.intValue width:self.width];
     
     // Pattern view
     _patternView = [[EatsGridPatternView alloc] init];
@@ -506,8 +508,8 @@
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
 {
-    _page.loopStart = [NSNumber numberWithUnsignedInt:roundf(((self.width - 1) / 100.0) * sender.startPercentage)];
-    _page.loopEnd = [NSNumber numberWithUnsignedInt:roundf(((self.width - 1) / 100.0) * sender.endPercentage)];
+    _page.loopStart = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.startPercentage width:self.width]];
+    _page.loopEnd = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.endPercentage width:self.width]];
     
     [self updateView];
 }
@@ -523,6 +525,18 @@
         if( [_page.playMode intValue] == EatsSequencerPlayMode_Pause )
             _page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
     }
+}
+
+- (void) eatsGridPatternViewSelection:(NSDictionary *)selection sender:(EatsGridPatternView *)sender
+{
+    uint start = [[selection valueForKey:@"start"] unsignedIntValue];
+    uint end = [[selection valueForKey:@"end"] unsignedIntValue];
+    
+    _page.loopStart = [NSNumber numberWithUnsignedInt:start];
+    _page.loopEnd = [NSNumber numberWithUnsignedInt:end];
+    
+    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:start width:_loopBraceView.width];
+    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:end width:_loopBraceView.width];
 }
 
 @end

@@ -35,6 +35,7 @@
     self.sendMIDIClock = [preferences boolForKey:@"sendMIDIClock"];
     
     self.emulateSP1200NoteVelocity = [preferences boolForKey:@"emulateSP1200NoteVelocity"];
+    self.loopFromScrubArea = [preferences boolForKey:@"loopFromScrubArea"];
 }
 
 - (void) savePreferences
@@ -50,6 +51,7 @@
     [preferences setBool:self.sendMIDIClock forKey:@"sendMIDIClock"];
     
     [preferences setBool:self.emulateSP1200NoteVelocity forKey:@"emulateSP1200NoteVelocity"];
+    [preferences setBool:self.loopFromScrubArea forKey:@"loopFromScrubArea"];
     
     [preferences synchronize];
 }
