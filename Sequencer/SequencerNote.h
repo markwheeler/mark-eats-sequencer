@@ -2,7 +2,7 @@
 //  SequencerNote.h
 //  Sequencer
 //
-//  Created by Mark Wheeler on 27/03/2013.
+//  Created by Mark Wheeler on 29/03/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 

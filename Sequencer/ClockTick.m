@@ -22,9 +22,6 @@
 
 @property NSUInteger        currentTick;
 @property NSMutableArray    *activeNotes;
-@property BOOL              inLoop;
-@property uint              oldLoopStart;
-@property uint              oldLoopEnd;
 
 @end
 
@@ -134,15 +131,13 @@
                 
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
-                
-                if( page.loopStart.intValue != _oldLoopStart || page.loopEnd.intValue != _oldLoopEnd )
-                    _inLoop = NO; // TODO This brings back the original problem of the playhead escaping the loop ahhhh!!!
-                
+
                 // If page has been scrubbed
                 if( page.nextStep ) {
                     page.currentStep = [page.nextStep copy];
+                    page.nextStep = nil;
                     
-                    
+                // Otherwise we need to calculate the next step
                 } else {
                     
                     int playNow = page.currentStep.intValue;
@@ -151,10 +146,12 @@
                     if( page.playMode.intValue == EatsSequencerPlayMode_Forward ) {
                         playNow ++;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                            if( _inLoop && playNow > page.loopEnd.intValue )
+                            if( page.inLoop.boolValue && playNow > page.loopEnd.intValue )
                                 playNow = page.loopStart.intValue;
+                            else if( page.inLoop.boolValue && playNow < page.loopStart.intValue )
+                                playNow = page.loopEnd.intValue;
                         } else {
-                            if( _inLoop && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
+                            if( page.inLoop.boolValue && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopStart.intValue;
                         }
 
@@ -165,10 +162,12 @@
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                            if( _inLoop && playNow < page.loopStart.intValue )
+                            if( page.inLoop.boolValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
+                            else if( page.inLoop.boolValue && playNow > page.loopEnd.intValue )
+                                playNow = page.loopStart.intValue;
                         } else {
-                            if( _inLoop && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
+                            if( page.inLoop.boolValue && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
                         }
                         
@@ -187,21 +186,18 @@
                 if( page.loopStart.intValue <= page.loopEnd.intValue ) {
                     if( page.currentStep >= page.loopStart && page.currentStep <= page.loopEnd
                        && page.loopEnd.intValue - page.loopStart.intValue != _sharedPreferences.gridWidth - 1 )
-                        _inLoop = YES;
+                        page.inLoop = [NSNumber numberWithBool:YES];
                     else
-                        _inLoop = NO;
+                        page.inLoop = [NSNumber numberWithBool:NO];;
                 } else {
                     if( page.currentStep >= page.loopStart || page.currentStep <= page.loopEnd )
-                        _inLoop = YES;
+                        page.inLoop = [NSNumber numberWithBool:YES];
                     else
-                        _inLoop = NO;
+                        page.inLoop = [NSNumber numberWithBool:NO];
                 }
                 
-                page.nextStep = nil;
-                _oldLoopStart = page.loopStart.intValue;
-                _oldLoopEnd = page.loopEnd.intValue; // TODO These variables and _inLoop need to be implemented PER PAGE!
                 
-
+                
                 // Send notes that need to be sent
                 
                 for( SequencerNote *note in [[page.patterns objectAtIndex:[page.currentPattern intValue]] notes] ) {

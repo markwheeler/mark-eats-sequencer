@@ -18,6 +18,7 @@
         <attribute name="currentPattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="currentStep" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="id" optional="YES" attributeType="Integer 16" minValueString="0" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="inLoop" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="loopEnd" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="loopStart" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" maxValueString="100" syncable="YES"/>
@@ -48,7 +49,7 @@
     <elements>
         <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="103"/>
         <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
-        <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="283"/>
+        <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="298"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>
         <element name="SequencerPatternRef" positionX="-20" positionY="198" width="128" height="73"/>
         <element name="SequencerRowPitch" positionX="-11" positionY="62" width="128" height="88"/>

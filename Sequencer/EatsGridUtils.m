@@ -29,6 +29,8 @@
             
             while ( (view = [enumerator nextObject]) && !foundView) {
                 
+                // TODO: Modify this so views can overlap? Brightest pixel takes priority. Or add their values?!
+                
                 if( view.visible && x >= view.x && x < view.x + view.width && y >= view.y && y < view.y + view.height ) {
                     [[gridArray objectAtIndex:x] insertObject:[[[view viewArray] objectAtIndex:x - view.x] objectAtIndex:y - view.y ] atIndex:y];
                     foundView = YES;
