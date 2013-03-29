@@ -209,10 +209,13 @@
                         int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
                         int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
                         
-                        // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
-                        int endStep = ((int)_currentTick / ( _ticksPerMeasure / _minQuantization )) + 2; // TODO: base this on note.length
+                        // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
+                        int noteLength = roundf( ( _sharedPreferences.gridWidth * ( note.lengthAsPercentage.floatValue / 100.0 ) ) * _minQuantization / page.stepLength.floatValue );
+                        NSLog(@"%i", noteLength);
+                        int endStep = ((int)_currentTick / ( _ticksPerMeasure / _minQuantization )) + noteLength;
                         if(endStep >= _minQuantization)
                             endStep -= _minQuantization;
+                        
                         
                         // Send MIDI note
                         [self startMIDINote:pitch

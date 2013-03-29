@@ -43,7 +43,6 @@
     if( down ) {
 
         _percentage = [EatsGridUtils stepsToPercentage:x width:self.width];
-        NSLog(@"slider percentage %f", _percentage);
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
             [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];

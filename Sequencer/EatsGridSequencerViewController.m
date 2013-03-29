@@ -238,7 +238,7 @@
     // Velocity
     if(sender == _velocityView) {
         _activeEditNote.velocityAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
-        NSLog(@"Velocity %@", _activeEditNote.velocityAsPercentage);
+        //NSLog(@"Velocity %@", _activeEditNote.velocityAsPercentage);
     
     // Length
     } else if(sender == _lengthView) {
