@@ -14,7 +14,7 @@
 @interface SequencerPage : NSManagedObject
 
 @property (nonatomic, retain) NSNumber * channel;
-@property (nonatomic, retain) NSNumber * currentPattern;
+@property (nonatomic, retain) NSNumber * currentPatternId;
 @property (nonatomic, retain) NSNumber * currentStep;
 @property (nonatomic, retain) NSNumber * id;
 @property (nonatomic, retain) NSNumber * loopEnd;

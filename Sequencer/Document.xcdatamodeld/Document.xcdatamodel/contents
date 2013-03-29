@@ -15,7 +15,7 @@
     </entity>
     <entity name="SequencerPage" representedClassName="SequencerPage" syncable="YES">
         <attribute name="channel" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="0" syncable="YES"/>
-        <attribute name="currentPattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="currentPatternId" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="currentStep" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="id" optional="YES" attributeType="Integer 16" minValueString="0" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="inLoop" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>

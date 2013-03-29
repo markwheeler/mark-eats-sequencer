@@ -39,6 +39,13 @@
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
         
+        // Get the pattern
+        NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+        patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage.id == 0) AND (id == inPage.currentPatternId)"];
+        
+        NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
+        _pattern = [patternMatches lastObject];
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridControllerNone:)
                                                      name:@"GridControllerNone"
@@ -129,5 +136,33 @@
         [_deviceInterface performSelector:@selector(redrawGridController:) withObject:gridArray];
 
 }
+
+- (void) setNewPageId:(NSNumber *)id
+{
+    // Get the page
+    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == %@", id];
+    
+    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
+    SequencerPage *page = [pageMatches lastObject];
+    
+    // Get the pattern for it
+    _pattern = [page.patterns objectAtIndex:page.currentPatternId.intValue];
+
+}
+
+- (void) setNewPatternId:(NSNumber *)id
+{
+    // Get the pattern
+    NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+    patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage == %@) AND (id == %@)", _pattern.inPage, id];
+
+    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
+    _pattern = [patternMatches lastObject];
+    
+    _pattern.inPage.currentPatternId = id;
+}
+
+
 
 @end

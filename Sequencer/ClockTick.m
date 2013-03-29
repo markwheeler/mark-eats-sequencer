@@ -127,7 +127,7 @@
         for(SequencerPage *page in _sequencer.pages) {
             
             // Play notes for current step, playMode != paused
-            if( _currentTick % (_ticksPerMeasure / [page.stepLength intValue]) == 0 && [page.playMode intValue] != EatsSequencerPlayMode_Pause ) {
+            if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 && page.playMode.intValue != EatsSequencerPlayMode_Pause ) {
                 
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
@@ -200,14 +200,14 @@
                 
                 // Send notes that need to be sent
                 
-                for( SequencerNote *note in [[page.patterns objectAtIndex:[page.currentPattern intValue]] notes] ) {
+                for( SequencerNote *note in [[page.patterns objectAtIndex:page.currentPatternId.intValue] notes] ) {
                     
                     if( note.step == page.currentStep ) {
                         
                         //Set note properties
-                        int channel = [page.channel intValue];
+                        int channel = page.channel.intValue;
                         int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
-                        int pitch = [[[page.pitches objectAtIndex:[note.row intValue]] pitch] intValue];
+                        int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
                         
                         // This number in the end here is the number of MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
                         int endStep = ((int)_currentTick / ( _ticksPerMeasure / _minQuantization )) + 2; // TODO: base this on note.length
@@ -251,7 +251,7 @@
 - (void) clockLateBy:(uint64_t)ns
 {
     // TODO: Create a visual indicator for this
-    NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
+    //NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
 }
 
 

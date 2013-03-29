@@ -16,7 +16,6 @@
 
 @interface EatsGridSequencerViewController ()
 
-@property SequencerPage                 *page;
 @property SequencerPattern              *pattern;
 @property SequencerNote                 *activeEditNote;
 @property NSDictionary                  *lastRemovedNoteInfo;
@@ -34,20 +33,7 @@
 
 - (void) setupView
 {
-
-    // Get the page
-    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
-    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == 0"];
-    
-    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
-    _page = [pageMatches lastObject];
-    
-    // Get the pattern
-    NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-    patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage == %@) AND (id == 0)", _page];
-    
-    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
-    _pattern = [patternMatches lastObject];
+    _pattern = [self.delegate valueForKey:@"pattern"];
     
     // Create the sub views
     _patternView = [[EatsGridPatternView alloc] init];
@@ -237,7 +223,7 @@
     NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
 
     _patternView.pattern = [patternMatches lastObject];
-    _patternView.currentStep = [_page.currentStep unsignedIntValue];
+    _patternView.currentStep = [_pattern.inPage.currentStep unsignedIntValue];
     
     [super updateView];
 }

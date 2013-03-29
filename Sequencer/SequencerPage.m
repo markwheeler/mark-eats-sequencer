@@ -16,7 +16,7 @@
 @implementation SequencerPage
 
 @dynamic channel;
-@dynamic currentPattern;
+@dynamic currentPatternId;
 @dynamic currentStep;
 @dynamic id;
 @dynamic loopEnd;

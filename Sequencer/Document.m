@@ -347,6 +347,7 @@
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
     page.nextStep = nil;
+    [self.gridNavigationController updateGridView];
 }
 
 
@@ -355,6 +356,7 @@
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
     page.nextStep = nil;
+    [self.gridNavigationController updateGridView];
 }
 
 - (IBAction)sequencerReverseButton:(NSButton *)sender
@@ -362,6 +364,7 @@
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
     page.nextStep = nil;
+    [self.gridNavigationController updateGridView];
 }
 
 - (IBAction)sequencerRandomButton:(NSButton *)sender
@@ -369,6 +372,7 @@
     SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
     page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
     page.nextStep = nil;
+    [self.gridNavigationController updateGridView];
 }
 
 - (IBAction)scalesOpenSheetButton:(NSButton *)sender {

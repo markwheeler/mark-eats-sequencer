@@ -63,7 +63,6 @@
         
 
         // Create the empty SequencerPatterns
-        
         NSMutableOrderedSet *setOfPatterns = [NSMutableOrderedSet orderedSetWithCapacity:32];
         for( int j = 0; j < 32; j++) {
             SequencerPattern *pattern = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerPattern" inManagedObjectContext:context];
@@ -77,12 +76,6 @@
     }
     sequencer.pages = setOfPages;
 
-    
-    //SequencerPage *page = sequencer.pages[2];
-    //NSLog(@"%@", [page.pitches[3] pitch]);
-    
-    // NOTE: Always use isEqual: to compare as this is more effecient that doing a == object.property with ManagedObjects
-    
     // TODO: Might need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
     
     return sequencer;

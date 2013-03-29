@@ -18,7 +18,6 @@
 @interface EatsGridPlayViewController ()
 
 @property Sequencer                         *sequencer;
-@property SequencerPage                     *page;
 @property SequencerPattern                  *pattern;
 
 @property EatsGridLoopBraceView             *loopBraceView;
@@ -55,11 +54,8 @@
     NSArray *sequencerMatches = [self.managedObjectContext executeFetchRequest:sequencerRequest error:nil];
     _sequencer = [sequencerMatches lastObject];
     
-    // Get the page
-    _page = [_sequencer.pages objectAtIndex:0];
-    
     // Get the pattern
-    _pattern = [_page.patterns objectAtIndex:0];
+    _pattern = [self.delegate valueForKey:@"pattern"];
     
     // Create the sub views
     
@@ -145,8 +141,8 @@
     _loopBraceView.height = 1;
     _loopBraceView.fillBar = YES;
     _loopBraceView.visible = NO;
-    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_page.loopStart.intValue width:self.width];
-    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_page.loopEnd.intValue width:self.width];
+    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
+    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopEnd.intValue width:self.width];
     
     // Pattern view
     _patternView = [[EatsGridPatternView alloc] init];
@@ -160,13 +156,13 @@
     _patternView.pattern = _pattern;
     _patternView.patternHeight = self.height;
     
-    // Make the correct playMode button active and listen for changes to keep it correct
-    [self setPlayMode:[_page.playMode intValue]];
-    [_page addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
-    
-    // Set the other buttons
+    // Set top left buttons correctly
     [self setActivePageButton];
     [self setActivePatternButton];
+    
+    // Make the correct playMode button active and listen for changes to keep it correct
+    [self setPlayMode:[_pattern.inPage.playMode intValue]];
+    //[_pattern.inPage addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Add everything to sub views
     self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
@@ -187,7 +183,7 @@
 
 - (void) dealloc
 {
-    [_page removeObserver:self forKeyPath:@"playMode"];
+    //[_pattern.inPage removeObserver:self forKeyPath:@"playMode"];
     
     if( _animationTimer )
         [_animationTimer invalidate];
@@ -198,13 +194,24 @@
 
 - (void) updateView
 {
+    if( _pattern != [self.delegate valueForKey:@"pattern"] )
+        _pattern = [self.delegate valueForKey:@"pattern"];
+    
     // Update PatternView sub view
     NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
     patternRequest.predicate = [NSPredicate predicateWithFormat:@"SELF == %@", _pattern];
     NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
     
-    _patternView.pattern = [patternMatches lastObject];
-    _patternView.currentStep = [_page.currentStep unsignedIntValue];
+    _pattern = [patternMatches lastObject];
+    
+    _patternView.pattern = _pattern;
+    _patternView.currentStep = _pattern.inPage.currentStep.unsignedIntValue;
+    
+    [self setPlayMode:_pattern.inPage.playMode.intValue];    
+    [self setActivePageButton];
+    [self setActivePatternButton];
+    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
+    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopEnd.intValue width:self.width];
     
     [super updateView];
 }
@@ -220,36 +227,30 @@
             button.buttonState = EatsButtonViewState_Inactive;
         i++;
     }
-    
-    [self updateView];
 }
 
 - (void) setActivePageButton
-{
+{    
     uint i = 0;
     for ( EatsGridButtonView *button in _pageButtons ) {
-        if( i == [_page.id intValue] )
+        if( i == [_pattern.inPage.id intValue] )
             button.buttonState = EatsButtonViewState_Active;
         else
             button.buttonState = EatsButtonViewState_Inactive;
         i++;
     }
-    
-    [self updateView];
 }
 
 - (void) setActivePatternButton
 {
     uint i = 0;
     for ( EatsGridButtonView *button in _patternButtons ) {
-        if( i == [_page.id intValue] )
+        if( i == _pattern.inPage.currentPatternId.intValue )
             button.buttonState = EatsButtonViewState_Active;
         else
             button.buttonState = EatsButtonViewState_Inactive;
         i++;
     }
-    
-    [self updateView];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -295,6 +296,8 @@
     
     [self updateView];
 }
+
+// TODO: Add ease to animation
 
 - (void) animateIncrement:(int)amount
 {
@@ -375,9 +378,9 @@
     if ( [_pageButtons containsObject:sender] ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            // Change the page
-            [self setActivePageButton];
-            NSLog(@"Page button %lu", [_pageButtons indexOfObject:sender]);
+            
+            if([self.delegate respondsToSelector:@selector(setNewPageId:)])
+                [self.delegate performSelector:@selector(setNewPageId:) withObject:[NSNumber numberWithUnsignedInteger:[_pageButtons indexOfObject:sender]]];
         }
     }
     
@@ -385,9 +388,9 @@
     if ( [_patternButtons containsObject:sender] ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            // Change the pattern
-            [self setActivePatternButton];
-            NSLog(@"Pattern button %lu", [_patternButtons indexOfObject:sender]);
+            
+            if([self.delegate respondsToSelector:@selector(setNewPatternId:)])
+                [self.delegate performSelector:@selector(setNewPatternId:) withObject:[NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]]];
         }
     }
     
@@ -395,28 +398,32 @@
     if( sender == _pauseButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+            [self setPlayMode:EatsSequencerPlayMode_Pause];
         }
         
     // Play mode forward button
     } else if( sender == _forwardButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+            [self setPlayMode:EatsSequencerPlayMode_Forward];
         }
         
     // Play mode reverse button
     } else if( sender == _reverseButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+            [self setPlayMode:EatsSequencerPlayMode_Reverse];
         }
         
     // Play mode random button
     } else if( sender == _randomButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];   
+            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
+            [self setPlayMode:EatsSequencerPlayMode_Random];
         }
         
     // TODO: BPM- button
@@ -508,8 +515,8 @@
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
 {
-    _page.loopStart = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.startPercentage width:self.width]];
-    _page.loopEnd = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.endPercentage width:self.width]];
+    _pattern.inPage.loopStart = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.startPercentage width:self.width]];
+    _pattern.inPage.loopEnd = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.endPercentage width:self.width]];
     
     [self updateView];
 }
@@ -521,9 +528,9 @@
     
     if( down ) {
         // Scrub the loop
-        _page.nextStep = [NSNumber numberWithUnsignedInt:x];
-        if( [_page.playMode intValue] == EatsSequencerPlayMode_Pause )
-            _page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+        _pattern.inPage.nextStep = [NSNumber numberWithUnsignedInt:x];
+        if( [_pattern.inPage.playMode intValue] == EatsSequencerPlayMode_Pause )
+            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
     }
 }
 
@@ -532,8 +539,8 @@
     uint start = [[selection valueForKey:@"start"] unsignedIntValue];
     uint end = [[selection valueForKey:@"end"] unsignedIntValue];
     
-    _page.loopStart = [NSNumber numberWithUnsignedInt:start];
-    _page.loopEnd = [NSNumber numberWithUnsignedInt:end];
+    _pattern.inPage.loopStart = [NSNumber numberWithUnsignedInt:start];
+    _pattern.inPage.loopEnd = [NSNumber numberWithUnsignedInt:end];
     
     _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:start width:_loopBraceView.width];
     _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:end width:_loopBraceView.width];
