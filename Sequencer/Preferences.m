@@ -22,6 +22,16 @@
     return sharedPreferences;
 }
 
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        self.gridWidth = 32;
+        self.gridHeight = 32;
+    }
+    return self;
+}
+
 - (void) loadPreferences
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];

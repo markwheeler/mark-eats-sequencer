@@ -20,7 +20,7 @@
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
 
-@property uint        currentTick;
+@property uint              currentTick;
 @property NSMutableArray    *activeNotes;
 
 @end
@@ -54,9 +54,7 @@
     
     // Create the objects needed for keeping track of active notes
     if(!_activeNotes) {
-        _activeNotes = [NSMutableArray array];
-        for(int i = 0; i < _minQuantization; i++)
-            [_activeNotes addObject:[NSMutableSet setWithCapacity:32]];
+        _activeNotes = [NSMutableArray arrayWithCapacity:32];
     }
     
     _currentTick = 0;
@@ -112,14 +110,24 @@
     if( _currentTick % (_ticksPerMeasure / _minQuantization) == 0 ) {
         
         // Check if any of the active notes need to be stopped this tick
-        NSMutableSet *notesToStop = [_activeNotes objectAtIndex:_currentTick / (_ticksPerMeasure / _minQuantization)];
-        for( NSDictionary *note in notesToStop ) {
-            [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
-                     onChannel:[[note objectForKey:@"channel"] intValue]
-                  withVelocity:[[note objectForKey:@"velocity"] intValue]
-                        atTime:ns];
+        NSMutableArray *toRemove = [NSMutableArray arrayWithCapacity:8];
+        for( NSMutableDictionary *note in _activeNotes ) {
+            
+            int lengthRemaining = [[note objectForKey:@"lengthRemaining"] intValue];
+            lengthRemaining --;
+            
+            if( lengthRemaining <= 0 ) {
+                [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
+                         onChannel:[[note objectForKey:@"channel"] intValue]
+                      withVelocity:[[note objectForKey:@"velocity"] intValue]
+                            atTime:ns];
+                [toRemove addObject:note];
+                
+            } else {
+                [note setObject:[NSNumber numberWithInt:lengthRemaining] forKey:@"lengthRemaining"];
+            }
         }
-        [notesToStop removeAllObjects];
+        [_activeNotes removeObjectsInArray:toRemove];
         
         // Update the sequencer pages and send notes
         
@@ -206,11 +214,9 @@
                     int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
                     
                     // Don't start a note that's already playing
-                    for( NSMutableSet *notesSet in _activeNotes ) {
-                        for( NSDictionary *note in notesSet ) {
-                            if( [[note valueForKey:@"pitch"] intValue] == pitch ) {
-                                isPlaying = YES;
-                            }
+                    for( NSMutableDictionary *note in _activeNotes ) {
+                        if( [[note valueForKey:@"pitch"] intValue] == pitch ) {
+                            isPlaying = YES;
                         }
                     }
                     
@@ -220,27 +226,24 @@
                         //Set the rest of the note properties
                         int channel = page.channel.intValue;
                         int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
-                        
-                        
-                        // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
-                        int noteLength = roundf( ( _sharedPreferences.gridWidth * ( note.lengthAsPercentage.floatValue / 100.0 ) ) * _minQuantization / page.stepLength.floatValue );
-                        int endStep = ((int)_currentTick / ( _ticksPerMeasure / _minQuantization )) + noteLength;
-                        while(endStep >= _minQuantization)
-                            endStep -= _minQuantization; // TODO This doesn't work! When the notes are longer than the currentTick loop the notes get stopped too soon!
-                        NSLog(@"currentTick: %u noteLength: %i endStep: %i", _currentTick, noteLength, endStep);
-                        
+                                                
                         // Send MIDI note
                         [self startMIDINote:pitch
                                   onChannel:channel
                                withVelocity:velocity
                                      atTime:ns];
                         
+                        // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
+                        int length = roundf( ( _sharedPreferences.gridWidth * ( note.lengthAsPercentage.floatValue / 100.0 ) ) * _minQuantization / page.stepLength.floatValue );
+                        if( length < 1 )
+                            NSLog(@"Note added was too short: %i", length);
                         // Add to activeNotes so we know when to stop it
-                        [[_activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                                                                                                   [NSNumber numberWithInt:channel], @"channel",
-                                                                                                                   [NSNumber numberWithInt:velocity], @"velocity",
-                                                                                                                   nil]];
-                                                                
+                        [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                                                                                                  [NSNumber numberWithInt:channel], @"channel",
+                                                                                                  [NSNumber numberWithInt:velocity], @"velocity",
+                                                                                                  [NSNumber numberWithInt:length], @"lengthRemaining",
+                                                                                                  nil]];
+                        
                         // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time?
                     }
                     
@@ -311,15 +314,13 @@
 
 - (void) stopAllActiveMIDINotes:(Float64)ns
 {
-    for( NSMutableSet *notesToStop in _activeNotes ) {
-        for( NSDictionary *note in notesToStop ) {
-            [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
-                     onChannel:[[note objectForKey:@"channel"] intValue]
-                  withVelocity:[[note objectForKey:@"velocity"] intValue]
-                        atTime:ns];
-        }
-        [notesToStop removeAllObjects];
+    for( NSDictionary *note in _activeNotes ) {
+        [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
+                 onChannel:[[note objectForKey:@"channel"] intValue]
+              withVelocity:[[note objectForKey:@"velocity"] intValue]
+                    atTime:ns];
     }
+    [_activeNotes removeAllObjects];
 }
 
 @end
