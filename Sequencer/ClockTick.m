@@ -20,7 +20,7 @@
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
 
-@property NSUInteger        currentTick;
+@property uint        currentTick;
 @property NSMutableArray    *activeNotes;
 
 @end
@@ -202,20 +202,32 @@
                 
                 for( SequencerNote *note in [[page.patterns objectAtIndex:page.currentPatternId.intValue] notes] ) {
                     
-                    if( note.step == page.currentStep ) {
+                    BOOL isPlaying = NO;
+                    int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
+                    
+                    // Don't start a note that's already playing
+                    for( NSMutableSet *notesSet in _activeNotes ) {
+                        for( NSDictionary *note in notesSet ) {
+                            if( [[note valueForKey:@"pitch"] intValue] == pitch ) {
+                                isPlaying = YES;
+                            }
+                        }
+                    }
+                    
+                    // Play it!
+                    if( !isPlaying && note.step == page.currentStep ) {
                         
-                        //Set note properties
+                        //Set the rest of the note properties
                         int channel = page.channel.intValue;
                         int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
-                        int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
+                        
                         
                         // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length. Must be between 1 and MIN_QUANTIZATION
                         int noteLength = roundf( ( _sharedPreferences.gridWidth * ( note.lengthAsPercentage.floatValue / 100.0 ) ) * _minQuantization / page.stepLength.floatValue );
-                        NSLog(@"%i", noteLength);
                         int endStep = ((int)_currentTick / ( _ticksPerMeasure / _minQuantization )) + noteLength;
-                        if(endStep >= _minQuantization)
-                            endStep -= _minQuantization;
-                        
+                        while(endStep >= _minQuantization)
+                            endStep -= _minQuantization; // TODO This doesn't work! When the notes are longer than the currentTick loop the notes get stopped too soon!
+                        NSLog(@"currentTick: %u noteLength: %i endStep: %i", _currentTick, noteLength, endStep);
                         
                         // Send MIDI note
                         [self startMIDINote:pitch
@@ -225,10 +237,10 @@
                         
                         // Add to activeNotes so we know when to stop it
                         [[_activeNotes objectAtIndex:endStep] addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                                                             [NSNumber numberWithInt:channel], @"channel",
-                                                                             [NSNumber numberWithInt:velocity], @"velocity",
-                                                                             nil]];
-                        
+                                                                                                                   [NSNumber numberWithInt:channel], @"channel",
+                                                                                                                   [NSNumber numberWithInt:velocity], @"velocity",
+                                                                                                                   nil]];
+                                                                
                         // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time?
                     }
                     

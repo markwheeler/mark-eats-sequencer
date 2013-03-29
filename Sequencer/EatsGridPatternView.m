@@ -8,6 +8,7 @@
 
 #import "EatsGridPatternView.h"
 #import "EatsGridNavigationController.h"
+#import "EatsGridUtils.h"
 #import "Preferences.h"
 #import "SequencerNote.h"
 
@@ -63,10 +64,9 @@
     // Work out how much we need to fold
     int scaleDifference = _patternHeight - self.height;
     if( scaleDifference < 0 ) scaleDifference = 0;
-
     
     for(SequencerNote *note in _pattern.notes) {
-        if( [note.step intValue] < self.width && [note.row intValue] < _patternHeight ) {
+        if( note.step.intValue < self.width && note.row.intValue < _patternHeight ) {
                         
             uint row = [note.row unsignedIntValue];
 
@@ -84,13 +84,30 @@
                 
             }
 
+            int lengthBrightness = _noteLengthBrightness;
+            
             // Put in the active note while editing
-            if( note == _activeEditNote && _mode == EatsPatternViewMode_NoteEdit )
-                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
+            if( note == _activeEditNote && _mode == EatsPatternViewMode_NoteEdit ) {
+                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
+                lengthBrightness = 12;
+            }
             
             // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:[note.step intValue]] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
-                [[viewArray objectAtIndex:[note.step intValue]] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:_noteBrightness * self.opacity]];
+            else if( [[[viewArray objectAtIndex:note.step.intValue] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
+                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:_noteBrightness * self.opacity]];
+            
+            // Put the length tails in
+            int tailDraw = note.step.intValue;
+            int length =  roundf( self.width * ( note.lengthAsPercentage.floatValue / 100 ) ) - 1;
+
+            for( int i = 0; i < length; i++ ) {
+                tailDraw ++;
+                if( tailDraw >= self.width )
+                    tailDraw -= self.width;
+                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < lengthBrightness * self.opacity )
+                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:lengthBrightness * self.opacity]];
+
+            }
         }
     }
     
