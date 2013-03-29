@@ -22,6 +22,9 @@
 
 @property NSUInteger        currentTick;
 @property NSMutableArray    *activeNotes;
+@property BOOL              inLoop;
+@property uint              oldLoopStart;
+@property uint              oldLoopEnd;
 
 @end
 
@@ -132,9 +135,13 @@
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
                 
+                if( page.loopStart.intValue != _oldLoopStart || page.loopEnd.intValue != _oldLoopEnd )
+                    _inLoop = NO; // TODO This brings back the original problem of the playhead escaping the loop ahhhh!!!
+                
                 // If page has been scrubbed
                 if( page.nextStep ) {
                     page.currentStep = [page.nextStep copy];
+                    
                     
                 } else {
                     
@@ -144,13 +151,13 @@
                     if( page.playMode.intValue == EatsSequencerPlayMode_Forward ) {
                         playNow ++;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                            if( playNow == page.loopEnd.intValue + 1 && !page.nextStep )
+                            if( _inLoop && playNow > page.loopEnd.intValue )
                                 playNow = page.loopStart.intValue;
-                            
                         } else {
-                            if( playNow == page.loopEnd.intValue + 1 && !page.nextStep )
+                            if( _inLoop && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopStart.intValue;
                         }
+
                         if( playNow >= _sharedPreferences.gridWidth )
                             playNow = 0;
                     
@@ -158,12 +165,13 @@
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                            if( playNow == page.loopStart.intValue -1 && !page.nextStep )
+                            if( _inLoop && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
                         } else {
-                            if( playNow == page.loopStart.intValue - 1 && !page.nextStep )
+                            if( _inLoop && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
                         }
+                        
                         if( playNow < 0 )
                             playNow = _sharedPreferences.gridWidth - 1;
                      
@@ -175,8 +183,23 @@
                     page.currentStep = [NSNumber numberWithInt: playNow];
                 }
                 
-                page.nextStep = nil;
+                // Are we in a loop
+                if( page.loopStart.intValue <= page.loopEnd.intValue ) {
+                    if( page.currentStep >= page.loopStart && page.currentStep <= page.loopEnd
+                       && page.loopEnd.intValue - page.loopStart.intValue != _sharedPreferences.gridWidth - 1 )
+                        _inLoop = YES;
+                    else
+                        _inLoop = NO;
+                } else {
+                    if( page.currentStep >= page.loopStart || page.currentStep <= page.loopEnd )
+                        _inLoop = YES;
+                    else
+                        _inLoop = NO;
+                }
                 
+                page.nextStep = nil;
+                _oldLoopStart = page.loopStart.intValue;
+                _oldLoopEnd = page.loopEnd.intValue; // TODO These variables and _inLoop need to be implemented PER PAGE!
                 
 
                 // Send notes that need to be sent
