@@ -10,6 +10,7 @@
 #import "EatsGridNavigationController.h"
 #import "EatsGridUtils.h"
 #import "Preferences.h"
+#import "Sequencer+Utils.h"
 #import "SequencerNote.h"
 
 
@@ -101,9 +102,16 @@
             int length =  roundf( self.width * ( note.lengthAsPercentage.floatValue / 100 ) ) - 1;
 
             for( int i = 0; i < length; i++ ) {
-                tailDraw ++;
-                if( tailDraw >= self.width )
+                if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                    tailDraw --;
+                else
+                    tailDraw ++;
+                
+                if( tailDraw < 0 )
+                    tailDraw += self.width;
+                else if( tailDraw >= self.width )
                     tailDraw -= self.width;
+                
                 if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < lengthBrightness * self.opacity )
                     [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:lengthBrightness * self.opacity]];
 
