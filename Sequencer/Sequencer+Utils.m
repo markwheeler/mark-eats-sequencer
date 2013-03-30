@@ -17,15 +17,13 @@
 @implementation Sequencer (Utils)
 
 + (Sequencer *)sequencerWithPages:(uint)numberOfPages
-                            width:(uint)width
-                           height:(uint)height
            inManagedObjectContext:(NSManagedObjectContext *)context
 {
     // Create an empty Sequencer
     Sequencer *sequencer = [NSEntityDescription insertNewObjectForEntityForName:@"Sequencer" inManagedObjectContext:context];
     
     // Generate pitches (Default C Major) TODO Make the first note line up with the bottom of the grid??
-    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:36 - ( 12 * (height / 8) ) length:32];
+    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:24 length:32];
     // Reverse the array
     pitches = [[pitches reverseObjectEnumerator] allObjects];
     
@@ -45,7 +43,7 @@
             page.name = [NSString stringWithFormat:@"Drums page %i", channel - 9];
         else
             page.name = [NSString stringWithFormat:@"Sequencer page %i", i];
-        page.loopEnd = [NSNumber numberWithUnsignedInt: width - 1];
+        page.loopEnd = [NSNumber numberWithUnsignedInt: 31];
         page.currentStep = [page.loopEnd copy];
         
         // Create the default pitches

@@ -155,7 +155,7 @@
         self.sequencer = [matches lastObject];
     } else {
         // Create initial structure
-        self.sequencer = [Sequencer sequencerWithPages:8 width:16 height:8 inManagedObjectContext:self.managedObjectContext];
+        self.sequencer = [Sequencer sequencerWithPages:8 inManagedObjectContext:self.managedObjectContext];
         
         [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
     }
@@ -201,6 +201,11 @@
     
     // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(gridControllerConnected:)
+                                                 name:@"GridControllerConnected"
+                                               object:nil];
     
     // Start the clock right away
     [self.clock startClock];
@@ -328,6 +333,18 @@
 
 #pragma mark - Private methods
 
+- (void) gridControllerConnected:(NSNotification *)notification
+{
+    // Make sure all the loops fit within the connected grid size
+    for( SequencerPage *page in self.sequencer.pages ) {
+        if( page.loopStart.intValue > self.sharedPreferences.gridWidth || page.loopEnd.intValue > self.sharedPreferences.gridWidth ) {
+            page.loopStart = [NSNumber numberWithInt:0];
+            page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
+        }
+    }
+    
+    // TODO: Offer to remove notes that extend beyond the size of the grid?
+}
 
 
 #pragma mark - Interface actions

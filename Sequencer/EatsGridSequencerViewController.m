@@ -266,6 +266,8 @@
 
             NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 
+            // TODO make it so that notes under the trails of others are hidden and non-interactive
+            
             if( [noteMatches count] ) {
 
                 // Remove a note

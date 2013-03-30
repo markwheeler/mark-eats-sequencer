@@ -7,12 +7,13 @@
 //
 
 #import "EatsMonome.h"
+#import "Preferences.h"
 
 @interface EatsMonome ()
 
 #define BRIGHTNESS_CUTOFF 7
 
-@property BOOL monomeSupportsVariableBrightness;
+@property Preferences   *sharedPreferences;
 
 @end
 
@@ -27,6 +28,8 @@
         
         _oscOutPort = port;
         _oscPrefix = prefix;
+        
+        _sharedPreferences = [Preferences sharedPreferences];
         
     }
     return self;
@@ -102,7 +105,7 @@
     NSUInteger level;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if(_monomeSupportsVariableBrightness) {
+    if( _sharedPreferences.gridSupportsVariableBrightness ) {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/set", _oscPrefix];
         level = l;
     } else {
@@ -125,7 +128,7 @@
     NSUInteger level;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if(_monomeSupportsVariableBrightness) {
+    if( _sharedPreferences.gridSupportsVariableBrightness ) {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/all", _oscPrefix];
         level = l;
     } else {
@@ -146,7 +149,7 @@
     NSMutableArray *levels;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if(_monomeSupportsVariableBrightness) {
+    if( _sharedPreferences.gridSupportsVariableBrightness ) {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/map", _oscPrefix];
         levels = [NSMutableArray arrayWithArray:l];
         
@@ -156,7 +159,7 @@
         // Go through and make everything binary in a new array 'levels'
         levels = [NSMutableArray arrayWithCapacity:64];
         for(NSNumber *level in l) {
-            if([level intValue] > BRIGHTNESS_CUTOFF)
+            if(level.intValue > BRIGHTNESS_CUTOFF)
                 [levels addObject:[NSNumber numberWithUnsignedInt:1]];
             else
                 [levels addObject:[NSNumber numberWithUnsignedInt:0]];
@@ -171,7 +174,7 @@
     [newMsg addInt:(unsigned)x];
     [newMsg addInt:(unsigned)y];
     for(NSNumber *level in levels) {
-        [newMsg addInt:[level intValue]];
+        [newMsg addInt:level.intValue];
     }
     
     [_oscOutPort sendThisMessage:newMsg];

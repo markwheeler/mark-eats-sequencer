@@ -18,8 +18,6 @@ typedef enum EatsSequencerPlayMode {
 @interface Sequencer (Utils)
 
 + (Sequencer *) sequencerWithPages:(uint)numberOfPages
-                             width:(uint)width
-                            height:(uint)height
             inManagedObjectContext:(NSManagedObjectContext *)context;
 
 + (void) addDummyDataToSequencer:(Sequencer *)sequencer
