@@ -36,6 +36,9 @@
 @property NSMutableArray                *quantizationArray;
 @property NSArray                       *swingArray;
 
+@property NSAlert                       *notesOutsideGridAlert;
+@property BOOL                          checkedForNotesOutsideGrid;
+
 @property (weak) IBOutlet NSWindow              *documentWindow;
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
@@ -164,8 +167,12 @@
     self.currentPage = [self.sequencer.pages objectAtIndex:0];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(didBecomeMain:)
+                                             selector:@selector(windowDidBecomeMain:)
                                                  name:NSWindowDidBecomeMainNotification
+                                               object:[aController window]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(windowDidBecomeKey:)
+                                                 name:NSWindowDidBecomeKeyNotification
                                                object:[aController window]];
     
     // Create a Clock and set it up
@@ -226,12 +233,21 @@
     return YES;
 }
 
-- (void)didBecomeMain:(NSNotification *)notification
+- (void)windowDidBecomeMain:(NSNotification *)notification
 {
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     if( documentController.lastActiveDocument != self ) {
         [documentController setActiveDocument:self];
         [self updateUI];
+    }
+}
+
+- (void)windowDidBecomeKey:(NSNotification *)aNotification
+{
+    if( !self.checkedForNotesOutsideGrid ) {
+        NSLog(@"Checking...");
+        [self checkForNotesOutsideGrid];
+        self.checkedForNotesOutsideGrid = YES;
     }
 }
 
@@ -335,6 +351,11 @@
 
 - (void) gridControllerConnected:(NSNotification *)notification
 {
+    [self checkForNotesOutsideGrid];
+}
+
+- (void) checkForNotesOutsideGrid
+{
     // Make sure all the loops fit within the connected grid size
     for( SequencerPage *page in self.sequencer.pages ) {
         if( page.loopStart.intValue > self.sharedPreferences.gridWidth || page.loopEnd.intValue > self.sharedPreferences.gridWidth ) {
@@ -343,7 +364,43 @@
         }
     }
     
-    // TODO: Offer to remove notes that extend beyond the size of the grid?
+    // Get the notes
+    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
+    
+    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+
+    if( [noteMatches count] && !self.notesOutsideGridAlert ) {
+         self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
+                                         defaultButton:@"Leave notes"
+                                       alternateButton:@"Remove notes"
+                                           otherButton:nil
+                             informativeTextWithFormat:@"Would you like to remove these %lu notes?", [noteMatches count]];
+        
+        [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+    }
+}
+
+- (void) notesOutsideGridAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    if( returnCode == NSOKButton ) {
+        NSLog(@"Leave them");
+        
+    } else {
+        NSLog(@"Remove them");
+        
+        // TODO remove all the notes
+        
+        // Get the notes
+        //NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+        //noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
+        
+        //NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+        
+        // Remove
+    }
+    
+    self.notesOutsideGridAlert = nil;
 }
 
 
