@@ -116,13 +116,20 @@
         }
         
         // Create the swing settings
-        self.swingArray = [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:50], @"swing", @"50 (Straight)", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:54], @"swing", @"54", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:58], @"swing", @"58", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:63], @"swing", @"63", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:67], @"swing", @"67 (Triplets)", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:71], @"swing", @"71", @"label", nil],
-                                                    nil];        
+        self.swingArray = [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:50], @"amount", @"8th – 50 (Straight)", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:54], @"amount", @"8th - 54", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:58], @"amount", @"8th - 58", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:63], @"amount", @"8th - 63", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:67], @"amount", @"8th - 67 (Triplets)", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:71], @"amount", @"8th - 71", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"type", [NSNumber numberWithInt:0], @"amount", @"-", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:50], @"amount", @"16th – 50 (Straight)", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:54], @"amount", @"16th - 54", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:58], @"amount", @"16th - 58", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:63], @"amount", @"16th - 63", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:67], @"amount", @"16th - 67 (Triplets)", @"label", nil],
+                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:71], @"amount", @"16th - 71", @"label", nil],
+                                                    nil];
     }
     return self;
 }
@@ -163,6 +170,9 @@
         [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
     }
     
+    // Setup UI
+    [self setupUI];
+    
     // Set the current page to the first one
     self.currentPage = [self.sequencer.pages objectAtIndex:0];
 
@@ -195,8 +205,7 @@
     // BPM
     [self updateClockBPM];
     
-    // Setup UI
-    [self setupUI];
+    // Set everything to match the model
     [self updateSequencerPageUI];
     
     // KVO
@@ -273,9 +282,13 @@
     [self updateStepQuantizationPopup];
     [self updatePatternQuantizationPopup];
     
+    // Add items to swing popup with separators between swing types
     [self.swingPopup removeAllItems];
     for( NSDictionary *swing in self.swingArray) {
-        [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
+        if( [[swing valueForKey:@"label"] isEqualTo:@"-"])
+            [self.swingPopup.menu addItem: [NSMenuItem separatorItem]];
+        else
+            [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
     }
     
     [self.currentPagePopup removeAllItems];
@@ -322,9 +335,13 @@
 
 - (void) updateSwingPopup
 {
-    [self.swingPopup selectItemAtIndex:[self.swingArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"swing"] isEqualTo:self.currentPage.swing];
-    }]];
+    NSUInteger index = [self.swingArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+        if( [[obj valueForKey:@"type"] isEqualTo:self.currentPage.swingType] && [[obj valueForKey:@"amount"] isEqualTo:self.currentPage.swingAmount] )
+            return YES;
+        else
+            return NO;
+    }];
+    [self.swingPopup selectItemAtIndex:index];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -405,6 +422,7 @@
     
     self.notesOutsideGridAlert = nil;
 }
+
 
 
 #pragma mark - Interface actions
@@ -513,7 +531,10 @@
 
 - (IBAction)swingPopup:(NSPopUpButton *)sender
 {
-    self.currentPage.swing = [[self.swingArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"swing"];
+    NSUInteger index = [sender indexOfSelectedItem];
+    
+    self.currentPage.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
+    self.currentPage.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
 }
 
 - (IBAction)currentPagePopup:(NSPopUpButton *)sender

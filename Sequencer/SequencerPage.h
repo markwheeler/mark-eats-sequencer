@@ -25,7 +25,8 @@
 @property (nonatomic, retain) NSNumber * nextStep;
 @property (nonatomic, retain) NSNumber * playMode;
 @property (nonatomic, retain) NSNumber * stepLength;
-@property (nonatomic, retain) NSNumber * swing;
+@property (nonatomic, retain) NSNumber * swingType;
+@property (nonatomic, retain) NSNumber * swingAmount;
 @property (nonatomic, retain) Sequencer *inSequencer;
 @property (nonatomic, retain) NSOrderedSet *patterns;
 @property (nonatomic, retain) NSOrderedSet *pitches;

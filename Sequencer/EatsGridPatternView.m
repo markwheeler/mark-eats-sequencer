@@ -55,7 +55,7 @@
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            if(x == _currentStep)
+            if( _pattern.inPage.currentPatternId == _pattern.id && x == _currentStep )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:_playheadBrightness * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];

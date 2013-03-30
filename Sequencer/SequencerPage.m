@@ -27,7 +27,8 @@
 @dynamic nextStep;
 @dynamic playMode;
 @dynamic stepLength;
-@dynamic swing;
+@dynamic swingType;
+@dynamic swingAmount;
 @dynamic inSequencer;
 @dynamic patterns;
 @dynamic pitches;
