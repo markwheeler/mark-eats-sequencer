@@ -7,7 +7,7 @@
         <relationship name="pages" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPage" inverseName="inSequencer" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
     <entity name="SequencerNote" representedClassName="SequencerNote" syncable="YES">
-        <attribute name="lengthAsPercentage" attributeType="Float" minValueString="0" maxValueString="100" defaultValueString="0" syncable="YES"/>
+        <attribute name="length" attributeType="Integer 16" minValueString="1" maxValueString="32" defaultValueString="1" syncable="YES"/>
         <attribute name="row" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="step" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="velocityAsPercentage" attributeType="Float" minValueString="0" maxValueString="100" defaultValueString="50" syncable="YES"/>

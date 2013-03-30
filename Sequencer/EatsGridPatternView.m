@@ -99,7 +99,9 @@
             
             // Put the length tails in
             int tailDraw = note.step.intValue;
-            int length =  roundf( self.width * ( note.lengthAsPercentage.floatValue / 100 ) ) - 1;
+            int length =  note.length.intValue - 1;
+            if( length > self.width - 1)
+                length = self.width - 1;
 
             for( int i = 0; i < length; i++ ) {
                 if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse )

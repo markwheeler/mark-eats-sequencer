@@ -234,7 +234,7 @@
                                      atTime:ns];
                         
                         // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
-                        int length = roundf( ( _sharedPreferences.gridWidth * ( note.lengthAsPercentage.floatValue / 100.0 ) ) * _minQuantization / page.stepLength.floatValue );
+                        int length = roundf( note.length.floatValue * ( _minQuantization / page.stepLength.floatValue ) );
                         if( length < 1 )
                             NSLog(@"Note added was too short: %i", length);
                         // Add to activeNotes so we know when to stop it

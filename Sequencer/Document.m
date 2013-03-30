@@ -37,7 +37,7 @@
 @property NSArray                       *swingArray;
 
 @property NSAlert                       *notesOutsideGridAlert;
-@property BOOL                          checkedForNotesOutsideGrid;
+@property BOOL                          checkedForThingsOutsideGrid;
 
 @property (weak) IBOutlet NSWindow              *documentWindow;
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
@@ -244,10 +244,9 @@
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
 {
-    if( !self.checkedForNotesOutsideGrid ) {
-        NSLog(@"Checking...");
-        [self checkForNotesOutsideGrid];
-        self.checkedForNotesOutsideGrid = YES;
+    if( !self.checkedForThingsOutsideGrid ) {
+        [self checkForThingsOutsideGrid];
+        self.checkedForThingsOutsideGrid = YES;
     }
 }
 
@@ -351,17 +350,21 @@
 
 - (void) gridControllerConnected:(NSNotification *)notification
 {
-    [self checkForNotesOutsideGrid];
+    [self checkForThingsOutsideGrid];
 }
 
-- (void) checkForNotesOutsideGrid
+- (void) checkForThingsOutsideGrid
 {
-    // Make sure all the loops fit within the connected grid size
+    // Make sure all the loops etc fit within the connected grid size
     for( SequencerPage *page in self.sequencer.pages ) {
-        if( page.loopStart.intValue > self.sharedPreferences.gridWidth || page.loopEnd.intValue > self.sharedPreferences.gridWidth ) {
+        if( page.loopStart.intValue >= self.sharedPreferences.gridWidth || page.loopEnd.intValue >= self.sharedPreferences.gridWidth ) {
             page.loopStart = [NSNumber numberWithInt:0];
             page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
         }
+        if( page.currentStep.intValue >= self.sharedPreferences.gridWidth )
+            page.currentStep = [page.loopEnd copy];
+        if( page.nextStep.intValue >= self.sharedPreferences.gridWidth )
+            page.nextStep = nil;
     }
     
     // Get the notes

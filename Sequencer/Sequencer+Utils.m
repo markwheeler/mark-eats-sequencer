@@ -88,7 +88,6 @@
         
         SequencerNote *note = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:context];
         
-        note.lengthAsPercentage = [NSNumber numberWithFloat:100.0 / 16];
         note.row = [NSNumber numberWithInt:arc4random_uniform(8)];
         note.step = [NSNumber numberWithInt:i];
         

@@ -98,10 +98,13 @@
     
     _activeEditNote = note;
     
+    NSLog(@"Active note length %@", _activeEditNote.length);
+    
     float stepPercentage = ( 100.0 / _velocityView.width );
-    _velocityView.percentage = ( ( [note.velocityAsPercentage floatValue] - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
-    stepPercentage = ( 100.0 / _lengthView.width );
-    _lengthView.percentage = ( ( [note.lengthAsPercentage floatValue] - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    _velocityView.percentage = ( ( note.velocityAsPercentage.floatValue - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    _lengthView.percentage =     ( ( ( ( note.length.floatValue / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    
+    NSLog(@"Percentage for slider %f", _lengthView.percentage );
     
     [self updateView];
     
@@ -242,8 +245,10 @@
     
     // Length
     } else if(sender == _lengthView) {
-        _activeEditNote.lengthAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
-        //NSLog(@"Length %@", _activeEditNote.lengthAsPercentage);
+
+        _activeEditNote.length = [NSNumber numberWithInt:roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1 ];
+        
+        NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
     }
     
     [self updateView];
@@ -277,7 +282,7 @@
                 _lastRemovedNoteInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"step",
                                                                                       [NSNumber numberWithUnsignedInt:y], @"row",
                                                                                       noteToRemove.velocityAsPercentage, @"velocityAsPercentage",
-                                                                                      noteToRemove.lengthAsPercentage, @"lengthAsPercentage",
+                                                                                      noteToRemove.length, @"length",
                                                                                       nil];
                 
                 [self.managedObjectContext deleteObject:[noteMatches lastObject]];
@@ -289,7 +294,6 @@
                 SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                 newNote.step = [NSNumber numberWithUnsignedInt:x];
                 newNote.row = [NSNumber numberWithUnsignedInt:y];
-                newNote.lengthAsPercentage = [NSNumber numberWithFloat:100.0 / self.width];
                 [newNotesSet addObject:newNote];
                 _pattern.notes = newNotesSet;
                 
@@ -329,7 +333,7 @@
             newNote.step = [_lastRemovedNoteInfo valueForKey:@"step"];
             newNote.row = [_lastRemovedNoteInfo valueForKey:@"row"];
             newNote.velocityAsPercentage = [_lastRemovedNoteInfo valueForKey:@"velocityAsPercentage"];
-            newNote.lengthAsPercentage = [_lastRemovedNoteInfo valueForKey:@"lengthAsPercentage"];
+            newNote.length = [_lastRemovedNoteInfo valueForKey:@"length"];
             
             [newNotesSet addObject:newNote];
             _pattern.notes = newNotesSet;
