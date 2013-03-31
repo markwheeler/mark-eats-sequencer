@@ -20,10 +20,12 @@
 
 @property (weak) id delegate;
 
-@property int ppqn;
-@property int ticksPerMeasure;
-@property int midiClockPPQN;
-@property int minQuantization;
+@property float         bpm;
+@property int           ppqn;
+@property int           ticksPerMeasure;
+@property int           midiClockPPQN;
+@property int           minQuantization;
+@property uint          qnPerMeasure;
 
 - (void) clockSongStart:(uint64_t)ns;
 - (void) clockSongStop:(uint64_t)ns;

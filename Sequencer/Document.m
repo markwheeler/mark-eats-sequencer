@@ -193,6 +193,7 @@
     self.clockTick.ticksPerMeasure = TICKS_PER_MEASURE;
     self.clockTick.midiClockPPQN = MIDI_CLOCK_PPQN;
     self.clockTick.minQuantization = MIN_QUANTIZATION;
+    self.clockTick.qnPerMeasure = QN_PER_MEASURE;
     self.clockTick.sequencer = self.sequencer;
     
     self.clock = [[EatsClock alloc] init];
@@ -310,6 +311,7 @@
 - (void) updateClockBPM
 {
     self.clock.bpm = [self.sequencer.bpm floatValue];
+    self.clockTick.bpm = [self.sequencer.bpm floatValue];
 }
 
 - (void) updateStepQuantizationPopup
@@ -331,6 +333,11 @@
     [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
         return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
     }]];
+    
+    if( self.currentPage.stepLength.intValue < 8 )
+        self.swingPopup.enabled = NO;
+    else
+        self.swingPopup.enabled = YES;
 }
 
 - (void) updateSwingPopup

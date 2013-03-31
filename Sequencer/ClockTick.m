@@ -109,29 +109,9 @@
     // Every third tick – 1/64 notes (smallest quantization possible)
     if( _currentTick % (_ticksPerMeasure / _minQuantization) == 0 ) {
         
-        // Check if any of the active notes need to be stopped this tick
-        NSMutableArray *toRemove = [NSMutableArray arrayWithCapacity:8];
-        for( NSMutableDictionary *note in _activeNotes ) {
-            
-            int lengthRemaining = [[note objectForKey:@"lengthRemaining"] intValue];
-            lengthRemaining --;
-            
-            if( lengthRemaining <= 0 ) {
-                [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
-                         onChannel:[[note objectForKey:@"channel"] intValue]
-                      withVelocity:[[note objectForKey:@"velocity"] intValue]
-                            atTime:ns];
-                [toRemove addObject:note];
-                
-            } else {
-                [note setObject:[NSNumber numberWithInt:lengthRemaining] forKey:@"lengthRemaining"];
-            }
-        }
-        [_activeNotes removeObjectsInArray:toRemove];
         
-        // Update the sequencer pages and send notes
+        // Update the current step for each page
         
-        // For each page...
         for(SequencerPage *page in _sequencer.pages) {
             
             // Play notes for current step, playMode != paused
@@ -139,13 +119,13 @@
                 
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
-
+                
                 // If page has been scrubbed
                 if( page.nextStep ) {
                     page.currentStep = [page.nextStep copy];
                     page.nextStep = nil;
                     
-                // Otherwise we need to calculate the next step
+                    // Otherwise we need to calculate the next step
                 } else {
                     
                     int playNow = page.currentStep.intValue;
@@ -162,11 +142,11 @@
                             if( page.inLoop.boolValue && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopStart.intValue;
                         }
-
+                        
                         if( playNow >= _sharedPreferences.gridWidth )
                             playNow = 0;
-                    
-                    // Reverse
+                        
+                        // Reverse
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
@@ -181,8 +161,8 @@
                         
                         if( playNow < 0 )
                             playNow = _sharedPreferences.gridWidth - 1;
-                     
-                    // Random
+                        
+                        // Random
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Random ) {
                         playNow = [Sequencer randomStepForPage:page ofWidth:_sharedPreferences.gridWidth];
                     }
@@ -203,8 +183,49 @@
                     else
                         page.inLoop = [NSNumber numberWithBool:NO];
                 }
+            }
+        }
+
+        
+        
+        // Check if any of the active notes need to be stopped this tick
+        
+        NSMutableArray *toRemove = [NSMutableArray arrayWithCapacity:8];
+        for( NSMutableDictionary *note in _activeNotes ) {
+            
+            int lengthRemaining = [[note objectForKey:@"lengthRemaining"] intValue];
+            lengthRemaining --;
+            
+            if( lengthRemaining <= 0 ) {
                 
+                // Calculate swing
                 
+                // Position of note in the loop 0 - minQuantization
+                SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
+                uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
+                
+                uint64_t nsWithSwing = ns + [self calculateSwingNsForPosition:position type:pageForNote.swingType.intValue amount:pageForNote.swingAmount.intValue];
+                
+                // Stop it
+                [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
+                         onChannel:[[note objectForKey:@"channel"] intValue]
+                      withVelocity:[[note objectForKey:@"velocity"] intValue]
+                            atTime:nsWithSwing];
+                [toRemove addObject:note];
+                
+            } else {
+                [note setObject:[NSNumber numberWithInt:lengthRemaining] forKey:@"lengthRemaining"];
+            }
+        }
+        [_activeNotes removeObjectsInArray:toRemove];
+        
+        
+        // Send the notes for each page
+
+        for(SequencerPage *page in _sequencer.pages) {
+            
+            // Play notes for current step, playMode != paused
+            if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 && page.playMode.intValue != EatsSequencerPlayMode_Pause ) {
                 
                 // Send notes that need to be sent
                 
@@ -223,15 +244,22 @@
                     // Play it!
                     if( !isPlaying && note.step == page.currentStep ) {
                         
-                        //Set the rest of the note properties
+                        //Set the basic note properties
                         int channel = page.channel.intValue;
                         int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
-                                                
+                        
+                        // Calculate swing
+                        
+                        // Position of note in the loop 0 - minQuantization
+                        uint position = ( note.step.intValue * ( _minQuantization / page.stepLength.intValue ) );
+                        
+                        uint64_t nsWithSwing = ns + [self calculateSwingNsForPosition:position type:page.swingType.intValue amount:page.swingAmount.intValue];
+                        
                         // Send MIDI note
                         [self startMIDINote:pitch
                                   onChannel:channel
                                withVelocity:velocity
-                                     atTime:ns];
+                                     atTime:nsWithSwing];
                         
                         // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
                         int length = roundf( note.length.floatValue * ( _minQuantization / page.stepLength.floatValue ) );
@@ -242,9 +270,8 @@
                                                                                                   [NSNumber numberWithInt:channel], @"channel",
                                                                                                   [NSNumber numberWithInt:velocity], @"velocity",
                                                                                                   [NSNumber numberWithInt:length], @"lengthRemaining",
+                                                                                                  page, @"fromPage",
                                                                                                   nil]];
-                        
-                        // TODO: See if it's possible to check if notes are being sent late based on their timestamp vs current time?
                     }
                     
                 }
@@ -272,6 +299,50 @@
     //NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
 }
 
+
+
+#pragma mark - Private methods
+
+- (uint64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount
+{
+    // Position must be 0 - minQuantization
+
+    // Number of 64ths in each cycle
+    uint swingCycle = _minQuantization / ( swingType / 2 );
+    //uint velocityCycle = swingCycle * 4;
+
+    // This gives us the positioning of the note in 64ths
+    uint positionInSwingCycle = position % swingCycle;
+    //uint positiongInVelocityCycle = position % velocityCycle;
+
+    // Start working in NS
+    uint64_t barInNs =  1000000000 * ( 60.0 / ( _bpm / _qnPerMeasure ) );
+    uint64_t swingCycleInNs = barInNs / ( _minQuantization / swingCycle );
+    uint64_t swingInNs = 0;
+    uint64_t positionRelativeToZero;
+    uint64_t defaultPositionRelativeToZero;
+
+    // Make odd split longer
+    if( positionInSwingCycle < swingCycle / 2 ) {
+        //velocity = 120;
+        
+        positionRelativeToZero = ( (swingCycleInNs * ( swingAmount * 0.01 ) ) / ( swingCycle / 2 ) ) * positionInSwingCycle;
+        defaultPositionRelativeToZero = ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * positionInSwingCycle;
+        swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
+        
+        // Make even split shorter
+    } else {
+        //velocity = 40;
+        
+        positionRelativeToZero = swingCycleInNs * ( swingAmount * 0.01 ) + ( (swingCycleInNs * ( 1 - (swingAmount * .01) )) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
+        defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
+        swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
+        
+    }
+
+    // Take the note and move it by using swingAmount as a percentage (swingAmount is in the range 50-100)
+    return swingInNs; // * 0.83; //( swingAmount - 50 ) / 50.0 );
+}
 
 
 #pragma mark - Private methods for sending and stopping MIDI
