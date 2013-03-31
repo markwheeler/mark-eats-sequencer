@@ -8,6 +8,7 @@
 
 #import "ClockTick.h"
 #import "EatsCommunicationManager.h"
+#import "EatsSwingUtils.h"
 #import "Preferences.h"
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
@@ -204,7 +205,12 @@
                 SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
                 uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
                 
-                uint64_t nsWithSwing = ns + [self calculateSwingNsForPosition:position type:pageForNote.swingType.intValue amount:pageForNote.swingAmount.intValue];
+                uint64_t nsWithSwing = ns + [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                                   type:pageForNote.swingType.intValue
+                                                                                 amount:pageForNote.swingAmount.intValue
+                                                                                    bpm:_bpm
+                                                                           qnPerMeasure:_qnPerMeasure
+                                                                        minQuantization:_minQuantization];
                 
                 // Stop it
                 [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
@@ -253,7 +259,12 @@
                         // Position of note in the loop 0 - minQuantization
                         uint position = ( note.step.intValue * ( _minQuantization / page.stepLength.intValue ) );
                         
-                        uint64_t nsWithSwing = ns + [self calculateSwingNsForPosition:position type:page.swingType.intValue amount:page.swingAmount.intValue];
+                        uint64_t nsWithSwing = ns + [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                                           type:page.swingType.intValue
+                                                                                         amount:page.swingAmount.intValue
+                                                                                            bpm:_bpm
+                                                                                   qnPerMeasure:_qnPerMeasure
+                                                                                minQuantization:_minQuantization];
                         
                         // Send MIDI note
                         [self startMIDINote:pitch
@@ -299,50 +310,6 @@
     //NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
 }
 
-
-
-#pragma mark - Private methods
-
-- (uint64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount
-{
-    // Position must be 0 - minQuantization
-
-    // Number of 64ths in each cycle
-    uint swingCycle = _minQuantization / ( swingType / 2 );
-    //uint velocityCycle = swingCycle * 4;
-
-    // This gives us the positioning of the note in 64ths
-    uint positionInSwingCycle = position % swingCycle;
-    //uint positiongInVelocityCycle = position % velocityCycle;
-
-    // Start working in NS
-    uint64_t barInNs =  1000000000 * ( 60.0 / ( _bpm / _qnPerMeasure ) );
-    uint64_t swingCycleInNs = barInNs / ( _minQuantization / swingCycle );
-    uint64_t swingInNs = 0;
-    uint64_t positionRelativeToZero;
-    uint64_t defaultPositionRelativeToZero;
-
-    // Make odd split longer
-    if( positionInSwingCycle < swingCycle / 2 ) {
-        //velocity = 120;
-        
-        positionRelativeToZero = ( (swingCycleInNs * ( swingAmount * 0.01 ) ) / ( swingCycle / 2 ) ) * positionInSwingCycle;
-        defaultPositionRelativeToZero = ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * positionInSwingCycle;
-        swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
-        
-        // Make even split shorter
-    } else {
-        //velocity = 40;
-        
-        positionRelativeToZero = swingCycleInNs * ( swingAmount * 0.01 ) + ( (swingCycleInNs * ( 1 - (swingAmount * .01) )) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
-        defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
-        swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
-        
-    }
-
-    // Take the note and move it by using swingAmount as a percentage (swingAmount is in the range 50-100)
-    return swingInNs; // * 0.83; //( swingAmount - 50 ) / 50.0 );
-}
 
 
 #pragma mark - Private methods for sending and stopping MIDI

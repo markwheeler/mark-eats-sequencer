@@ -54,6 +54,7 @@
 		4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */; };
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
+		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 /* End PBXBuildFile section */
 
@@ -155,6 +156,8 @@
 		4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPlayViewController.m; sourceTree = "<group>"; };
 		4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridButtonView.h; sourceTree = "<group>"; };
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
+		4DF1FD971708FB4500AB043B /* EatsSwingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsSwingUtils.h; sourceTree = "<group>"; };
+		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -263,6 +266,8 @@
 				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
 				4D36B25416FBB32C008057FC /* ClockTick.h */,
 				4D36B25516FBB32C008057FC /* ClockTick.m */,
+				4DF1FD971708FB4500AB043B /* EatsSwingUtils.h */,
+				4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */,
 				4D172E8616E5BD090012C019 /* Preferences.h */,
 				4D172E8716E5BD090012C019 /* Preferences.m */,
 				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
@@ -431,6 +436,7 @@
 				4D8553C8170737D000A54A80 /* SequencerNote.m in Sources */,
 				4D8553CB170737D000A54A80 /* Sequencer.m in Sources */,
 				4D8553CE170737D000A54A80 /* SequencerPage.m in Sources */,
+				4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

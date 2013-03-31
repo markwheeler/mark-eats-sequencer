@@ -10,6 +10,7 @@
 #import <VVMIDI/VVMIDI.h>
 #import "EatsDocumentController.h"
 #import "EatsCommunicationManager.h"
+#import "EatsSwingUtils.h"
 #import "Preferences.h"
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
@@ -116,20 +117,7 @@
         }
         
         // Create the swing settings
-        self.swingArray = [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:50], @"amount", @"8th – 50 (Straight)", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:54], @"amount", @"8th - 54", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:58], @"amount", @"8th - 58", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:63], @"amount", @"8th - 63", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:67], @"amount", @"8th - 67 (Triplets)", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:71], @"amount", @"8th - 71", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"type", [NSNumber numberWithInt:0], @"amount", @"-", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:50], @"amount", @"16th – 50 (Straight)", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:54], @"amount", @"16th - 54", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:58], @"amount", @"16th - 58", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:63], @"amount", @"16th - 63", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:67], @"amount", @"16th - 67 (Triplets)", @"label", nil],
-                                                    [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:71], @"amount", @"16th - 71", @"label", nil],
-                                                    nil];
+        self.swingArray = [EatsSwingUtils swingArray];
     }
     return self;
 }
@@ -145,14 +133,14 @@
     [self.currentPage removeObserver:self forKeyPath:@"swing"];
 }
 
-- (NSString *)windowNibName
+- (NSString *) windowNibName
 {
     // Override returning the nib file name of the document
     // If you need to use a subclass of NSWindowController or if your document supports multiple NSWindowControllers, you should remove this method and override -makeWindowControllers instead.
     return @"Document";
 }
 
-- (void)windowControllerDidLoadNib:(NSWindowController *)aController
+- (void) windowControllerDidLoadNib:(NSWindowController *)aController
 {
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
@@ -228,7 +216,7 @@
     [self.clock startClock];
 }
 
-- (void)windowWillClose:(NSNotification *)notification
+- (void) windowWillClose:(NSNotification *)notification
 {
     [self.clock stopClock];
     
@@ -238,12 +226,12 @@
     //self.gridNavigationController = nil;
 }
 
-+ (BOOL)autosavesInPlace
++ (BOOL) autosavesInPlace
 {
     return YES;
 }
 
-- (void)windowDidBecomeMain:(NSNotification *)notification
+- (void) windowDidBecomeMain:(NSNotification *)notification
 {
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     if( documentController.lastActiveDocument != self ) {
@@ -252,7 +240,7 @@
     }
 }
 
-- (void)windowDidBecomeKey:(NSNotification *)aNotification
+- (void) windowDidBecomeKey:(NSNotification *)aNotification
 {
     if( !self.checkedForThingsOutsideGrid ) {
         [self checkForThingsOutsideGrid];
@@ -334,10 +322,12 @@
         return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
     }]];
     
-    if( self.currentPage.stepLength.intValue < 8 )
+    // Commented out as the swing setting may still be useful if you have velocity adjustments enabled
+    /*if( self.currentPage.stepLength.intValue < 8 )
         self.swingPopup.enabled = NO;
     else
         self.swingPopup.enabled = YES;
+     */
 }
 
 - (void) updateSwingPopup
@@ -446,34 +436,30 @@
 
 - (IBAction)sequencerPauseButton:(NSButton *)sender
 {
-    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
-    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-    page.nextStep = nil;
+    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+    self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
 
 - (IBAction)sequencerForwardButton:(NSButton *)sender
 {
-    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
-    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-    page.nextStep = nil;
+    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+    self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
 - (IBAction)sequencerReverseButton:(NSButton *)sender
 {
-    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
-    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
-    page.nextStep = nil;
+    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+    self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
 - (IBAction)sequencerRandomButton:(NSButton *)sender
 {
-    SequencerPage *page = [self.sequencer.pages objectAtIndex:0];
-    page.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
-    page.nextStep = nil;
+    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
+    self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
