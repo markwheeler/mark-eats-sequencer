@@ -301,6 +301,8 @@
 			isa = PBXGroup;
 			children = (
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
+				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
+				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
 				4D8553CC170737D000A54A80 /* SequencerPage.h */,
 				4D8553CD170737D000A54A80 /* SequencerPage.m */,
 				4D8553C9170737D000A54A80 /* Sequencer.h */,
@@ -313,8 +315,6 @@
 				4D8553C1170737CF00A54A80 /* SequencerPattern.m */,
 				4D8553BD170737CF00A54A80 /* SequencerPatternRef.h */,
 				4D8553BE170737CF00A54A80 /* SequencerPatternRef.m */,
-				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
-				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
 			);
 			name = "Core Data";
 			sourceTree = "<group>";

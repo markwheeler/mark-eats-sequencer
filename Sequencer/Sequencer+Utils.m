@@ -22,11 +22,6 @@
     // Create an empty Sequencer
     Sequencer *sequencer = [NSEntityDescription insertNewObjectForEntityForName:@"Sequencer" inManagedObjectContext:context];
     
-    // Generate pitches (Default C Major) TODO Make the first note line up with the bottom of the grid??
-    NSArray *pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:24 length:32];
-    // Reverse the array
-    pitches = [[pitches reverseObjectEnumerator] allObjects];
-    
     // Create the empty SequencerPages
     NSMutableOrderedSet *setOfPages = [NSMutableOrderedSet orderedSetWithCapacity:numberOfPages];
     for( int i = 0; i < numberOfPages; i++) {
@@ -47,6 +42,14 @@
         page.currentStep = [page.loopEnd copy];
         
         // Create the default pitches
+        // TODO Make these line up better with the grid (tonic note on last row?)
+        NSArray *pitches;
+        if (channel == 10 || channel == 11)
+            pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_DrumMap tonicNote:35 length:32]; // Drum Map
+        else
+            pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:24 length:32]; // C Major
+        // Reverse the array
+        pitches = [[pitches reverseObjectEnumerator] allObjects];
         
         NSMutableOrderedSet *setOfRowPitches = [NSMutableOrderedSet orderedSetWithCapacity:32];
         int r = 0;
