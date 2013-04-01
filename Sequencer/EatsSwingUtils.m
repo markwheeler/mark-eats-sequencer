@@ -32,15 +32,13 @@
 
 + (uint64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(uint)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization
 {
-    // Position must be 0 - minQuantization
+    // Position must be 0 - minQuantization - 1
     
     // Number of 64ths in each cycle
     uint swingCycle = minQuantization / ( swingType / 2 );
-    //uint velocityCycle = swingCycle * 4;
     
     // This gives us the positioning of the note in 64ths
     uint positionInSwingCycle = position % swingCycle;
-    //uint positiongInVelocityCycle = position % velocityCycle;
     
     // Start working in NS
     uint64_t barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
@@ -53,15 +51,13 @@
     
     // Make odd split longer
     if( positionInSwingCycle < swingCycle / 2 ) {
-        //velocity = 120;
         
         positionRelativeToZero = ( (swingCycleInNs * swingAmountFactor ) / ( swingCycle / 2 ) ) * positionInSwingCycle;
         defaultPositionRelativeToZero = ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * positionInSwingCycle;
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
         
-        // Make even split shorter
+    // Make even split shorter
     } else {
-        //velocity = 40;
         
         positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( (swingCycleInNs * ( 1.0 - swingAmountFactor )) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
         defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );

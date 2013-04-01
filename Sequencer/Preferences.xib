@@ -475,7 +475,7 @@
 																<int key="NSvFlags">256</int>
 																<string key="NSFrameSize">{358, 118}</string>
 																<reference key="NSSuperview" ref="282745584"/>
-																<reference key="NSNextKeyView" ref="401540699"/>
+																<reference key="NSNextKeyView" ref="105479164"/>
 																<string key="NSReuseIdentifierKey">_NS:13</string>
 																<bool key="NSEnabled">YES</bool>
 																<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -621,7 +621,7 @@
 												</array>
 												<string key="NSFrame">{{60, 30}, {360, 120}}</string>
 												<reference key="NSSuperview" ref="984124513"/>
-												<reference key="NSNextKeyView" ref="105479164"/>
+												<reference key="NSNextKeyView" ref="282745584"/>
 												<string key="NSReuseIdentifierKey">_NS:9</string>
 												<int key="NSsFlags">133650</int>
 												<reference key="NSVScroller" ref="401540699"/>
@@ -807,7 +807,7 @@
 												<object class="NSButtonCell" key="NSCell" id="77180626">
 													<int key="NSCellFlags">-2080374784</int>
 													<int key="NSCellFlags2">268435456</int>
-													<string key="NSContents">Emulate SP-1200 note velocity</string>
+													<string key="NSContents">Preference One (disconnected)</string>
 													<reference key="NSSupport" ref="36186955"/>
 													<string key="NSCellIdentifier">_NS:9</string>
 													<reference key="NSControlView" ref="81936539"/>
@@ -1141,22 +1141,6 @@
 						</object>
 					</object>
 					<int key="connectionID">642</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: self.sharedPreferences.emulateSP1200NoteVelocity</string>
-						<reference key="source" ref="81936539"/>
-						<reference key="destination" ref="1001"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="81936539"/>
-							<reference key="NSDestination" ref="1001"/>
-							<string key="NSLabel">value: self.sharedPreferences.emulateSP1200NoteVelocity</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">self.sharedPreferences.emulateSP1200NoteVelocity</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">644</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2738,6 +2722,20 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">PreferencesController</string>
 					<string key="superclassName">NSWindowController</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="gridControllerPopup:">NSPopUpButton</string>
+						<string key="preferencesToolbarAction:">NSToolbarItem</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="gridControllerPopup:">
+							<string key="name">gridControllerPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="preferencesToolbarAction:">
+							<string key="name">preferencesToolbarAction:</string>
+							<string key="candidateClassName">NSToolbarItem</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="clockSourcePopup">NSPopUpButton</string>
 						<string key="gridControllerPopup">NSPopUpButton</string>

@@ -29,7 +29,6 @@ typedef enum EatsGridType{
 @property VVMIDINode        *midiClockSource;
 @property BOOL              sendMIDIClock;
 
-@property BOOL              emulateSP1200NoteVelocity;
 @property BOOL              loopFromScrubArea;
 
 + (id) sharedPreferences;

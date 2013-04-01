@@ -9,6 +9,7 @@
 #import "ClockTick.h"
 #import "EatsCommunicationManager.h"
 #import "EatsSwingUtils.h"
+#import "EatsVelocityUtils.h"
 #import "Preferences.h"
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
@@ -147,7 +148,7 @@
                         if( playNow >= _sharedPreferences.gridWidth )
                             playNow = 0;
                         
-                        // Reverse
+                    // Reverse
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
@@ -163,13 +164,15 @@
                         if( playNow < 0 )
                             playNow = _sharedPreferences.gridWidth - 1;
                         
-                        // Random
+                    // Random
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Random ) {
                         playNow = [Sequencer randomStepForPage:page ofWidth:_sharedPreferences.gridWidth];
                     }
                     
                     page.currentStep = [NSNumber numberWithInt: playNow];
                 }
+                
+                // TODO make MLR-style loops hold on to the playhead better
                 
                 // Are we in a loop
                 if( page.loopStart.intValue <= page.loopEnd.intValue ) {
@@ -200,27 +203,32 @@
             if( lengthRemaining <= 0 ) {
                 
                 // Calculate swing
-                
-                // Position of note in the loop 0 - minQuantization
                 SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
-                uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
+                uint64_t nsSwing = 0;
                 
-                // Reverse position if we're playing in reverse
-                if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                    position = _minQuantization - 1 - position;
-                
-                uint64_t nsWithSwing = ns + [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                                   type:pageForNote.swingType.intValue
-                                                                                 amount:pageForNote.swingAmount.intValue
-                                                                                    bpm:_bpm
-                                                                           qnPerMeasure:_qnPerMeasure
-                                                                        minQuantization:_minQuantization];
+                // We only add swing when playing forward or reverse
+                if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Forward || pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+                    
+                    // Position of note in the loop 0 - minQuantization
+                    uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
+                    
+                    // Reverse position if we're playing in reverse
+                    if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                        position = _minQuantization - 1 - position;
+                    
+                    nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                     type:pageForNote.swingType.intValue
+                                                                   amount:pageForNote.swingAmount.intValue
+                                                                      bpm:_bpm
+                                                             qnPerMeasure:_qnPerMeasure
+                                                          minQuantization:_minQuantization];
+                }
                 
                 // Stop it
                 [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                          onChannel:[[note objectForKey:@"channel"] intValue]
                       withVelocity:[[note objectForKey:@"velocity"] intValue]
-                            atTime:nsWithSwing];
+                            atTime:ns + nsSwing];
                 [toRemove addObject:note];
                 
             } else {
@@ -258,27 +266,41 @@
                         int channel = page.channel.intValue;
                         int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
                         
-                        // Calculate swing
+                        // Calculate swing and velocity
                         
-                        // Position of note in the loop 0 - minQuantization
-                        uint position = ( note.step.intValue * ( _minQuantization / page.stepLength.intValue ) );
+                        uint64_t nsSwing = 0;
                         
-                        // Reverse position if we're playing in reverse
-                        if( page.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                            position = _minQuantization - 1 - position;
+                        // We only add swing and velocity groove when playing forward or reverse
+                        if( page.playMode.intValue == EatsSequencerPlayMode_Forward || page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+                            
+                            // Position of note in the loop 0 - minQuantization
+                            uint position = ( note.step.intValue * ( _minQuantization / page.stepLength.intValue ) );
+                            
+                            // Reverse position if we're playing in reverse
+                            if( page.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                                position = _minQuantization - 1 - position;
+                            
+                            nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                                      type:page.swingType.intValue
+                                                                                    amount:page.swingAmount.intValue
+                                                                                       bpm:_bpm
+                                                                              qnPerMeasure:_qnPerMeasure
+                                                                           minQuantization:_minQuantization];
+                            // Velocity groove if enabled
+                            if( page.velocityGroove.boolValue ) {
+                                velocity = [EatsVelocityUtils calculateVelocityForPosition:position
+                                                                              baseVelocity:velocity
+                                                                                      type:page.swingType.intValue
+                                                                           minQuantization:_minQuantization];
+                            }
+                        }
                         
-                        uint64_t nsWithSwing = ns + [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                                           type:page.swingType.intValue
-                                                                                         amount:page.swingAmount.intValue
-                                                                                            bpm:_bpm
-                                                                                   qnPerMeasure:_qnPerMeasure
-                                                                                minQuantization:_minQuantization];
                         
                         // Send MIDI note
                         [self startMIDINote:pitch
                                   onChannel:channel
                                withVelocity:velocity
-                                     atTime:nsWithSwing];
+                                     atTime:ns + nsSwing];
                         
                         // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
                         int length = roundf( note.length.floatValue * ( _minQuantization / page.stepLength.floatValue ) );
