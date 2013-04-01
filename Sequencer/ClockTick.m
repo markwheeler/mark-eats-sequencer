@@ -205,6 +205,10 @@
                 SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
                 uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
                 
+                // Reverse position if we're playing in reverse
+                if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                    position = _minQuantization - 1 - position;
+                
                 uint64_t nsWithSwing = ns + [EatsSwingUtils calculateSwingNsForPosition:position
                                                                                    type:pageForNote.swingType.intValue
                                                                                  amount:pageForNote.swingAmount.intValue
@@ -258,6 +262,10 @@
                         
                         // Position of note in the loop 0 - minQuantization
                         uint position = ( note.step.intValue * ( _minQuantization / page.stepLength.intValue ) );
+                        
+                        // Reverse position if we're playing in reverse
+                        if( page.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                            position = _minQuantization - 1 - position;
                         
                         uint64_t nsWithSwing = ns + [EatsSwingUtils calculateSwingNsForPosition:position
                                                                                            type:page.swingType.intValue
