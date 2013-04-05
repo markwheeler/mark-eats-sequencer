@@ -54,28 +54,41 @@
     // Populate
     [self updateGridControllers];
     [self updateMIDI];
+    
+    if( self.sharedPreferences.gridAutoConnect ) {
+        if( self.sharedPreferences.gridOSCLabel )
+            [self gridControllerConnectToOSCDeviceWithLabel:self.sharedPreferences.gridOSCLabel];
+        //else if( self.sharedPreferences.gridMIDINode )
+            // Reconnect to MIDI grid
+    }
 }
 
 
 
 #pragma mark - Public methods
 
+// TODO – Detect monome disconnects. MLRV seems able to do this.
+
 - (void)updateGridControllers
 {
-    // Should try and reconnect here but for now we're just going to 'none' state
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
-    self.sharedPreferences.gridType = EatsGridType_None;
     
-    NSArray *monomePortLabelArray = [self.sharedCommunicationManager.oscManager outPortLabelArray];
+    NSArray *oscPortLabelArray = [self.sharedCommunicationManager.oscManager outPortLabelArray];
     
     [self.gridControllerPopup removeAllItems];
     [self.gridControllerPopup addItemWithTitle:@"None"];
     [self.gridControllerStatus setStringValue:@""];
     
-    for (NSString *s in monomePortLabelArray) {
+    for (NSString *s in oscPortLabelArray) {
+        
         // Avoid listing the app's port
         if(![s isEqualToString:self.sharedCommunicationManager.oscOutputPortLabel])
             [self.gridControllerPopup addItemWithTitle:s];
+        
+        // Try to reconnect
+        if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
+            [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:s] ];
+        }
+            
     }
 }
 
@@ -110,6 +123,26 @@
     }
 }
 
+- (void) gridControllerConnectToOSCDeviceWithLabel:(NSString *)label
+{
+    [self.gridControllerStatus setStringValue:@""];
+    OSCOutPort *selectedPort = nil;
+    
+    selectedPort = [self.sharedCommunicationManager.oscManager findOutputWithLabel:label];
+	if (selectedPort == nil)
+		return;
+    
+    // Set the OSC Out Port
+    //NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
+    //NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
+    [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
+    
+    [self.gridControllerStatus setStringValue:@"Trying to connect..."];
+    [EatsMonome connectToMonomeAtPort:self.sharedCommunicationManager.oscOutPort
+                             fromPort:self.sharedCommunicationManager.oscInPort
+                           withPrefix:self.sharedCommunicationManager.oscPrefix];
+}
+
 - (void)gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
 {
    
@@ -117,6 +150,15 @@
     self.sharedPreferences.gridType = EatsGridType_Monome;
     self.sharedPreferences.gridWidth = w - (w % 8);
     self.sharedPreferences.gridHeight = h - (h % 8);
+    
+    if(gridType == EatsGridType_Monome) {
+        self.sharedPreferences.gridOSCLabel = self.gridControllerPopup.selectedItem.title;
+        self.sharedPreferences.gridMIDINode = nil;
+        
+    } else if(gridType == EatsGridType_Launchpad) {
+        self.sharedPreferences.gridOSCLabel = nil;
+        //self.sharedPreferences.gridMIDINode = xxxxxxxx;
+    }
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
@@ -144,29 +186,14 @@
     // Set none
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
     self.sharedPreferences.gridType = EatsGridType_None;
+    self.sharedPreferences.gridOSCLabel = nil;
+    self.sharedPreferences.gridMIDINode = nil;
     self.sharedPreferences.gridWidth = 32;
     self.sharedPreferences.gridHeight = 32;
     
-    [self.gridControllerStatus setStringValue:@""];
-    OSCOutPort *selectedPort = nil;
-    
-    // Figure out the index of the selected item
-	if ([sender indexOfSelectedItem] <= -1)
-		return;
     // Find the output port corresponding to the label of the selected item
-    selectedPort = [self.sharedCommunicationManager.oscManager findOutputWithLabel:[sender titleOfSelectedItem]];
-	if (selectedPort == nil)
-		return;
-    
-    // Set the OSC Out Port
-    //NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
-    //NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
-    [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
-    
-    [self.gridControllerStatus setStringValue:@"Trying to connect..."];
-    [EatsMonome connectToMonomeAtPort:self.sharedCommunicationManager.oscOutPort
-                             fromPort:self.sharedCommunicationManager.oscInPort
-                           withPrefix:self.sharedCommunicationManager.oscPrefix];
+	if ([sender indexOfSelectedItem] > -1)
+        [self gridControllerConnectToOSCDeviceWithLabel:[sender titleOfSelectedItem]];
 }
 
 

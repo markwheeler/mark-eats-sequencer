@@ -21,6 +21,7 @@ typedef enum EatsGridType{
 @property uint              gridWidth;
 @property uint              gridHeight;
 @property EatsGridType      gridType;
+@property NSString          *gridOSCLabel;
 @property VVMIDINode        *gridMIDINode;
 
 @property BOOL              gridAutoConnect;

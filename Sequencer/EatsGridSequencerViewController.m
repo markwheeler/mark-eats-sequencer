@@ -98,13 +98,9 @@
     
     _activeEditNote = note;
     
-    NSLog(@"Active note length %@", _activeEditNote.length);
-    
     float stepPercentage = ( 100.0 / _velocityView.width );
     _velocityView.percentage = ( ( note.velocityAsPercentage.floatValue - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
     _lengthView.percentage =     ( ( ( ( note.length.floatValue / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
-    
-    NSLog(@"Percentage for slider %f", _lengthView.percentage );
     
     [self updateView];
     

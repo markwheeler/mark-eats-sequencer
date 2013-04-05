@@ -34,3 +34,5 @@ typedef enum EatsScaleType{
 + (NSArray *) generateScaleType:(EatsScaleType)type tonicNote:(uint)tonic length:(uint)length;
 
 @end
+
+//TODO consider switching this out completely for https://github.com/fredericcormier/WesternMusicElements

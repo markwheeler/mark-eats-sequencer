@@ -36,6 +36,7 @@
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
+    self.gridOSCLabel = [preferences objectForKey:@"gridOSCLabel"];
     self.gridMIDINode = [preferences objectForKey:@"gridMIDINode"];
     
     self.gridAutoConnect = [preferences boolForKey:@"gridAutoConnect"];
@@ -51,7 +52,14 @@
 {    
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
-    [preferences setObject:self.gridMIDINode forKey:@"gridMIDINode"];
+    NSString *oscLabel = nil;
+    VVMIDINode *midiNode = nil;
+    if( self.gridAutoConnect ) {
+        oscLabel = self.gridOSCLabel;
+        midiNode = self.gridMIDINode;
+    }
+    [preferences setObject:oscLabel forKey:@"gridOSCLabel"];
+    [preferences setObject:midiNode forKey:@"gridMIDINode"];
     
     [preferences setBool:self.gridAutoConnect forKey:@"gridAutoConnect"];
     [preferences setBool:self.gridSupportsVariableBrightness forKey:@"gridSupportsVariableBrightness"];

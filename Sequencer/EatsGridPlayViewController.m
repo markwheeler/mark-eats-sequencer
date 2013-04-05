@@ -426,7 +426,7 @@
             [self setPlayMode:EatsSequencerPlayMode_Random];
         }
         
-    // TODO: BPM- button
+    // BPM- button
     } else if( sender == _bpmDecrementButton ) {
         if ( buttonDown ) {
             
@@ -453,7 +453,7 @@
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         
-    // TODO: BPM+ button
+    // BPM+ button
     } else if( sender == _bpmIncrementButton ) {
         if ( buttonDown ) {
             
@@ -485,7 +485,7 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
         } else {
-            NSLog(@"Clear");
+            NSLog(@"Clear pattern");
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         
