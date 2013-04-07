@@ -136,12 +136,12 @@
                     if( page.playMode.intValue == EatsSequencerPlayMode_Forward ) {
                         playNow ++;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                            if( page.inLoop.boolValue && playNow > page.loopEnd.intValue )
+                            if( ( page.inLoop.boolValue || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue )
                                 playNow = page.loopStart.intValue;
                             else if( page.inLoop.boolValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
                         } else {
-                            if( page.inLoop.boolValue && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
+                            if( ( page.inLoop.boolValue || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopStart.intValue;
                         }
                         
@@ -152,12 +152,12 @@
                     } else if( page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                            if( page.inLoop.boolValue && playNow < page.loopStart.intValue )
+                            if( ( page.inLoop.boolValue || _sharedPreferences.loopFromScrubArea ) && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
                             else if( page.inLoop.boolValue && playNow > page.loopEnd.intValue )
                                 playNow = page.loopStart.intValue;
                         } else {
-                            if( page.inLoop.boolValue && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
+                            if( ( page.inLoop.boolValue || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
                                 playNow = page.loopEnd.intValue;
                         }
                         
@@ -172,7 +172,6 @@
                     page.currentStep = [NSNumber numberWithInt: playNow];
                 }
                 
-                // TODO make MLR-style loops hold on to the playhead better
                 
                 // Are we in a loop
                 if( page.loopStart.intValue <= page.loopEnd.intValue ) {
