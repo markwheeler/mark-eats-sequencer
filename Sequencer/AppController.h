@@ -11,9 +11,12 @@
 #import <VVMIDI/VVMIDI.h>
 #import "EatsCommunicationManager.h"
 
-@interface AppController : NSObject <VVMIDIDelegateProtocol>
+@interface AppController : NSObject <VVMIDIDelegateProtocol, PreferencesControllerDelegateProtocol>
 
 @property PreferencesController *preferencesController;
+
+- (void) gridControllerNone;
+- (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
 
 // MIDI delegate methods
 - (void) setupChanged;

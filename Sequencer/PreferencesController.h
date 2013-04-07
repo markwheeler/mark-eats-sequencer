@@ -10,10 +10,19 @@
 #import "Preferences.h"
 #import "EatsCommunicationManager.h"
 
+@protocol PreferencesControllerDelegateProtocol
+
+- (void) gridControllerNone;
+- (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
+
+@end
+
+
 @interface PreferencesController : NSWindowController
 
-- (void)updateGridControllers;
-- (void)updateMIDI;
-- (void)gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h;
+@property (weak) id delegate;
+
+- (void) updateOSC;
+- (void) updateMIDI;
 
 @end

@@ -8,11 +8,13 @@
 
 #import "AppController.h"
 #import "Preferences.h"
+#import "EatsMonome.h"
 
 @interface AppController()
 
 @property EatsCommunicationManager  *sharedCommunicationManager;
 @property Preferences               *sharedPreferences;
+@property NSTimer                   *gridControllerConnectionTimer;
 
 @end
 
@@ -29,8 +31,8 @@
         
         // Get the comms manager for MIDI & OSC
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
-        [self.sharedCommunicationManager.midiManager setDelegate:self];
-        [self.sharedCommunicationManager.oscManager setDelegate:self];
+        self.sharedCommunicationManager.midiManager.delegate = self;
+        self.sharedCommunicationManager.oscManager.delegate = self;
         
         // Register to receive notifications that the list of OSC outputs has changed
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCOutPortsChangedNotification object:nil];
@@ -39,6 +41,7 @@
         // Create the preferences window (makes it easier to keep it up to date)
         if(!self.preferencesController) {
             self.preferencesController = [[PreferencesController alloc] initWithWindowNibName:@"Preferences"];
+            self.preferencesController.delegate = self;
         }
         
         // Fake an outputs-changed notification to make sure my list of destinations updates (in case it refreshes before I'm awake)
@@ -94,13 +97,86 @@
 
 
 
+#pragma mark – Public methods
+
+- (void) gridControllerNone
+{
+    [self.gridControllerConnectionTimer invalidate];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
+}
+
+- (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode
+{
+    if( gridType.intValue == EatsGridType_Monome ) {
+        
+        OSCOutPort *selectedPort = nil;
+        
+        selectedPort = [self.sharedCommunicationManager.oscManager findOutputWithLabel:(NSString *)labelOrNode];
+        if (selectedPort == nil)
+            return;
+        
+        // Set the OSC Out Port
+        
+        //NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
+        //NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
+        
+        [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
+        
+        self.sharedPreferences.gridOSCLabel = (NSString *)labelOrNode;
+        self.sharedPreferences.gridMIDINode = nil;
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnecting" object:self];
+        self.gridControllerConnectionTimer = [NSTimer scheduledTimerWithTimeInterval:3
+                                                           target:self
+                                                         selector:@selector(gridControllerConnectionTimeout:)
+                                                         userInfo:nil
+                                                          repeats:NO];
+        
+        [EatsMonome connectToMonomeAtPort:self.sharedCommunicationManager.oscOutPort
+                                 fromPort:self.sharedCommunicationManager.oscInPort
+                               withPrefix:self.sharedCommunicationManager.oscPrefix];
+        
+        
+    } else if ( gridType.intValue == EatsGridType_Launchpad ) {
+        
+        // Connect using midiNode
+        
+    }
+    
+}
+
+- (void) gridControllerConnectionTimeout:(NSTimer *)timer
+{
+    [self.gridControllerConnectionTimer invalidate];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
+    self.sharedPreferences.gridOSCLabel = nil;
+    self.sharedPreferences.gridMIDINode = nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnectionError" object:self];
+}
+
+- (void) gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
+{
+    [self.gridControllerConnectionTimer invalidate];
+    
+    // Set the prefs, making sure the width is divisible by 8
+    self.sharedPreferences.gridType = EatsGridType_Monome;
+    self.sharedPreferences.gridWidth = w - (w % 8);
+    self.sharedPreferences.gridHeight = h - (h % 8);
+    
+    // Let everyone know
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
+}
+
+
+
 #pragma mark - MIDI Manager delegate methods
 
 - (void) setupChanged
 {
     //NSLog(@"%s", __func__);
     [self.preferencesController updateMIDI];
-    [self.preferencesController updateGridControllers];
+    
+    // TODO: Check which nodes should be active
 }
 
 - (void) receivedMIDI:(NSArray *)a fromNode:(VVMIDINode *)n
@@ -114,12 +190,24 @@
 
 
 
-#pragma mark - OSC Manager notifications and delegate methods
+#pragma mark - OSC Manager notifications and methods
 
 - (void) oscOutputsChangedNotification:(NSNotification *)note
 {
-    //NSLog(@"%s", __func__);
-    [self.preferencesController updateGridControllers];
+    // Auto-connect and make sure our device hasn't disappeared
+    BOOL stillActive = NO;
+    for(NSString *s in [self.sharedCommunicationManager.oscManager outPortLabelArray] ) {
+        if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
+            stillActive = YES;
+            [self gridControllerConnectToDeviceType:[NSNumber numberWithInt:EatsGridType_Monome ] withOSCLabelOrMIDINode:s];
+        }
+    }
+    
+    if( !stillActive )
+       [self gridControllerNone];
+    
+    // Update the prefs window
+    [self.preferencesController updateOSC];
 }
 
 - (void) receivedOSCMessage:(OSCMessage *)o
@@ -141,8 +229,7 @@
         for (NSString *s in [o valueArray]) {
             [sizeValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
         }
-        [self.preferencesController gridControllerConnected:EatsGridType_Monome width:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
-        
+        [self gridControllerConnected:EatsGridType_Monome width:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
         
     // Other SerialOSC info (just skipping them for now)
         

@@ -7,7 +7,6 @@
 //
 
 #import "PreferencesController.h"
-#import "EatsMonome.h"
 
 @interface PreferencesController ()
 
@@ -30,7 +29,7 @@
 
 @implementation PreferencesController
 
-- (id)initWithWindow:(NSWindow *)window
+- (id) initWithWindow:(NSWindow *)window
 {
     self = [super initWithWindow:window];
     if (self) {
@@ -40,7 +39,7 @@
     return self;
 }
 
-- (void)windowDidLoad
+- (void) windowDidLoad
 {
     [super windowDidLoad];
     
@@ -52,26 +51,44 @@
     self.sharedPreferences = [Preferences sharedPreferences];
 
     // Populate
-    [self updateGridControllers];
+    [self updateOSC];
     [self updateMIDI];
     
-    if( self.sharedPreferences.gridAutoConnect ) {
-        if( self.sharedPreferences.gridOSCLabel )
-            [self gridControllerConnectToOSCDeviceWithLabel:self.sharedPreferences.gridOSCLabel];
-        //else if( self.sharedPreferences.gridMIDINode )
-            // Reconnect to MIDI grid
-    }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(gridControllerNone:)
+                                                 name:@"GridControllerNone"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(gridControllerConnecting:)
+                                                 name:@"GridControllerConnecting"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(gridControllerConnectionError:)
+                                                 name:@"GridControllerConnectionError"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(gridControllerConnected:)
+                                                 name:@"GridControllerConnected"
+                                               object:nil];
+}
+
+- (void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
 
 #pragma mark - Public methods
 
-// TODO – Detect monome disconnects. MLRV seems able to do this.
+// TODO – Detect monome disconnects. MLRV seems able to do this!
 
-- (void)updateGridControllers
+- (void) updateOSC
 {
-    
     NSArray *oscPortLabelArray = [self.sharedCommunicationManager.oscManager outPortLabelArray];
     
     [self.gridControllerPopup removeAllItems];
@@ -84,15 +101,16 @@
         if(![s isEqualToString:self.sharedCommunicationManager.oscOutputPortLabel])
             [self.gridControllerPopup addItemWithTitle:s];
         
-        // Try to reconnect
+        // Set popup to active controller
         if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
             [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:s] ];
+            [self gridControllerConnected:nil];
         }
             
     }
 }
 
-- (void)updateMIDI
+- (void) updateMIDI
 {
     [self.clockSourcePopup removeAllItems];
     
@@ -123,51 +141,33 @@
     }
 }
 
-- (void) gridControllerConnectToOSCDeviceWithLabel:(NSString *)label
+- (void) gridControllerNone:(NSNotification *)notification
 {
+    
+    self.sharedPreferences.gridType = EatsGridType_None;
+    self.sharedPreferences.gridWidth = 32;
+    self.sharedPreferences.gridHeight = 32;
+    
+    [self.gridControllerPopup selectItemAtIndex:0];
     [self.gridControllerStatus setStringValue:@""];
-    OSCOutPort *selectedPort = nil;
-    
-    selectedPort = [self.sharedCommunicationManager.oscManager findOutputWithLabel:label];
-	if (selectedPort == nil)
-		return;
-    
-    // Set the OSC Out Port
-    //NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
-    //NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
-    [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
-    
-    [self.gridControllerStatus setStringValue:@"Trying to connect..."];
-    [EatsMonome connectToMonomeAtPort:self.sharedCommunicationManager.oscOutPort
-                             fromPort:self.sharedCommunicationManager.oscInPort
-                           withPrefix:self.sharedCommunicationManager.oscPrefix];
 }
 
-- (void)gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
+- (void) gridControllerConnectionError:(NSNotification *)notification
 {
-   
-    // Set the prefs, making sure the width is divisible by 8
-    self.sharedPreferences.gridType = EatsGridType_Monome;
-    self.sharedPreferences.gridWidth = w - (w % 8);
-    self.sharedPreferences.gridHeight = h - (h % 8);
-    
-    if(gridType == EatsGridType_Monome) {
-        self.sharedPreferences.gridOSCLabel = self.gridControllerPopup.selectedItem.title;
-        self.sharedPreferences.gridMIDINode = nil;
-        
-    } else if(gridType == EatsGridType_Launchpad) {
-        self.sharedPreferences.gridOSCLabel = nil;
-        //self.sharedPreferences.gridMIDINode = xxxxxxxx;
-    }
-    
-    // Let everyone know
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
-    
-    // Update the UI
+    [self.gridControllerStatus setStringValue:@"❌ Error connecting to grid controller"];
+}
+
+- (void) gridControllerConnecting:(NSNotification *)notification
+{
+    [self.gridControllerStatus setStringValue:@"Trying to connect..."];
+}
+
+- (void) gridControllerConnected:(NSNotification *)notification
+{
     NSString *gridName;
-    if(gridType == EatsGridType_Monome)
-        gridName = [NSString stringWithFormat:@"monome %u", w*h];
-    else if(gridType == EatsGridType_Launchpad)
+    if(self.sharedPreferences.gridType == EatsGridType_Monome)
+        gridName = [NSString stringWithFormat:@"monome %u", self.sharedPreferences.gridWidth * self.sharedPreferences.gridHeight];
+    else if(self.sharedPreferences.gridType == EatsGridType_Launchpad)
         gridName = @"Launchpad";
     
     [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected OK to %@", gridName]];
@@ -177,23 +177,20 @@
 
 #pragma mark - Interface actions
 
-- (IBAction)preferencesToolbarAction:(NSToolbarItem *)sender {
+- (IBAction) preferencesToolbarAction:(NSToolbarItem *)sender {
     [self.preferencesTabView selectTabViewItemAtIndex:[sender tag]];
 }
 
-- (IBAction)gridControllerPopup:(NSPopUpButton *)sender {
-    
-    // Set none
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
-    self.sharedPreferences.gridType = EatsGridType_None;
-    self.sharedPreferences.gridOSCLabel = nil;
-    self.sharedPreferences.gridMIDINode = nil;
-    self.sharedPreferences.gridWidth = 32;
-    self.sharedPreferences.gridHeight = 32;
+- (IBAction) gridControllerPopup:(NSPopUpButton *)sender {
     
     // Find the output port corresponding to the label of the selected item
-	if ([sender indexOfSelectedItem] > -1)
-        [self gridControllerConnectToOSCDeviceWithLabel:[sender titleOfSelectedItem]];
+	if ([sender indexOfSelectedItem] > 0) {
+        [self.delegate performSelector:@selector(gridControllerConnectToDeviceType:withOSCLabelOrMIDINode:) withObject:[NSNumber numberWithInt:EatsGridType_Monome] withObject:[sender titleOfSelectedItem]];
+    } else {
+        self.sharedPreferences.gridOSCLabel = nil;
+        self.sharedPreferences.gridMIDINode = nil;
+        [self.delegate performSelector:@selector(gridControllerNone)];
+    }
 }
 
 
