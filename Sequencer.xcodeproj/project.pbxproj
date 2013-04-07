@@ -42,6 +42,7 @@
 		4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B716E45EB900A8E3F2 /* EatsClock.m */; };
 		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
 		4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */; };
+		4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */; };
 		4DA8A91A170B8805001C26EB /* WMChord.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A90F170B8805001C26EB /* WMChord.m */; };
 		4DA8A91B170B8805001C26EB /* WMData.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A911170B8805001C26EB /* WMData.m */; };
 		4DA8A91C170B8805001C26EB /* WMNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A913170B8805001C26EB /* WMNote.m */; };
@@ -141,6 +142,8 @@
 		4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsExternalClockCalculator.m; sourceTree = "<group>"; };
 		4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsMonome.h; sourceTree = "<group>"; };
 		4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMonome.m; sourceTree = "<group>"; };
+		4D82B13917117AEF00AD8222 /* EatsDebugGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDebugGridView.h; sourceTree = "<group>"; };
+		4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDebugGridView.m; sourceTree = "<group>"; };
 		4DA8A90E170B8805001C26EB /* WMChord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMChord.h; sourceTree = "<group>"; };
 		4DA8A90F170B8805001C26EB /* WMChord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMChord.m; sourceTree = "<group>"; };
 		4DA8A910170B8805001C26EB /* WMData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMData.h; sourceTree = "<group>"; };
@@ -284,6 +287,8 @@
 				4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */,
 				4D2772441709C8EA00A8069B /* EatsVelocityUtils.h */,
 				4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */,
+				4D82B13917117AEF00AD8222 /* EatsDebugGridView.h */,
+				4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */,
 				4D172E8616E5BD090012C019 /* Preferences.h */,
 				4D172E8716E5BD090012C019 /* Preferences.m */,
 				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
@@ -489,6 +494,7 @@
 				4DA8A91D170B8805001C26EB /* WMNoteCollection.m in Sources */,
 				4DA8A91E170B8805001C26EB /* WMPool.m in Sources */,
 				4DA8A91F170B8805001C26EB /* WMScale.m in Sources */,
+				4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
