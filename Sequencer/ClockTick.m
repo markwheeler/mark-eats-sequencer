@@ -279,12 +279,15 @@
                             if( page.playMode.intValue == EatsSequencerPlayMode_Reverse )
                                 position = _minQuantization - 1 - position;
                             
+                            //NSLog(@"Note position: %u", position);
+                            
+                            // Calculate the swing based on note position etc
                             nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                                      type:page.swingType.intValue
-                                                                                    amount:page.swingAmount.intValue
-                                                                                       bpm:_bpm
-                                                                              qnPerMeasure:_qnPerMeasure
-                                                                           minQuantization:_minQuantization];
+                                                                             type:page.swingType.intValue
+                                                                           amount:page.swingAmount.intValue
+                                                                              bpm:_bpm
+                                                                     qnPerMeasure:_qnPerMeasure
+                                                                  minQuantization:_minQuantization];
                             // Velocity groove if enabled
                             if( page.velocityGroove.boolValue ) {
                                 velocity = [EatsVelocityUtils calculateVelocityForPosition:position
@@ -304,7 +307,7 @@
                         // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
                         int length = roundf( note.length.floatValue * ( _minQuantization / page.stepLength.floatValue ) );
                         if( length < 1 )
-                            NSLog(@"Note added was too short: %i", length);
+                            NSLog(@"Note added to active notes was too short: %i", length);
                         // Add to activeNotes so we know when to stop it
                         [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
                                                                                                   [NSNumber numberWithInt:channel], @"channel",

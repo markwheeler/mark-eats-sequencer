@@ -8,11 +8,13 @@
 
 #import "EatsVelocityUtils.h"
 
+// These values as they are set create a start of bar very close to the SP1200, and the end of bar is close but not QUITE as extreme.
+
 // This is the percentage between the velocity and 0 that it will end up at (eg, 64 becomes 64 * 0.7 )
 #define LOW_VELOCITY_PULL 0.7
 
-// This is the percentage between the velocity and 127 that it will end up at (eg, 64 becomes (127 - 64) * (1 - 0.3) )
-#define HIGH_VELOCITY_PULL 0.3
+// This is the percentage between the velocity and 127 that it will end up at (eg, 64 becomes (127 - 64) * (1 - 0.2) )
+#define HIGH_VELOCITY_PULL 0.2
 
 
 @implementation EatsVelocityUtils
@@ -20,9 +22,6 @@
 + (uint) calculateVelocityForPosition:(uint)position baseVelocity:(uint)baseVelocity type:(int)swingType minQuantization:(uint)minQuantization
 {
     // Position must be 0 - minQuantization - 1
-    
-    // Simple test
-    // uint velocity = roundf( 127.0 * ( ( position + 1.0 / minQuantization ) / 100.0 ) );
     
     uint velocity = baseVelocity;
     float velocityDifference = 0;
@@ -53,8 +52,6 @@
     }
     
     //NSLog(@"Velocity %u", velocity );
-
-    //TODO tweak values (less extreme?) and maybe add slight variation in the middle of the bar?
     
     return velocity;
 }
