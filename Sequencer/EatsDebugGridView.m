@@ -43,22 +43,42 @@
     
     CGFloat cornerRadius = squareSize * 0.1;
     
-    for(int r=0; r < _rows; r++){
-        for(int c=0; c < _columns; c++) {
+    for( int r = 0; r < _rows; r++ ){
+        for( int c = 0; c < _columns; c++ ) {
             // Draw shape
-            NSRect rect = NSMakeRect((squareSize + _gutter) * c, self.bounds.size.height - squareSize - (squareSize + _gutter) * r, squareSize, squareSize);
+            NSRect rect = NSMakeRect((squareSize + _gutter) * c, (squareSize + _gutter) * r, squareSize, squareSize);
             NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect: rect xRadius:cornerRadius yRadius:cornerRadius];
             
             // Set clip so we can do an 'inner' stroke
             [roundedRect setClip];
+
+            // Colours
+            float fillBrightness;
+            float strokeBrightness;
+            
+            // TODO – Notes
+            if( r == 99 && c == 99 ) {
+                fillBrightness = 0;
+                strokeBrightness = 0;
+                
+            // Active area
+            } else if( r < 8 && c < 16 ) {
+                fillBrightness = 0.85;
+                strokeBrightness = 0.7;
+                
+            // Inactive area
+            } else {
+                fillBrightness = 0.9;
+                strokeBrightness = 0.8;
+            }
             
             // Fill
-            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:0.85 alpha:1] set];
+            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:fillBrightness alpha:1] set];
             [roundedRect fill];
             
             
             // Stroke
-            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:0.75 alpha:1] set];
+            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:strokeBrightness alpha:1] set];
             [roundedRect setLineWidth:2.0];
             [roundedRect stroke];
         }
