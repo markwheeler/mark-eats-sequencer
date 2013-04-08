@@ -383,7 +383,7 @@
     
     // Get the notes
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row < %u)", self.sharedPreferences.gridWidth, 32 - self.sharedPreferences.gridHeight];
     
     NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 
@@ -471,19 +471,15 @@
             // Generate the scale
             if (returnCode == NSOKButton) {
                 
-                uint numberToGenerate = self.sharedPreferences.gridHeight;
-                if( !numberToGenerate )
-                    numberToGenerate = 32;
-                
                 // Generate pitches
                 NSArray *pitches = [EatsScaleGenerator generateScaleType:self.scaleGeneratorSheetController.scaleType
                                                                tonicNote:self.scaleGeneratorSheetController.tonicNote
-                                                                  length:numberToGenerate];
+                                                                  length:32];
+                
                 // Reverse the array
                 pitches = [[pitches reverseObjectEnumerator] allObjects];
                 
                 // Put them into the page
-                //NSMutableOrderedSet *setOfRowPitches = [self.currentPage.pitches mutableCopy];
                 int r = 0;
                 
                 for( NSNumber *pitch in pitches ) {

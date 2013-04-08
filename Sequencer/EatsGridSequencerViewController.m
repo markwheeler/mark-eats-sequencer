@@ -241,10 +241,8 @@
     
     // Length
     } else if(sender == _lengthView) {
-
         _activeEditNote.length = [NSNumber numberWithInt:roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1 ];
-        
-        NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
+        //NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
     }
     
     [self updateView];
@@ -263,7 +261,7 @@
             
             // See if there's a note there
             NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-            noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y];
+            noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y + 32 - self.height];
 
             NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 
@@ -275,11 +273,11 @@
                 SequencerNote *noteToRemove = [noteMatches lastObject];
                 
                 // Make a record of it first in case it's a double tap
-                _lastRemovedNoteInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"step",
-                                                                                      [NSNumber numberWithUnsignedInt:y], @"row",
-                                                                                      noteToRemove.velocityAsPercentage, @"velocityAsPercentage",
-                                                                                      noteToRemove.length, @"length",
-                                                                                      nil];
+                _lastRemovedNoteInfo = [NSDictionary dictionaryWithObjectsAndKeys:noteToRemove.step, @"step",
+                                                                                  noteToRemove.row, @"row",
+                                                                                  noteToRemove.velocityAsPercentage, @"velocityAsPercentage",
+                                                                                  noteToRemove.length, @"length",
+                                                                                  nil];
                 
                 [self.managedObjectContext deleteObject:[noteMatches lastObject]];
 
@@ -289,7 +287,7 @@
                 NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
                 SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                 newNote.step = [NSNumber numberWithUnsignedInt:x];
-                newNote.row = [NSNumber numberWithUnsignedInt:y];
+                newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
                 [newNotesSet addObject:newNote];
                 _pattern.notes = newNotesSet;
                 
@@ -315,7 +313,7 @@
         
         // See if there's a note there
         NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y + 32 - self.height];
 
         NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
 

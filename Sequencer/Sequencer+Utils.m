@@ -47,7 +47,7 @@
         if (channel == 10 || channel == 11)
             pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_DrumMap tonicNote:35 length:32]; // Drum Map
         else
-            pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:24 length:32]; // C Major
+            pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:60 length:32]; // C Major
         // Reverse the array
         pitches = [[pitches reverseObjectEnumerator] allObjects];
         
@@ -91,7 +91,7 @@
         
         SequencerNote *note = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:context];
         
-        note.row = [NSNumber numberWithInt:arc4random_uniform(8)];
+        note.row = [NSNumber numberWithInt:31 - arc4random_uniform(8)];
         note.step = [NSNumber numberWithInt:i];
         
         [notes addObject:note];

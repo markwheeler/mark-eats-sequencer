@@ -67,9 +67,9 @@
     if( scaleDifference < 0 ) scaleDifference = 0;
     
     for(SequencerNote *note in _pattern.notes) {
-        if( note.step.intValue < self.width && note.row.intValue < _patternHeight ) {
+        if( note.step.intValue < self.width && note.row.intValue >= 32 - _patternHeight ) {
                         
-            uint row = [note.row unsignedIntValue];
+            uint row = [note.row unsignedIntValue] - 32 + _patternHeight;
 
             // Fold from top
             if( _foldFrom == EatsPatternViewFoldFrom_Top ) {
