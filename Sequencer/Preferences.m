@@ -45,11 +45,13 @@
     self.midiClockSource = [preferences objectForKey:@"midiClockSource"];
     self.sendMIDIClock = [preferences boolForKey:@"sendMIDIClock"];
     
+    self.enabledMIDIOutputNames = [[preferences arrayForKey:@"enabledMIDIOutputNames"] mutableCopy];
+    
     self.loopFromScrubArea = [preferences boolForKey:@"loopFromScrubArea"];
 }
 
 - (void) savePreferences
-{    
+{
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
     NSString *oscLabel = nil;
@@ -66,6 +68,12 @@
     
     [preferences setObject:self.midiClockSource forKey:@"midiClockSource"];
     [preferences setBool:self.sendMIDIClock forKey:@"sendMIDIClock"];
+
+    // Remove old entries if we end up with loads for some reason
+    while ([self.enabledMIDIOutputNames count] > 100 ) {
+        [self.enabledMIDIOutputNames removeObjectAtIndex:0];
+    }
+    [preferences setObject:self.enabledMIDIOutputNames forKey:@"enabledMIDIOutputNames"];
     
     [preferences setBool:self.loopFromScrubArea forKey:@"loopFromScrubArea"];
     

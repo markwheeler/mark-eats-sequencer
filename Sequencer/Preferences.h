@@ -27,6 +27,8 @@ typedef enum EatsGridType{
 @property BOOL              gridAutoConnect;
 @property BOOL              gridSupportsVariableBrightness;
 
+@property NSMutableArray    *enabledMIDIOutputNames;
+
 @property VVMIDINode        *midiClockSource;
 @property BOOL              sendMIDIClock;
 

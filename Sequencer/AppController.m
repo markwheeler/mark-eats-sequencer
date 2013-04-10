@@ -174,9 +174,18 @@
 - (void) setupChanged
 {
     //NSLog(@"%s", __func__);
-    [self.preferencesController updateMIDI];
     
-    // TODO: Check which nodes should be active
+    // Enable only the nodes that have been previously enabled
+    NSArray *nodeArray = [self.sharedCommunicationManager.midiManager.destArray lockCreateArrayCopy];
+    
+    for( VVMIDINode *node in nodeArray ) {
+        if( [self.sharedPreferences.enabledMIDIOutputNames indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) { return [obj isEqualToString:node.name]; }] != NSNotFound )
+            node.enabled = YES;
+        else
+            node.enabled = NO;
+    }
+    
+    [self.preferencesController updateMIDI];
 }
 
 - (void) receivedMIDI:(NSArray *)a fromNode:(VVMIDINode *)n

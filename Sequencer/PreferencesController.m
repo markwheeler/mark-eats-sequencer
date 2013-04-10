@@ -132,7 +132,7 @@
     for (int i = 0; i < [self.sharedCommunicationManager.midiManager.destNodeNameArray count]; i++) {
         NSMutableDictionary *value = [[NSMutableDictionary alloc] init];
         
-        [value setObject:(NSString *)self.sharedCommunicationManager.midiManager.destNodeNameArray[i]
+        [value setObject:self.sharedCommunicationManager.midiManager.destNodeNameArray[i]
                   forKey:@"deviceName"];
         [value setObject:[NSNumber numberWithBool:[[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:i] enabled]]
                   forKey:@"enabled"];
@@ -191,6 +191,30 @@
         self.sharedPreferences.gridMIDINode = nil;
         [self.delegate performSelector:@selector(gridControllerNone)];
     }
+}
+
+- (IBAction) midiOutputCheckbox:(id)sender {
+    // Get the name and search for it in the array of saved names
+    NSString *nodeName = [[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] name];
+    NSUInteger nameIndex = [self.sharedPreferences.enabledMIDIOutputNames indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) { return [obj isEqualToString:nodeName]; }];
+    
+    // Disable
+    if([[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] enabled]) {
+        [[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] setEnabled:NO];
+        
+        // Remove the name if it's in the saved array
+        if( nameIndex != NSNotFound )
+            [self.sharedPreferences.enabledMIDIOutputNames removeObjectAtIndex:nameIndex];
+        
+    // Enable
+    } else {
+        [[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] setEnabled:YES];
+        
+        // Add the name if it's not in the saved array
+        if( nameIndex == NSNotFound )
+            [self.sharedPreferences.enabledMIDIOutputNames addObject:nodeName];
+    }
+    
 }
 
 
