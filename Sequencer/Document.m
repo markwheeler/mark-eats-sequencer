@@ -44,12 +44,12 @@
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
 
-@property (weak) IBOutlet NSTableView   *rowPitchesTableView;
-@property (weak) IBOutlet NSPopUpButton *stepQuantizationPopup;
-@property (weak) IBOutlet NSPopUpButton *patternQuantizationPopup;
-@property (weak) IBOutlet NSPopUpButton *stepLengthPopup;
-@property (weak) IBOutlet NSPopUpButton *swingPopup;
-@property (weak) IBOutlet NSPopUpButton *currentPagePopup;
+@property (weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
+@property (weak) IBOutlet NSTableView           *rowPitchesTableView;
+@property (weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
+@property (weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
+@property (weak) IBOutlet NSPopUpButton         *stepLengthPopup;
+@property (weak) IBOutlet NSPopUpButton         *swingPopup;
 
 @end
 
@@ -280,9 +280,8 @@
             [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
     }
     
-    [self.currentPagePopup removeAllItems];
     for(SequencerPage *page in self.sequencer.pages) {
-        [self.currentPagePopup addItemWithTitle:[NSString stringWithFormat:@"%@", page.id]];
+        [self.currentPageSegmentedControl setLabel:page.name forSegment:[page.id intValue]];
     }
     
     // Table view default sort
@@ -321,13 +320,6 @@
     [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
         return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
     }]];
-    
-    // Commented out as the swing setting may still be useful if you have velocity adjustments enabled
-    /*if( self.currentPage.stepLength.intValue < 8 )
-        self.swingPopup.enabled = NO;
-    else
-        self.swingPopup.enabled = YES;
-     */
 }
 
 - (void) updateSwingPopup
@@ -398,6 +390,19 @@
     }
 }
 
+- (void) editLabelAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    NSString *newLabel = [alert.accessoryView valueForKey:@"stringValue"];
+    
+    if( returnCode == NSOKButton && ![newLabel isEqualToString:@""] ) {
+        
+        if( newLabel.length > 100 ) // The property can't take a string longer than 100 chars
+            newLabel = [newLabel substringToIndex:100];
+        self.currentPage.name = newLabel;
+        [self.currentPageSegmentedControl setLabel:self.currentPage.name forSegment:[self.currentPage.id intValue]];
+    }
+}
+
 - (void) notesOutsideGridAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if( returnCode == NSOKButton ) {
@@ -424,17 +429,50 @@
 
 #pragma mark - Interface actions
 
-- (IBAction)playButton:(NSButton *)sender
+- (IBAction) playButton:(NSButton *)sender
 {
     [self.clock startClock];
 }
 
-- (IBAction)stopButton:(NSButton *)sender
+- (IBAction) stopButton:(NSButton *)sender
 {
     [self.clock stopClock];
 }
 
-- (IBAction)sequencerPauseButton:(NSButton *)sender
+
+- (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
+{
+    self.sequencer.stepQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+}
+
+- (IBAction) patternQuantizationPopup:(NSPopUpButton *)sender
+{
+    self.sequencer.patternQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+}
+
+- (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
+{
+    self.currentPage = [self.sequencer.pages objectAtIndex:sender.selectedSegment];
+}
+
+- (IBAction) editLabelButton:(NSButton *)sender
+{
+    // Make a text field, add it to an alert and then show it so you can edit the page name
+    
+    NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
+    accessoryTextField.stringValue = self.currentPage.name;
+    
+    NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
+                                                 defaultButton:@"OK"
+                                               alternateButton:@"Cancel"
+                                                   otherButton:nil
+                                     informativeTextWithFormat:@""];
+    [editLabelAlert setAccessoryView:accessoryTextField];
+
+    [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+}
+
+- (IBAction) sequencerPauseButton:(NSButton *)sender
 {
     self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
     self.currentPage.nextStep = nil;
@@ -442,28 +480,28 @@
 }
 
 
-- (IBAction)sequencerForwardButton:(NSButton *)sender
+- (IBAction) sequencerForwardButton:(NSButton *)sender
 {
     self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
     self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
-- (IBAction)sequencerReverseButton:(NSButton *)sender
+- (IBAction) sequencerReverseButton:(NSButton *)sender
 {
     self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
     self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
-- (IBAction)sequencerRandomButton:(NSButton *)sender
+- (IBAction) sequencerRandomButton:(NSButton *)sender
 {
     self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
     self.currentPage.nextStep = nil;
     [self.gridNavigationController updateGridView];
 }
 
-- (IBAction)scalesOpenSheetButton:(NSButton *)sender {
+- (IBAction) scalesOpenSheetButton:(NSButton *)sender {
     if (!self.scaleGeneratorSheetController) {
         self.scaleGeneratorSheetController = [[ScaleGeneratorSheetController alloc] init];
         [self.scaleGeneratorSheetController beginSheetModalForWindow:self.documentWindow completionHandler:^(NSUInteger returnCode) {
@@ -503,17 +541,7 @@
     }
 }
 
-- (IBAction)stepQuantizationPopup:(NSPopUpButton *)sender
-{
-    self.sequencer.stepQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-}
-
-- (IBAction)patternQuantizationPopup:(NSPopUpButton *)sender
-{
-    self.sequencer.patternQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-}
-
-- (IBAction)stepLengthPopup:(NSPopUpButton *)sender
+- (IBAction) stepLengthPopup:(NSPopUpButton *)sender
 {
     self.currentPage.stepLength = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
 }
@@ -524,11 +552,6 @@
     
     self.currentPage.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
     self.currentPage.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
-}
-
-- (IBAction)currentPagePopup:(NSPopUpButton *)sender
-{
-    self.currentPage = [self.sequencer.pages objectAtIndex:[sender indexOfSelectedItem]];
 }
 
 

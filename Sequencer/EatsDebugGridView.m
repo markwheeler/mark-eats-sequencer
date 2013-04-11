@@ -30,9 +30,9 @@
     //[[NSColor colorWithCalibratedHue:0.5 saturation:0.7 brightness:1.0 alpha:1] set];
     //NSRectFill(dirtyRect);
     
-    // Set the square size and corner radius
-    CGFloat squareWidth = floor(((self.bounds.size.width + _gutter) / _columns) - _gutter);
-    CGFloat squareHeight = floor(((self.bounds.size.height + _gutter) / _rows) - _gutter);
+    // Set the square size and corner radius – use floor() around these two lines to make squares sit 'on pixel'
+    CGFloat squareWidth = ((self.bounds.size.width + _gutter) / _columns) - _gutter;
+    CGFloat squareHeight = ((self.bounds.size.height + _gutter) / _rows) - _gutter;
     
     CGFloat squareSize;
     if(squareWidth < squareHeight) squareSize = squareWidth;

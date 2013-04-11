@@ -75,6 +75,7 @@
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
+		4DF3CBDF17173FE600D84532 /* shadow-rule.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DF3CBDE17173FE600D84532 /* shadow-rule.png */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 /* End PBXBuildFile section */
 
@@ -207,6 +208,7 @@
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
 		4DF1FD971708FB4500AB043B /* EatsSwingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsSwingUtils.h; sourceTree = "<group>"; };
 		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
+		4DF3CBDE17173FE600D84532 /* shadow-rule.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shadow-rule.png"; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -229,6 +231,7 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				4DF3CBDE17173FE600D84532 /* shadow-rule.png */,
 				4D1C40361712150A000F773D /* page-forward-icon.png */,
 				4D1C40371712150A000F773D /* page-forward-icon@2x.png */,
 				4D1C40381712150A000F773D /* page-pause-icon.png */,
@@ -497,6 +500,7 @@
 				4D1C404D17121834000F773D /* sequencer-stop-icon@2x.png in Resources */,
 				4D1C405017121875000F773D /* sequencer-play-icon.png in Resources */,
 				4D1C405117121875000F773D /* sequencer-play-icon@2x.png in Resources */,
+				4DF3CBDF17173FE600D84532 /* shadow-rule.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

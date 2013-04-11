@@ -35,9 +35,9 @@
         page.channel = [NSNumber numberWithUnsignedInt: channel];
         page.id = [NSNumber numberWithInt:i];
         if (channel == 10 || channel == 11)
-            page.name = [NSString stringWithFormat:@"Drums page %i", channel - 9];
+            page.name = [NSString stringWithFormat:@"Drums %i", channel - 9];
         else
-            page.name = [NSString stringWithFormat:@"Sequencer page %i", i];
+            page.name = [NSString stringWithFormat:@"Page %i", i + 1];
         page.loopEnd = [NSNumber numberWithUnsignedInt: 31];
         page.currentStep = [page.loopEnd copy];
         
