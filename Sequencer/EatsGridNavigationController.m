@@ -126,9 +126,9 @@
         if(![_deviceInterface isKindOfClass:[EatsMonome class]])
             _deviceInterface = [[EatsMonome alloc] initWithOSCPort:_sharedCommunicationManager.oscOutPort oscPrefix:_sharedCommunicationManager.oscPrefix];
         
-    } else if(_sharedPreferences.gridType == EatsGridType_Launchpad && _sharedPreferences.gridMIDINode) {
+    } else if(_sharedPreferences.gridType == EatsGridType_Launchpad && _sharedPreferences.gridMIDINodeName) {
         //if(![_deviceInterface isKindOfClass:[EatsLaunchpad class])
-        //    _deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:_gridMIDINode];
+        //    _deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:_gridMIDINodeName];
         
     }
     

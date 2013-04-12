@@ -61,7 +61,9 @@
     
     _currentTick = 0;
     
-    if(_sharedPreferences.sendMIDIClock) {
+    if( _sharedPreferences.sendMIDIClock
+       && _sharedPreferences.midiClockSourceName == nil
+       && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :ns];
@@ -77,11 +79,10 @@
 }
 
 - (void) clockSongStop:(uint64_t)ns
-{
-    
-    // [_externalClockCalculator resetExternalClock]; TODO: Add external clock support back in (AppController? Or at Document level?)
-    
-    if(_sharedPreferences.sendMIDIClock) {
+{    
+    if( _sharedPreferences.sendMIDIClock
+       && _sharedPreferences.midiClockSourceName == nil
+       && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         // Send stop
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createWithType:VVMIDIStopVal channel:0 timestamp:ns];
@@ -104,7 +105,10 @@
     //if( [NSThread isMainThread] ) NSLog(@"%s is running on main thread", __func__);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
-    if(_currentTick % (_ppqn / _midiClockPPQN) == 0 && _sharedPreferences.sendMIDIClock) {
+    if( _currentTick % (_ppqn / _midiClockPPQN) == 0
+       && _sharedPreferences.sendMIDIClock
+       && _sharedPreferences.midiClockSourceName == nil
+       && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         [self sendMIDIClockPulseAtTime:ns];
     }
     

@@ -15,6 +15,7 @@
 
 @property PreferencesController *preferencesController;
 
+// Preferences controller delegate methods
 - (void) gridControllerNone;
 - (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
 

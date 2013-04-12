@@ -8,13 +8,15 @@
 
 #import "AppController.h"
 #import "Preferences.h"
+#import "EatsExternalClockCalculator.h"
 #import "EatsMonome.h"
 
 @interface AppController()
 
-@property EatsCommunicationManager  *sharedCommunicationManager;
-@property Preferences               *sharedPreferences;
-@property NSTimer                   *gridControllerConnectionTimer;
+@property EatsCommunicationManager      *sharedCommunicationManager;
+@property Preferences                   *sharedPreferences;
+@property EatsExternalClockCalculator   *externalClockCalculator;
+@property NSTimer                       *gridControllerConnectionTimer;
 
 @end
 
@@ -29,6 +31,12 @@
         self.sharedPreferences = [Preferences sharedPreferences];
         [self.sharedPreferences loadPreferences];
         
+        // Create the preferences window (makes it easier to keep it up to date)
+        if(!self.preferencesController) {
+            self.preferencesController = [[PreferencesController alloc] initWithWindowNibName:@"Preferences"];
+            self.preferencesController.delegate = self;
+        }
+        
         // Get the comms manager for MIDI & OSC
         self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedCommunicationManager.midiManager.delegate = self;
@@ -38,14 +46,10 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCOutPortsChangedNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCInPortsChangedNotification object:nil];
         
-        // Create the preferences window (makes it easier to keep it up to date)
-        if(!self.preferencesController) {
-            self.preferencesController = [[PreferencesController alloc] initWithWindowNibName:@"Preferences"];
-            self.preferencesController.delegate = self;
-        }
-        
         // Fake an outputs-changed notification to make sure my list of destinations updates (in case it refreshes before I'm awake)
         [self oscOutputsChangedNotification:nil];
+        
+        self.externalClockCalculator = [[EatsExternalClockCalculator alloc] init];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
@@ -123,7 +127,7 @@
         [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
         
         self.sharedPreferences.gridOSCLabel = (NSString *)labelOrNode;
-        self.sharedPreferences.gridMIDINode = nil;
+        self.sharedPreferences.gridMIDINodeName = nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnecting" object:self];
         self.gridControllerConnectionTimer = [NSTimer scheduledTimerWithTimeInterval:3
@@ -150,7 +154,7 @@
     [self.gridControllerConnectionTimer invalidate];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
     self.sharedPreferences.gridOSCLabel = nil;
-    self.sharedPreferences.gridMIDINode = nil;
+    self.sharedPreferences.gridMIDINodeName = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnectionError" object:self];
 }
 
@@ -176,25 +180,56 @@
     //NSLog(@"%s", __func__);
     
     // Enable only the nodes that have been previously enabled
-    NSArray *nodeArray = [self.sharedCommunicationManager.midiManager.destArray lockCreateArrayCopy];
+    NSArray *destNodeArray = [self.sharedCommunicationManager.midiManager.destArray lockCreateArrayCopy];
     
-    for( VVMIDINode *node in nodeArray ) {
-        if( [self.sharedPreferences.enabledMIDIOutputNames indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) { return [obj isEqualToString:node.name]; }] != NSNotFound )
+    for( VVMIDINode *node in destNodeArray ) {
+        if( [self.sharedPreferences.enabledMIDIOutputNames containsObject:node.name] )
             node.enabled = YES;
         else
             node.enabled = NO;
     }
     
+    if( ![self.sharedCommunicationManager.midiManager.sourceNodeNameArray containsObject:self.sharedPreferences.midiClockSourceName] && ![self.sharedCommunicationManager.midiManager.virtualSource.name isEqualToString:self.sharedPreferences.midiClockSourceName] ) {
+        self.sharedPreferences.midiClockSourceName = nil;
+    }
+    
     [self.preferencesController updateMIDI];
 }
 
-- (void) receivedMIDI:(NSArray *)a fromNode:(VVMIDINode *)n
+- (void) receivedMIDI:(NSArray *)a fromNode:(VVMIDINode *)node
 {
     //NSLog(@"%s", __func__);
     
-    //uint externalBPM = currentDocument.externalClockCalculator externalClockTick;
-    //if(externalBPM)
-    //    [currentDocument setBpm: externalBPM];
+    // If this message is from the clockSource MIDI node
+    if([node.name isEqualToString:_sharedPreferences.midiClockSourceName]) {
+        for (VVMIDIMessage *m in a) {
+            if([m type] == VVMIDIStartVal) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockStart" object:self];
+                
+            } else if([m type] == VVMIDIContinueVal) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockContinue" object:self];
+                
+            } else if([m type] == VVMIDISongPosPointerVal) {
+                if([m data1] == 0 && [m data2] == 0)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockZero" object:self];
+            }
+            
+            else if([m type] == VVMIDIStopVal) {
+                [_externalClockCalculator resetExternalClock];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockStop" object:self];
+                
+            } else if([m type] == VVMIDIClockVal) {
+                
+                NSNumber *externalBPM = [_externalClockCalculator externalClockTick:m.timestamp];
+                if( externalBPM.intValue >= 20 && externalBPM.intValue <= 300 ) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockBPM"
+                                                                        object:self
+                                                                      userInfo:[NSDictionary dictionaryWithObject:externalBPM forKey:@"bpm"]];
+                }
+                    
+            }
+        }
+    }
 }
 
 

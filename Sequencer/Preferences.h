@@ -22,14 +22,14 @@ typedef enum EatsGridType{
 @property uint              gridHeight;
 @property EatsGridType      gridType;
 @property NSString          *gridOSCLabel;
-@property VVMIDINode        *gridMIDINode;
+@property NSString          *gridMIDINodeName;
 
 @property BOOL              gridAutoConnect;
 @property BOOL              gridSupportsVariableBrightness;
 
 @property NSMutableArray    *enabledMIDIOutputNames;
 
-@property VVMIDINode        *midiClockSource;
+@property NSString          *midiClockSourceName;
 @property BOOL              sendMIDIClock;
 
 @property BOOL              loopFromScrubArea;

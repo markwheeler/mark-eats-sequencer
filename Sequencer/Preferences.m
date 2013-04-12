@@ -37,12 +37,12 @@
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
     self.gridOSCLabel = [preferences objectForKey:@"gridOSCLabel"];
-    self.gridMIDINode = [preferences objectForKey:@"gridMIDINode"];
+    self.gridMIDINodeName = [preferences objectForKey:@"gridMIDINodeName"];
     
     self.gridAutoConnect = [preferences boolForKey:@"gridAutoConnect"];
     self.gridSupportsVariableBrightness = [preferences boolForKey:@"gridSupportsVariableBrightness"];
     
-    self.midiClockSource = [preferences objectForKey:@"midiClockSource"];
+    self.midiClockSourceName = [preferences objectForKey:@"midiClockSourceName"];
     self.sendMIDIClock = [preferences boolForKey:@"sendMIDIClock"];
     
     self.enabledMIDIOutputNames = [[preferences arrayForKey:@"enabledMIDIOutputNames"] mutableCopy];
@@ -55,18 +55,18 @@
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
     NSString *oscLabel = nil;
-    VVMIDINode *midiNode = nil;
+    NSString *midiNodeName = nil;
     if( self.gridAutoConnect ) {
         oscLabel = self.gridOSCLabel;
-        midiNode = self.gridMIDINode;
+        midiNodeName = self.gridMIDINodeName;
     }
     [preferences setObject:oscLabel forKey:@"gridOSCLabel"];
-    [preferences setObject:midiNode forKey:@"gridMIDINode"];
+    [preferences setObject:midiNodeName forKey:@"gridMIDINodeName"];
     
     [preferences setBool:self.gridAutoConnect forKey:@"gridAutoConnect"];
     [preferences setBool:self.gridSupportsVariableBrightness forKey:@"gridSupportsVariableBrightness"];
     
-    [preferences setObject:self.midiClockSource forKey:@"midiClockSource"];
+    [preferences setObject:self.midiClockSourceName forKey:@"midiClockSourceName"];
     [preferences setBool:self.sendMIDIClock forKey:@"sendMIDIClock"];
 
     // Remove old entries if we end up with loads for some reason

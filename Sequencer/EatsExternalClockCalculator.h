@@ -10,7 +10,7 @@
 
 @interface EatsExternalClockCalculator : NSObject
 
-- (uint) externalClockTick:(uint64_t)timestamp;
+- (NSNumber *) externalClockTick:(uint64_t)timestamp;
 - (void) resetExternalClock;
 
 @end

@@ -31,31 +31,34 @@
 }
 
 
-- (uint) externalClockTick:(uint64_t)timestamp
+- (NSNumber *) externalClockTick:(uint64_t)timestamp
 {
-    
-    uint bpm = 0;
     
     if(_externalPulsePreviousTimestamp > 0) {
         [_externalClockIntervals addObject:[NSNumber numberWithLongLong:timestamp - _externalPulsePreviousTimestamp]];
     }
     
+    // Keep track of pulses
     if([_externalClockIntervals count] < 24) { // This number defines how many pulses to average out before setting the BPM
         _externalPulsePreviousTimestamp = timestamp;
         
+        return nil;
+        
+    // Average them out and return a new BPM
     } else {
         // Average out the last pulses
         float rangedAverageIntervalInNs = [self rangedAverage:_externalClockIntervals range:0.7]; // Range defines how extreme a peak has to be to consider it noise
         
         // Convert it into a BPM and return it
         // Secs in a min  ((interview in ns * MIDI standard ppqn / ns in a sec)
-        bpm = 60 / ((rangedAverageIntervalInNs * MIDI_CLOCK_PPQN) / 1000000000.0);
+        uint bpm = roundf( 60.0 / ((rangedAverageIntervalInNs * MIDI_CLOCK_PPQN) / 1000000000.0) );
+        // TODO perhaps the above shouldn't be rounded and we should deal with float bpm behind the scenes to get max sync accuracy
         
         // Reset everything
         [self resetExternalClock];
+        
+        return [NSNumber numberWithUnsignedInt:bpm];
     }
-    
-    return bpm;
 }
 
 - (void) resetExternalClock

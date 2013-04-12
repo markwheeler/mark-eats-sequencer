@@ -12,6 +12,7 @@
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
+#import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
 
@@ -19,6 +20,7 @@
 
 @property Sequencer                         *sequencer;
 @property SequencerPattern                  *pattern;
+@property Preferences                       *sharedPreferences;
 
 @property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
@@ -56,6 +58,9 @@
     
     // Get the pattern
     _pattern = [self.delegate valueForKey:@"pattern"];
+    
+    // Get prefs
+    _sharedPreferences = [Preferences sharedPreferences];
     
     // Create the sub views
     
@@ -428,7 +433,7 @@
         
     // BPM- button
     } else if( sender == _bpmDecrementButton ) {
-        if ( buttonDown ) {
+        if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
             
             if( !_bpmRepeatTimer ) {
                 
@@ -455,7 +460,7 @@
         
     // BPM+ button
     } else if( sender == _bpmIncrementButton ) {
-        if ( buttonDown ) {
+        if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
             
             if( !_bpmRepeatTimer ) {
                 

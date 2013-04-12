@@ -34,6 +34,8 @@
     self = [super initWithWindow:window];
     if (self) {
         // Initialization code here.
+        self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
+        self.sharedPreferences = [Preferences sharedPreferences];
     }
     
     return self;
@@ -46,9 +48,6 @@
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
     [self.preferencesToolbar setSelectedItemIdentifier:@"0"];
-    
-    self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
-    self.sharedPreferences = [Preferences sharedPreferences];
 
     // Populate
     [self updateOSC];
@@ -114,14 +113,18 @@
 {
     [self.clockSourcePopup removeAllItems];
     
-	// Push the labels to the pop-up button of destinations
+	// Populate the clock source popup
     [self.clockSourcePopup addItemWithTitle:@"Internal"];
     [self.clockSourcePopup addItemWithTitle:self.sharedCommunicationManager.midiManager.virtualSource.name];
     for (NSString *s in self.sharedCommunicationManager.midiManager.sourceNodeNameArray) {
         [self.clockSourcePopup addItemWithTitle:s];
     }
-    
-    //[self clockSourcePopup:nil]; Call Action
+    // Select the clock source and if we can't find it then reset to 'internal'
+    if( self.sharedPreferences.midiClockSourceName ) {
+        NSMenuItem *menuItem = [self.clockSourcePopup itemWithTitle:self.sharedPreferences.midiClockSourceName];
+        if( menuItem )
+            [self.clockSourcePopup selectItem:menuItem];
+    }
     
     
     // Clear the destinations table view
@@ -188,7 +191,7 @@
         [self.delegate performSelector:@selector(gridControllerConnectToDeviceType:withOSCLabelOrMIDINode:) withObject:[NSNumber numberWithInt:EatsGridType_Monome] withObject:[sender titleOfSelectedItem]];
     } else {
         self.sharedPreferences.gridOSCLabel = nil;
-        self.sharedPreferences.gridMIDINode = nil;
+        self.sharedPreferences.gridMIDINodeName = nil;
         [self.delegate performSelector:@selector(gridControllerNone)];
     }
 }
@@ -196,7 +199,7 @@
 - (IBAction) midiOutputCheckbox:(id)sender {
     // Get the name and search for it in the array of saved names
     NSString *nodeName = [[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] name];
-    NSUInteger nameIndex = [self.sharedPreferences.enabledMIDIOutputNames indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) { return [obj isEqualToString:nodeName]; }];
+    NSUInteger nameIndex = [self.sharedPreferences.enabledMIDIOutputNames indexOfObject:nodeName];
     
     // Disable
     if([[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] enabled]) {
@@ -217,5 +220,20 @@
     
 }
 
+- (IBAction)clockSourcePopup:(NSPopUpButton *)sender
+{
+    // Internal clock
+	if (sender.indexOfSelectedItem <= 0) {
+        self.sharedPreferences.midiClockSourceName = nil;
+        
+    // Our own virtual node
+    } else if (sender.indexOfSelectedItem == 1) {
+        self.sharedPreferences.midiClockSourceName = self.sharedCommunicationManager.midiManager.virtualSource.name;
+        
+    // An external node
+    } else {
+        self.sharedPreferences.midiClockSourceName = [[self.sharedCommunicationManager.midiManager findSourceNodeNamed:[sender titleOfSelectedItem]] name];
+    }
+}
 
 @end

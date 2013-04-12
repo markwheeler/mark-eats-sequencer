@@ -12,6 +12,7 @@
 #import "Sequencer.h"
 
 @protocol ClockTickDelegateProtocol
+@property BOOL isActive;
 @optional
 - (void) updateUI;
 @end

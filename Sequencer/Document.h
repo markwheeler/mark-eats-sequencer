@@ -15,12 +15,15 @@
 #import "SequencerPatternRef.h"
 #import "EatsClock.h"
 #import "ClockTick.h"
+#import "Preferences.h"
 
 @interface Document : NSPersistentDocument <ClockTickDelegateProtocol>
 
 @property Sequencer         *sequencer;
 @property SequencerPage     *currentPage;
 @property BOOL              isActive;
+
+@property Preferences                   *sharedPreferences;
 
 - (void) updateUI;
 

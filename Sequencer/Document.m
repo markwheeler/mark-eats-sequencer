@@ -11,10 +11,8 @@
 #import "EatsDocumentController.h"
 #import "EatsCommunicationManager.h"
 #import "EatsSwingUtils.h"
-#import "Preferences.h"
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
-#import "EatsExternalClockCalculator.h"
 #import "EatsGridNavigationController.h"
 #import "EatsScaleGenerator.h"
 
@@ -27,10 +25,8 @@
 #define MIN_QUANTIZATION 64
 #define MAX_QUANTIZATION 1
 
-@property Preferences                   *sharedPreferences;
 @property EatsClock                     *clock;
 @property ClockTick                     *clockTick;
-@property EatsExternalClockCalculator   *externalClockCalculator;
 @property EatsGridNavigationController  *gridNavigationController;
 @property ScaleGeneratorSheetController *scaleGeneratorSheetController;
 
@@ -189,8 +185,6 @@
     self.clock.ppqn = PPQN;
     self.clock.qnPerMeasure = QN_PER_MEASURE;
     
-    self.externalClockCalculator = [[EatsExternalClockCalculator alloc] init];
-    
     // BPM
     [self updateClockBPM];
     
@@ -212,8 +206,34 @@
                                                  name:@"GridControllerConnected"
                                                object:nil];
     
+    // External clock notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(externalClockStart:)
+                                                 name:@"ExternalClockStart"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(externalClockContinue:)
+                                                 name:@"ExternalClockContinue"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(externalClockZero:)
+                                                 name:@"ExternalClockZero"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(externalClockStop:)
+                                                 name:@"ExternalClockStop"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(externalClockBPM:)
+                                                 name:@"ExternalClockBPM"
+                                               object:nil];
+    
     // Start the clock right away
-    [self.clock startClock];
+    //[self.clock startClock];
 }
 
 - (void) windowWillClose:(NSNotification *)notification
@@ -353,6 +373,31 @@
 
 
 #pragma mark - Private methods
+
+- (void) externalClockStart:(NSNotification *)notification
+{
+    [self.clock startClock];
+}
+
+- (void) externalClockContinue:(NSNotification *)notification
+{
+    [self.clock continueClock];
+}
+
+- (void) externalClockZero:(NSNotification *)notification
+{
+    [self.clock setClockToZero];
+}
+
+- (void) externalClockStop:(NSNotification *)notification
+{
+    [self.clock stopClock];
+}
+
+- (void) externalClockBPM:(NSNotification *)notification
+{
+    self.sequencer.bpm = [notification.userInfo valueForKey:@"bpm"];
+}
 
 - (void) gridControllerConnected:(NSNotification *)notification
 {
