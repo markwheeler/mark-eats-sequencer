@@ -51,13 +51,12 @@
         
         // Convert it into a BPM and return it
         // Secs in a min  ((interview in ns * MIDI standard ppqn / ns in a sec)
-        uint bpm = roundf( 60.0 / ((rangedAverageIntervalInNs * MIDI_CLOCK_PPQN) / 1000000000.0) );
-        // TODO perhaps the above shouldn't be rounded and we should deal with float bpm behind the scenes to get max sync accuracy
+        float bpm = 60.0 / ((rangedAverageIntervalInNs * MIDI_CLOCK_PPQN) / 1000000000.0);
         
         // Reset everything
         [self resetExternalClock];
         
-        return [NSNumber numberWithUnsignedInt:bpm];
+        return [NSNumber numberWithFloat:bpm];
     }
 }
 

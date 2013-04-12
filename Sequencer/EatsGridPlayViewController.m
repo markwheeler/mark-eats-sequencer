@@ -345,30 +345,44 @@
     }
 }
 
-- (void) decrementBPM:(NSTimer *)timer
+- (void) decrementBPMRepeat:(NSTimer *)timer
 {
     [timer invalidate];
     _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                            target:self
-                                                         selector:@selector(decrementBPM:)
+                                                         selector:@selector(decrementBPMRepeat:)
                                                          userInfo:nil
                                                           repeats:YES];
     
-    if( [_sequencer.bpm intValue] > 20 )
-        _sequencer.bpm = [NSNumber numberWithInt:[_sequencer.bpm intValue] - 1];
+    [self decrementBPM];
 }
 
-- (void) incrementBPM:(NSTimer *)timer
+- (void) incrementBPMRepeat:(NSTimer *)timer
 {
     [timer invalidate];
     _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                            target:self
-                                                         selector:@selector(incrementBPM:)
+                                                         selector:@selector(incrementBPMRepeat:)
                                                          userInfo:nil
                                                           repeats:YES];
     
-    if( [_sequencer.bpm intValue] < 300 )
-    _sequencer.bpm = [NSNumber numberWithInt:[_sequencer.bpm intValue] + 1];
+    [self incrementBPM];
+}
+
+- (void) decrementBPM
+{
+    float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
+    if( newBPM < 20 )
+        newBPM = 20;
+    _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+}
+
+- (void) incrementBPM
+{
+    float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
+    if( newBPM > 300 )
+        newBPM = 300;
+    _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
 }
 
 
@@ -438,12 +452,11 @@
             if( !_bpmRepeatTimer ) {
                 
                 sender.buttonState = EatsButtonViewState_Down;
-                if( [_sequencer.bpm intValue] > 20 )
-                    _sequencer.bpm = [NSNumber numberWithInt:[_sequencer.bpm intValue] - 1];
+                [self decrementBPM];
                 
                 _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                                        target:self
-                                                                     selector:@selector(decrementBPM:)
+                                                                     selector:@selector(decrementBPMRepeat:)
                                                                      userInfo:nil
                                                                       repeats:YES];
             }
@@ -465,12 +478,11 @@
             if( !_bpmRepeatTimer ) {
                 
                 sender.buttonState = EatsButtonViewState_Down;
-                if( [_sequencer.bpm intValue] < 300 )
-                    _sequencer.bpm = [NSNumber numberWithInt:[_sequencer.bpm intValue] + 1];
+                [self incrementBPM];
                 
                 _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                                        target:self
-                                                                     selector:@selector(incrementBPM:)
+                                                                     selector:@selector(incrementBPMRepeat:)
                                                                      userInfo:nil
                                                                       repeats:YES];
             }

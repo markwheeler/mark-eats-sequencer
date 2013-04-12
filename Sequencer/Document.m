@@ -474,6 +474,11 @@
 
 #pragma mark - Interface actions
 
+- (IBAction)bpmStepper:(NSStepper *)sender
+{
+    self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
+}
+
 - (IBAction) playButton:(NSButton *)sender
 {
     [self.clock startClock];
