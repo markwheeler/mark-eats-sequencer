@@ -436,7 +436,7 @@
 											<string key="NSFrameSize">{74, 238}</string>
 											<reference key="NSSuperview" ref="426589572"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView" ref="26908012"/>
+											<reference key="NSNextKeyView" ref="865576460"/>
 											<string key="NSReuseIdentifierKey">_NS:13</string>
 											<bool key="NSEnabled">YES</bool>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -632,7 +632,7 @@
 							<string key="NSFrame">{{396, 48}, {76, 240}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView" ref="426589572"/>
+							<reference key="NSNextKeyView" ref="26908012"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<int key="NSsFlags">133650</int>
 							<reference key="NSVScroller" ref="865576460"/>
@@ -649,6 +649,7 @@
 							<string key="NSFrame">{{390, 14}, {88, 32}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="625953857">
@@ -846,7 +847,7 @@
 							<string key="NSFrame">{{200, 454}, {46, 32}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
+							<reference key="NSNextKeyView" ref="728036264"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="1001088876">
@@ -1184,7 +1185,7 @@
 								<int key="NSCellFlags2">33554432</int>
 								<object class="NSCustomResource" key="NSContents">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">shadow-rule</string>
+									<string key="NSResourceName">ShadowRule</string>
 								</object>
 								<string key="NSCellIdentifier">_NS:9</string>
 								<int key="NSAlign">0</int>
@@ -4168,87 +4169,13 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">104075</int>
+			<int key="maxID">104076</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">Document</string>
 					<string key="superclassName">NSPersistentDocument</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="bpmStepper:">NSStepper</string>
-						<string key="currentPageSegmentedControl:">NSSegmentedControl</string>
-						<string key="editLabelButton:">NSButton</string>
-						<string key="patternQuantizationPopup:">NSPopUpButton</string>
-						<string key="playButton:">NSButton</string>
-						<string key="scalesOpenSheetButton:">NSButton</string>
-						<string key="sequencerForwardButton:">NSButton</string>
-						<string key="sequencerPauseButton:">NSButton</string>
-						<string key="sequencerRandomButton:">NSButton</string>
-						<string key="sequencerReverseButton:">NSButton</string>
-						<string key="stepLengthPopup:">NSPopUpButton</string>
-						<string key="stepQuantizationPopup:">NSPopUpButton</string>
-						<string key="stopButton:">NSButton</string>
-						<string key="swingPopup:">NSPopUpButton</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="bpmStepper:">
-							<string key="name">bpmStepper:</string>
-							<string key="candidateClassName">NSStepper</string>
-						</object>
-						<object class="IBActionInfo" key="currentPageSegmentedControl:">
-							<string key="name">currentPageSegmentedControl:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="editLabelButton:">
-							<string key="name">editLabelButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="patternQuantizationPopup:">
-							<string key="name">patternQuantizationPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="playButton:">
-							<string key="name">playButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="scalesOpenSheetButton:">
-							<string key="name">scalesOpenSheetButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="sequencerForwardButton:">
-							<string key="name">sequencerForwardButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="sequencerPauseButton:">
-							<string key="name">sequencerPauseButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="sequencerRandomButton:">
-							<string key="name">sequencerRandomButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="sequencerReverseButton:">
-							<string key="name">sequencerReverseButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="stepLengthPopup:">
-							<string key="name">stepLengthPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="stepQuantizationPopup:">
-							<string key="name">stepQuantizationPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="stopButton:">
-							<string key="name">stopButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="swingPopup:">
-							<string key="name">swingPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="currentPageSegmentedControl">NSSegmentedControl</string>
 						<string key="documentWindow">NSWindow</string>
@@ -4329,13 +4256,13 @@
 			<string key="NSMenuCheckmark">{11, 11}</string>
 			<string key="NSMenuMixedState">{10, 3}</string>
 			<string key="NSSwitch">{15, 15}</string>
+			<string key="ShadowRule">{10, 8}</string>
 			<string key="page-forward-icon">{9, 15}</string>
 			<string key="page-pause-icon">{11, 15}</string>
 			<string key="page-random-icon">{16, 15}</string>
 			<string key="page-reverse-icon">{9, 15}</string>
 			<string key="sequencer-play-icon">{9, 15}</string>
 			<string key="sequencer-stop-icon">{11, 15}</string>
-			<string key="shadow-rule">{10, 8}</string>
 		</dictionary>
 		<bool key="IBDocument.UseAutolayout">YES</bool>
 	</data>

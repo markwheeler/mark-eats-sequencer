@@ -55,6 +55,9 @@
 		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
 		4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */; };
 		4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */; };
+		4D9A774E1719B08200D5379F /* PreferencesSyncIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */; };
+		4D9A77521719B78900D5379F /* PreferencesOutputIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */; };
+		4D9A77541719BC4400D5379F /* PreferencesInputIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */; };
 		4DA8A91A170B8805001C26EB /* WMChord.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A90F170B8805001C26EB /* WMChord.m */; };
 		4DA8A91B170B8805001C26EB /* WMData.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A911170B8805001C26EB /* WMData.m */; };
 		4DA8A91C170B8805001C26EB /* WMNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A913170B8805001C26EB /* WMNote.m */; };
@@ -67,6 +70,9 @@
 		4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589816FD129100BC36E6 /* EatsGridView.m */; };
 		4DB0589C16FD1AE000BC36E6 /* EatsGridHorizontalSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */; };
 		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
+		4DC19BE31719AB380094B0D8 /* ShadowRule.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE11719AB380094B0D8 /* ShadowRule.png */; };
+		4DC19BE41719AB380094B0D8 /* ShadowRule@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */; };
+		4DC19BE61719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */; };
 		4DC940A9170064B6005FD88D /* ScaleGeneratorSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */; };
 		4DC940AE170068E9005FD88D /* JCSSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC940AD170068E9005FD88D /* JCSSheetController.m */; };
 		4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */; };
@@ -75,7 +81,6 @@
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
-		4DF3CBDF17173FE600D84532 /* shadow-rule.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DF3CBDE17173FE600D84532 /* shadow-rule.png */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 /* End PBXBuildFile section */
 
@@ -169,6 +174,9 @@
 		4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMonome.m; sourceTree = "<group>"; };
 		4D82B13917117AEF00AD8222 /* EatsDebugGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDebugGridView.h; sourceTree = "<group>"; };
 		4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDebugGridView.m; sourceTree = "<group>"; };
+		4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesSyncIconTemplate.pdf; sourceTree = "<group>"; };
+		4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesOutputIconTemplate.pdf; sourceTree = "<group>"; };
+		4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesInputIconTemplate.pdf; sourceTree = "<group>"; };
 		4DA8A90E170B8805001C26EB /* WMChord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMChord.h; sourceTree = "<group>"; };
 		4DA8A90F170B8805001C26EB /* WMChord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMChord.m; sourceTree = "<group>"; };
 		4DA8A910170B8805001C26EB /* WMData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMData.h; sourceTree = "<group>"; };
@@ -192,6 +200,9 @@
 		4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalSliderView.h; sourceTree = "<group>"; };
 		4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalSliderView.m; sourceTree = "<group>"; };
 		4DB87FB616E4435A00BA58BC /* Preferences.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Preferences.xib; sourceTree = "<group>"; };
+		4DC19BE11719AB380094B0D8 /* ShadowRule.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowRule.png; sourceTree = "<group>"; };
+		4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ShadowRule@2x.png"; sourceTree = "<group>"; };
+		4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesAdvancedIconTemplate.pdf; sourceTree = "<group>"; };
 		4DC940A7170064B6005FD88D /* ScaleGeneratorSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScaleGeneratorSheetController.h; sourceTree = "<group>"; };
 		4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScaleGeneratorSheetController.m; sourceTree = "<group>"; };
 		4DC940AC170068E9005FD88D /* JCSSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JCSSheetController.h; sourceTree = "<group>"; };
@@ -208,7 +219,6 @@
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
 		4DF1FD971708FB4500AB043B /* EatsSwingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsSwingUtils.h; sourceTree = "<group>"; };
 		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
-		4DF3CBDE17173FE600D84532 /* shadow-rule.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shadow-rule.png"; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -231,7 +241,6 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
-				4DF3CBDE17173FE600D84532 /* shadow-rule.png */,
 				4D1C40361712150A000F773D /* page-forward-icon.png */,
 				4D1C40371712150A000F773D /* page-forward-icon@2x.png */,
 				4D1C40381712150A000F773D /* page-pause-icon.png */,
@@ -240,10 +249,16 @@
 				4D1C403B1712150A000F773D /* page-random-icon@2x.png */,
 				4D1C403C1712150A000F773D /* page-reverse-icon.png */,
 				4D1C403D1712150A000F773D /* page-reverse-icon@2x.png */,
+				4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */,
+				4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */,
+				4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */,
+				4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */,
 				4D1C404E17121875000F773D /* sequencer-play-icon.png */,
 				4D1C404F17121875000F773D /* sequencer-play-icon@2x.png */,
 				4D1C404817121834000F773D /* sequencer-stop-icon.png */,
 				4D1C404917121834000F773D /* sequencer-stop-icon@2x.png */,
+				4DC19BE11719AB380094B0D8 /* ShadowRule.png */,
+				4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */,
 			);
 			path = graphics;
 			sourceTree = "<group>";
@@ -500,7 +515,12 @@
 				4D1C404D17121834000F773D /* sequencer-stop-icon@2x.png in Resources */,
 				4D1C405017121875000F773D /* sequencer-play-icon.png in Resources */,
 				4D1C405117121875000F773D /* sequencer-play-icon@2x.png in Resources */,
-				4DF3CBDF17173FE600D84532 /* shadow-rule.png in Resources */,
+				4DC19BE31719AB380094B0D8 /* ShadowRule.png in Resources */,
+				4DC19BE41719AB380094B0D8 /* ShadowRule@2x.png in Resources */,
+				4DC19BE61719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf in Resources */,
+				4D9A774E1719B08200D5379F /* PreferencesSyncIconTemplate.pdf in Resources */,
+				4D9A77521719B78900D5379F /* PreferencesOutputIconTemplate.pdf in Resources */,
+				4D9A77541719BC4400D5379F /* PreferencesInputIconTemplate.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
