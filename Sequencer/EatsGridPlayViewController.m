@@ -15,6 +15,7 @@
 #import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
+#define ANIMATION_EASE 0.4
 
 @interface EatsGridPlayViewController ()
 
@@ -43,6 +44,7 @@
 
 @property NSTimer                           *animationTimer;
 @property uint                              animationFrame;
+@property int                               animationSpeedMultiplier;
 
 @end
 
@@ -178,12 +180,10 @@
     
     // Start animateIn
     _animationFrame = 0;
-    int speedMultiplier = 8 / self.height;
-    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( 1.0 * speedMultiplier ) / ANIMATION_FRAMERATE
-                                                           target:self
-                                                         selector:@selector(animateIn:)
-                                                         userInfo:nil
-                                                          repeats:YES];
+    _animationSpeedMultiplier = 8 / self.height;
+    [self animateIncrement:-1];
+    [self scheduleAnimateInTimer];
+    [self updateView];
 }
 
 - (void) dealloc
@@ -272,14 +272,17 @@
 {
     _animationFrame ++;
     
+    [timer invalidate];
+    
     [self animateIncrement:1];
     
     [self updateView];
     
     // Final frame
-    if( _animationFrame == (self.height / 2) - 1 ) { 
-        [timer invalidate];
+    if( _animationFrame == self.height / 2 ) {
         _animationTimer = nil;
+    } else {
+        [self scheduleAnimateInTimer];
     }
     
 }
@@ -287,22 +290,42 @@
 - (void) animateOut:(NSTimer *)timer
 {
     _animationFrame ++;
-        
-    if( _patternView.height == self.height - 1 ) { // Final frame
-        
-        [timer invalidate];
+    
+    [timer invalidate];
+    
+    // Final frame
+    if( _patternView.height == self.height - 1 ) {
         _animationTimer = nil;
         
         [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
+    } else {
+        [self scheduleAnimateOutTimer];
     }
-    
     
     [self animateIncrement:-1];
     
     [self updateView];
 }
 
-// TODO: Add ease to animation
+- (void) scheduleAnimateInTimer
+{
+    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 1 + ANIMATION_EASE * _animationFrame ) ) / ANIMATION_FRAMERATE
+                                                       target:self
+                                                     selector:@selector(animateIn:)
+                                                     userInfo:nil
+                                                      repeats:YES];
+    NSLog(@"%f", _animationTimer.timeInterval );
+}
+
+- (void) scheduleAnimateOutTimer
+{
+    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 1 + ANIMATION_EASE * ((self.height / 2) - 1 - _animationFrame) ) )/ ANIMATION_FRAMERATE
+                                                       target:self
+                                                     selector:@selector(animateOut:)
+                                                     userInfo:nil
+                                                      repeats:YES];
+    NSLog(@"%f", _animationTimer.timeInterval );
+}
 
 - (void) animateIncrement:(int)amount
 {
@@ -516,13 +539,7 @@
             [self animateIncrement:-1];
             
             _animationFrame = 0;
-            int speedMultiplier = 8 / self.height;
-            _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( 1.0 * speedMultiplier ) / ANIMATION_FRAMERATE
-                                                                   target:self
-                                                                 selector:@selector(animateOut:)
-                                                                 userInfo:nil
-                                                                  repeats:YES];
-            return;
+            [self scheduleAnimateOutTimer];
         }
     }
     
