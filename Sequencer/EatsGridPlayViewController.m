@@ -313,18 +313,16 @@
                                                        target:self
                                                      selector:@selector(animateIn:)
                                                      userInfo:nil
-                                                      repeats:YES];
-    NSLog(@"%f", _animationTimer.timeInterval );
+                                                      repeats:NO];
 }
 
 - (void) scheduleAnimateOutTimer
 {
-    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 1 + ANIMATION_EASE * ((self.height / 2) - 1 - _animationFrame) ) )/ ANIMATION_FRAMERATE
+    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 1 + ANIMATION_EASE * ( (self.height / 2) - 1 - _animationFrame) ) ) / ANIMATION_FRAMERATE
                                                        target:self
                                                      selector:@selector(animateOut:)
                                                      userInfo:nil
-                                                      repeats:YES];
-    NSLog(@"%f", _animationTimer.timeInterval );
+                                                      repeats:NO];
 }
 
 - (void) animateIncrement:(int)amount
