@@ -79,7 +79,7 @@
 }
 
 - (void) clockSongStop:(uint64_t)ns
-{    
+{
     if( _sharedPreferences.sendMIDIClock
        && _sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
@@ -91,7 +91,8 @@
         }
     }
     
-    [self stopAllActiveMIDINotes:ns];
+    [self stopNotes:_activeNotes atTime:ns];
+    [_activeNotes removeAllObjects];
 }
 
 - (void) clockTick:(uint64_t)ns
@@ -131,7 +132,7 @@
                     page.currentStep = [page.nextStep copy];
                     page.nextStep = nil;
                     
-                    // Otherwise we need to calculate the next step
+                // Otherwise we need to calculate the next step
                 } else {
                     
                     int playNow = page.currentStep.intValue;
@@ -203,41 +204,13 @@
             int lengthRemaining = [[note objectForKey:@"lengthRemaining"] intValue];
             lengthRemaining --;
             
-            if( lengthRemaining <= 0 ) {
-                
-                // Calculate swing
-                SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
-                uint64_t nsSwing = 0;
-                
-                // We only add swing when playing forward or reverse
-                if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Forward || pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-                    
-                    // Position of note in the loop 0 - minQuantization
-                    uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
-                    
-                    // Reverse position if we're playing in reverse
-                    if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                        position = _minQuantization - 1 - position;
-                    
-                    nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                     type:pageForNote.swingType.intValue
-                                                                   amount:pageForNote.swingAmount.intValue
-                                                                      bpm:_bpm
-                                                             qnPerMeasure:_qnPerMeasure
-                                                          minQuantization:_minQuantization];
-                }
-                
-                // Stop it
-                [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
-                         onChannel:[[note objectForKey:@"channel"] intValue]
-                      withVelocity:[[note objectForKey:@"velocity"] intValue]
-                            atTime:ns + nsSwing];
+            if( lengthRemaining <= 0 )
                 [toRemove addObject:note];
-                
-            } else {
+            else
                 [note setObject:[NSNumber numberWithInt:lengthRemaining] forKey:@"lengthRemaining"];
-            }
         }
+        
+        [self stopNotes:toRemove atTime:ns];
         [_activeNotes removeObjectsInArray:toRemove];
         
         
@@ -386,15 +359,39 @@
 		[_sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
-- (void) stopAllActiveMIDINotes:(Float64)ns
+- (void) stopNotes:(NSArray *)notes atTime:(uint64_t)ns
 {
-    for( NSDictionary *note in _activeNotes ) {
+    
+    for( NSMutableDictionary *note in notes ) {
+        
+        // Calculate swing
+        SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
+        uint64_t nsSwing = 0;
+        
+        // We only add swing when playing forward or reverse
+        if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Forward || pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+            
+            // Position of note in the loop 0 - minQuantization
+            uint position = ( pageForNote.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
+            
+            // Reverse position if we're playing in reverse
+            if( pageForNote.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                position = _minQuantization - 1 - position;
+            
+            nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
+                                                             type:pageForNote.swingType.intValue
+                                                           amount:pageForNote.swingAmount.intValue
+                                                              bpm:_bpm
+                                                     qnPerMeasure:_qnPerMeasure
+                                                  minQuantization:_minQuantization];
+        }
+        
+        // Stop it
         [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                  onChannel:[[note objectForKey:@"channel"] intValue]
               withVelocity:[[note objectForKey:@"velocity"] intValue]
-                    atTime:ns];
+                    atTime:ns + nsSwing];
     }
-    [_activeNotes removeAllObjects];
 }
 
 @end

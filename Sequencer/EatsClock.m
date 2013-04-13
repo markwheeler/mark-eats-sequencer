@@ -190,7 +190,7 @@
 
     // Stop
     dispatch_async(_tickQueue, ^{
-        [_delegate clockSongStop:mach_absolute_time() * _machTimeToNsFactor];
+        [_delegate clockSongStop:_tickTimeInNs];
     });
 
     _clockStatus = EatsClockStatus_Stopped;

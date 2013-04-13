@@ -40,10 +40,13 @@
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
 
-@property (weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
-@property (weak) IBOutlet NSTableView           *rowPitchesTableView;
+@property (weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
 @property (weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
 @property (weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
+@property (weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
+
+@property (weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
+@property (weak) IBOutlet NSTableView           *rowPitchesTableView;
 @property (weak) IBOutlet NSPopUpButton         *stepLengthPopup;
 @property (weak) IBOutlet NSPopUpButton         *swingPopup;
 
@@ -377,11 +380,13 @@
 - (void) externalClockStart:(NSNotification *)notification
 {
     [self.clock startClock];
+    [self.sequencerPlaybackControls setSelectedSegment:1];
 }
 
 - (void) externalClockContinue:(NSNotification *)notification
 {
     [self.clock continueClock];
+    [self.sequencerPlaybackControls setSelectedSegment:1];
 }
 
 - (void) externalClockZero:(NSNotification *)notification
@@ -392,6 +397,7 @@
 - (void) externalClockStop:(NSNotification *)notification
 {
     [self.clock stopClock];
+    [self.sequencerPlaybackControls setSelectedSegment:0];
 }
 
 - (void) externalClockBPM:(NSNotification *)notification
@@ -479,15 +485,14 @@
     self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
 }
 
-- (IBAction) playButton:(NSButton *)sender
+- (IBAction)sequencerPlaybackControls:(NSSegmentedControl *)sender
 {
-    [self.clock startClock];
+    if( sender.selectedSegment == 0 )
+        [self.clock stopClock];
+    else
+        [self.clock startClock];
 }
 
-- (IBAction) stopButton:(NSButton *)sender
-{
-    [self.clock stopClock];
-}
 
 
 - (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
@@ -522,34 +527,35 @@
     [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
-- (IBAction) sequencerPauseButton:(NSButton *)sender
+
+- (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
 {
-    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-    self.currentPage.nextStep = nil;
-    [self.gridNavigationController updateGridView];
+    // Pause
+    if( sender.selectedSegment == 0 ) {
+        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+        self.currentPage.nextStep = nil;
+        [self.gridNavigationController updateGridView];
+        
+    // Forward
+    } else if( sender.selectedSegment == 1 ) {
+        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+        self.currentPage.nextStep = nil;
+        [self.gridNavigationController updateGridView];
+        
+    // Reverse
+    } else if( sender.selectedSegment == 2 ) {
+        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+        self.currentPage.nextStep = nil;
+        [self.gridNavigationController updateGridView];
+        
+    // Random
+    } else if( sender.selectedSegment == 3 ) {
+        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
+        self.currentPage.nextStep = nil;
+        [self.gridNavigationController updateGridView];
+    }
 }
 
-
-- (IBAction) sequencerForwardButton:(NSButton *)sender
-{
-    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-    self.currentPage.nextStep = nil;
-    [self.gridNavigationController updateGridView];
-}
-
-- (IBAction) sequencerReverseButton:(NSButton *)sender
-{
-    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
-    self.currentPage.nextStep = nil;
-    [self.gridNavigationController updateGridView];
-}
-
-- (IBAction) sequencerRandomButton:(NSButton *)sender
-{
-    self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
-    self.currentPage.nextStep = nil;
-    [self.gridNavigationController updateGridView];
-}
 
 - (IBAction) scalesOpenSheetButton:(NSButton *)sender {
     if (!self.scaleGeneratorSheetController) {

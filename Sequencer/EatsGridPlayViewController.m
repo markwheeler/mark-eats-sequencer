@@ -439,6 +439,7 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
             _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+            _pattern.inPage.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Pause];
         }
         
@@ -447,6 +448,7 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
             _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+            _pattern.inPage.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Forward];
         }
         
@@ -455,6 +457,7 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
             _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+            _pattern.inPage.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Reverse];
         }
         
@@ -463,6 +466,7 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
             _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
+            _pattern.inPage.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Random];
         }
         
