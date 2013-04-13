@@ -64,6 +64,7 @@
 		4DA8A91D170B8805001C26EB /* WMNoteCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A915170B8805001C26EB /* WMNoteCollection.m */; };
 		4DA8A91E170B8805001C26EB /* WMPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A917170B8805001C26EB /* WMPool.m */; };
 		4DA8A91F170B8805001C26EB /* WMScale.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A919170B8805001C26EB /* WMScale.m */; };
+		4DADBEC51719FA910091F952 /* SequencerAppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */; };
 		4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */; };
 		4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */; };
 		4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589516FD10EE00BC36E6 /* EatsGridUtils.m */; };
@@ -189,6 +190,7 @@
 		4DA8A917170B8805001C26EB /* WMPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMPool.m; sourceTree = "<group>"; };
 		4DA8A918170B8805001C26EB /* WMScale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMScale.h; sourceTree = "<group>"; };
 		4DA8A919170B8805001C26EB /* WMScale.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMScale.m; sourceTree = "<group>"; };
+		4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = SequencerAppIcon.icns; path = ../../SequencerAppIcon.icns; sourceTree = "<group>"; };
 		4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridPatternView.h; sourceTree = "<group>"; };
 		4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPatternView.m; sourceTree = "<group>"; };
 		4DB0589116FCC82F00BC36E6 /* EatsGridSubView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridSubView.h; sourceTree = "<group>"; };
@@ -241,6 +243,7 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */,
 				4D1C40361712150A000F773D /* page-forward-icon.png */,
 				4D1C40371712150A000F773D /* page-forward-icon@2x.png */,
 				4D1C40381712150A000F773D /* page-pause-icon.png */,
@@ -521,6 +524,7 @@
 				4D9A774E1719B08200D5379F /* PreferencesSyncIconTemplate.pdf in Resources */,
 				4D9A77521719B78900D5379F /* PreferencesOutputIconTemplate.pdf in Resources */,
 				4D9A77541719BC4400D5379F /* PreferencesInputIconTemplate.pdf in Resources */,
+				4DADBEC51719FA910091F952 /* SequencerAppIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -644,7 +648,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -672,7 +676,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -691,6 +695,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/**";
 				INFOPLIST_FILE = "Sequencer/Sequencer-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -711,6 +716,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/**";
 				INFOPLIST_FILE = "Sequencer/Sequencer-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
