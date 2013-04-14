@@ -13,7 +13,6 @@
 		4D08230C1718C009009C6A95 /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D08230B1718C009009C6A95 /* Sequencer.m */; };
 		4D08230F1718C009009C6A95 /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D08230E1718C009009C6A95 /* SequencerPage.m */; };
 		4D0823121718C009009C6A95 /* SequencerPatternRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0823111718C009009C6A95 /* SequencerPatternRef.m */; };
-		4D08357916EC2D1000700EEA /* EatsScaleGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */; };
 		4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */; };
 		4D172E8516E5BACF0012C019 /* EatsGridIntroViewConrtoller.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8416E5BACF0012C019 /* EatsGridIntroViewConrtoller.m */; };
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
@@ -65,6 +64,14 @@
 		4DA8A91E170B8805001C26EB /* WMPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A917170B8805001C26EB /* WMPool.m */; };
 		4DA8A91F170B8805001C26EB /* WMScale.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A919170B8805001C26EB /* WMScale.m */; };
 		4DADBEC51719FA910091F952 /* SequencerAppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */; };
+		4DADBEDF171A10610091F952 /* chords.json in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBED7171A10610091F952 /* chords.json */; };
+		4DADBEE0171A10610091F952 /* log.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBED8171A10610091F952 /* log.txt */; };
+		4DADBEE1171A10610091F952 /* NoteCollectionParser 2.rb in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBED9171A10610091F952 /* NoteCollectionParser 2.rb */; };
+		4DADBEE2171A10610091F952 /* NoteCollectionParser.rb in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEDA171A10610091F952 /* NoteCollectionParser.rb */; };
+		4DADBEE3171A10610091F952 /* NotesArrayScripts.rb in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEDB171A10610091F952 /* NotesArrayScripts.rb */; };
+		4DADBEE4171A10610091F952 /* scales.json in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEDC171A10610091F952 /* scales.json */; };
+		4DADBEE5171A10610091F952 /* WMRubyData.rb in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEDE171A10610091F952 /* WMRubyData.rb */; };
+		4DADBEEB171A1F8A0091F952 /* WMPool+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DADBEEA171A1F890091F952 /* WMPool+Utils.m */; };
 		4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */; };
 		4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */; };
 		4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589516FD10EE00BC36E6 /* EatsGridUtils.m */; };
@@ -114,8 +121,6 @@
 		4D08230E1718C009009C6A95 /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
 		4D0823101718C009009C6A95 /* SequencerPatternRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternRef.h; sourceTree = "<group>"; };
 		4D0823111718C009009C6A95 /* SequencerPatternRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternRef.m; sourceTree = "<group>"; };
-		4D08357716EC2D1000700EEA /* EatsScaleGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsScaleGenerator.h; sourceTree = "<group>"; };
-		4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsScaleGenerator.m; sourceTree = "<group>"; };
 		4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridNavigationController.h; sourceTree = "<group>"; };
 		4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridNavigationController.m; sourceTree = "<group>"; };
 		4D172E8316E5BACF0012C019 /* EatsGridIntroViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridIntroViewController.h; sourceTree = "<group>"; };
@@ -191,6 +196,15 @@
 		4DA8A918170B8805001C26EB /* WMScale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMScale.h; sourceTree = "<group>"; };
 		4DA8A919170B8805001C26EB /* WMScale.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMScale.m; sourceTree = "<group>"; };
 		4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = SequencerAppIcon.icns; path = ../../SequencerAppIcon.icns; sourceTree = "<group>"; };
+		4DADBED7171A10610091F952 /* chords.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chords.json; sourceTree = "<group>"; };
+		4DADBED8171A10610091F952 /* log.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = log.txt; sourceTree = "<group>"; };
+		4DADBED9171A10610091F952 /* NoteCollectionParser 2.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = "NoteCollectionParser 2.rb"; sourceTree = "<group>"; };
+		4DADBEDA171A10610091F952 /* NoteCollectionParser.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = NoteCollectionParser.rb; sourceTree = "<group>"; };
+		4DADBEDB171A10610091F952 /* NotesArrayScripts.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = NotesArrayScripts.rb; sourceTree = "<group>"; };
+		4DADBEDC171A10610091F952 /* scales.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = scales.json; sourceTree = "<group>"; };
+		4DADBEDE171A10610091F952 /* WMRubyData.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = WMRubyData.rb; sourceTree = "<group>"; };
+		4DADBEE9171A1F890091F952 /* WMPool+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "WMPool+Utils.h"; path = "Sequencer/WMPool+Utils.h"; sourceTree = SOURCE_ROOT; };
+		4DADBEEA171A1F890091F952 /* WMPool+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "WMPool+Utils.m"; path = "Sequencer/WMPool+Utils.m"; sourceTree = SOURCE_ROOT; };
 		4DB0588E16FCBC7C00BC36E6 /* EatsGridPatternView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridPatternView.h; sourceTree = "<group>"; };
 		4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPatternView.m; sourceTree = "<group>"; };
 		4DB0589116FCC82F00BC36E6 /* EatsGridSubView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridSubView.h; sourceTree = "<group>"; };
@@ -359,8 +373,6 @@
 				4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */,
 				4DC940A7170064B6005FD88D /* ScaleGeneratorSheetController.h */,
 				4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */,
-				4D08357716EC2D1000700EEA /* EatsScaleGenerator.h */,
-				4D08357816EC2D1000700EEA /* EatsScaleGenerator.m */,
 				4D7515B916E464E800A8E3F2 /* EatsExternalClockCalculator.h */,
 				4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */,
 				4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */,
@@ -371,6 +383,8 @@
 				4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */,
 				4DD0B5B716E702320025AB1C /* EatsGridPlayViewController.h */,
 				4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */,
+				4DADBEE9171A1F890091F952 /* WMPool+Utils.h */,
+				4DADBEEA171A1F890091F952 /* WMPool+Utils.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
 				4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */,
@@ -401,6 +415,8 @@
 			isa = PBXGroup;
 			children = (
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
+				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
+				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
 				4D0823101718C009009C6A95 /* SequencerPatternRef.h */,
 				4D0823111718C009009C6A95 /* SequencerPatternRef.m */,
 				4D08230D1718C009009C6A95 /* SequencerPage.h */,
@@ -413,8 +429,6 @@
 				4D0823051718C008009C6A95 /* SequencerPattern.m */,
 				4D0823011718C008009C6A95 /* SequencerRowPitch.h */,
 				4D0823021718C008009C6A95 /* SequencerRowPitch.m */,
-				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
-				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
 			);
 			name = "Core Data";
 			sourceTree = "<group>";
@@ -422,6 +436,7 @@
 		4DA8A90D170B8805001C26EB /* WMLib */ = {
 			isa = PBXGroup;
 			children = (
+				4DADBED6171A10610091F952 /* Ruby */,
 				4DA8A90E170B8805001C26EB /* WMChord.h */,
 				4DA8A90F170B8805001C26EB /* WMChord.m */,
 				4DA8A910170B8805001C26EB /* WMData.h */,
@@ -437,6 +452,20 @@
 				4DA8A919170B8805001C26EB /* WMScale.m */,
 			);
 			path = WMLib;
+			sourceTree = "<group>";
+		};
+		4DADBED6171A10610091F952 /* Ruby */ = {
+			isa = PBXGroup;
+			children = (
+				4DADBED7171A10610091F952 /* chords.json */,
+				4DADBED8171A10610091F952 /* log.txt */,
+				4DADBED9171A10610091F952 /* NoteCollectionParser 2.rb */,
+				4DADBEDA171A10610091F952 /* NoteCollectionParser.rb */,
+				4DADBEDB171A10610091F952 /* NotesArrayScripts.rb */,
+				4DADBEDC171A10610091F952 /* scales.json */,
+				4DADBEDE171A10610091F952 /* WMRubyData.rb */,
+			);
+			path = Ruby;
 			sourceTree = "<group>";
 		};
 		4DC940A61700644A005FD88D /* JCSSheetController */ = {
@@ -525,6 +554,13 @@
 				4D9A77521719B78900D5379F /* PreferencesOutputIconTemplate.pdf in Resources */,
 				4D9A77541719BC4400D5379F /* PreferencesInputIconTemplate.pdf in Resources */,
 				4DADBEC51719FA910091F952 /* SequencerAppIcon.icns in Resources */,
+				4DADBEDF171A10610091F952 /* chords.json in Resources */,
+				4DADBEE0171A10610091F952 /* log.txt in Resources */,
+				4DADBEE1171A10610091F952 /* NoteCollectionParser 2.rb in Resources */,
+				4DADBEE2171A10610091F952 /* NoteCollectionParser.rb in Resources */,
+				4DADBEE3171A10610091F952 /* NotesArrayScripts.rb in Resources */,
+				4DADBEE4171A10610091F952 /* scales.json in Resources */,
+				4DADBEE5171A10610091F952 /* WMRubyData.rb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -552,7 +588,6 @@
 				4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */,
 				4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */,
 				4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */,
-				4D08357916EC2D1000700EEA /* EatsScaleGenerator.m in Sources */,
 				4D36B25616FBB32C008057FC /* ClockTick.m in Sources */,
 				4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */,
 				4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */,
@@ -579,6 +614,7 @@
 				4D08230C1718C009009C6A95 /* Sequencer.m in Sources */,
 				4D08230F1718C009009C6A95 /* SequencerPage.m in Sources */,
 				4D0823121718C009009C6A95 /* SequencerPatternRef.m in Sources */,
+				4DADBEEB171A1F8A0091F952 /* WMPool+Utils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

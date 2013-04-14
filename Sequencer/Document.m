@@ -14,7 +14,6 @@
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
-#import "EatsScaleGenerator.h"
 
 @interface Document ()
 
@@ -565,21 +564,27 @@
             // Generate the scale
             if (returnCode == NSOKButton) {
                 
-                // Generate pitches
-                NSArray *pitches = [EatsScaleGenerator generateScaleType:self.scaleGeneratorSheetController.scaleType
-                                                               tonicNote:self.scaleGeneratorSheetController.tonicNote
-                                                                  length:32];
+                // Check what note the user entered
+                NSString *noteName = self.scaleGeneratorSheetController.tonicNoteName;
+                WMNote *tonicNote;
+                if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
+                    tonicNote = [[WMPool pool] noteWithMidiNoteNumber:noteName.intValue]; // Lookup by MIDI value if they enetered a number
+                else
+                    tonicNote = [[WMPool pool] noteWithShortName:noteName]; // Otherwise use the short name
                 
-                // Reverse the array
-                pitches = [[pitches reverseObjectEnumerator] allObjects];
-                
-                // Put them into the page
-                int r = 0;
-                
-                for( NSNumber *pitch in pitches ) {
-                    SequencerRowPitch *rowPitch = [self.currentPage.pitches objectAtIndex:r];
-                    rowPitch.pitch = pitch;
-                    r++;
+                // If we found a note then generate the sequence
+                if( tonicNote ) {
+                    // Generate pitches
+                    NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:self.scaleGeneratorSheetController.scaleMode length:32];
+                    
+                    // Put them into the page
+                    int r = 0;
+                    
+                    for( WMNote *note in sequenceOfNotes ) {
+                        SequencerRowPitch *rowPitch = [self.currentPage.pitches objectAtIndex:r];
+                        rowPitch.pitch = [NSNumber numberWithInt:note.midiNoteNumber];
+                        r++;
+                    }
                 }
                 
             // Cancel

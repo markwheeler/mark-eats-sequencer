@@ -8,13 +8,16 @@
 
 #import "ScaleGeneratorSheetController.h"
 #import "SequencerRowPitch.h"
+#import "WMPool+Utils.h"
+
+#define DRUM_MAP @"Drum map"
 
 @interface ScaleGeneratorSheetController ()
 
-@property (weak) IBOutlet NSPopUpButton *scaleTypePopup;
-@property (weak) IBOutlet NSTextField *tonicNoteTextField;
+@property (weak) IBOutlet NSPopUpButton *scaleModePopup;
+@property (weak) IBOutlet NSTextField   *tonicNoteTextField;
 
-@property NSNumber                  *previousTonicNote;
+@property NSString                      *previousTonicNoteName;
 
 @end
 
@@ -33,32 +36,40 @@
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
     // Populate UI
-    [self.scaleTypePopup removeAllItems];
-    [self.scaleTypePopup addItemsWithTitles:[EatsScaleGenerator scaleTypeNames]];
-    self.tonicNote = 60;
+    [self.scaleModePopup removeAllItems];
+    [self.scaleModePopup addItemsWithTitles:[[[[WMPool pool] scaleDefinitions] allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]];
+    [self.scaleModePopup addItemWithTitle:DRUM_MAP];
+    self.scaleMode = WMScaleModeIonianMajor;
+    self.tonicNoteName = @"C3";
 }
 
 
 
 #pragma Mark - Action methods
-
-- (IBAction)scaleTypePopup:(NSPopUpButton *)sender {
-    if( [sender indexOfSelectedItem] == EatsScaleType_DrumMap ) {
-        self.previousTonicNote = [NSNumber numberWithInt:[self.tonicNoteTextField intValue]];
-        self.tonicNote = 35;
+- (IBAction)scaleModePopup:(NSPopUpButton *)sender {
+    
+    if( [sender indexOfSelectedItem] == [sender indexOfItemWithTitle:DRUM_MAP] ) {
+        self.previousTonicNoteName = self.tonicNoteTextField.stringValue;
+        self.tonicNoteName = @"B0";
         self.tonicNoteTextField.enabled = NO;
-        
+
     } else {
         // Puts back the revious tonic if we're returning from a drum map
-        if( self.previousTonicNote ) {
-            self.tonicNote = [self.previousTonicNote unsignedIntValue];
-            self.previousTonicNote = nil;
+        if( self.previousTonicNoteName ) {
+            self.tonicNoteName = self.previousTonicNoteName;
+            self.previousTonicNoteName = nil;
         }
         self.tonicNoteTextField.enabled = YES;
     }
 }
 
 - (IBAction)generateButton:(NSButton *)sender {
+    // Check for drum map
+    if( [self.scaleMode isEqualToString:DRUM_MAP] )
+        self.scaleMode = WMScaleModeChromatic;
+    
+    self.tonicNoteName = self.tonicNoteTextField.stringValue;
+    
     [self endSheetWithReturnCode:NSOKButton];
 }
 

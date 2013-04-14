@@ -12,7 +12,7 @@
 #import "SequencerPattern.h"
 #import "SequencerPatternRef.h"
 #import "SequencerNote.h"
-#import "EatsScaleGenerator.h"
+#import "WMPool+Utils.h"
 
 @implementation Sequencer (Utils)
 
@@ -43,22 +43,22 @@
         
         // Create the default pitches
         // TODO Make these line up better with the grid (tonic note on last row?)
-        NSArray *pitches;
-        if (channel == 10 || channel == 11)
-            pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_DrumMap tonicNote:35 length:32]; // Drum Map
-        else
-            pitches = [EatsScaleGenerator generateScaleType:EatsScaleType_Ionian tonicNote:60 length:32]; // C Major
-        // Reverse the array
-        pitches = [[pitches reverseObjectEnumerator] allObjects];
         
+        NSArray *sequenceOfNotes;
+        
+// TODO
+        if (channel == 10 || channel == 11)
+            sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"B0" scaleMode:WMScaleModeChromatic length:32];  // Drum map
+        else
+            sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"C3" scaleMode:WMScaleModeIonianMajor length:32]; // C major
+        
+        // Put it in to the sequencer page
         NSMutableOrderedSet *setOfRowPitches = [NSMutableOrderedSet orderedSetWithCapacity:32];
-        int r = 0;
-        for( NSNumber *pitch in pitches ) {
+        for( int r = 0; r < 32; r ++ ) {
             SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:context];
             rowPitch.row = [NSNumber numberWithInt:r];
-            rowPitch.pitch = pitch;
+            rowPitch.pitch = [NSNumber numberWithInt:[[sequenceOfNotes objectAtIndex:r] midiNoteNumber]];
             [setOfRowPitches addObject:rowPitch];
-            r++;
         }
         page.pitches = setOfRowPitches;
         

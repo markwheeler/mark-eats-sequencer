@@ -8,12 +8,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "JCSSheetController.h"
-#import "EatsScaleGenerator.h"
 #import "SequencerPage.h"
+#import "WMPool+Utils.h"
 
 @interface ScaleGeneratorSheetController : JCSSheetController
 
-@property EatsScaleType             scaleType;
-@property uint                      tonicNote;
+@property NSString                   *scaleMode;
+@property NSString                   *tonicNoteName;
 
 @end
