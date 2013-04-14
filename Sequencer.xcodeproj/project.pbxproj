@@ -16,6 +16,7 @@
 		4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */; };
 		4D172E8516E5BACF0012C019 /* EatsGridIntroViewConrtoller.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8416E5BACF0012C019 /* EatsGridIntroViewConrtoller.m */; };
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
+		4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */; };
 		4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */; };
 		4D1C403E1712150A000F773D /* page-forward-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C40361712150A000F773D /* page-forward-icon.png */; };
 		4D1C403F1712150A000F773D /* page-forward-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C40371712150A000F773D /* page-forward-icon@2x.png */; };
@@ -127,6 +128,8 @@
 		4D172E8416E5BACF0012C019 /* EatsGridIntroViewConrtoller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridIntroViewConrtoller.m; sourceTree = "<group>"; };
 		4D172E8616E5BD090012C019 /* Preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Preferences.h; sourceTree = "<group>"; };
 		4D172E8716E5BD090012C019 /* Preferences.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Preferences.m; sourceTree = "<group>"; };
+		4D1AEF08171B026600317D56 /* EatsWMNoteValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsWMNoteValueTransformer.h; sourceTree = "<group>"; };
+		4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsWMNoteValueTransformer.m; sourceTree = "<group>"; };
 		4D1B31A216EBDB9E00140B51 /* EatsDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDocumentController.h; sourceTree = "<group>"; };
 		4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDocumentController.m; sourceTree = "<group>"; };
 		4D1C40361712150A000F773D /* page-forward-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-forward-icon.png"; sourceTree = "<group>"; };
@@ -383,6 +386,8 @@
 				4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */,
 				4DD0B5B716E702320025AB1C /* EatsGridPlayViewController.h */,
 				4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */,
+				4D1AEF08171B026600317D56 /* EatsWMNoteValueTransformer.h */,
+				4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */,
 				4DADBEE9171A1F890091F952 /* WMPool+Utils.h */,
 				4DADBEEA171A1F890091F952 /* WMPool+Utils.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
@@ -615,6 +620,7 @@
 				4D08230F1718C009009C6A95 /* SequencerPage.m in Sources */,
 				4D0823121718C009009C6A95 /* SequencerPatternRef.m in Sources */,
 				4DADBEEB171A1F8A0091F952 /* WMPool+Utils.m in Sources */,
+				4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
