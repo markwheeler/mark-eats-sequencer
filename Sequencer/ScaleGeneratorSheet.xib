@@ -166,7 +166,6 @@
 							<string key="NSFrame">{{310, 12}, {96, 32}}</string>
 							<reference key="NSSuperview" ref="1006"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="323706147">
@@ -293,7 +292,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="716227349">
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">272629760</int>
-								<string key="NSContents">Tonic note can be a MIDI note number or a short name (eg, E-1, F#-1, C#8 or G5) where C3 is middle C.</string>
+								<string key="NSContents">Tonic note can be a MIDI note number or a short name (eg, E-1, Db-1, C#8 or G5) where C3 is middle C.</string>
 								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">11</double>

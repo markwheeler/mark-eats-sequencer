@@ -10,7 +10,7 @@
 
 
 NSArray *noteNames() {
- return @[@"A", @"A#", @"B", @"C", @"C#", @"D", @"D#", @"E", @"F", @"F#", @"G", @"G#"];
+ return @[@"A♭", @"A", @"A♯", @"B♭", @"B", @"C", @"C♯", @"D♭", @"D", @"D♯", @"E♭", @"E", @"F", @"F♯", @"G♭", @"G", @"G♯"];
 }
 
 NSArray *accidentalNames() {
