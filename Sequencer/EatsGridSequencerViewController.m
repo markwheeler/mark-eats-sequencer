@@ -76,7 +76,7 @@
     _animationFrame = 0;
     
     // Display sliders at bottom
-    if( [note.row intValue] < self.height / 2 ) {
+    if( [note.row intValue] < 32 - ( self.height / 2 ) ) {
         _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
         _velocityView.y = self.height - 1;
         _velocityView.visible = YES;
