@@ -40,6 +40,7 @@
         _playheadBrightness = PLAYHEAD_BRIGHTNESS;
         _noteBrightness = NOTE_BRIGHTNESS;
         _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
+        _doublePressTime = 0.4; // Default
     }
     return self;
 }
@@ -208,7 +209,7 @@
             
             // Check for double presses
             if(_lastReleasedKey
-               && [[_lastReleasedKey valueForKey:@"time"] timeIntervalSinceNow] > -0.4
+               && [[_lastReleasedKey valueForKey:@"time"] timeIntervalSinceNow] > -_doublePressTime
                && [[_lastReleasedKey valueForKey:@"x"] intValue] == x
                && [[_lastReleasedKey valueForKey:@"y"] intValue] == y) {
                 

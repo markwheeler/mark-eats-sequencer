@@ -8,17 +8,22 @@
 
 #import "EatsGridSequencerViewController.h"
 #import "EatsGridNavigationController.h"
+#import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
 
 #define ANIMATION_FRAMERATE 15
 #define NOTE_EDIT_FADE_AMOUNT 6
+#define DOUBLE_PRESS_TIME 0.4
 
 @interface EatsGridSequencerViewController ()
 
 @property SequencerPattern              *pattern;
 @property SequencerNote                 *activeEditNote;
-@property NSDictionary                  *lastRemovedNoteInfo;
+//@property NSDictionary                  *lastRemovedNoteInfo;
+@property NSMutableArray                *lastPressedNotes;
+@property uint                          lastX;
+@property uint                          lastY;
 
 @property EatsGridPatternView           *patternView;
 @property EatsGridHorizontalSliderView  *velocityView;
@@ -33,6 +38,8 @@
 
 - (void) setupView
 {
+    _lastPressedNotes = [NSMutableArray arrayWithCapacity:2];
+    
     _pattern = [self.delegate valueForKey:@"pattern"];
     
     // Create the sub views
@@ -43,6 +50,7 @@
     _patternView.width = self.width;
     _patternView.height = self.height;
     _patternView.mode = EatsPatternViewMode_Edit;
+    _patternView.doublePressTime = DOUBLE_PRESS_TIME;
     _patternView.pattern = _pattern;
     _patternView.patternHeight = self.height;
     
@@ -227,6 +235,53 @@
     [super updateView];
 }
 
+- (SequencerNote *) checkForNoteAtX:(uint)x y:(uint)y
+{
+    // See if there's a note there
+    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y + 32 - self.height];
+    
+    BOOL sortDirection = ( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
+    noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
+    
+    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+    
+    // Look through all the notes on the row, checking their length
+    for( SequencerNote *note in noteMatches ) {
+        int endPoint;
+        
+        // When in reverse
+        if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+            endPoint = note.step.intValue - note.length.intValue + 1;
+            
+            // If it's wrapping
+            if( endPoint < 0 && ( x <= note.step.intValue || x >= endPoint + self.width ) ) {
+                return note;
+            
+            // If it's not wrapping
+            } else if( x <= note.step.intValue && x >= endPoint ) {
+                return note;
+            }
+            
+        // When playing forwards
+        } else {
+            endPoint = note.step.intValue + note.length.intValue - 1;
+            
+            // If it's wrapping and we're going forwards
+            if( endPoint >= self.width && ( x >= note.step.intValue || x <= endPoint - self.width ) ) {
+                return note;
+                
+            // If it's not wrapping
+            } else if( x >= note.step.intValue && x <= endPoint ) {
+                return note;
+            }
+        }
+    }
+    
+    // Return nil if we didn't find one
+    return nil;
+}
+
 
 
 #pragma mark - Sub view delegate methods
@@ -259,40 +314,50 @@
        
         if( down ) {
             
-            // See if there's a note there
-            NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-            noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y + 32 - self.height];
-
-            NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
-
-            // TODO make it so that notes under the trails of others are hidden and non-interactive
+            SequencerNote *foundNote = [self checkForNoteAtX:x y:y];
             
-            if( [noteMatches count] ) {
-
-                // Remove a note
-                SequencerNote *noteToRemove = [noteMatches lastObject];
+            BOOL lastPressedIsOld = YES;
+            if( _lastPressedNotes.lastObject && _lastPressedNotes.lastObject != [NSNull null]) {
+                if( [[_lastPressedNotes.lastObject valueForKey:@"time"] timeIntervalSinceNow] > - DOUBLE_PRESS_TIME )
+                    lastPressedIsOld = NO;
+            }
+            
+            // TODO Sanity check this!
+            
+            if( foundNote ) {
                 
                 // Make a record of it first in case it's a double tap
-                _lastRemovedNoteInfo = [NSDictionary dictionaryWithObjectsAndKeys:noteToRemove.step, @"step",
-                                                                                  noteToRemove.row, @"row",
-                                                                                  noteToRemove.velocityAsPercentage, @"velocityAsPercentage",
-                                                                                  noteToRemove.length, @"length",
+                SequencerNote *lastNote = [NSDictionary dictionaryWithObjectsAndKeys:foundNote.step, @"step",
+                                                                                  foundNote.row, @"row",
+                                                                                  foundNote.velocityAsPercentage, @"velocityAsPercentage",
+                                                                                  foundNote.length, @"length",
+                                                                                  [NSDate date], @"time",
                                                                                   nil];
+                [_lastPressedNotes addObject:lastNote];
                 
-                [self.managedObjectContext deleteObject:[noteMatches lastObject]];
-
+                if( lastPressedIsOld || _lastX != x || _lastY != y )
+                    [self.managedObjectContext deleteObject:foundNote];
+                
             } else {
 
-                // Add a note
-                NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
-                SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
-                newNote.step = [NSNumber numberWithUnsignedInt:x];
-                newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
-                [newNotesSet addObject:newNote];
-                _pattern.notes = newNotesSet;
+                if( lastPressedIsOld || _lastX != x || _lastY != y ) {
+                    // Add a note
+                    NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
+                    SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                    newNote.step = [NSNumber numberWithUnsignedInt:x];
+                    newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
+                    [newNotesSet addObject:newNote];
+                    _pattern.notes = newNotesSet;
+                }
+            
+                [_lastPressedNotes addObject:[NSNull null]];
                 
             }
-
+            
+            // Only keep track of the last two 'down' objects
+            if( _lastPressedNotes.count > 2 )
+                [_lastPressedNotes removeObjectAtIndex:0];
+            
             [self updateView];
         }
         
@@ -302,36 +367,36 @@
         [self exitNoteEditMode];
        
     }
+    
+    _lastX = x;
+    _lastY = y;
 }
 
 - (void) eatsGridPatternViewDoublePressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender
 {
-    uint x = [[xy valueForKey:@"x"] unsignedIntValue];
-    uint y = [[xy valueForKey:@"y"] unsignedIntValue];
+//    uint x = [[xy valueForKey:@"x"] unsignedIntValue];
+//    uint y = [[xy valueForKey:@"y"] unsignedIntValue];
     
     if( sender.mode == EatsPatternViewMode_Edit ) {
         
-        // See if there's a note there
-        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y + 32 - self.height];
-
-        NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
-
-        if( [noteMatches count] && _lastRemovedNoteInfo ) {
+        if( [_lastPressedNotes objectAtIndex:0] != [NSNull null] ) {
             
             // Put the old note back in
-            [self.managedObjectContext deleteObject:[noteMatches lastObject]];
+//            id lastPressed = ( _lastPressedNotes.count > 1 ) ? [_lastPressedNotes objectAtIndex:1] : [NSNull null];
+//            SequencerNote *foundNote = [self checkForNoteAtX:x y:y];
+//            if( foundNote && ( lastPressed == [NSNull null] || _lastX != x || _lastY != y ) )
+//                [self.managedObjectContext deleteObject:foundNote];
             NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
             SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
             
-            newNote.step = [_lastRemovedNoteInfo valueForKey:@"step"];
-            newNote.row = [_lastRemovedNoteInfo valueForKey:@"row"];
-            newNote.velocityAsPercentage = [_lastRemovedNoteInfo valueForKey:@"velocityAsPercentage"];
-            newNote.length = [_lastRemovedNoteInfo valueForKey:@"length"];
+            newNote.step = [[_lastPressedNotes objectAtIndex:0] valueForKey:@"step"];
+            newNote.row = [[_lastPressedNotes objectAtIndex:0] valueForKey:@"row"];
+            newNote.velocityAsPercentage = [[_lastPressedNotes objectAtIndex:0] valueForKey:@"velocityAsPercentage"];
+            newNote.length = [[_lastPressedNotes objectAtIndex:0] valueForKey:@"length"];
             
             [newNotesSet addObject:newNote];
             _pattern.notes = newNotesSet;
-            _lastRemovedNoteInfo = nil;
+//            _lastRemovedNoteInfo = nil;
             
             [self enterNoteEditModeFor:newNote];
             
