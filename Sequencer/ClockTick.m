@@ -17,6 +17,12 @@
 #import "SequencerPattern.h"
 #import "SequencerNote.h"
 
+typedef enum EatsStepAdvance {
+    EatsStepAdvance_None,
+    EatsStepAdvance_Normal,
+    EatsStepAdvance_Scrubbed
+} EatsStepAdvance;
+
 @interface ClockTick ()
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
@@ -95,6 +101,27 @@
     [_activeNotes removeAllObjects];
 }
 
+- (EatsStepAdvance) needToAdvance:(SequencerPage *)page
+{
+     
+    // If the page has been scrubbed
+    if( page.nextStep && _currentTick % (_ticksPerMeasure / _sequencer.stepQuantization.intValue) == 0 ) {
+        return EatsStepAdvance_Scrubbed;
+        
+    // If the sequence needs to advance
+    } else if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 ) {
+        return EatsStepAdvance_Normal;
+    
+    } else {
+        return EatsStepAdvance_None;
+    }
+    
+    // If the page has changed pattern
+//            if( page.nextPatternId && _currentTick % (_ticksPerMeasure / _sequencer.patternQuantization.intValue ) == 0 ) {
+//                needsToAdvance = YES;
+//            }
+}
+
 - (void) clockTick:(uint64_t)ns
 {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
@@ -116,19 +143,57 @@
     // Every third tick – 1/64 notes (smallest quantization possible)
     if( _currentTick % (_ticksPerMeasure / _minQuantization) == 0 ) {
         
+        // Check if any of the active notes need to be stopped this tick
+        
+        NSMutableArray *toRemove = [NSMutableArray arrayWithCapacity:8];
+        for( NSMutableDictionary *note in _activeNotes ) {
+            
+            int lengthRemaining = [[note objectForKey:@"lengthRemaining"] intValue];
+            lengthRemaining --;
+            
+            if( lengthRemaining <= 0 )
+                [toRemove addObject:note];
+            else
+                [note setObject:[NSNumber numberWithInt:lengthRemaining] forKey:@"lengthRemaining"];
+        }
+        
+        [self stopNotes:toRemove atTime:ns];
+        [_activeNotes removeObjectsInArray:toRemove];
+        
         
         // Update the current step for each page
         
         for(SequencerPage *page in _sequencer.pages) {
             
+
+            
+            // Is in the range 0 – _minQuantization
+            //            int tickPosition = floor( _minQuantization * ( _currentTick / (float)_ticksPerMeasure ));
+
+            
+            
+            
+            
+            
+            /*
+            calculate what the next step would be (assuming we're doing it now)
+            work out the 0-64 position for that new step
+            do mod stuff to work out if it's required for either next step or normal advancing
+            
+            
+            
+            */
+            
+            EatsStepAdvance needsToAdvance = [self needToAdvance:page];
+            
             // Play notes for current step, playMode != paused
-            if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 && page.playMode.intValue != EatsSequencerPlayMode_Pause ) {
+            if( needsToAdvance != EatsStepAdvance_None && page.playMode.intValue != EatsSequencerPlayMode_Pause ) {
                 
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
                 
-                // If page has been scrubbed
-                if( page.nextStep ) {
+                // If the page has been scrubbed
+                if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
                     page.currentStep = [page.nextStep copy];
                     page.nextStep = nil;
                     
@@ -191,52 +256,24 @@
                     else
                         page.inLoop = [NSNumber numberWithBool:NO];
                 }
-            }
-        }
 
-        
-        
-        // Check if any of the active notes need to be stopped this tick
-        
-        NSMutableArray *toRemove = [NSMutableArray arrayWithCapacity:8];
-        for( NSMutableDictionary *note in _activeNotes ) {
-            
-            int lengthRemaining = [[note objectForKey:@"lengthRemaining"] intValue];
-            lengthRemaining --;
-            
-            if( lengthRemaining <= 0 )
-                [toRemove addObject:note];
-            else
-                [note setObject:[NSNumber numberWithInt:lengthRemaining] forKey:@"lengthRemaining"];
-        }
-        
-        [self stopNotes:toRemove atTime:ns];
-        [_activeNotes removeObjectsInArray:toRemove];
-        
-        
-        // Send the notes for each page
 
-        for(SequencerPage *page in _sequencer.pages) {
-            
-            // Play notes for current step, playMode != paused
-            if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 && page.playMode.intValue != EatsSequencerPlayMode_Pause ) {
-                
                 // Send notes that need to be sent
                 
                 for( SequencerNote *note in [[page.patterns objectAtIndex:page.currentPatternId.intValue] notes] ) {
                     
-                    BOOL isPlaying = NO;
+//                    BOOL isPlaying = NO;
                     int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
-                    
-                    // Don't start a note that's already playing
-                    for( NSMutableDictionary *note in _activeNotes ) {
-                        if( [[note valueForKey:@"pitch"] intValue] == pitch ) {
-                            isPlaying = YES;
-                        }
-                    }
+//
+//                    // Don't start a note that's already playing
+//                    for( NSMutableDictionary *note in _activeNotes ) {
+//                        if( [[note valueForKey:@"pitch"] intValue] == pitch ) {
+//                            isPlaying = YES;
+//                        }
+//                    }
                     
                     // Play it!
-                    if( !isPlaying && note.step == page.currentStep ) {
+                    if( note.step == page.currentStep ) {
                         
                         //Set the basic note properties
                         int channel = page.channel.intValue;
