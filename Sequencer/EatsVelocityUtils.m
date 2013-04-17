@@ -35,7 +35,7 @@
     uint eighthOfCycle = velocityCycle / 8;
     
     // Make start quieter
-    if( positionInVelocityCycle < velocityCycle / 8 ) {
+    if( positionInVelocityCycle < eighthOfCycle ) {
         
         velocityDifference = velocity - ( velocity * LOW_VELOCITY_PULL );
         velocityDifference *= ( eighthOfCycle - positionInVelocityCycle ) / (float)eighthOfCycle;

@@ -59,6 +59,9 @@
             _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
             _currentView = EatsGridViewType_Sequencer;
         }
+        
+        // Keep an eye on pattern changes
+        [_pattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 
     }
     return self;
@@ -66,6 +69,7 @@
 
 - (void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_pattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
 }
 
 
@@ -139,6 +143,8 @@
 
 - (void) setNewPageId:(NSNumber *)id
 {
+    [_pattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
+    
     // Get the page
     NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
     pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == %@", id];
@@ -148,21 +154,29 @@
     
     // Get the pattern for it
     _pattern = [page.patterns objectAtIndex:page.currentPatternId.intValue];
-
+    
+    [_pattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
-- (void) setNewPatternId:(NSNumber *)id
+- (void) updatePattern
 {
     // Get the pattern
     NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-    patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage == %@) AND (id == %@)", _pattern.inPage, id];
+    patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage == %@) AND (id == %@)", _pattern.inPage, _pattern.inPage.currentPatternId];
 
     NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
     _pattern = [patternMatches lastObject];
-    
-    _pattern.inPage.currentPatternId = id;
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    
+    if ( object == _pattern.inPage && [keyPath isEqual:@"currentPatternId"] ) {
+        [self updatePattern];
+    }
+}
 
 
 @end

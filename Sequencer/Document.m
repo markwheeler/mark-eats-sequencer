@@ -127,6 +127,7 @@
     [self.sequencer removeObserver:self forKeyPath:@"bpm"];
     [self.sequencer removeObserver:self forKeyPath:@"stepQuantization"];
     [self.sequencer removeObserver:self forKeyPath:@"patternQuantization"];
+    [self.currentPage removeObserver:self forKeyPath:@"currentPatternId"];
     [self.currentPage removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPage removeObserver:self forKeyPath:@"swing"];
 }
@@ -197,6 +198,7 @@
     [self.sequencer addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencer addObserver:self forKeyPath:@"stepQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencer addObserver:self forKeyPath:@"patternQuantization" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPage addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
@@ -337,6 +339,11 @@
     }]];
 }
 
+- (void) updateCurrentPattern
+{
+    // Update pattern UI
+}
+
 - (void) updateStepLengthPopup
 {
     [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
@@ -366,6 +373,8 @@
         [self updateStepQuantizationPopup];
     else if ( object == self.sequencer && [keyPath isEqual:@"patternQuantization"] )
         [self updatePatternQuantizationPopup];
+    else if ( object == self.currentPage && [keyPath isEqual:@"currentPatternId"] )
+        [self updateCurrentPattern];
     else if ( object == self.currentPage && [keyPath isEqual:@"stepLength"] )
         [self updateStepLengthPopup];
     else if ( object == self.currentPage && [keyPath isEqual:@"swing"] )

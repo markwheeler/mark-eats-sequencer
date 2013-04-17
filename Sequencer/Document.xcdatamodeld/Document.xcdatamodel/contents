@@ -22,7 +22,7 @@
         <attribute name="loopEnd" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="loopStart" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" maxValueString="100" syncable="YES"/>
-        <attribute name="nextPatternId" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+        <attribute name="nextPatternId" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="nextStep" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <attribute name="playMode" attributeType="Integer 16" minValueString="0" maxValueString="3" defaultValueString="0" syncable="YES"/>
         <attribute name="stepLength" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>

@@ -25,7 +25,6 @@ typedef enum EatsGridViewType{
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
 - (void) setNewPageId:(NSNumber *)id;
-- (void) setNewPatternId:(NSNumber *)id;
 @end
 
 
@@ -40,6 +39,5 @@ typedef enum EatsGridViewType{
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
 - (void) setNewPageId:(NSNumber *)id;
-- (void) setNewPatternId:(NSNumber *)id;
 
 @end

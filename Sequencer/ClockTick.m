@@ -101,27 +101,6 @@ typedef enum EatsStepAdvance {
     [_activeNotes removeAllObjects];
 }
 
-- (EatsStepAdvance) needToAdvance:(SequencerPage *)page
-{
-     
-    // If the page has been scrubbed
-    if( page.nextStep && _currentTick % (_ticksPerMeasure / _sequencer.stepQuantization.intValue) == 0 ) {
-        return EatsStepAdvance_Scrubbed;
-        
-    // If the sequence needs to advance
-    } else if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 ) {
-        return EatsStepAdvance_Normal;
-    
-    } else {
-        return EatsStepAdvance_None;
-    }
-    
-    // If the page has changed pattern
-//            if( page.nextPatternId && _currentTick % (_ticksPerMeasure / _sequencer.patternQuantization.intValue ) == 0 ) {
-//                needsToAdvance = YES;
-//            }
-}
-
 - (void) clockTick:(uint64_t)ns
 {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
@@ -161,32 +140,14 @@ typedef enum EatsStepAdvance {
         [_activeNotes removeObjectsInArray:toRemove];
         
         
-        // Update the current step for each page
+        // Update the current step for each page and send new notes
         
         for(SequencerPage *page in _sequencer.pages) {
             
-
+            // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
+            EatsStepAdvance needsToAdvance = [self needToAdvanceStep:page];
             
-            // Is in the range 0 – _minQuantization
-            //            int tickPosition = floor( _minQuantization * ( _currentTick / (float)_ticksPerMeasure ));
-
-            
-            
-            
-            
-            
-            /*
-            calculate what the next step would be (assuming we're doing it now)
-            work out the 0-64 position for that new step
-            do mod stuff to work out if it's required for either next step or normal advancing
-            
-            
-            
-            */
-            
-            EatsStepAdvance needsToAdvance = [self needToAdvance:page];
-            
-            // Play notes for current step, playMode != paused
+            // If we need to advance and it's not paused
             if( needsToAdvance != EatsStepAdvance_None && page.playMode.intValue != EatsSequencerPlayMode_Pause ) {
                 
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
@@ -256,21 +217,26 @@ typedef enum EatsStepAdvance {
                     else
                         page.inLoop = [NSNumber numberWithBool:NO];
                 }
+                
+                
+                // OK now we know what the step is we can get on with acting upon it!
+                
+                
+                // Position of step in the loop 0 - minQuantization
+                uint position = ( page.currentStep.intValue * ( _minQuantization / page.stepLength.intValue ) );
+                
+                // Check if we need to advance the pattern (depending on where we are within it)
+                if( page.nextPatternId && position % (_minQuantization / _sequencer.patternQuantization.intValue ) == 0 ) {
+                    page.currentPatternId = [page.nextPatternId copy];
+                    page.nextPatternId = nil;
+                }
 
 
                 // Send notes that need to be sent
                 
                 for( SequencerNote *note in [[page.patterns objectAtIndex:page.currentPatternId.intValue] notes] ) {
                     
-//                    BOOL isPlaying = NO;
                     int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
-//
-//                    // Don't start a note that's already playing
-//                    for( NSMutableDictionary *note in _activeNotes ) {
-//                        if( [[note valueForKey:@"pitch"] intValue] == pitch ) {
-//                            isPlaying = YES;
-//                        }
-//                    }
                     
                     // Play it!
                     if( note.step == page.currentStep ) {
@@ -285,9 +251,6 @@ typedef enum EatsStepAdvance {
                         
                         // We only add swing and velocity groove when playing forward or reverse
                         if( page.playMode.intValue == EatsSequencerPlayMode_Forward || page.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-                            
-                            // Position of note in the loop 0 - minQuantization
-                            uint position = ( note.step.intValue * ( _minQuantization / page.stepLength.intValue ) );
                             
                             // Reverse position if we're playing in reverse
                             if( page.playMode.intValue == EatsSequencerPlayMode_Reverse )
@@ -345,7 +308,7 @@ typedef enum EatsStepAdvance {
         
     }
     
-    // Increment the tick to the next step
+    // Increment the tick
     _currentTick++;
     if(_currentTick >= _ticksPerMeasure) _currentTick = 0;
 }
@@ -354,6 +317,27 @@ typedef enum EatsStepAdvance {
 {
     // TODO: Create a visual indicator for this
     //NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
+}
+
+
+
+#pragma mark - Private methods
+
+- (EatsStepAdvance) needToAdvanceStep:(SequencerPage *)page
+{
+    
+    // If the page has been scrubbed
+    if( page.nextStep && _currentTick % (_ticksPerMeasure / _sequencer.stepQuantization.intValue) == 0 ) {
+        return EatsStepAdvance_Scrubbed;
+        
+        // If the sequence needs to advance
+    } else if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 ) {
+        return EatsStepAdvance_Normal;
+        
+    } else {
+        return EatsStepAdvance_None;
+    }
+    
 }
 
 

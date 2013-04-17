@@ -428,9 +428,7 @@
     if ( [_patternButtons containsObject:sender] ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            
-            if([self.delegate respondsToSelector:@selector(setNewPatternId:)])
-                [self.delegate performSelector:@selector(setNewPatternId:) withObject:[NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]]];
+            _pattern.inPage.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]];
         }
     }
     

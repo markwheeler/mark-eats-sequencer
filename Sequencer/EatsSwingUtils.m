@@ -28,8 +28,6 @@
                                      nil];
 }
 
-// TODO Swing gets a note out of sync when playback is reversed (may nede to know which direction playback is going in this method to allow for it? ie, shift numbers 1 across?)
-
 + (uint64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization
 {
     // Position must be 0 - minQuantization - 1
