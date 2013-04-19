@@ -34,7 +34,6 @@ typedef enum EatsPatternViewFoldFrom {
 
 @interface EatsGridPatternView : EatsGridSubView
 
-@property uint                      currentStep;
 @property SequencerPattern          *pattern;
 @property uint                      patternHeight;
 @property SequencerNote             *activeEditNote;
@@ -45,6 +44,7 @@ typedef enum EatsPatternViewFoldFrom {
 @property uint                      playheadBrightness;
 @property uint                      noteBrightness;
 @property uint                      noteLengthBrightness;
+@property uint                      flashBrightness;
 @property float                     doublePressTime;
 
 @end
