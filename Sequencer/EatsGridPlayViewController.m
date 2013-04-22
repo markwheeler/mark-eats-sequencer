@@ -17,6 +17,9 @@
 #define ANIMATION_FRAMERATE 15
 #define ANIMATION_EASE 0.4
 
+#define FLASH_MIN_BRIGHTNESS 5
+#define FLASH_MAX_BRIGHTNESS 10
+
 @interface EatsGridPlayViewController ()
 
 @property Sequencer                         *sequencer;
@@ -45,6 +48,10 @@
 @property NSTimer                           *animationTimer;
 @property uint                              animationFrame;
 @property int                               animationSpeedMultiplier;
+
+@property NSTimer                           *flashingTimer;
+@property uint                              flashAnimationFrame;
+@property NSNumber                          *currentlyFlashingStep;
 
 @end
 
@@ -195,6 +202,9 @@
     
     if( _bpmRepeatTimer )
         [_bpmRepeatTimer invalidate];
+    
+    if( _flashingTimer )
+        [self stopNextStepFlashing];
 }
 
 - (void) updateView
@@ -210,8 +220,19 @@
     _pattern = [patternMatches lastObject];
     
     _patternView.pattern = _pattern;
-    _patternView.currentStep = _pattern.inPage.currentStep.unsignedIntValue;
     
+    // Start or stop flashing nextStep
+    NSNumber *nextStep = _pattern.inPage.nextStep;
+    if( nextStep == nil && _flashingTimer ) {
+        [self stopNextStepFlashing];
+    } else if( nextStep != _currentlyFlashingStep ) {
+        [self stopNextStepFlashing];
+        [self startNextStepFlashing];
+        [self setFlashing];
+    }
+    _currentlyFlashingStep = nextStep;
+    
+    // Set buttons etc
     [self setPlayMode:_pattern.inPage.playMode.intValue];    
     [self setActivePageButton];
     [self setActivePatternButton];
@@ -407,6 +428,40 @@
 }
 
 
+#pragma mark - nextStep flashing methods
+
+- (void) startNextStepFlashing
+{
+    _flashAnimationFrame = 0;
+    _flashingTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                                      target:self
+                                                    selector:@selector(updateNextStepFlashing:)
+                                                    userInfo:nil
+                                                     repeats:YES];
+}
+
+- (void) stopNextStepFlashing
+{
+    [_flashingTimer invalidate];
+    _flashingTimer = nil;
+}
+
+- (void) setFlashing
+{
+    _patternView.flashBrightness = FLASH_MAX_BRIGHTNESS - _flashAnimationFrame;
+    
+    _flashAnimationFrame ++;
+    if( _patternView.flashBrightness < FLASH_MIN_BRIGHTNESS )
+        _flashAnimationFrame = 0;
+}
+
+- (void) updateNextStepFlashing:(NSTimer *)sender
+{
+    [self setFlashing];
+    [self updateView];
+}
+
+
 
 #pragma mark - Sub view delegate methods
 
@@ -565,6 +620,7 @@
         _pattern.inPage.nextStep = [NSNumber numberWithUnsignedInt:x];
         if( [_pattern.inPage.playMode intValue] == EatsSequencerPlayMode_Pause )
             _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+        [self updateView];
     }
 }
 

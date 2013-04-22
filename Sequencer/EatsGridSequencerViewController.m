@@ -233,7 +233,6 @@
     NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
 
     _patternView.pattern = [patternMatches lastObject];
-    _patternView.currentStep = [_pattern.inPage.currentStep unsignedIntValue];
     
     [super updateView];
 }
