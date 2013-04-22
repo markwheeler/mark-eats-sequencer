@@ -166,9 +166,6 @@
 
     NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
     _pattern = [patternMatches lastObject];
-    
-    if( [_currentViewController respondsToSelector:@selector(setPattern:)] )
-        [_currentViewController performSelector:@selector(setPattern:) withObject:_pattern];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath

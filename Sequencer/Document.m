@@ -44,7 +44,6 @@
 @property (weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
 @property (weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
 
-@property (weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
 @property (weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
 @property (weak) IBOutlet NSTableView           *rowPitchesTableView;
 @property (weak) IBOutlet NSPopUpButton         *stepLengthPopup;
@@ -211,11 +210,6 @@
                                                  name:@"GridControllerConnected"
                                                object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(gridControllerNone:)
-                                                 name:@"GridControllerNone"
-                                               object:nil];
-    
     // External clock notifications
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(externalClockStart:)
@@ -323,7 +317,6 @@
 {
     [self updateStepLengthPopup];
     [self updateSwingPopup];
-    [self updateCurrentPattern];
 }
 
 - (void) updateClockBPM
@@ -348,7 +341,7 @@
 
 - (void) updateCurrentPattern
 {
-    [self.currentPatternSegmentedControl setSelectedSegment:_currentPage.currentPatternId.integerValue];
+    // Update pattern UI
 }
 
 - (void) updateStepLengthPopup
@@ -423,12 +416,6 @@
 - (void) gridControllerConnected:(NSNotification *)notification
 {
     [self checkForThingsOutsideGrid];
-    [self updateInterfaceToMatchGridSize];
-}
-
-- (void) gridControllerNone:(NSNotification *)notification
-{
-    [self updateInterfaceToMatchGridSize];
 }
 
 - (void) checkForThingsOutsideGrid
@@ -443,10 +430,6 @@
             page.currentStep = [page.loopEnd copy];
         if( page.nextStep.intValue >= self.sharedPreferences.gridWidth )
             page.nextStep = nil;
-        if( page.currentPatternId.intValue >= self.sharedPreferences.gridWidth )
-            page.currentPatternId = [NSNumber numberWithInt:0];
-        if( page.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
-            page.nextPatternId = nil;
     }
     
     // Get the notes
@@ -463,15 +446,6 @@
                              informativeTextWithFormat:@"Would you like to remove these %lu notes?", [noteMatches count]];
         
         [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
-    }
-}
-
-- (void) updateInterfaceToMatchGridSize
-{
-    [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
-    for( int i = 0; i < self.currentPatternSegmentedControl.segmentCount; i ++ ) {
-        [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i] forSegment:i];
-        [self.currentPatternSegmentedControl setWidth:28.0 forSegment:i];
     }
 }
 
@@ -541,11 +515,7 @@
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
 {
-    [self.currentPage removeObserver:self forKeyPath:@"currentPatternId"];
-    
     self.currentPage = [self.sequencer.pages objectAtIndex:sender.selectedSegment];
-    
-    [self.currentPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (IBAction) editLabelButton:(NSButton *)sender
@@ -565,11 +535,6 @@
     [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
-- (IBAction)currentPatternSegmentedControl:(NSSegmentedControl *)sender
-{
-    _currentPage.nextPatternId = [NSNumber numberWithInteger:sender.selectedSegment];
-    [sender setSelectedSegment:_currentPage.currentPatternId.integerValue];
-}
 
 - (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
 {
