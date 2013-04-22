@@ -120,11 +120,6 @@
                                                          selector:@selector(animateInNoteEditMode:)
                                                          userInfo:nil
                                                           repeats:YES];
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-    
-    // Make sure we fire even when the UI is tracking mouse down stuff
-    [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-    [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
 }
 
 - (void) exitNoteEditMode
@@ -159,11 +154,6 @@
                                                          selector:@selector(animateOutNoteEditMode:)
                                                          userInfo:nil
                                                           repeats:YES];
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-    
-    // Make sure we fire even when the UI is tracking mouse down stuff
-    [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-    [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
 }
 
 - (void) animateInNoteEditMode:(NSTimer *)timer
