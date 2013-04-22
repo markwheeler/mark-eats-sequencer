@@ -60,13 +60,13 @@
 
 - (void) setupView
 {
+    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
+    
     // Get the sequencer
-    NSFetchRequest *sequencerRequest = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-    NSArray *sequencerMatches = [self.managedObjectContext executeFetchRequest:sequencerRequest error:nil];
-    _sequencer = [sequencerMatches lastObject];
+    _sequencer = [self.delegate valueForKey:@"sequencer"];
     
     // Get the pattern
-    _pattern = [self.delegate valueForKey:@"pattern"];
+    _pattern = [self.delegate valueForKey:@"currentPattern"];
     
     // Get prefs
     _sharedPreferences = [Preferences sharedPreferences];
@@ -213,20 +213,27 @@
 
 - (void) updateView
 {
-    if( _pattern != [self.delegate valueForKey:@"pattern"] )
-        _pattern = [self.delegate valueForKey:@"pattern"];
+    
+    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
+    
+    if( _pattern != [self.delegate valueForKey:@"currentPattern"] )
+        _pattern = [self.delegate valueForKey:@"currentPattern"];
     
     // Update PatternView sub view
+    NSError *requestError = nil;
     NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
     patternRequest.predicate = [NSPredicate predicateWithFormat:@"SELF == %@", _pattern];
-    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
+    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:&requestError];
+    
+    if( requestError )
+        NSLog(@"Request error: %@", requestError);
     
     _pattern = [patternMatches lastObject];
     
     _patternView.pattern = _pattern;
     
     // Start or stop flashing nextPatternId
-    NSNumber *nextPatternId = [_pattern.inPage.nextPatternId copy];
+    NSNumber *nextPatternId = _pattern.inPage.nextPatternId;
     if( nextPatternId == nil && _flashingNextPatternTimer ) {
         [self stopNextPatternFlashing];
         
@@ -241,12 +248,13 @@
     NSNumber *nextStep = _pattern.inPage.nextStep;
     if( nextStep == nil && _flashingNextStepTimer ) {
         [self stopNextStepFlashing];
+        
     } else if( nextStep != _currentlyFlashingStep ) {
         [self stopNextStepFlashing];
         [self startNextStepFlashing];
     }
     _currentlyFlashingStep = nextStep;
-        
+    
     // Set buttons etc
     [self setPlayMode:_pattern.inPage.playMode.intValue];
     [self setActivePageButton];
