@@ -29,18 +29,22 @@
 
 #pragma mark - public methods
 
-- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencer:(Sequencer *)sequencer
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context
 {
     self = [super init];
     if (self) {
         
-        if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
-        
         _isActive = NO;
         _managedObjectContext = context;
-        _sequencer = sequencer;
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
+        
+        // Get the pattern
+        NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+        patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage.id == 0) AND (id == inPage.currentPatternId)"];
+        
+        NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
+        _pattern = [patternMatches lastObject];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridControllerNone:)
@@ -56,9 +60,8 @@
             _currentView = EatsGridViewType_Sequencer;
         }
         
-        // Set the page and keep an eye on pattern changes
-        [self setNewPageId:0];
-        [_currentPattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+        // Keep an eye on pattern changes
+        [_pattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 
     }
     return self;
@@ -66,7 +69,7 @@
 
 - (void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_currentPattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
+    [_pattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
 }
 
 
@@ -140,22 +143,32 @@
 
 - (void) setNewPageId:(NSNumber *)id
 {
-    [_currentPattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
+    [_pattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
     
-    SequencerPage *page = [_sequencer.pages objectAtIndex:id.unsignedIntegerValue];
-    _currentPattern =  [page.patterns objectAtIndex:page.currentPatternId.unsignedIntegerValue];
+    // Get the page
+    NSFetchRequest *pageRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+    pageRequest.predicate = [NSPredicate predicateWithFormat:@"id == %@", id];
     
-    [_currentPattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    NSArray *pageMatches = [self.managedObjectContext executeFetchRequest:pageRequest error:nil];
+    SequencerPage *page = [pageMatches lastObject];
+    
+    // Get the pattern for it
+    _pattern = [page.patterns objectAtIndex:page.currentPatternId.intValue];
+    
+    [_pattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (void) updatePattern
 {
-    [_currentPattern.inPage removeObserver:self forKeyPath:@"currentPatternId"];
+    // Get the pattern
+    NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+    patternRequest.predicate = [NSPredicate predicateWithFormat:@"(inPage == %@) AND (id == %@)", _pattern.inPage, _pattern.inPage.currentPatternId];
+
+    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:nil];
+    _pattern = [patternMatches lastObject];
     
-    SequencerPage *page = _currentPattern.inPage;
-    _currentPattern =  [page.patterns objectAtIndex:page.currentPatternId.unsignedIntegerValue];
-    
-    [_currentPattern.inPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    if( [_currentViewController respondsToSelector:@selector(setPattern:)] )
+        [_currentViewController performSelector:@selector(setPattern:) withObject:_pattern];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -163,8 +176,8 @@
                         change:(NSDictionary *)change
                        context:(void *)context {
     
-    if ( object == _currentPattern.inPage && [keyPath isEqual:@"currentPatternId"] ) {
-        [self performSelectorOnMainThread:@selector(updatePattern) withObject:nil waitUntilDone:NO];
+    if ( object == _pattern.inPage && [keyPath isEqual:@"currentPatternId"] ) {
+        [self updatePattern];
     }
 }
 

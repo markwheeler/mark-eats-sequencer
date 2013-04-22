@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <VVOSC/VVOSC.h>
 #import <VVMIDI/VVMIDI.h>
-#import "Sequencer+Utils.h"
+#import "SequencerPage.h"
 #import "SequencerPattern.h"
 
 typedef enum EatsGridViewType{
@@ -21,8 +21,7 @@ typedef enum EatsGridViewType{
 
 @protocol EatsGridViewDelegateProtocol
 @property BOOL                      isActive;
-@property Sequencer                 *sequencer;
-@property SequencerPattern          *currentPattern;
+@property SequencerPattern          *pattern;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
 - (void) setNewPageId:(NSNumber *)id;
@@ -33,10 +32,9 @@ typedef enum EatsGridViewType{
 
 @property BOOL                      isActive;
 @property NSManagedObjectContext    *managedObjectContext;
-@property Sequencer                 *sequencer;
-@property SequencerPattern          *currentPattern;
+@property SequencerPattern          *pattern;
 
-- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencer:(Sequencer *)sequencer;
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
 - (void) updateGridView;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
