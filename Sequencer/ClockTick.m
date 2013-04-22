@@ -225,6 +225,8 @@ typedef enum EatsStepAdvance {
                 // Position of step in the loop 0 - minQuantization
                 uint position = ( page.currentStep.intValue * ( _minQuantization / page.stepLength.intValue ) );
                 
+                // TODO Pattern quantization doesn't do what it's supposed to! It just jumps depending on your position in the loop :(
+                
                 // Check if we need to advance the pattern (depending on where we are within it)
                 if( page.nextPatternId && position % (_minQuantization / _sequencer.patternQuantization.intValue ) == 0 ) {
                     page.currentPatternId = [page.nextPatternId copy];
