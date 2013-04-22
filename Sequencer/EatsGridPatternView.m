@@ -51,15 +51,13 @@
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns with playhead and flashing nextStep
+    // Generate the columns with playhead
     for(uint x = 0; x < self.width; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            if( _pattern.inPage.currentPatternId == _pattern.id && x == _pattern.inPage.currentStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
-            else if( _pattern.inPage.nextStep && x == _pattern.inPage.nextStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_flashBrightness * self.opacity] atIndex:y];
+            if( _pattern.inPage.currentPatternId == _pattern.id && x == _currentStep )
+                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:_playheadBrightness * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
