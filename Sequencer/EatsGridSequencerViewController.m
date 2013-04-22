@@ -258,43 +258,43 @@
 
 - (SequencerNote *) checkForNoteAtX:(uint)x y:(uint)y
 {
+    // See if there's a note there
+    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y + 32 - self.height];
+    
     BOOL sortDirection = ( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
-    NSArray *sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
-        
-    NSArray *notes = [_pattern.notes sortedArrayUsingDescriptors:sortDescriptors];
+    noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
+    
+    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
     
     // Look through all the notes on the row, checking their length
-    for( SequencerNote *note in notes ) {
+    for( SequencerNote *note in noteMatches ) {
+        int endPoint;
         
-        if( note.row.intValue == y + 32 - self.height) {
-        
-            int endPoint;
+        // When in reverse
+        if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+            endPoint = note.step.intValue - note.length.intValue + 1;
             
-            // When in reverse
-            if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-                endPoint = note.step.intValue - note.length.intValue + 1;
+            // If it's wrapping
+            if( endPoint < 0 && ( x <= note.step.intValue || x >= endPoint + self.width ) ) {
+                return note;
+            
+            // If it's not wrapping
+            } else if( x <= note.step.intValue && x >= endPoint ) {
+                return note;
+            }
+            
+        // When playing forwards
+        } else {
+            endPoint = note.step.intValue + note.length.intValue - 1;
+            
+            // If it's wrapping and we're going forwards
+            if( endPoint >= self.width && ( x >= note.step.intValue || x <= endPoint - self.width ) ) {
+                return note;
                 
-                // If it's wrapping
-                if( endPoint < 0 && ( x <= note.step.intValue || x >= endPoint + self.width ) ) {
-                    return note;
-                
-                // If it's not wrapping
-                } else if( x <= note.step.intValue && x >= endPoint ) {
-                    return note;
-                }
-                
-            // When playing forwards
-            } else {
-                endPoint = note.step.intValue + note.length.intValue - 1;
-                
-                // If it's wrapping and we're going forwards
-                if( endPoint >= self.width && ( x >= note.step.intValue || x <= endPoint - self.width ) ) {
-                    return note;
-                    
-                // If it's not wrapping
-                } else if( x >= note.step.intValue && x <= endPoint ) {
-                    return note;
-                }
+            // If it's not wrapping
+            } else if( x >= note.step.intValue && x <= endPoint ) {
+                return note;
             }
         }
     }

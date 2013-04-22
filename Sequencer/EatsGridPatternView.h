@@ -42,9 +42,9 @@ typedef enum EatsPatternViewFoldFrom {
 @property uint                      wipe; // 0-100
 
 @property uint                      playheadBrightness;
+@property uint                      nextStepBrightness;
 @property uint                      noteBrightness;
 @property uint                      noteLengthBrightness;
-@property uint                      flashBrightness;
 @property float                     doublePressTime;
 
 @end

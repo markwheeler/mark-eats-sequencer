@@ -34,8 +34,6 @@
     self = [super init];
     if (self) {
         
-        if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
-        
         _isActive = NO;
         _managedObjectContext = context;
         _sequencer = sequencer;

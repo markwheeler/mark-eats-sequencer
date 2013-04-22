@@ -17,9 +17,6 @@
 #define ANIMATION_FRAMERATE 15
 #define ANIMATION_EASE 0.4
 
-#define FLASH_MIN_BRIGHTNESS 5
-#define FLASH_MAX_BRIGHTNESS 10
-
 @interface EatsGridPlayViewController ()
 
 @property Sequencer                         *sequencer;
@@ -49,19 +46,12 @@
 @property uint                              animationFrame;
 @property int                               animationSpeedMultiplier;
 
-@property NSTimer                           *flashingNextPatternTimer;
-@property NSTimer                           *flashingNextStepTimer;
-@property NSNumber                          *currentlyFlashingPatternId;
-@property NSNumber                          *currentlyFlashingStep;
-
 @end
 
 @implementation EatsGridPlayViewController
 
 - (void) setupView
 {
-    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
-    
     // Get the sequencer
     _sequencer = [self.delegate valueForKey:@"sequencer"];
     
@@ -172,7 +162,7 @@
     
     // Set top left buttons correctly
     [self setActivePageButton];
-    [self setActivePatternButton];
+    [self setPatternButtonState];
     
     // Make the correct playMode button active and listen for changes to keep it correct
     [self setPlayMode:[_pattern.inPage.playMode intValue]];
@@ -202,12 +192,6 @@
     
     if( _bpmRepeatTimer )
         [_bpmRepeatTimer invalidate];
-
-    if( _flashingNextPatternTimer )
-        [self stopNextPatternFlashing];
-    
-    if( _flashingNextStepTimer )
-        [self stopNextStepFlashing];
     
 }
 
@@ -232,34 +216,10 @@
     
     _patternView.pattern = _pattern;
     
-    // Start or stop flashing nextPatternId
-    NSNumber *nextPatternId = _pattern.inPage.nextPatternId;
-    if( nextPatternId == nil && _flashingNextPatternTimer ) {
-        [self stopNextPatternFlashing];
-        
-    } else if( nextPatternId != _currentlyFlashingPatternId ) {
-        [self stopNextPatternFlashing];
-        [self startNextPatternFlashing];
-    }
-    _currentlyFlashingPatternId = nextPatternId;
-    [self setPatternButtonInactiveState];
-    
-    // Start or stop flashing nextStep
-    NSNumber *nextStep = _pattern.inPage.nextStep;
-    if( nextStep == nil && _flashingNextStepTimer ) {
-        [self stopNextStepFlashing];
-        
-    } else if( nextStep != _currentlyFlashingStep ) {
-        [self stopNextStepFlashing];
-        [self startNextStepFlashing];
-    }
-    _currentlyFlashingStep = nextStep;
-    
     // Set buttons etc
     [self setPlayMode:_pattern.inPage.playMode.intValue];
     [self setActivePageButton];
-    [self setActivePatternButton];
-    [self setPatternButtonInactiveState];
+    [self setPatternButtonState];
     _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
     _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopEnd.intValue width:self.width];
     
@@ -291,25 +251,20 @@
     }
 }
 
-- (void) setActivePatternButton
+- (void) setPatternButtonState
 {
+    // TODO put a dim light if there are notes in the pattern
+
     uint i = 0;
     for ( EatsGridButtonView *button in _patternButtons ) {
         if( i == _pattern.inPage.currentPatternId.intValue )
             button.buttonState = EatsButtonViewState_Active;
         else
             button.buttonState = EatsButtonViewState_Inactive;
-        i++;
-    }
-}
-
-- (void) setPatternButtonInactiveState
-{
-    // TODO put a dim light if there are notes in the pattern
-    
-    uint i = 0;
-    for ( EatsGridButtonView *button in _patternButtons ) {
-        if( i != _currentlyFlashingPatternId.intValue )
+        
+        if( i == _pattern.inPage.nextPatternId.intValue && _pattern.inPage.nextPatternId )
+            button.inactiveBrightness = 8;
+        else
             button.inactiveBrightness = 0;
         i++;
     }
@@ -484,97 +439,6 @@
 }
 
 
-#pragma mark - Flashing methods
-
-- (void) startNextPatternFlashing
-{
-    NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"animationFrame", nil];
-    
-    _flashingNextPatternTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
-                                                                 target:self
-                                                               selector:@selector(updateNextPatternFlashing:)
-                                                               userInfo:userInfo
-                                                                repeats:YES];
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-    
-    // Make sure we fire even when the UI is tracking mouse down stuff
-    [runloop addTimer:_flashingNextPatternTimer forMode: NSRunLoopCommonModes];
-    [runloop addTimer:_flashingNextPatternTimer forMode: NSEventTrackingRunLoopMode];
-    
-    [self setNextPatternFlashing];
-}
-
-- (void) stopNextPatternFlashing
-{
-    [_flashingNextPatternTimer invalidate];
-    _flashingNextPatternTimer = nil;
-}
-
-- (void) setNextPatternFlashing
-{
-    int animationFrame = [[_flashingNextPatternTimer.userInfo valueForKey:@"animationFrame"] intValue];
-    
-    EatsGridButtonView *button = [_patternButtons objectAtIndex:_currentlyFlashingPatternId.intValue];
-    
-    button.inactiveBrightness = FLASH_MAX_BRIGHTNESS - animationFrame;
-    
-    animationFrame ++;
-    if( button.inactiveBrightness < FLASH_MIN_BRIGHTNESS )
-        animationFrame = 0;
-    
-    [_flashingNextPatternTimer.userInfo setValue:[NSNumber numberWithInt:animationFrame] forKey:@"animationFrame"];
-}
-
-- (void) updateNextPatternFlashing:(NSTimer *)sender
-{
-    [self setNextPatternFlashing];
-    [self updateView];
-}
-
-- (void) startNextStepFlashing
-{
-    NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"animationFrame", nil];
-    
-    _flashingNextStepTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
-                                                              target:self
-                                                            selector:@selector(updateNextStepFlashing:)
-                                                            userInfo:userInfo
-                                                             repeats:YES];
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-    
-    // Make sure we fire even when the UI is tracking mouse down stuff
-    [runloop addTimer:_flashingNextStepTimer forMode: NSRunLoopCommonModes];
-    [runloop addTimer:_flashingNextStepTimer forMode: NSEventTrackingRunLoopMode];
-    
-    [self setNextStepFlashing];
-}
-
-- (void) stopNextStepFlashing
-{
-    [_flashingNextStepTimer invalidate];
-    _flashingNextStepTimer = nil;
-}
-
-- (void) setNextStepFlashing
-{
-    int animationFrame = [[_flashingNextStepTimer.userInfo valueForKey:@"animationFrame"] intValue];
-    
-    _patternView.flashBrightness = FLASH_MAX_BRIGHTNESS - animationFrame;
-    
-    animationFrame ++;
-    if( _patternView.flashBrightness < FLASH_MIN_BRIGHTNESS )
-        animationFrame = 0;
-    
-    [_flashingNextStepTimer.userInfo setValue:[NSNumber numberWithInt:animationFrame] forKey:@"animationFrame"];
-}
-
-- (void) updateNextStepFlashing:(NSTimer *)sender
-{
-    [self setNextStepFlashing];
-    [self updateView];
-}
-
-
 
 #pragma mark - Sub view delegate methods
 
@@ -597,6 +461,9 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
             _pattern.inPage.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]];
+            
+        } else {
+            sender.buttonState = EatsButtonViewState_Inactive;
         }
     }
     

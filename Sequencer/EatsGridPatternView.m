@@ -16,6 +16,7 @@
 
 
 #define PLAYHEAD_BRIGHTNESS 8
+#define NEXT_STEP_BRIGHTNESS 8
 #define NOTE_BRIGHTNESS 15
 #define NOTE_LENGTH_BRIGHTNESS 10
 
@@ -39,6 +40,7 @@
         _sharedPreferences = [Preferences sharedPreferences];
         
         _playheadBrightness = PLAYHEAD_BRIGHTNESS;
+        _nextStepBrightness = NEXT_STEP_BRIGHTNESS;
         _noteBrightness = NOTE_BRIGHTNESS;
         _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
         _doublePressTime = 0.4; // Default
@@ -60,7 +62,7 @@
             if( _pattern.inPage.currentPatternId == _pattern.id && x == _pattern.inPage.currentStep.intValue )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
             else if( _pattern.inPage.nextStep && x == _pattern.inPage.nextStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_flashBrightness * self.opacity] atIndex:y];
+                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
         }
