@@ -49,9 +49,9 @@
 @property uint                              animationFrame;
 @property int                               animationSpeedMultiplier;
 
-@property NSTimer                           *flashingTimer;
-@property uint                              flashAnimationFrame;
+@property NSMutableSet                      *flashingTimers;
 @property NSNumber                          *currentlyFlashingStep;
+@property NSNumber                          *currentlyFlashingPatternId;
 
 @end
 
@@ -59,7 +59,9 @@
 
 - (void) setupView
 {
-    
+    // Create set
+    _flashingTimers = [NSMutableSet setWithCapacity:2];
+
     // Get the sequencer
     NSFetchRequest *sequencerRequest = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
     NSArray *sequencerMatches = [self.managedObjectContext executeFetchRequest:sequencerRequest error:nil];
@@ -203,8 +205,7 @@
     if( _bpmRepeatTimer )
         [_bpmRepeatTimer invalidate];
     
-    if( _flashingTimer )
-        [self stopNextStepFlashing];
+    [self stopAllFlashing];
 }
 
 - (void) updateView
@@ -221,16 +222,39 @@
     
     _patternView.pattern = _pattern;
     
-    // Start or stop flashing nextStep
+    // Start or stop flashing
     NSNumber *nextStep = _pattern.inPage.nextStep;
-    if( nextStep == nil && _flashingTimer ) {
-        [self stopNextStepFlashing];
+    if( nextStep == nil && _currentlyFlashingStep != nil ) {
+        [self stopObjectFlashing:_patternView];
     } else if( nextStep != _currentlyFlashingStep ) {
-        [self stopNextStepFlashing];
-        [self startNextStepFlashing];
-        [self setFlashing];
+        [self stopObjectFlashing:_patternView];
+        [self startObjectFlashing:_patternView];
+        //[self setObjectFlashing:_patternView];
     }
     _currentlyFlashingStep = nextStep;
+    
+    NSNumber *nextPatternId = _pattern.inPage.nextPatternId;
+    if( nextPatternId == nil && _currentlyFlashingPatternId != nil ) {
+        for( EatsGridButtonView *button in _patternButtons ) {
+            [self stopObjectFlashing:button];
+            button.inactiveBrightness = 0;
+        }
+        
+    } else if( nextPatternId != _currentlyFlashingPatternId ) {
+        EatsGridButtonView *nextPatternButton = [_patternButtons objectAtIndex:nextPatternId.intValue];
+        
+        for( EatsGridButtonView *button in _patternButtons ) {
+            if( button == nextPatternButton ) {
+                [self stopObjectFlashing:nextPatternButton];
+                [self startObjectFlashing:nextPatternButton];
+                //[self setObjectFlashing:nextPatternButton];
+            } else {
+                [self stopObjectFlashing:button];
+                button.inactiveBrightness = 0;
+            }
+        }
+    }
+    _currentlyFlashingPatternId = nextPatternId;
     
     // Set buttons etc
     [self setPlayMode:_pattern.inPage.playMode.intValue];    
@@ -428,36 +452,77 @@
 }
 
 
-#pragma mark - nextStep flashing methods
+#pragma mark - Flashing methods
 
-- (void) startNextStepFlashing
+- (void) startObjectFlashing:(id)object
 {
-    _flashAnimationFrame = 0;
-    _flashingTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
-                                                      target:self
-                                                    selector:@selector(updateNextStepFlashing:)
-                                                    userInfo:nil
-                                                     repeats:YES];
-}
-
-- (void) stopNextStepFlashing
-{
-    [_flashingTimer invalidate];
-    _flashingTimer = nil;
-}
-
-- (void) setFlashing
-{
-    _patternView.flashBrightness = FLASH_MAX_BRIGHTNESS - _flashAnimationFrame;
+    // Keep track of the object and animation frame by attaching it to the timer
+    NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:object, @"object",
+                                                                                      [NSNumber numberWithInt:0], @"animationFrame",
+                                                                                      nil];
     
-    _flashAnimationFrame ++;
-    if( _patternView.flashBrightness < FLASH_MIN_BRIGHTNESS )
-        _flashAnimationFrame = 0;
+    [_flashingTimers addObject:[NSTimer scheduledTimerWithTimeInterval:0.1
+                                                       target:self
+                                                     selector:@selector(updateObjectFlashing:)
+                                                     userInfo:userInfo
+                                                      repeats:YES]];
+    [self setObjectFlashing:object];
 }
 
-- (void) updateNextStepFlashing:(NSTimer *)sender
+- (void) stopObjectFlashing:(id)object
 {
-    [self setFlashing];
+    NSTimer *timer = [[_flashingTimers objectsPassingTest:^(id obj, BOOL *stop){
+        NSTimer *aTimer = obj;
+        return [[aTimer.userInfo valueForKey:@"object"] isEqual:object];
+    }] anyObject];
+    
+    if( timer ) {
+        NSLog(@"Remove");
+        [timer invalidate];
+        [_flashingTimers removeObject:timer];
+    }
+}
+
+- (void) stopAllFlashing
+{
+    for( NSTimer *timer in _flashingTimers ) {
+        [timer invalidate];
+    }
+    [_flashingTimers removeAllObjects];
+}
+
+- (void) setObjectFlashing:(id)object
+{
+    NSTimer *timer = [[_flashingTimers objectsPassingTest:^(id obj, BOOL *stop){
+        NSTimer *aTimer = obj;
+        return [[aTimer.userInfo valueForKey:@"object"] isEqual:object];
+    }] anyObject];
+    
+    
+    NSNumber *animationFrame = [timer.userInfo valueForKey:@"animationFrame"];
+    int brightness = FLASH_MAX_BRIGHTNESS - animationFrame.intValue;
+    
+    // ButtonView
+    if( [object class] == [EatsGridButtonView class] ) {
+        EatsGridButtonView *button = object;
+        button.inactiveBrightness = brightness;
+        
+    // PatternView
+    } else if( [object class] == [EatsGridPatternView class] ) {
+        EatsGridPatternView *patternView = object;
+        patternView.flashBrightness = brightness;
+    }
+    
+    animationFrame = [NSNumber numberWithInt:animationFrame.intValue + 1];
+    if( brightness < FLASH_MIN_BRIGHTNESS )
+        animationFrame = [NSNumber numberWithInt:0];
+    
+    [timer.userInfo setValue:animationFrame forKey:@"animationFrame"];
+}
+
+- (void) updateObjectFlashing:(NSTimer *)timer
+{
+    [self setObjectFlashing:[timer.userInfo valueForKey:@"object"]];
     [self updateView];
 }
 
