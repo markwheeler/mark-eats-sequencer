@@ -11,7 +11,6 @@
 #import "EatsGridUtils.h"
 #import "Preferences.h"
 #import "Sequencer+Utils.h"
-#import "SequencerPage.h"
 #import "SequencerNote.h"
 
 
