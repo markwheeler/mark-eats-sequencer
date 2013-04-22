@@ -32,17 +32,13 @@
     return self;
 }
 
-- (NSDictionary *) defaultPreferences
-{
-    return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"gridAutoConnect", nil];
-}
-
 - (void) loadPreferences
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
     // Default values
-    [preferences registerDefaults:[self defaultPreferences]];
+    NSDictionary *defaultValues = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"gridAutoConnect", nil];
+    [preferences registerDefaults:defaultValues];
     
     // Load user settings
     self.gridOSCLabel = [preferences objectForKey:@"gridOSCLabel"];
