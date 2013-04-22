@@ -77,6 +77,10 @@
                                                           nil];
 }
 
+
+
+#pragma mark - Private methods
+
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
     if( _animationTimer ) return;

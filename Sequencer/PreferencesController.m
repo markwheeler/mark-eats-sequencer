@@ -145,12 +145,7 @@
 }
 
 - (void) gridControllerNone:(NSNotification *)notification
-{
-    
-    self.sharedPreferences.gridType = EatsGridType_None;
-    self.sharedPreferences.gridWidth = 32;
-    self.sharedPreferences.gridHeight = 32;
-    
+{    
     [self.gridControllerPopup selectItemAtIndex:0];
     [self.gridControllerStatus setStringValue:@""];
 }
