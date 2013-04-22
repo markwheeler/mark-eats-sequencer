@@ -36,11 +36,6 @@
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
-    // Default values
-    NSDictionary *defaultValues = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"gridAutoConnect", nil];
-    [preferences registerDefaults:defaultValues];
-    
-    // Load user settings
     self.gridOSCLabel = [preferences objectForKey:@"gridOSCLabel"];
     self.gridMIDINodeName = [preferences objectForKey:@"gridMIDINodeName"];
     
