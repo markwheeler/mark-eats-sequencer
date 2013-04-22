@@ -145,9 +145,15 @@
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     
+    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
+    
     // Setup the Core Data object
+    NSError *requestError = nil;
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-    NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:nil];
+    NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+    
+    if( requestError )
+        NSLog(@"Request error: %@", requestError);
     
     if([matches count]) {
         self.sequencer = [matches lastObject];
@@ -204,7 +210,7 @@
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext];
+    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencer:self.sequencer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
@@ -449,11 +455,18 @@
             page.nextPatternId = nil;
     }
     
+    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
+    
     // Get the notes
+    NSError *requestError = nil;
+    
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
     noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row < %u)", self.sharedPreferences.gridWidth, 32 - self.sharedPreferences.gridHeight];
     
-    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
+    
+    if( requestError )
+        NSLog(@"Request error: %@", requestError);
 
     if( [noteMatches count] && !self.notesOutsideGridAlert ) {
          self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
@@ -498,11 +511,9 @@
         
         // TODO remove all the notes
         
-        // Get the notes
-        //NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        //noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
+        if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
         
-        //NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
+        // Get the notes
         
         // Remove
     }
