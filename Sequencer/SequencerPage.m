@@ -2,14 +2,14 @@
 //  SequencerPage.m
 //  Sequencer
 //
-//  Created by Mark Wheeler on 17/04/2013.
+//  Created by Mark Wheeler on 25/04/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
 #import "SequencerPage.h"
 #import "Sequencer.h"
 #import "SequencerPattern.h"
-#import "SequencerPatternRef.h"
+#import "SequencerPatternIdInPlaylist.h"
 #import "SequencerRowPitch.h"
 
 

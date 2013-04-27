@@ -1,8 +1,8 @@
 //
-//  SequencerPatternRef.h
+//  SequencerPatternIdInPlaylist.h
 //  Sequencer
 //
-//  Created by Mark Wheeler on 17/04/2013.
+//  Created by Mark Wheeler on 25/04/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
@@ -11,9 +11,9 @@
 
 @class SequencerPage;
 
-@interface SequencerPatternRef : NSManagedObject
+@interface SequencerPatternIdInPlaylist : NSManagedObject
 
-@property (nonatomic, retain) NSNumber * pattern;
+@property (nonatomic, retain) NSNumber * patternId;
 @property (nonatomic, retain) SequencerPage *inPlaylist;
 
 @end

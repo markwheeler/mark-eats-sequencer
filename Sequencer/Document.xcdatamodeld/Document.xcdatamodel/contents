@@ -32,15 +32,15 @@
         <relationship name="inSequencer" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Sequencer" inverseName="pages" inverseEntity="Sequencer" syncable="YES"/>
         <relationship name="patterns" optional="YES" toMany="YES" maxCount="32" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPattern" inverseName="inPage" inverseEntity="SequencerPattern" syncable="YES"/>
         <relationship name="pitches" optional="YES" toMany="YES" maxCount="32" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerRowPitch" inverseName="inPage" inverseEntity="SequencerRowPitch" syncable="YES"/>
-        <relationship name="playlist" optional="YES" toMany="YES" maxCount="64" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPatternRef" inverseName="inPlaylist" inverseEntity="SequencerPatternRef" syncable="YES"/>
+        <relationship name="playlist" optional="YES" toMany="YES" maxCount="64" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPatternIdInPlaylist" inverseName="inPlaylist" inverseEntity="SequencerPatternIdInPlaylist" syncable="YES"/>
     </entity>
     <entity name="SequencerPattern" representedClassName="SequencerPattern" syncable="YES">
         <attribute name="id" optional="YES" attributeType="Integer 16" minValueString="0" defaultValueString="0" indexed="YES" syncable="YES"/>
         <relationship name="inPage" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="patterns" inverseEntity="SequencerPage" syncable="YES"/>
         <relationship name="notes" optional="YES" toMany="YES" maxCount="1024" deletionRule="Nullify" destinationEntity="SequencerNote" inverseName="inPattern" inverseEntity="SequencerNote" syncable="YES"/>
     </entity>
-    <entity name="SequencerPatternRef" representedClassName="SequencerPatternRef" syncable="YES">
-        <attribute name="pattern" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
+    <entity name="SequencerPatternIdInPlaylist" representedClassName="SequencerPatternIdInPlaylist" syncable="YES">
+        <attribute name="patternId" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" syncable="YES"/>
         <relationship name="inPlaylist" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="playlist" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
     <entity name="SequencerRowPitch" representedClassName="SequencerRowPitch" syncable="YES">
@@ -53,7 +53,7 @@
         <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
         <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="328"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>
-        <element name="SequencerPatternRef" positionX="-20" positionY="198" width="128" height="73"/>
+        <element name="SequencerPatternIdInPlaylist" positionX="-20" positionY="198" width="128" height="73"/>
         <element name="SequencerRowPitch" positionX="-11" positionY="62" width="128" height="88"/>
     </elements>
 </model>

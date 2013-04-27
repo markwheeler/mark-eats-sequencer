@@ -2,14 +2,14 @@
 //  SequencerPage.h
 //  Sequencer
 //
-//  Created by Mark Wheeler on 17/04/2013.
+//  Created by Mark Wheeler on 25/04/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Sequencer, SequencerPattern, SequencerPatternRef, SequencerRowPitch;
+@class Sequencer, SequencerPattern, SequencerPatternIdInPlaylist, SequencerRowPitch;
 
 @interface SequencerPage : NSManagedObject
 
@@ -56,14 +56,14 @@
 - (void)removePitchesObject:(SequencerRowPitch *)value;
 - (void)addPitches:(NSOrderedSet *)values;
 - (void)removePitches:(NSOrderedSet *)values;
-- (void)insertObject:(SequencerPatternRef *)value inPlaylistAtIndex:(NSUInteger)idx;
+- (void)insertObject:(SequencerPatternIdInPlaylist *)value inPlaylistAtIndex:(NSUInteger)idx;
 - (void)removeObjectFromPlaylistAtIndex:(NSUInteger)idx;
 - (void)insertPlaylist:(NSArray *)value atIndexes:(NSIndexSet *)indexes;
 - (void)removePlaylistAtIndexes:(NSIndexSet *)indexes;
-- (void)replaceObjectInPlaylistAtIndex:(NSUInteger)idx withObject:(SequencerPatternRef *)value;
+- (void)replaceObjectInPlaylistAtIndex:(NSUInteger)idx withObject:(SequencerPatternIdInPlaylist *)value;
 - (void)replacePlaylistAtIndexes:(NSIndexSet *)indexes withPlaylist:(NSArray *)values;
-- (void)addPlaylistObject:(SequencerPatternRef *)value;
-- (void)removePlaylistObject:(SequencerPatternRef *)value;
+- (void)addPlaylistObject:(SequencerPatternIdInPlaylist *)value;
+- (void)removePlaylistObject:(SequencerPatternIdInPlaylist *)value;
 - (void)addPlaylist:(NSOrderedSet *)values;
 - (void)removePlaylist:(NSOrderedSet *)values;
 @end

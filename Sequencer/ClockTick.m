@@ -140,6 +140,8 @@ typedef enum EatsStepAdvance {
         [_activeNotes removeObjectsInArray:toRemove];
         
         
+        // TODO probably need to fetch or refresh MOs here
+                
         // Update the current step for each page and send new notes
         
         for(SequencerPage *page in _sequencer.pages) {
