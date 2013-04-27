@@ -13,6 +13,8 @@
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
+#import "SequencerState.h"
+#import "SequencerPageState.h"
 
 
 #define PLAYHEAD_BRIGHTNESS 8
@@ -23,6 +25,7 @@
 @interface EatsGridPatternView ()
 
 @property Preferences           *sharedPreferences;
+@property SequencerState        *sharedSequencerState;
 
 @property NSDictionary          *lastReleasedKey;
 
@@ -38,6 +41,7 @@
     self = [super init];
     if (self) {
         _sharedPreferences = [Preferences sharedPreferences];
+        _sharedSequencerState = [SequencerState sharedSequencerState];
         
         _playheadBrightness = PLAYHEAD_BRIGHTNESS;
         _nextStepBrightness = NEXT_STEP_BRIGHTNESS;
@@ -54,14 +58,16 @@
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    
     // Generate the columns with playhead and flashing nextStep
     for(uint x = 0; x < self.width; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            if( _pattern.inPage.currentPatternId == _pattern.id && x == _pattern.inPage.currentStep.intValue )
+            if( pageState.currentPatternId.intValue == _pattern.id.intValue && x == pageState.currentStep.intValue )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
-            else if( _pattern.inPage.nextStep && x == _pattern.inPage.nextStep.intValue )
+            else if( pageState.nextStep && x == pageState.nextStep.intValue )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -110,7 +116,7 @@
                 length = self.width - 1;
 
             for( int i = 0; i < length; i++ ) {
-                if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                if( pageState.playMode == EatsSequencerPlayMode_Reverse )
                     tailDraw --;
                 else
                     tailDraw ++;

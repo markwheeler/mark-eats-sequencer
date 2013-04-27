@@ -24,6 +24,8 @@
 #define MIN_QUANTIZATION 64
 #define MAX_QUANTIZATION 1
 
+#define SEQUENCER_PAGES 8
+
 @property EatsClock                     *clock;
 @property ClockTick                     *clockTick;
 @property EatsGridNavigationController  *gridNavigationController;
@@ -75,6 +77,7 @@
 - (void) setCurrentPage:(SequencerPage *)currentPage
 {
     _currentPage = currentPage;
+    _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:currentPage.id.unsignedIntegerValue];
     self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@", currentPage];
     self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self == %@", currentPage];
     [self updateSequencerPageUI];
@@ -128,7 +131,7 @@
     [self.sequencer removeObserver:self forKeyPath:@"bpm"];
     [self.sequencer removeObserver:self forKeyPath:@"stepQuantization"];
     [self.sequencer removeObserver:self forKeyPath:@"patternQuantization"];
-    [self.currentPage removeObserver:self forKeyPath:@"currentPatternId"];
+    [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     [self.currentPage removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPage removeObserver:self forKeyPath:@"swing"];
 }
@@ -159,9 +162,16 @@
         self.sequencer = [matches lastObject];
     } else {
         // Create initial structure
-        self.sequencer = [Sequencer sequencerWithPages:8 inManagedObjectContext:self.managedObjectContext];
+        self.sequencer = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContext];
         
         [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
+    }
+    
+    // Setup the SequencerState
+    SequencerState *sequencerState = [SequencerState sharedSequencerState];
+    [sequencerState createPageStates:SEQUENCER_PAGES];
+    for( SequencerPage *page in self.sequencer.pages ) {
+        [[sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
     }
     
     // Setup UI
@@ -169,7 +179,7 @@
     
     // Set the current page to the first one
     self.currentPage = [self.sequencer.pages objectAtIndex:0];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(windowDidBecomeMain:)
                                                  name:NSWindowDidBecomeMainNotification
@@ -205,7 +215,7 @@
     [self.sequencer addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencer addObserver:self forKeyPath:@"stepQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencer addObserver:self forKeyPath:@"patternQuantization" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.currentPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPage addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
@@ -354,7 +364,7 @@
 
 - (void) updateCurrentPattern
 {
-    [self.currentPatternSegmentedControl setSelectedSegment:_currentPage.currentPatternId.integerValue];
+    [self.currentPatternSegmentedControl setSelectedSegment:_currentSequencerPageState.currentPatternId.integerValue];
 }
 
 - (void) updateStepLengthPopup
@@ -386,7 +396,7 @@
         [self updateStepQuantizationPopup];
     else if ( object == self.sequencer && [keyPath isEqual:@"patternQuantization"] )
         [self updatePatternQuantizationPopup];
-    else if ( object == self.currentPage && [keyPath isEqual:@"currentPatternId"] )
+    else if ( object == self.currentSequencerPageState && [keyPath isEqual:@"currentPatternId"] )
         [self updateCurrentPattern];
     else if ( object == self.currentPage && [keyPath isEqual:@"stepLength"] )
         [self updateStepLengthPopup];
@@ -445,14 +455,15 @@
             page.loopStart = [NSNumber numberWithInt:0];
             page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
         }
-        if( page.currentStep.intValue >= self.sharedPreferences.gridWidth )
-            page.currentStep = [page.loopEnd copy];
-        if( page.nextStep.intValue >= self.sharedPreferences.gridWidth )
-            page.nextStep = nil;
-        if( page.currentPatternId.intValue >= self.sharedPreferences.gridWidth )
-            page.currentPatternId = [NSNumber numberWithInt:0];
-        if( page.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
-            page.nextPatternId = nil;
+        
+        if( self.currentSequencerPageState.currentStep.intValue >= self.sharedPreferences.gridWidth )
+            self.currentSequencerPageState.currentStep = [page.loopEnd copy];
+        if( self.currentSequencerPageState.nextStep.intValue >= self.sharedPreferences.gridWidth )
+            self.currentSequencerPageState.nextStep = nil;
+        if( self.currentSequencerPageState.currentPatternId.intValue >= self.sharedPreferences.gridWidth )
+            self.currentSequencerPageState.currentPatternId = [NSNumber numberWithInt:0];
+        if( self.currentSequencerPageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
+            self.currentSequencerPageState.nextPatternId = nil;
     }
     
     if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
@@ -552,11 +563,11 @@
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
 {
-    [self.currentPage removeObserver:self forKeyPath:@"currentPatternId"];
+    [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     
     self.currentPage = [self.sequencer.pages objectAtIndex:sender.selectedSegment];
     
-    [self.currentPage addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (IBAction) editLabelButton:(NSButton *)sender
@@ -578,34 +589,30 @@
 
 - (IBAction)currentPatternSegmentedControl:(NSSegmentedControl *)sender
 {
-    _currentPage.nextPatternId = [NSNumber numberWithInteger:sender.selectedSegment];
-    [sender setSelectedSegment:_currentPage.currentPatternId.integerValue];
+    self.currentSequencerPageState.nextPatternId = [NSNumber numberWithInteger:sender.selectedSegment];
+    [sender setSelectedSegment:self.currentSequencerPageState.currentPatternId.integerValue];
 }
 
 - (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
 {
     // Pause
     if( sender.selectedSegment == 0 ) {
-        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-        self.currentPage.nextStep = nil;
+        self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
         
     // Forward
     } else if( sender.selectedSegment == 1 ) {
-        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-        self.currentPage.nextStep = nil;
+        self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
         
     // Reverse
     } else if( sender.selectedSegment == 2 ) {
-        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
-        self.currentPage.nextStep = nil;
+        self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
         
     // Random
     } else if( sender.selectedSegment == 3 ) {
-        //self.currentPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
-        self.currentPage.nextStep = nil;
+        self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
     }
 }

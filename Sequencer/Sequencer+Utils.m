@@ -10,7 +10,7 @@
 #import "SequencerPage.h"
 #import "SequencerRowPitch.h"
 #import "SequencerPattern.h"
-#import "SequencerPatternRef.h"
+#import "SequencerPatternIdInPlaylist.h"
 #import "SequencerNote.h"
 #import "WMPool+Utils.h"
 
@@ -39,7 +39,6 @@
         else
             page.name = [NSString stringWithFormat:@"Page %i", i + 1];
         page.loopEnd = [NSNumber numberWithUnsignedInt: 31];
-        page.currentStep = [page.loopEnd copy];
         
         // Create the default pitches
         // TODO Make these line up better with the grid (tonic note on last row?)

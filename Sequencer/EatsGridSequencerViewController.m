@@ -11,6 +11,8 @@
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
+#import "SequencerState.h"
+#import "SequencerPageState.h"
 
 #define ANIMATION_FRAMERATE 15
 #define NOTE_EDIT_FADE_AMOUNT 6
@@ -19,6 +21,7 @@
 @interface EatsGridSequencerViewController ()
 
 @property SequencerPattern              *pattern;
+@property SequencerState                *sharedSequencerState;
 @property SequencerNote                 *activeEditNote;
 @property NSMutableArray                *lastTwoPresses;
 @property uint                          lastX;
@@ -39,6 +42,7 @@
 {
     _lastTwoPresses = [NSMutableArray arrayWithCapacity:2];
     
+    _sharedSequencerState = [SequencerState sharedSequencerState];
     _pattern = [self.delegate valueForKey:@"currentPattern"];
     
     // Create the sub views
@@ -262,7 +266,9 @@
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
     noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y + 32 - self.height];
     
-    BOOL sortDirection = ( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    
+    BOOL sortDirection = ( pageState.playMode == EatsSequencerPlayMode_Reverse ) ? NO : YES;
     noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
     
     NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
@@ -272,7 +278,7 @@
         int endPoint;
         
         // When in reverse
-        if( _pattern.inPage.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+        if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
             endPoint = note.step.intValue - note.length.intValue + 1;
             
             // If it's wrapping

@@ -8,13 +8,6 @@
 
 #import "Sequencer.h"
 
-typedef enum EatsSequencerPlayMode {
-    EatsSequencerPlayMode_Pause,
-    EatsSequencerPlayMode_Forward,
-    EatsSequencerPlayMode_Reverse,
-    EatsSequencerPlayMode_Random
-} EatsSequencerPlayMode;
-
 @interface Sequencer (Utils)
 
 + (Sequencer *) sequencerWithPages:(uint)numberOfPages

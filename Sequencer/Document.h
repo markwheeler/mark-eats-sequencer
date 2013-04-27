@@ -12,18 +12,22 @@
 #import "SequencerRowPitch.h"
 #import "SequencerPattern.h"
 #import "SequencerNote.h"
-#import "SequencerPatternRef.h"
+#import "SequencerPatternIdInPlaylist.h"
 #import "EatsClock.h"
 #import "ClockTick.h"
 #import "Preferences.h"
+#import "SequencerState.h"
+#import "SequencerPageState.h"
 
 @interface Document : NSPersistentDocument <ClockTickDelegateProtocol>
 
-@property Sequencer         *sequencer;
-@property SequencerPage     *currentPage;
-@property BOOL              isActive;
+@property Sequencer             *sequencer;
+@property SequencerPage         *currentPage;
+@property SequencerPageState    *currentSequencerPageState;
 
-@property Preferences                   *sharedPreferences;
+@property BOOL                  isActive;
+
+@property Preferences           *sharedPreferences;
 
 - (void) updateUI;
 

@@ -12,6 +12,8 @@
 #import "Sequencer+Utils.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
+#import "SequencerState.h"
+#import "SequencerPageState.h"
 #import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
@@ -21,6 +23,7 @@
 
 @property Sequencer                         *sequencer;
 @property SequencerPattern                  *pattern;
+@property SequencerState                    *sharedSequencerState;
 @property Preferences                       *sharedPreferences;
 
 @property EatsGridLoopBraceView             *loopBraceView;
@@ -54,6 +57,7 @@
 {
     // Get the sequencer
     _sequencer = [self.delegate valueForKey:@"sequencer"];
+    _sharedSequencerState = [SequencerState sharedSequencerState];
     
     // Get the pattern
     _pattern = [self.delegate valueForKey:@"currentPattern"];
@@ -164,9 +168,8 @@
     [self setActivePageButton];
     [self setPatternButtonState];
     
-    // Make the correct playMode button active and listen for changes to keep it correct
-    [self setPlayMode:[_pattern.inPage.playMode intValue]];
-    //[_pattern.inPage addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
+    // Make the correct playMode button active
+    [self setPlayMode:[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode]];
     
     // Add everything to sub views
     self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
@@ -185,8 +188,6 @@
 
 - (void) dealloc
 {
-    //[_pattern.inPage removeObserver:self forKeyPath:@"playMode"];
-    
     if( _animationTimer )
         [_animationTimer invalidate];
     
@@ -217,7 +218,7 @@
     _patternView.pattern = _pattern;
     
     // Set buttons etc
-    [self setPlayMode:_pattern.inPage.playMode.intValue];
+    [self setPlayMode:[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode]];
     [self setActivePageButton];
     [self setPatternButtonState];
     _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
@@ -255,29 +256,21 @@
 {
     // TODO put a dim light if there are notes in the pattern
 
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    
     uint i = 0;
     for ( EatsGridButtonView *button in _patternButtons ) {
-        if( i == _pattern.inPage.currentPatternId.intValue )
+        if( i == pageState.currentPatternId.intValue )
             button.buttonState = EatsButtonViewState_Active;
         else
             button.buttonState = EatsButtonViewState_Inactive;
         
-        if( i == _pattern.inPage.nextPatternId.intValue && _pattern.inPage.nextPatternId )
+        if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
             button.inactiveBrightness = 8;
         else
             button.inactiveBrightness = 0;
         i++;
     }
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context
-{
-    
-    if ( [keyPath isEqual:@"playMode"] )
-        [self setPlayMode:[[change valueForKey:@"new"] intValue]];
 }
 
 - (void) animateIn:(NSTimer *)timer
@@ -444,6 +437,8 @@
 
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender
 {
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    
     BOOL buttonDown = [down boolValue];
     
     // Page buttons
@@ -460,7 +455,7 @@
     if ( [_patternButtons containsObject:sender] ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _pattern.inPage.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]];
+            pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]];
             
         } else {
             sender.buttonState = EatsButtonViewState_Inactive;
@@ -471,8 +466,8 @@
     if( sender == _pauseButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-            _pattern.inPage.nextStep = nil;
+            pageState.playMode = EatsSequencerPlayMode_Pause;
+            pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Pause];
         }
         
@@ -480,8 +475,8 @@
     } else if( sender == _forwardButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-            _pattern.inPage.nextStep = nil;
+            pageState.playMode = EatsSequencerPlayMode_Forward;
+            pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Forward];
         }
         
@@ -489,8 +484,8 @@
     } else if( sender == _reverseButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
-            _pattern.inPage.nextStep = nil;
+            pageState.playMode = EatsSequencerPlayMode_Reverse;
+            pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Reverse];
         }
         
@@ -498,8 +493,8 @@
     } else if( sender == _randomButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
-            _pattern.inPage.nextStep = nil;
+            pageState.playMode = EatsSequencerPlayMode_Random;
+            pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Random];
         }
         
@@ -604,11 +599,13 @@
     uint x = [[xyDown valueForKey:@"x"] unsignedIntValue];
     BOOL down = [[xyDown valueForKey:@"down"] boolValue];
     
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    
     if( down ) {
         // Scrub the loop
-        _pattern.inPage.nextStep = [NSNumber numberWithUnsignedInt:x];
-        if( [_pattern.inPage.playMode intValue] == EatsSequencerPlayMode_Pause )
-            _pattern.inPage.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+        pageState.nextStep = [NSNumber numberWithUnsignedInt:x];
+        if( pageState.playMode == EatsSequencerPlayMode_Pause )
+            pageState.playMode = EatsSequencerPlayMode_Forward;
         [self updateView];
     }
 }
