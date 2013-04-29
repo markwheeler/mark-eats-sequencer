@@ -156,7 +156,7 @@ typedef enum EatsStepAdvance {
             EatsStepAdvance needsToAdvance = [self needToAdvanceStep:page];
             
             // If we need to advance and it's not paused
-            if( needsToAdvance != EatsStepAdvance_None && pageState.playMode != EatsSequencerPlayMode_Pause ) {
+            if( needsToAdvance != EatsStepAdvance_None && pageState.playMode.intValue != EatsSequencerPlayMode_Pause ) {
                 
                 // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                 //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
@@ -172,7 +172,7 @@ typedef enum EatsStepAdvance {
                     int playNow = pageState.currentStep.intValue;
                     
                     // Forward
-                    if( pageState.playMode == EatsSequencerPlayMode_Forward ) {
+                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Forward ) {
                         playNow ++;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
                             if( ( pageState.inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue )
@@ -188,7 +188,7 @@ typedef enum EatsStepAdvance {
                             playNow = 0;
                         
                     // Reverse
-                    } else if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
+                    } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( page.loopStart.intValue <= page.loopEnd.intValue ) {
                             if( ( pageState.inLoop || _sharedPreferences.loopFromScrubArea ) && playNow < page.loopStart.intValue )
@@ -204,7 +204,7 @@ typedef enum EatsStepAdvance {
                             playNow = _sharedPreferences.gridWidth - 1;
                         
                     // Random
-                    } else if( pageState.playMode == EatsSequencerPlayMode_Random ) {
+                    } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Random ) {
                         playNow = [Sequencer randomStepForPage:page ofWidth:_sharedPreferences.gridWidth];
                     }
                     
@@ -260,10 +260,10 @@ typedef enum EatsStepAdvance {
                         uint64_t nsSwing = 0;
                         
                         // We only add swing and velocity groove when playing forward or reverse
-                        if( pageState.playMode == EatsSequencerPlayMode_Forward || pageState.playMode == EatsSequencerPlayMode_Reverse ) {
+                        if( pageState.playMode.intValue== EatsSequencerPlayMode_Forward || pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
                             
                             // Reverse position if we're playing in reverse
-                            if( pageState.playMode == EatsSequencerPlayMode_Reverse )
+                            if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
                                 position = _minQuantization - 1 - position;
                             
                             //NSLog(@"Note position: %u", position);
@@ -402,13 +402,13 @@ typedef enum EatsStepAdvance {
         uint64_t nsSwing = 0;
         
         // We only add swing when playing forward or reverse
-        if( pageState.playMode == EatsSequencerPlayMode_Forward || pageState.playMode == EatsSequencerPlayMode_Reverse ) {
+        if( pageState.playMode.intValue == EatsSequencerPlayMode_Forward || pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
             
             // Position of note in the loop 0 - minQuantization
             uint position = ( pageState.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
             
             // Reverse position if we're playing in reverse
-            if( pageState.playMode == EatsSequencerPlayMode_Reverse )
+            if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
                 position = _minQuantization - 1 - position;
             
             nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position

@@ -76,10 +76,17 @@
 
 - (void) setCurrentPage:(SequencerPage *)currentPage
 {
+    [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
+    [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
+    
     _currentPage = currentPage;
     _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:currentPage.id.unsignedIntegerValue];
     self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@", currentPage];
     self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self == %@", currentPage];
+    
+    [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
+    
     [self updateSequencerPageUI];
 }
 
@@ -132,6 +139,7 @@
     [self.sequencer removeObserver:self forKeyPath:@"stepQuantization"];
     [self.sequencer removeObserver:self forKeyPath:@"patternQuantization"];
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
+    [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
     [self.currentPage removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPage removeObserver:self forKeyPath:@"swing"];
 }
@@ -216,6 +224,7 @@
     [self.sequencer addObserver:self forKeyPath:@"stepQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencer addObserver:self forKeyPath:@"patternQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPage addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
@@ -340,6 +349,7 @@
     [self updateStepLengthPopup];
     [self updateSwingPopup];
     [self updateCurrentPattern];
+    [self updatePlayMode];
 }
 
 - (void) updateClockBPM
@@ -365,6 +375,11 @@
 - (void) updateCurrentPattern
 {
     [self.currentPatternSegmentedControl setSelectedSegment:_currentSequencerPageState.currentPatternId.integerValue];
+}
+
+- (void) updatePlayMode
+{
+    self.pagePlaybackControls.selectedSegment = self.currentSequencerPageState.playMode.integerValue;
 }
 
 - (void) updateStepLengthPopup
@@ -398,6 +413,8 @@
         [self updatePatternQuantizationPopup];
     else if ( object == self.currentSequencerPageState && [keyPath isEqual:@"currentPatternId"] )
         [self updateCurrentPattern];
+    else if ( object == self.currentSequencerPageState && [keyPath isEqual:@"playMode"] )
+        [self updatePlayMode];
     else if ( object == self.currentPage && [keyPath isEqual:@"stepLength"] )
         [self updateStepLengthPopup];
     else if ( object == self.currentPage && [keyPath isEqual:@"swing"] )
@@ -563,11 +580,7 @@
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
 {
-    [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
-    
     self.currentPage = [self.sequencer.pages objectAtIndex:sender.selectedSegment];
-    
-    [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (IBAction) editLabelButton:(NSButton *)sender
@@ -595,23 +608,25 @@
 
 - (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
 {
+    self.currentSequencerPageState.playMode = [NSNumber numberWithInteger:sender.selectedSegment];
+    
     // Pause
-    if( sender.selectedSegment == 0 ) {
+    if( sender.selectedSegment == EatsSequencerPlayMode_Pause ) {
         self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
         
     // Forward
-    } else if( sender.selectedSegment == 1 ) {
+    } else if( sender.selectedSegment == EatsSequencerPlayMode_Forward ) {
         self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
         
     // Reverse
-    } else if( sender.selectedSegment == 2 ) {
+    } else if( sender.selectedSegment == EatsSequencerPlayMode_Reverse ) {
         self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
         
     // Random
-    } else if( sender.selectedSegment == 3 ) {
+    } else if( sender.selectedSegment == EatsSequencerPlayMode_Random ) {
         self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
     }
@@ -677,5 +692,9 @@
     self.currentPage.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
 }
 
+- (IBAction)testButton:(id)sender
+{
+    NSLog(@"playMode is %@", self.currentSequencerPageState.playMode);
+}
 
 @end

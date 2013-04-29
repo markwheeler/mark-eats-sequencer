@@ -116,7 +116,7 @@
                 length = self.width - 1;
 
             for( int i = 0; i < length; i++ ) {
-                if( pageState.playMode == EatsSequencerPlayMode_Reverse )
+                if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
                     tailDraw --;
                 else
                     tailDraw ++;

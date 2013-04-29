@@ -26,6 +26,7 @@
     NSMutableArray *pages = [NSMutableArray arrayWithCapacity:numberOfPages];
     for( int i = 0; i < numberOfPages; i++ ) {
         SequencerPageState *pageState = [[SequencerPageState alloc] init];
+        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
         [pages addObject:pageState];
     }
     self.pageStates = [NSArray arrayWithArray:pages];

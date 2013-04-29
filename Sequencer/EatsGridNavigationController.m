@@ -59,7 +59,6 @@
         
         // Set the page and keep an eye on pattern changes
         [self setNewPageId:0];
-        [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 
     }
     return self;
@@ -151,7 +150,7 @@
 }
 
 - (void) updatePattern
-{
+{   
     [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     
     SequencerPage *page = _currentPattern.inPage;
@@ -164,8 +163,8 @@
                       ofObject:(id)object
                         change:(NSDictionary *)change
                        context:(void *)context {
-    
-    if ( object == _currentPattern.inPage && [keyPath isEqual:@"currentPatternId"] ) {
+
+    if ( object == _currentSequencerPageState && [keyPath isEqual:@"currentPatternId"] ) {
         [self performSelectorOnMainThread:@selector(updatePattern) withObject:nil waitUntilDone:NO];
     }
 }

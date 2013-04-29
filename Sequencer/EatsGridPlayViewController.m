@@ -169,7 +169,7 @@
     [self setPatternButtonState];
     
     // Make the correct playMode button active
-    [self setPlayMode:[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode]];
+    [self setPlayMode:[[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode] intValue]];
     
     // Add everything to sub views
     self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
@@ -218,7 +218,7 @@
     _patternView.pattern = _pattern;
     
     // Set buttons etc
-    [self setPlayMode:[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode]];
+    [self setPlayMode:[[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode] intValue]];
     [self setActivePageButton];
     [self setPatternButtonState];
     _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
@@ -466,7 +466,7 @@
     if( sender == _pauseButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            pageState.playMode = EatsSequencerPlayMode_Pause;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
             pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Pause];
         }
@@ -475,7 +475,7 @@
     } else if( sender == _forwardButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            pageState.playMode = EatsSequencerPlayMode_Forward;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
             pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Forward];
         }
@@ -484,7 +484,7 @@
     } else if( sender == _reverseButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            pageState.playMode = EatsSequencerPlayMode_Reverse;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
             pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Reverse];
         }
@@ -493,7 +493,7 @@
     } else if( sender == _randomButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
-            pageState.playMode = EatsSequencerPlayMode_Random;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
             pageState.nextStep = nil;
             [self setPlayMode:EatsSequencerPlayMode_Random];
         }
@@ -604,8 +604,8 @@
     if( down ) {
         // Scrub the loop
         pageState.nextStep = [NSNumber numberWithUnsignedInt:x];
-        if( pageState.playMode == EatsSequencerPlayMode_Pause )
-            pageState.playMode = EatsSequencerPlayMode_Forward;
+        if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause )
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
         [self updateView];
     }
 }

@@ -24,6 +24,6 @@ typedef enum EatsSequencerPlayMode {
 @property NSNumber              *nextStep;
 @property BOOL                  inLoop;
 
-@property EatsSequencerPlayMode playMode;
+@property NSNumber              *playMode;
 
 @end

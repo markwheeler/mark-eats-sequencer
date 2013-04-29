@@ -268,7 +268,7 @@
     
     SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
-    BOOL sortDirection = ( pageState.playMode == EatsSequencerPlayMode_Reverse ) ? NO : YES;
+    BOOL sortDirection = ( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
     noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
     
     NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:nil];
@@ -278,7 +278,7 @@
         int endPoint;
         
         // When in reverse
-        if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
+        if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
             endPoint = note.step.intValue - note.length.intValue + 1;
             
             // If it's wrapping
