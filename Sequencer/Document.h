@@ -30,5 +30,7 @@
 @property Preferences           *sharedPreferences;
 
 - (void) updateUI;
+- (void) clearPatternStartAlert;
+- (void) clearPattern;
 
 @end

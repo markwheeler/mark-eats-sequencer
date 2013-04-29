@@ -35,6 +35,7 @@
 @property NSArray                       *swingArray;
 
 @property NSAlert                       *notesOutsideGridAlert;
+@property NSAlert                       *clearPatternAlert;
 @property BOOL                          checkedForThingsOutsideGrid;
 
 @property (weak) IBOutlet NSWindow              *documentWindow;
@@ -308,6 +309,31 @@
     [self.gridNavigationController updateGridView];
 }
 
+- (void) clearPatternStartAlert
+{
+    self.clearPatternAlert = [NSAlert alertWithMessageText:@"Clear current pattern?"
+                                                 defaultButton:@"Clear"
+                                               alternateButton:@"Cancel"
+                                                   otherButton:nil
+                                     informativeTextWithFormat:@""];
+    
+    [self.clearPatternAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(clearPatternAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+}
+
+- (void) clearPatternAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    if( returnCode == NSOKButton )
+        [self clearPattern];
+    self.clearPatternAlert = nil;
+}
+
+- (void) clearPattern
+{
+    NSLog(@"Clear pattern");
+    
+    // TODO clear pattern
+}
+
 
 #pragma mark - Setup and update UI
 
@@ -498,10 +524,10 @@
 
     if( [noteMatches count] && !self.notesOutsideGridAlert ) {
          self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
-                                         defaultButton:@"Leave notes"
-                                       alternateButton:@"Remove notes"
-                                           otherButton:nil
-                             informativeTextWithFormat:@"Would you like to remove these %lu notes?", [noteMatches count]];
+                                                      defaultButton:@"Leave notes"
+                                                    alternateButton:@"Remove notes"
+                                                        otherButton:nil
+                                          informativeTextWithFormat:@"Would you like to remove these %lu notes?", [noteMatches count]];
         
         [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
     }
@@ -690,11 +716,6 @@
     
     self.currentPage.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
     self.currentPage.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
-}
-
-- (IBAction)testButton:(id)sender
-{
-    NSLog(@"playMode is %@", self.currentSequencerPageState.playMode);
 }
 
 @end

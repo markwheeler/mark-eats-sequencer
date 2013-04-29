@@ -60,12 +60,14 @@
     
     SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
-    // Generate the columns with playhead and flashing nextStep
+    // Generate the columns with playhead and nextStep
     for(uint x = 0; x < self.width; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
-            if( pageState.currentPatternId.intValue == _pattern.id.intValue && x == pageState.currentStep.intValue )
+            if( self.width * _wipe / 100 >= x + 1 )
+                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:15 * self.opacity] atIndex:y];
+            else if( pageState.currentPatternId.intValue == _pattern.id.intValue && x == pageState.currentStep.intValue )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
             else if( pageState.nextStep && x == pageState.nextStep.intValue )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];

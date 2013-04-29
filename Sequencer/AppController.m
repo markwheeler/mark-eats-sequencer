@@ -10,6 +10,7 @@
 #import "Preferences.h"
 #import "EatsExternalClockCalculator.h"
 #import "EatsMonome.h"
+#import "EatsDocumentController.h"
 
 @interface AppController()
 
@@ -348,9 +349,14 @@
 
 #pragma mark - Interface actions
 
-- (IBAction)PreferencesMenuItem:(NSMenuItem *)sender {
+- (IBAction) PreferencesMenuItem:(NSMenuItem *)sender {
     [self.preferencesController showWindow:self];
 }
 
+- (IBAction) clearMenuItem:(NSMenuItem *)sender
+{
+    EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
+    [documentController.currentDocument clearPatternStartAlert];
+}
 
 @end

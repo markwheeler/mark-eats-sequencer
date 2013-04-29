@@ -44,6 +44,7 @@
 @property EatsGridButtonView                *exitButton;
 
 @property NSTimer                           *bpmRepeatTimer;
+@property NSTimer                           *clearTimer;
 
 @property NSTimer                           *animationTimer;
 @property uint                              animationFrame;
@@ -431,6 +432,28 @@
     _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
 }
 
+- (void) clearIncrement:(NSTimer *)timer
+{
+    if( _patternView.wipe >= 100 ) {
+        [self stopClear];
+        NSLog(@"TODO: Clear pattern");
+        // TODO: Link this back to the document method to avoid doubling up? Or create a method in Sequencer that clears?
+        
+    } else {
+        _patternView.wipe = _patternView.wipe + 10;
+    }
+    
+    [self updateView];
+}
+
+- (void) stopClear
+{
+    [_clearTimer invalidate];
+    _clearTimer = nil;
+    _patternView.wipe = 0;
+    _clearButton.buttonState = EatsButtonViewState_Inactive;
+}
+
 
 
 #pragma mark - Sub view delegate methods
@@ -560,13 +583,26 @@
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         
-    // TODO: Clear button
+    // Clear button
     } else if( sender == _clearButton ) {
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
+            
+            _clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                                           target:self
+                                                         selector:@selector(clearIncrement:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+            NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+            
+            // Make sure we fire even when the UI is tracking mouse down stuff
+            [runloop addTimer:_clearTimer forMode: NSRunLoopCommonModes];
+            [runloop addTimer:_clearTimer forMode: NSEventTrackingRunLoopMode];
+            
         } else {
-            NSLog(@"Clear pattern");
             sender.buttonState = EatsButtonViewState_Inactive;
+            
+            [self stopClear];
         }
         
     // Exit button
@@ -574,6 +610,9 @@
         if ( buttonDown ) {
             sender.buttonState = EatsButtonViewState_Down;
         } else {
+            
+            if( _clearTimer )
+                [self stopClear];
             
             // Start animateOut
             [self animateIncrement:-1];
