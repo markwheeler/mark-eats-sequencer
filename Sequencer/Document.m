@@ -108,6 +108,15 @@
 
         self.isActive = NO;
         
+        // Replace the NSPersistentDocument's MOC with a new one that can be used as a parent
+        NSManagedObjectContext *parentMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        parentMOC.persistentStoreCoordinator = self.managedObjectContext.persistentStoreCoordinator;
+        self.managedObjectContext = parentMOC;
+        
+        // Create a child MOC with a private queue for use in background threads etc
+        self.childManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+        self.childManagedObjectContext.parentContext = self.managedObjectContext;
+        
         self.sharedPreferences = [Preferences sharedPreferences];
         
         // Create the quantization settings
@@ -157,31 +166,31 @@
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     
-    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
-    
     // Setup the Core Data object
-    NSError *requestError = nil;
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-    NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-    
-    if([matches count]) {
-        self.sequencer = [matches lastObject];
-    } else {
-        // Create initial structure
-        self.sequencer = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContext];
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
         
-        [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
-    }
-    
-    // Setup the SequencerState
-    SequencerState *sequencerState = [SequencerState sharedSequencerState];
-    [sequencerState createPageStates:SEQUENCER_PAGES];
-    for( SequencerPage *page in self.sequencer.pages ) {
-        [[sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
-    }
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        if( [matches count] ) {
+            self.sequencer = [matches lastObject];
+        } else {
+            // Create initial structure
+            self.sequencer = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContext];
+            
+            [Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
+        }
+        
+        // Setup the SequencerState
+        SequencerState *sequencerState = [SequencerState sharedSequencerState];
+        [sequencerState createPageStates:SEQUENCER_PAGES];
+        for( SequencerPage *page in self.sequencer.pages ) {
+            [[sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
+        }
+    }];
     
     // Setup UI
     [self setupUI];
@@ -207,7 +216,7 @@
     self.clockTick.midiClockPPQN = MIDI_CLOCK_PPQN;
     self.clockTick.minQuantization = MIN_QUANTIZATION;
     self.clockTick.qnPerMeasure = QN_PER_MEASURE;
-    self.clockTick.sequencer = self.sequencer;
+    self.clockTick.managedObjectContext = self.childManagedObjectContext;
     
     self.clock = [[EatsClock alloc] init];
     self.clock.delegate = self.clockTick;
@@ -230,7 +239,7 @@
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencer:self.sequencer];
+    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
@@ -512,25 +521,26 @@
     if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
     
     // Get the notes
-    NSError *requestError = nil;
-    
-    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row < %u)", self.sharedPreferences.gridWidth, 32 - self.sharedPreferences.gridHeight];
-    
-    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-
-    if( [noteMatches count] && !self.notesOutsideGridAlert ) {
-         self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
-                                                      defaultButton:@"Leave notes"
-                                                    alternateButton:@"Remove notes"
-                                                        otherButton:nil
-                                          informativeTextWithFormat:@"Would you like to remove these %lu notes?", [noteMatches count]];
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        NSError *requestError = nil;
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row < %u)", self.sharedPreferences.gridWidth, 32 - self.sharedPreferences.gridHeight];
         
-        [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
-    }
+        NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+
+        if( count > 0 && !self.notesOutsideGridAlert ) {
+             self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
+                                                          defaultButton:@"Leave notes"
+                                                        alternateButton:@"Remove notes"
+                                                            otherButton:nil
+                                              informativeTextWithFormat:@"Would you like to remove these %lu notes?", count];
+            
+            [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+        }
+    }];
 }
 
 - (void) updateInterfaceToMatchGridSize
