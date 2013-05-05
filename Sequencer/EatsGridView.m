@@ -58,7 +58,8 @@
     // Over-ride this
     
     // Generate and combine all the sub views
-    NSArray *gridArray = [EatsGridUtils combineSubViews:_subViews gridWidth:_width gridHeight:_height];
+
+    NSArray *gridArray = [EatsGridUtils combineSubViews:subViewsCopy gridWidth:_width gridHeight:_height];
     
     // Send msg to delegate
     if([_delegate respondsToSelector:@selector(updateGridWithArray:)])

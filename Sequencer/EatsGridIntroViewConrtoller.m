@@ -189,18 +189,20 @@
 
 - (void) startAnimation
 {
-    [_animationTimer invalidate];
-    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / FRAMERATE
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        
+        [_animationTimer invalidate];
+        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / FRAMERATE
                                                            target:self
                                                          selector:@selector(updateAnimation:)
                                                          userInfo:nil
                                                           repeats:YES];
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-    
-    // Make sure we fire even when the UI is tracking mouse down stuff
-    [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-    [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
-
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        
+        // Make sure we fire even when the UI is tracking mouse down stuff
+        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
+    });
 }
 
 - (void) gridInput:(NSNotification *)notification
