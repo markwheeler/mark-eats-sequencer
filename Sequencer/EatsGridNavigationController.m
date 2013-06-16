@@ -157,7 +157,7 @@
 {
     [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         SequencerPage *page = [_sequencer.pages objectAtIndex:pageId.unsignedIntegerValue];
         _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:pageId.unsignedIntegerValue];
         _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
@@ -168,7 +168,7 @@
 
 - (void) updatePattern
 {
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         SequencerPage *page = _currentPattern.inPage;
         _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
     }];
