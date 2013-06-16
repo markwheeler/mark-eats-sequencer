@@ -28,11 +28,11 @@
 @property int           minQuantization;
 @property uint          qnPerMeasure;
 
+@property NSManagedObjectContext *managedObjectContext;
+
 - (void) clockSongStart:(uint64_t)ns;
 - (void) clockSongStop:(uint64_t)ns;
 - (void) clockTick:(uint64_t)ns;
 - (void) clockLateBy:(uint64_t)ns;
-
-@property (weak) Sequencer *sequencer;
 
 @end

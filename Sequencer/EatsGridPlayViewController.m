@@ -21,8 +21,6 @@
 
 @interface EatsGridPlayViewController ()
 
-@property Sequencer                         *sequencer;
-@property SequencerPattern                  *pattern;
 @property SequencerState                    *sharedSequencerState;
 @property Preferences                       *sharedPreferences;
 
@@ -56,12 +54,7 @@
 
 - (void) setupView
 {
-    // Get the sequencer
-    _sequencer = [self.delegate valueForKey:@"sequencer"];
     _sharedSequencerState = [SequencerState sharedSequencerState];
-    
-    // Get the pattern
-    _pattern = [self.delegate valueForKey:@"currentPattern"];
     
     // Get prefs
     _sharedPreferences = [Preferences sharedPreferences];
@@ -150,19 +143,19 @@
     _loopBraceView.height = 1;
     _loopBraceView.fillBar = YES;
     _loopBraceView.visible = NO;
-    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
-    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopEnd.intValue width:self.width];
+    [self setLoopBraceViewStartAndEnd];
     
     // Pattern view
     _patternView = [[EatsGridPatternView alloc] init];
     _patternView.delegate = self;
+    _patternView.managedObjectContext = self.managedObjectContext;
     _patternView.x = 0;
     _patternView.y = 1;
     _patternView.width = self.width;
     _patternView.height = self.height - 1;
     _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
     _patternView.mode = EatsPatternViewMode_Play;
-    _patternView.pattern = _pattern;
+    _patternView.currentPageId = [self.delegate valueForKey:@"currentPageId"];
     _patternView.patternHeight = self.height;
     
     // Set top left buttons correctly
@@ -170,7 +163,7 @@
     [self setPatternButtonState];
     
     // Make the correct playMode button active
-    [self setPlayMode:[[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode] intValue]];
+    [self setPlayMode:[[[_sharedSequencerState.pageStates objectAtIndex:[[self.delegate valueForKey:@"currentPageId"] unsignedIntegerValue]] playMode] intValue]];
     
     // Add everything to sub views
     self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
@@ -199,31 +192,15 @@
 
 - (void) updateView
 {
+    NSNumber *currentPageId = [self.delegate valueForKey:@"currentPageId"];
     
-    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
-    
-    if( _pattern != [self.delegate valueForKey:@"currentPattern"] )
-        _pattern = [self.delegate valueForKey:@"currentPattern"];
-    
-    // Update PatternView sub view
-    NSError *requestError = nil;
-    NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-    patternRequest.predicate = [NSPredicate predicateWithFormat:@"SELF == %@", _pattern];
-    NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:&requestError];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-    
-    _pattern = [patternMatches lastObject];
-    
-    _patternView.pattern = _pattern;
+    _patternView.currentPageId = currentPageId;
     
     // Set buttons etc
-    [self setPlayMode:[[[_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue] playMode] intValue]];
+    [self setPlayMode:[[[_sharedSequencerState.pageStates objectAtIndex:currentPageId.unsignedIntegerValue] playMode] intValue]];
     [self setActivePageButton];
     [self setPatternButtonState];
-    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopStart.intValue width:self.width];
-    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_pattern.inPage.loopEnd.intValue width:self.width];
+    [self setLoopBraceViewStartAndEnd];
     
     [super updateView];
 }
@@ -245,7 +222,7 @@
 {
     uint i = 0;
     for ( EatsGridButtonView *button in _pageButtons ) {
-        if( i == [_pattern.inPage.id intValue] )
+        if( i == [[self.delegate valueForKey:@"currentPageId"] intValue] )
             button.buttonState = EatsButtonViewState_Active;
         else
             button.buttonState = EatsButtonViewState_Inactive;
@@ -257,7 +234,7 @@
 {
     // TODO put a dim light if there are notes in the pattern
 
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:[[self.delegate valueForKey:@"currentPageId"] unsignedIntegerValue]];
     
     uint i = 0;
     for ( EatsGridButtonView *button in _patternButtons ) {
@@ -272,6 +249,48 @@
             button.inactiveBrightness = 0;
         i++;
     }
+}
+
+- (void) setLoopBraceViewStartAndEnd
+{
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+        request.predicate = [NSPredicate predicateWithFormat:@"(id == %@)", [self.delegate valueForKey:@"currentPageId"]];
+        
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        SequencerPage *page = [matches lastObject];
+        
+        _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:page.loopStart.intValue width:self.width];
+        _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:page.loopEnd.intValue width:self.width];
+        
+    }];
+}
+
+- (void) setLoopStart:(NSNumber *)startStep andEnd:(NSNumber *)endStep
+{
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPage"];
+        request.predicate = [NSPredicate predicateWithFormat:@"(id == %@)", [self.delegate valueForKey:@"currentPageId"]];
+        
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        SequencerPage *page = [matches lastObject];
+        
+        page.loopStart = startStep;
+        page.loopEnd = endStep;
+        
+    }];
 }
 
 - (void) animateIn:(NSTimer *)timer
@@ -418,18 +437,40 @@
 
 - (void) decrementBPM
 {
-    float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
-    if( newBPM < 20 )
-        newBPM = 20;
-    _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        Sequencer *sequencer = [matches lastObject];
+        
+        float newBPM = roundf( [sequencer.bpm floatValue] ) - 1;
+        if( newBPM < 20 )
+            newBPM = 20;
+        sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+    }];   
 }
 
 - (void) incrementBPM
 {
-    float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
-    if( newBPM > 300 )
-        newBPM = 300;
-    _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        Sequencer *sequencer = [matches lastObject];
+        
+        float newBPM = roundf( [sequencer.bpm floatValue] ) + 1;
+        if( newBPM > 300 )
+            newBPM = 300;
+        sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+    }];
 }
 
 - (void) clearIncrement:(NSTimer *)timer
@@ -460,7 +501,7 @@
 
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender
 {
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:[[self.delegate valueForKey:@"currentPageId"] unsignedIntegerValue]];
     
     BOOL buttonDown = [down boolValue];
     
@@ -627,8 +668,7 @@
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
 {
-    _pattern.inPage.loopStart = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.startPercentage width:self.width]];
-    _pattern.inPage.loopEnd = [NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.endPercentage width:self.width]];
+    [self setLoopStart:[NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.startPercentage width:self.width]] andEnd:[NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.endPercentage width:self.width]]];
     
     [self updateView];
 }
@@ -638,7 +678,7 @@
     uint x = [[xyDown valueForKey:@"x"] unsignedIntValue];
     BOOL down = [[xyDown valueForKey:@"down"] boolValue];
     
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:[[self.delegate valueForKey:@"currentPageId"] unsignedIntegerValue]];
     
     if( down ) {
         // Scrub the loop
@@ -654,8 +694,7 @@
     uint start = [[selection valueForKey:@"start"] unsignedIntValue];
     uint end = [[selection valueForKey:@"end"] unsignedIntValue];
     
-    _pattern.inPage.loopStart = [NSNumber numberWithUnsignedInt:start];
-    _pattern.inPage.loopEnd = [NSNumber numberWithUnsignedInt:end];
+    [self setLoopStart:[NSNumber numberWithUnsignedInt:start] andEnd:[NSNumber numberWithUnsignedInt:end]];
     
     _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:start width:_loopBraceView.width];
     _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:end width:_loopBraceView.width];

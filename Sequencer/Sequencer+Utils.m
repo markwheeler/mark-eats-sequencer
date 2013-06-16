@@ -45,7 +45,6 @@
         
         NSArray *sequenceOfNotes;
         
-// TODO
         if (channel == 10 || channel == 11)
             sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"B0" scaleMode:WMScaleModeChromatic length:32];  // Drum map
         else
@@ -76,8 +75,6 @@
     }
     sequencer.pages = setOfPages;
 
-    // TODO: Might need category methods for when steps or pitches change so we can remove all the notes that fall outside of the new bounds. Or do with KVO
-    
     return sequencer;
 }
 

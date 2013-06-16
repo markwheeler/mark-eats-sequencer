@@ -56,86 +56,101 @@
 {
     if( !self.visible ) return nil;
     
-    NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
+    __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
-    
-    // Generate the columns with playhead and nextStep
-    for(uint x = 0; x < self.width; x++) {
-        [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
-        // Generate the rows
-        for(uint y = 0; y < self.height; y++) {
-            if( self.width * _wipe / 100 >= x + 1 )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:15 * self.opacity] atIndex:y];
-            else if( pageState.currentPatternId.intValue == _pattern.id.intValue && x == pageState.currentStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
-            else if( pageState.nextStep && x == pageState.nextStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];
-            else
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
-        }
-    }
-    
-    // Work out how much we need to fold
-    int scaleDifference = _patternHeight - self.height;
-    if( scaleDifference < 0 ) scaleDifference = 0;
-    
-    for(SequencerNote *note in _pattern.notes) {
-        if( note.step.intValue < self.width && note.row.intValue >= 32 - _patternHeight ) {
-                        
-            uint row = [note.row unsignedIntValue] - 32 + _patternHeight;
-
-            // Fold from top
-            if( _foldFrom == EatsPatternViewFoldFrom_Top ) {
-                if( row < scaleDifference * 2 )
-                   row = row / 2;
-               else
-                   row -= scaleDifference;
-               
-            // Fold from bottom
-            } else if( _foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-                if( row >= _patternHeight - (scaleDifference * 2) )
-                    row = (row / 2) + ((_patternHeight - (scaleDifference * 2)) / 2);
-                
-            }
-
-            int lengthBrightness = _noteLengthBrightness;
-            
-            // Put in the active note while editing
-            if( note == _activeEditNote && _mode == EatsPatternViewMode_NoteEdit ) {
-                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
-                lengthBrightness = 12;
-            }
-            
-            // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:note.step.intValue] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
-                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:_noteBrightness * self.opacity]];
-            
-            // Put the length tails in
-            int tailDraw = note.step.intValue;
-            int length =  note.length.intValue - 1;
-            if( length > self.width - 1)
-                length = self.width - 1;
-
-            for( int i = 0; i < length; i++ ) {
-                if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                    tailDraw --;
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+        
+        SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPageId.unsignedIntegerValue];
+        request.predicate = [NSPredicate predicateWithFormat:@"(inPage.id == %@) AND (id == %@)", _currentPageId, pageState.currentPatternId];
+        
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        SequencerPattern *pattern = [matches lastObject];
+        
+        // Generate the columns with playhead and nextStep
+        for(uint x = 0; x < self.width; x++) {
+            [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
+            // Generate the rows
+            for(uint y = 0; y < self.height; y++) {
+                if( self.width * _wipe / 100 >= x + 1 )
+                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:15 * self.opacity] atIndex:y];
+                else if( pageState.currentPatternId.intValue == pattern.id.intValue && x == pageState.currentStep.intValue )
+                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
+                else if( pageState.nextStep && x == pageState.nextStep.intValue )
+                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];
                 else
-                    tailDraw ++;
-                
-                if( tailDraw < 0 )
-                    tailDraw += self.width;
-                else if( tailDraw >= self.width )
-                    tailDraw -= self.width;
-                
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < lengthBrightness * self.opacity )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:lengthBrightness * self.opacity]];
-
+                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
             }
         }
-    }
+        
+        // Work out how much we need to fold
+        int scaleDifference = _patternHeight - self.height;
+        if( scaleDifference < 0 ) scaleDifference = 0;
+        
+        for(SequencerNote *note in pattern.notes) {
+            if( note.step.intValue < self.width && note.row.intValue >= 32 - _patternHeight ) {
+                
+                uint row = [note.row unsignedIntValue] - 32 + _patternHeight;
+                
+                // Fold from top
+                if( _foldFrom == EatsPatternViewFoldFrom_Top ) {
+                    if( row < scaleDifference * 2 )
+                        row = row / 2;
+                    else
+                        row -= scaleDifference;
+                    
+                    // Fold from bottom
+                } else if( _foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+                    if( row >= _patternHeight - (scaleDifference * 2) )
+                        row = (row / 2) + ((_patternHeight - (scaleDifference * 2)) / 2);
+                    
+                }
+                
+                int lengthBrightness = _noteLengthBrightness;
+                
+                // Put in the active note while editing
+                if( note == _activeEditNote && _mode == EatsPatternViewMode_NoteEdit ) {
+                    [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
+                    lengthBrightness = 12;
+                }
+                
+                // Put the rest in (unless there's something brighter there)
+                else if( [[[viewArray objectAtIndex:note.step.intValue] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
+                    [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:_noteBrightness * self.opacity]];
+                
+                // Put the length tails in
+                int tailDraw = note.step.intValue;
+                int length =  note.length.intValue - 1;
+                if( length > self.width - 1)
+                    length = self.width - 1;
+                
+                for( int i = 0; i < length; i++ ) {
+                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                        tailDraw --;
+                    else
+                        tailDraw ++;
+                    
+                    if( tailDraw < 0 )
+                        tailDraw += self.width;
+                    else if( tailDraw >= self.width )
+                        tailDraw -= self.width;
+                    
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < lengthBrightness * self.opacity )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:lengthBrightness * self.opacity]];
+                    
+                }
+            }
+        }
+    }];
     
     return viewArray;
+    
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down

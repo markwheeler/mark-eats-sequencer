@@ -11,7 +11,6 @@
 #import "EatsCommunicationManager.h"
 #import "Preferences.h"
 #import "SequencerState.h"
-#import "SequencerPageState.h"
 #import "EatsMonome.h"
 #import "EatsGridIntroViewController.h"
 #import "EatsGridSequencerViewController.h"
@@ -21,7 +20,6 @@
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
-@property SequencerPageState            *currentSequencerPageState;
 @property EatsGridViewType              currentView;
 @property NSObject                      *currentViewController;
 @property id                            deviceInterface;
@@ -32,14 +30,14 @@
 
 #pragma mark - public methods
 
-- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencer:(Sequencer *)sequencer
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context
 {
     self = [super init];
     if (self) {
         
         _isActive = NO;
         _managedObjectContext = context;
-        _sequencer = sequencer;
+//        _sequencer = sequencer;
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
         
@@ -58,7 +56,7 @@
         }
         
         // Set the page and keep an eye on pattern changes
-        [self setNewPageId:0];
+        [self setNewPageId:[NSNumber numberWithInt:0]];
 
     }
     return self;
@@ -138,25 +136,23 @@
 
 }
 
-- (void) setNewPageId:(NSNumber *)id
+- (void) setNewPageId:(NSNumber *)pageId
 {
     [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     
-    SequencerPage *page = [_sequencer.pages objectAtIndex:id.unsignedIntegerValue];
-    _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:id.unsignedIntegerValue];
-    _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
+    _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:pageId.unsignedIntegerValue];
+    _currentPageId = pageId;
+    
+//    SequencerPage *page = [_sequencer.pages objectAtIndex:id.unsignedIntegerValue];
+//    _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
     
     [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (void) updatePattern
 {   
-    [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
-    
-    SequencerPage *page = _currentPattern.inPage;
-    _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
-    
-    [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+//    SequencerPage *page = _currentPattern.inPage;
+//    _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
