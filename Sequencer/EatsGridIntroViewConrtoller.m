@@ -157,10 +157,14 @@
     _currentFrame++;
     
     // Save trail info
+    //if(_particleA) [_particleATrail insertObject:[_particleA copy] atIndex:0];
+    //if(_particleB) [_particleBTrail insertObject:[_particleB copy] atIndex:0];
     if(_particleA) [_particleATrail addObject:[_particleA copy]];
     if(_particleB) [_particleBTrail addObject:[_particleB copy]];
     
     if([_particleATrail count] > TRAIL_LENGTH || (!_particleA && [_particleATrail count] > 0) ) {
+        //[_particleATrail removeLastObject];
+        //[_particleBTrail removeLastObject];
         [_particleATrail removeObjectAtIndex:0];
         [_particleBTrail removeObjectAtIndex:0];
     }
