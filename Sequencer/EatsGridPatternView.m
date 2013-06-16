@@ -59,20 +59,9 @@
     __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
     [self.managedObjectContext performBlockAndWait:^(void) {
-        
-        NSError *requestError = nil;
-        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-        
-        SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPageId.unsignedIntegerValue];
-        request.predicate = [NSPredicate predicateWithFormat:@"(inPage.id == %@) AND (id == %@)", _currentPageId, pageState.currentPatternId];
-        
-        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-        
-        SequencerPattern *pattern = [matches lastObject];
-        
+    
+        SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    
         // Generate the columns with playhead and nextStep
         for(uint x = 0; x < self.width; x++) {
             [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
@@ -80,7 +69,7 @@
             for(uint y = 0; y < self.height; y++) {
                 if( self.width * _wipe / 100 >= x + 1 )
                     [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:15 * self.opacity] atIndex:y];
-                else if( pageState.currentPatternId.intValue == pattern.id.intValue && x == pageState.currentStep.intValue )
+                else if( pageState.currentPatternId.intValue == _pattern.id.intValue && x == pageState.currentStep.intValue )
                     [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
                 else if( pageState.nextStep && x == pageState.nextStep.intValue )
                     [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];
@@ -93,7 +82,7 @@
         int scaleDifference = _patternHeight - self.height;
         if( scaleDifference < 0 ) scaleDifference = 0;
         
-        for(SequencerNote *note in pattern.notes) {
+        for(SequencerNote *note in _pattern.notes) {
             if( note.step.intValue < self.width && note.row.intValue >= 32 - _patternHeight ) {
                 
                 uint row = [note.row unsignedIntValue] - 32 + _patternHeight;
@@ -105,7 +94,7 @@
                     else
                         row -= scaleDifference;
                     
-                    // Fold from bottom
+                // Fold from bottom
                 } else if( _foldFrom == EatsPatternViewFoldFrom_Bottom ) {
                     if( row >= _patternHeight - (scaleDifference * 2) )
                         row = (row / 2) + ((_patternHeight - (scaleDifference * 2)) / 2);
@@ -147,22 +136,22 @@
                 }
             }
         }
+        
     }];
     
     return viewArray;
-    
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
 {
     // In play mode we check for selections
     if( _mode == EatsPatternViewMode_Play ) {
-    
+        
         // Down
         if( down ) {
             
             if( _sharedPreferences.loopFromScrubArea && _lastDownKey ) {
-
+                
                 // Set a selection
                 int loopEndX = x - 1;
                 if( loopEndX < 0 )
@@ -171,8 +160,8 @@
                 _setSelection = YES;
                 
                 NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[_lastDownKey valueForKey:@"x"], @"start",
-                                                                                     [NSNumber numberWithInt:loopEndX], @"end",
-                                                                                     nil];
+                                           [NSNumber numberWithInt:loopEndX], @"end",
+                                           nil];
                 if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
                     [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
                 
@@ -221,7 +210,7 @@
                 [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
             
         }
-    
+        
     }
     
     // Clear up after tracking selection
@@ -229,7 +218,7 @@
         _lastDownKey = nil;
         _setSelection = NO;
     }
-
+    
     // In edit mode we check for double presses
     if ( _mode == EatsPatternViewMode_Edit ) {
         
@@ -261,15 +250,14 @@
     
     // These two modes always receive all presses
     if( _mode == EatsPatternViewMode_Edit || _mode == EatsPatternViewMode_NoteEdit ) {
-
+        
         // Send the press to delegate
         NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
                                 [NSNumber numberWithUnsignedInt:y], @"y",
                                 [NSNumber numberWithBool:down], @"down",
                                 nil];
         if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
-        [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
-
+            [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
     }
 
 }

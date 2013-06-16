@@ -35,4 +35,6 @@
 - (void) clockTick:(uint64_t)ns;
 - (void) clockLateBy:(uint64_t)ns;
 
+- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context;
+
 @end
