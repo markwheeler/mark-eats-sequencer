@@ -199,7 +199,9 @@
 
 - (void) updateView
 {
-    [self.managedObjectContext performBlock:^(void) {
+    NSLog(@"%@", [NSThread currentThread]);
+    
+    [self.managedObjectContext performBlockAndWait:^(void) {
         if( _currentPattern != [self.delegate valueForKey:@"currentPattern"] )
             _currentPattern = [self.delegate valueForKey:@"currentPattern"];
         
@@ -215,18 +217,15 @@
         _currentPattern = [patternMatches lastObject];
         
         _patternView.pattern = _currentPattern;
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            // Set buttons etc
-            [self setPlayMode];
-            [self setActivePageButton];
-            [self setPatternButtonState];
-            [self setLoopBraceViewStartAndEnd];
-            
-            [super updateView];
-        });
     }];
+    
+    // Set buttons etc
+    [self setPlayMode];
+    [self setActivePageButton];
+    [self setPatternButtonState];
+    [self setLoopBraceViewStartAndEnd];
+    
+    [super updateView];
 }
 
 // Activates the playMode button
@@ -234,43 +233,37 @@
 {
     __block EatsSequencerPlayMode playMode;
     
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
         playMode = pageState.playMode.intValue;
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            uint i = 0;
-            for ( EatsGridButtonView *button in _playModeButtons ) {
-                if( i == playMode )
-                    button.buttonState = EatsButtonViewState_Active;
-                else
-                    button.buttonState = EatsButtonViewState_Inactive;
-                i++;
-            }
-        });
     }];
+    
+    uint i = 0;
+    for ( EatsGridButtonView *button in _playModeButtons ) {
+        if( i == playMode )
+            button.buttonState = EatsButtonViewState_Active;
+        else
+            button.buttonState = EatsButtonViewState_Inactive;
+        i++;
+    }
 }
 
 - (void) setActivePageButton
 {
     __block int currentPageId;
     
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         currentPageId = _currentPattern.inPage.id.intValue;
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            uint i = 0;
-            for ( EatsGridButtonView *button in _pageButtons ) {
-                if( i == currentPageId )
-                    button.buttonState = EatsButtonViewState_Active;
-                else
-                    button.buttonState = EatsButtonViewState_Inactive;
-                i++;
-            }
-        });
     }];
+    
+    uint i = 0;
+    for ( EatsGridButtonView *button in _pageButtons ) {
+        if( i == currentPageId )
+            button.buttonState = EatsButtonViewState_Active;
+        else
+            button.buttonState = EatsButtonViewState_Inactive;
+        i++;
+    }
 }
 
 - (void) setPatternButtonState
@@ -279,31 +272,28 @@
 
     __block SequencerPageState *pageState;
     
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            uint i = 0;
-            for ( EatsGridButtonView *button in _patternButtons ) {
-                if( i == pageState.currentPatternId.intValue )
-                    button.buttonState = EatsButtonViewState_Active;
-                else
-                    button.buttonState = EatsButtonViewState_Inactive;
-                
-                if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
-                    button.inactiveBrightness = 8;
-                else
-                    button.inactiveBrightness = 0;
-                i++;
-            }
-        });
     }];
+    
+    uint i = 0;
+    for ( EatsGridButtonView *button in _patternButtons ) {
+        if( i == pageState.currentPatternId.intValue )
+            button.buttonState = EatsButtonViewState_Active;
+        else
+            button.buttonState = EatsButtonViewState_Inactive;
+        
+        if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
+            button.inactiveBrightness = 8;
+        else
+            button.inactiveBrightness = 0;
+        i++;
+    }
 }
 
 - (void) setLoopBraceViewStartAndEnd
 {
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         
         _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_currentPattern.inPage.loopStart.intValue width:self.width];
         _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_currentPattern.inPage.loopEnd.intValue width:self.width];
@@ -313,7 +303,7 @@
 
 - (void) setLoopStart:(NSNumber *)startStep andEnd:(NSNumber *)endStep
 {
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         _currentPattern.inPage.loopStart = startStep;
         _currentPattern.inPage.loopEnd = endStep;
         [self.managedObjectContext save:nil];
@@ -473,7 +463,7 @@
 
 - (void) decrementBPM
 {
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
         if( newBPM < 20 )
             newBPM = 20;
@@ -483,7 +473,7 @@
 
 - (void) incrementBPM
 {
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
         if( newBPM > 300 )
             newBPM = 300;
@@ -521,187 +511,183 @@
 {
     __block SequencerPageState *pageState;
     
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
+    }];
         
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+    BOOL buttonDown = [down boolValue];
+    
+    // Page buttons
+    if ( [_pageButtons containsObject:sender] ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
             
-            BOOL buttonDown = [down boolValue];
+            if([self.delegate respondsToSelector:@selector(setNewPageId:)])
+                [self.delegate performSelector:@selector(setNewPageId:) withObject:[NSNumber numberWithUnsignedInteger:[_pageButtons indexOfObject:sender]]];
+        }
+    }
+    
+    // Pattern buttons
+    if ( [_patternButtons containsObject:sender] ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]];
             
-            // Page buttons
-            if ( [_pageButtons containsObject:sender] ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    
-                    if([self.delegate respondsToSelector:@selector(setNewPageId:)])
-                        [self.delegate performSelector:@selector(setNewPageId:) withObject:[NSNumber numberWithUnsignedInteger:[_pageButtons indexOfObject:sender]]];
-                }
-            }
+        } else {
+            sender.buttonState = EatsButtonViewState_Inactive;
+        }
+    }
+    
+    // Play mode pause button
+    if( sender == _pauseButton ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+            pageState.nextStep = nil;
+            [self setPlayMode];
+        }
+        
+    // Play mode forward button
+    } else if( sender == _forwardButton ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+            pageState.nextStep = nil;
+            [self setPlayMode];
+        }
+        
+    // Play mode reverse button
+    } else if( sender == _reverseButton ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
+            pageState.nextStep = nil;
+            [self setPlayMode];
+        }
+        
+    // Play mode random button
+    } else if( sender == _randomButton ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
+            pageState.nextStep = nil;
+            [self setPlayMode];
+        }
+        
+    // BPM- button
+    } else if( sender == _bpmDecrementButton ) {
+        if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
             
-            // Pattern buttons
-            if ( [_patternButtons containsObject:sender] ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternButtons indexOfObject:sender]];
-                    
-                } else {
-                    sender.buttonState = EatsButtonViewState_Inactive;
-                }
-            }
-            
-            // Play mode pause button
-            if( sender == _pauseButton ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-                    pageState.nextStep = nil;
-                    [self setPlayMode];
-                }
+            if( !_bpmRepeatTimer ) {
                 
-                // Play mode forward button
-            } else if( sender == _forwardButton ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-                    pageState.nextStep = nil;
-                    [self setPlayMode];
-                }
+                sender.buttonState = EatsButtonViewState_Down;
+                [self decrementBPM];
                 
-                // Play mode reverse button
-            } else if( sender == _reverseButton ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Reverse];
-                    pageState.nextStep = nil;
-                    [self setPlayMode];
-                }
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
                 
-                // Play mode random button
-            } else if( sender == _randomButton ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Random];
-                    pageState.nextStep = nil;
-                    [self setPlayMode];
-                }
-                
-                // BPM- button
-            } else if( sender == _bpmDecrementButton ) {
-                if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
-                    
-                    if( !_bpmRepeatTimer ) {
-                        
-                        sender.buttonState = EatsButtonViewState_Down;
-                        [self decrementBPM];
-                        
-                        dispatch_async(dispatch_get_main_queue(), ^(void) {
-                        
-                            _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
-                                                                               target:self
-                                                                             selector:@selector(decrementBPMRepeat:)
-                                                                             userInfo:nil
-                                                                              repeats:YES];
-                            NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                            
-                            // Make sure we fire even when the UI is tracking mouse down stuff
-                            [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
-                            [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
-                            
-                        });
-                    }
-                    
-                } else {
-                    
-                    if( _bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
-                        [_bpmRepeatTimer invalidate];
-                        _bpmRepeatTimer = nil;
-                    }
-                    
-                    sender.buttonState = EatsButtonViewState_Inactive;
-                }
-                
-                // BPM+ button
-            } else if( sender == _bpmIncrementButton ) {
-                if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
-                    
-                    if( !_bpmRepeatTimer ) {
-                        
-                        sender.buttonState = EatsButtonViewState_Down;
-                        [self incrementBPM];
-                        
-                        dispatch_async(dispatch_get_main_queue(), ^(void) {
-                        
-                            _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
-                                                                               target:self
-                                                                             selector:@selector(incrementBPMRepeat:)
-                                                                             userInfo:nil
-                                                                              repeats:YES];
-                            NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                            
-                            // Make sure we fire even when the UI is tracking mouse down stuff
-                            [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
-                            [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
-                            
-                        });
-                    }
-                    
-                } else {
-                    
-                    if( _bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
-                        [_bpmRepeatTimer invalidate];
-                        _bpmRepeatTimer = nil;
-                    }
-                    
-                    sender.buttonState = EatsButtonViewState_Inactive;
-                }
-                
-                // Clear button
-            } else if( sender == _clearButton ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^(void) {
-                    
-                        _clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                    _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                                        target:self
-                                                                     selector:@selector(clearIncrement:)
+                                                                     selector:@selector(decrementBPMRepeat:)
                                                                      userInfo:nil
                                                                       repeats:YES];
-                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                        
-                        // Make sure we fire even when the UI is tracking mouse down stuff
-                        [runloop addTimer:_clearTimer forMode: NSRunLoopCommonModes];
-                        [runloop addTimer:_clearTimer forMode: NSEventTrackingRunLoopMode];
-                        
-                    });
+                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                     
-                } else {
-                    sender.buttonState = EatsButtonViewState_Inactive;
+                    // Make sure we fire even when the UI is tracking mouse down stuff
+                    [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
                     
-                    [self stopClear];
-                }
-                
-                // Exit button
-            } else if( sender == _exitButton ) {
-                if ( buttonDown ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                } else {
-                    
-                    if( _clearTimer )
-                        [self stopClear];
-                    
-                    // Start animateOut
-                    [self animateIncrement:-1];
-                    
-                    _animationFrame = 0;
-                    [self scheduleAnimateOutTimer];
-                }
+                });
             }
             
-            [self updateView];
-        });
-    }];
+        } else {
+            
+            if( _bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                [_bpmRepeatTimer invalidate];
+                _bpmRepeatTimer = nil;
+            }
+            
+            sender.buttonState = EatsButtonViewState_Inactive;
+        }
+        
+    // BPM+ button
+    } else if( sender == _bpmIncrementButton ) {
+        if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
+            
+            if( !_bpmRepeatTimer ) {
+                
+                sender.buttonState = EatsButtonViewState_Down;
+                [self incrementBPM];
+                
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                
+                    _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                                       target:self
+                                                                     selector:@selector(incrementBPMRepeat:)
+                                                                     userInfo:nil
+                                                                      repeats:YES];
+                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                    
+                    // Make sure we fire even when the UI is tracking mouse down stuff
+                    [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+                    
+                });
+            }
+            
+        } else {
+            
+            if( _bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                [_bpmRepeatTimer invalidate];
+                _bpmRepeatTimer = nil;
+            }
+            
+            sender.buttonState = EatsButtonViewState_Inactive;
+        }
+        
+    // Clear button
+    } else if( sender == _clearButton ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+            
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+            
+                _clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                                               target:self
+                                                             selector:@selector(clearIncrement:)
+                                                             userInfo:nil
+                                                              repeats:YES];
+                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                
+                // Make sure we fire even when the UI is tracking mouse down stuff
+                [runloop addTimer:_clearTimer forMode: NSRunLoopCommonModes];
+                [runloop addTimer:_clearTimer forMode: NSEventTrackingRunLoopMode];
+                
+            });
+            
+        } else {
+            sender.buttonState = EatsButtonViewState_Inactive;
+            
+            [self stopClear];
+        }
+        
+        // Exit button
+    } else if( sender == _exitButton ) {
+        if ( buttonDown ) {
+            sender.buttonState = EatsButtonViewState_Down;
+        } else {
+            
+            if( _clearTimer )
+                [self stopClear];
+            
+            // Start animateOut
+            [self animateIncrement:-1];
+            
+            _animationFrame = 0;
+            [self scheduleAnimateOutTimer];
+        }
+    }
+    
+    [self updateView];
 }
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
@@ -718,20 +704,17 @@
     
     __block SequencerPageState *pageState;
     
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            if( down ) {
-                // Scrub the loop
-                pageState.nextStep = [NSNumber numberWithUnsignedInt:x];
-                if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause )
-                    pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-                [self updateView];
-            }
-        });
     }];
+    
+    if( down ) {
+        // Scrub the loop
+        pageState.nextStep = [NSNumber numberWithUnsignedInt:x];
+        if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause )
+            pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+        [self updateView];
+    }
 }
 
 - (void) eatsGridPatternViewSelection:(NSDictionary *)selection sender:(EatsGridPatternView *)sender
