@@ -24,6 +24,8 @@
 @property NSObject                      *currentViewController;
 @property id                            deviceInterface;
 
+@property dispatch_queue_t              updateGridViewQueue;
+
 @end
 
 @implementation EatsGridNavigationController
@@ -35,7 +37,10 @@
     self = [super init];
     if (self) {
         
+        _updateGridViewQueue = dispatch_queue_create("com.MarkEatsSequencer.UpdateGridView", NULL);
+        
         _isActive = NO;
+        _updating = NO;
         _managedObjectContext = context;
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
@@ -84,11 +89,16 @@
 
 - (void) updateGridView
 {
-    if([_currentViewController respondsToSelector:@selector(updateView)] && _isActive) {
+    if( _updating ) NSLog(@"Skipped an update");
+    
+    if([_currentViewController respondsToSelector:@selector(updateView)] && _isActive && !_updating) {
         
-        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+        // Send this out on it's own serial thread so we don't try and do multiple updates at the same time (which makes bad stuff happen)
+        // TODO: Note sure this is solving anything as too much stuff happens async further down the chain??
+        _updating = YES;
+        dispatch_async(_updateGridViewQueue, ^(void) {
             [_currentViewController performSelector:@selector(updateView)];
-        //});
+        });
         
     }
 }
@@ -150,7 +160,8 @@
     
     if(_sharedPreferences.gridType != EatsGridType_None && [_deviceInterface respondsToSelector:@selector(redrawGridController:)])
         [_deviceInterface performSelector:@selector(redrawGridController:) withObject:gridArray];
-
+    
+    _updating = NO;
 }
 
 - (void) setNewPageId:(NSNumber *)pageId
