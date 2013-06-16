@@ -34,9 +34,7 @@ typedef enum EatsPatternViewFoldFrom {
 
 @interface EatsGridPatternView : EatsGridSubView
 
-@property NSManagedObjectContext    *managedObjectContext;
-@property NSNumber                  *currentPageId;
-
+@property SequencerPattern          *pattern;
 @property uint                      patternHeight;
 @property SequencerNote             *activeEditNote;
 @property EatsPatternViewMode       mode;

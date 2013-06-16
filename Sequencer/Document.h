@@ -21,14 +21,13 @@
 
 @interface Document : NSPersistentDocument <ClockTickDelegateProtocol>
 
-@property Sequencer                 *sequencer;
-@property SequencerPage             *currentPage;
-@property SequencerPageState        *currentSequencerPageState;
+@property Sequencer             *sequencer;
+@property SequencerPage         *currentPage;
+@property SequencerPageState    *currentSequencerPageState;
 
-@property BOOL                      isActive;
+@property BOOL                  isActive;
 
-@property NSManagedObjectContext    *childManagedObjectContext;
-@property Preferences               *sharedPreferences;
+@property Preferences           *sharedPreferences;
 
 - (void) updateUI;
 - (void) clearPatternStartAlert;
