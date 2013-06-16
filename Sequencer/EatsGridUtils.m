@@ -34,9 +34,8 @@
                 // TODO: Modify this so views can overlap? Brightest pixel takes priority. Or add their values?!
                 
                 // TODO I've put in some changes here to make it more 'robust' but they may not be addressing the actual problem.
-                //NSLog(@"A %u", y >= view.y);
+                
                 if( view.visible && x >= view.x && x < view.x + view.width && y >= view.y && y < view.y + view.height ) {
-                    //NSLog(@"B %u", y >= view.y);
                     [[gridArray objectAtIndex:x] insertObject:[[view.viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y ] atIndex:y];
                     foundView = YES;
                 }
