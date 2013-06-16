@@ -34,6 +34,7 @@ typedef enum EatsGridViewType{
 @interface EatsGridNavigationController : NSObject <EatsGridViewDelegateProtocol>
 
 @property BOOL                      isActive;
+@property BOOL                      updating;
 @property NSManagedObjectContext    *managedObjectContext;
 @property Sequencer                 *sequencer;
 @property SequencerPattern          *currentPattern;
