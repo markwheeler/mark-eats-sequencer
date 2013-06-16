@@ -329,7 +329,7 @@ typedef enum EatsStepAdvance {
             
             // Tell the delegate to update the interface (doing this on main thread because it uses non-thread-safe NSManagedObjectContext)
             if([_delegate respondsToSelector:@selector(updateUI)])
-                [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+                [_delegate performSelector:@selector(updateUI)];
             
             [self incrementTick];
         }];

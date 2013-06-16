@@ -91,59 +91,60 @@
     if( _animationTimer ) return;
     _animationFrame = 0;
     
-    __block int noteRow;
-    __block float noteVelocityAsPercentage;
-    __block float noteLength;
-    
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        noteRow = note.row.intValue;
-        noteVelocityAsPercentage = note.velocityAsPercentage.floatValue;
-        noteLength = note.length.floatValue;
+    [self.managedObjectContext performBlock:^(void) {
+        int noteRow = note.row.intValue;
+        float noteVelocityAsPercentage = note.velocityAsPercentage.floatValue;
+        float noteLength = note.length.floatValue;
+        
+        // Jump out of the MOC's thread when we're done with MOs
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+
+            // Display sliders at bottom
+            if( noteRow < 32 - ( self.height / 2 ) ) {
+                _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
+                _velocityView.y = self.height - 1;
+                _velocityView.visible = YES;
+                
+                // Display sliders at top
+            } else {
+                _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+                _patternView.y = 1;
+                _lengthView.y = 0;
+                _lengthView.visible = YES;
+            }
+            
+            _patternView.height = self.height - 1;
+            _patternView.activeEditNote = note;
+            _patternView.mode = EatsPatternViewMode_NoteEdit;
+            
+            _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+            _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+            
+            _activeEditNote = note;
+            
+            float stepPercentage = ( 100.0 / _velocityView.width );
+            _velocityView.percentage = ( ( noteVelocityAsPercentage - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+            _lengthView.percentage = ( ( ( ( noteLength / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+            
+            [self updateView];
+            
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+            
+                _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                                   target:self
+                                                                 selector:@selector(animateInNoteEditMode:)
+                                                                 userInfo:nil
+                                                                  repeats:YES];
+                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                
+                // Make sure we fire even when the UI is tracking mouse down stuff
+                [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
+                [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
+                
+            });
+            
+        });
     }];
-    
-    // Display sliders at bottom
-    if( noteRow < 32 - ( self.height / 2 ) ) {
-        _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
-        _velocityView.y = self.height - 1;
-        _velocityView.visible = YES;
-        
-        // Display sliders at top
-    } else {
-        _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-        _patternView.y = 1;
-        _lengthView.y = 0;
-        _lengthView.visible = YES;
-    }
-    
-    _patternView.height = self.height - 1;
-    _patternView.activeEditNote = note;
-    _patternView.mode = EatsPatternViewMode_NoteEdit;
-    
-    _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
-    _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
-    
-    _activeEditNote = note;
-    
-    float stepPercentage = ( 100.0 / _velocityView.width );
-    _velocityView.percentage = ( ( noteVelocityAsPercentage - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
-    _lengthView.percentage = ( ( ( ( noteLength / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
-    
-    [self updateView];
-    
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-        
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
-                                                           target:self
-                                                         selector:@selector(animateInNoteEditMode:)
-                                                         userInfo:nil
-                                                          repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-        
-        // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
-        
-    });
 }
 
 - (void) exitNoteEditMode
@@ -260,7 +261,7 @@
 
 - (void) updateView
 {
-    [self.managedObjectContext performBlockAndWait:^(void) {
+    [self.managedObjectContext performBlock:^(void) {
         if( _pattern != [self.delegate valueForKey:@"currentPattern"] )
             _pattern = [self.delegate valueForKey:@"currentPattern"];
         
@@ -274,9 +275,12 @@
             NSLog(@"Request error: %@", requestError);
         
         _patternView.pattern = [patternMatches lastObject];
+        
+        // Jump out of the MOC's thread when we're done with MOs
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+            [super updateView];
+        });
     }];
-    
-    [super updateView];
 }
 
 - (SequencerNote *) checkForNoteAtX:(uint)x y:(uint)y
@@ -340,7 +344,7 @@
 // Both sliders
 - (void) eatsGridHorizontalSliderViewUpdated:(EatsGridHorizontalSliderView *)sender
 {
-    [self.managedObjectContext performBlockAndWait:^(void) {
+    [self.managedObjectContext performBlock:^(void) {    
         // Velocity
         if(sender == _velocityView) {
             _activeEditNote.velocityAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
@@ -353,9 +357,12 @@
         }
         
         [self.managedObjectContext save:nil];
+        
+        // Jump out of the MOC's thread when we're done with MOs
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+            [self updateView];
+        });
     }];
-    
-     [self updateView];
 }
 
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
@@ -371,58 +378,61 @@
         // Edit mode
         if( sender.mode == EatsPatternViewMode_Edit ) {
                 
-            // We check if the last press was a note and if it is a note, if it was pressed a while ago or recently
-            BOOL lastPressedIsOld = YES;
-            if( _lastTwoPresses.lastObject && [[_lastTwoPresses.lastObject valueForKey:@"type"] isEqualToString:@"note"]) {
-                if( [[_lastTwoPresses.lastObject valueForKey:@"time"] timeIntervalSinceNow] > - DOUBLE_PRESS_TIME )
-                    lastPressedIsOld = NO;
-            }
-        
-            [self.managedObjectContext performBlockAndWait:^(void) {
-               
-                // See if we have a note there
-                SequencerNote *foundNote = [self checkForNoteAtX:x y:y];
-                
-                if( foundNote ) {
+                // We check if the last press was a note and if it is a note, if it was pressed a while ago or recently
+                BOOL lastPressedIsOld = YES;
+                if( _lastTwoPresses.lastObject && [[_lastTwoPresses.lastObject valueForKey:@"type"] isEqualToString:@"note"]) {
+                    if( [[_lastTwoPresses.lastObject valueForKey:@"time"] timeIntervalSinceNow] > - DOUBLE_PRESS_TIME )
+                        lastPressedIsOld = NO;
+                }
+            
+                [self.managedObjectContext performBlock:^(void) {
+                   
+                    // See if we have a note there
+                    SequencerNote *foundNote = [self checkForNoteAtX:x y:y];
                     
-                    // Make a record of it first for keeping track of double taps
-                    SequencerNote *lastNote = [NSDictionary dictionaryWithObjectsAndKeys:@"note", @"type",
-                                                                                        foundNote.step, @"step",
-                                                                                        foundNote.row, @"row",
-                                                                                        foundNote.velocityAsPercentage, @"velocityAsPercentage",
-                                                                                        foundNote.length, @"length",
-                                                                                        [NSDate date], @"time",
-                                                                                        nil];
-                    [_lastTwoPresses addObject:lastNote];
-                    
-                    // If we're not in a double press remove the note (ie, the last note is recent, or we're in a different place on the grid)
-                    if( lastPressedIsOld || _lastX != x || _lastY != y )
-                        [self.managedObjectContext deleteObject:foundNote];
-                    
-                } else {
-                    
-                    // If we're not in a double press then add a new note
-                    if( lastPressedIsOld || _lastX != x || _lastY != y ) {
+                    if( foundNote ) {
                         
-                        NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
-                        SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
-                        newNote.step = [NSNumber numberWithUnsignedInt:x];
-                        newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
-                        [newNotesSet addObject:newNote];
-                        _pattern.notes = newNotesSet;
+                        // Make a record of it first for keeping track of double taps
+                        SequencerNote *lastNote = [NSDictionary dictionaryWithObjectsAndKeys:@"note", @"type",
+                                                                                            foundNote.step, @"step",
+                                                                                            foundNote.row, @"row",
+                                                                                            foundNote.velocityAsPercentage, @"velocityAsPercentage",
+                                                                                            foundNote.length, @"length",
+                                                                                            [NSDate date], @"time",
+                                                                                            nil];
+                        [_lastTwoPresses addObject:lastNote];
+                        
+                        // If we're not in a double press remove the note (ie, the last note is recent, or we're in a different place on the grid)
+                        if( lastPressedIsOld || _lastX != x || _lastY != y )
+                            [self.managedObjectContext deleteObject:foundNote];
+                        
+                    } else {
+                        
+                        // If we're not in a double press then add a new note
+                        if( lastPressedIsOld || _lastX != x || _lastY != y ) {
+                            
+                            NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
+                            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                            newNote.step = [NSNumber numberWithUnsignedInt:x];
+                            newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
+                            [newNotesSet addObject:newNote];
+                            _pattern.notes = newNotesSet;
+                        }
+                        
+                        // Make a record that we pressed an empty point on the grid
+                        [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"none" forKey:@"type"]];
+                        
                     }
                     
-                    // Make a record that we pressed an empty point on the grid
-                    [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"none" forKey:@"type"]];
+                    [self.managedObjectContext save:nil];
                     
-                }
-                
-                [self.managedObjectContext save:nil];
-                
-                [self trackLastPressAtX:x y:y];
-            }];
-            
-            [self updateView];
+                    // Jump out of the MOC's thread when we're done with MOs
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+                        [self updateView];
+                    });
+                    
+                    [self trackLastPressAtX:x y:y];
+                }];
             
         // Note edit mode
         } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
@@ -460,7 +470,7 @@
             
             __block SequencerNote *newNote;
             
-            [self.managedObjectContext performBlockAndWait:^(void) {
+            [self.managedObjectContext performBlock:^(void) {
                 
                 // Put the old note back in
                 NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
@@ -476,9 +486,12 @@
                 
                 [self.managedObjectContext save:nil];
                 
+                // Jump out of the MOC's thread when we're done with MOs
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+                    [self enterNoteEditModeFor:newNote];
+                });
+                
             }];
-            
-            [self enterNoteEditModeFor:newNote];
             
         // If not then we enter the play view
         } else if( [[[_lastTwoPresses objectAtIndex:0] valueForKey:@"type"] isEqualToString:@"none"] ) {
