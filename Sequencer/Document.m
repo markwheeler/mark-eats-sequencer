@@ -209,7 +209,7 @@
     
     // Create a Clock and set it up
     
-    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.childManagedObjectContext];
+    self.clockTick = [[ClockTick alloc] init];
     self.clockTick.delegate = self;
     self.clockTick.ppqn = PPQN;
     self.clockTick.ticksPerMeasure = TICKS_PER_MEASURE;
@@ -518,8 +518,10 @@
             self.currentSequencerPageState.nextPatternId = nil;
     }
     
+    if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
+    
     // Get the notes
-    [self.managedObjectContext performBlock:^(void) {
+    [self.managedObjectContext performBlockAndWait:^(void) {
         NSError *requestError = nil;
         NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
         noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row < %u)", self.sharedPreferences.gridWidth, 32 - self.sharedPreferences.gridHeight];

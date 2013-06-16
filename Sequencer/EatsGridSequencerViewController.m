@@ -20,7 +20,6 @@
 
 @interface EatsGridSequencerViewController ()
 
-@property SequencerPattern              *pattern;
 @property SequencerState                *sharedSequencerState;
 @property SequencerNote                 *activeEditNote;
 @property NSMutableArray                *lastTwoPresses;
@@ -43,7 +42,6 @@
     _lastTwoPresses = [NSMutableArray arrayWithCapacity:2];
     
     _sharedSequencerState = [SequencerState sharedSequencerState];
-    _pattern = [self.delegate valueForKey:@"currentPattern"];
     
     // Create the sub views
     _patternView = [[EatsGridPatternView alloc] init];
@@ -55,7 +53,7 @@
     _patternView.mode = EatsPatternViewMode_Edit;
     _patternView.doublePressTime = DOUBLE_PRESS_TIME;
     _patternView.managedObjectContext = self.managedObjectContext;
-    _patternView.pattern = _pattern;
+    _patternView.currentPageId = [self.delegate valueForKey:@"currentPageId"];
     _patternView.patternHeight = self.height;
     
     _velocityView = [[EatsGridHorizontalSliderView alloc] init];
@@ -91,60 +89,45 @@
     if( _animationTimer ) return;
     _animationFrame = 0;
     
-    [self.managedObjectContext performBlock:^(void) {
-        int noteRow = note.row.intValue;
-        float noteVelocityAsPercentage = note.velocityAsPercentage.floatValue;
-        float noteLength = note.length.floatValue;
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+    // Display sliders at bottom
+    if( [note.row intValue] < 32 - ( self.height / 2 ) ) {
+        _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
+        _velocityView.y = self.height - 1;
+        _velocityView.visible = YES;
 
-            // Display sliders at bottom
-            if( noteRow < 32 - ( self.height / 2 ) ) {
-                _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
-                _velocityView.y = self.height - 1;
-                _velocityView.visible = YES;
-                
-                // Display sliders at top
-            } else {
-                _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-                _patternView.y = 1;
-                _lengthView.y = 0;
-                _lengthView.visible = YES;
-            }
-            
-            _patternView.height = self.height - 1;
-            _patternView.activeEditNote = note;
-            _patternView.mode = EatsPatternViewMode_NoteEdit;
-            
-            _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
-            _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
-            
-            _activeEditNote = note;
-            
-            float stepPercentage = ( 100.0 / _velocityView.width );
-            _velocityView.percentage = ( ( noteVelocityAsPercentage - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
-            _lengthView.percentage = ( ( ( ( noteLength / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
-            
-            [self updateView];
-            
-            dispatch_async(dispatch_get_main_queue(), ^(void) {
-            
-                _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
-                                                                   target:self
-                                                                 selector:@selector(animateInNoteEditMode:)
-                                                                 userInfo:nil
-                                                                  repeats:YES];
-                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                
-                // Make sure we fire even when the UI is tracking mouse down stuff
-                [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-                [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
-                
-            });
-            
-        });
-    }];
+    // Display sliders at top
+    } else {
+        _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+        _patternView.y = 1;
+        _lengthView.y = 0;
+        _lengthView.visible = YES;
+    }
+    
+    _patternView.height = self.height - 1;
+    _patternView.activeEditNote = note;
+    _patternView.mode = EatsPatternViewMode_NoteEdit;
+    
+    _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    
+    _activeEditNote = note;
+    
+    float stepPercentage = ( 100.0 / _velocityView.width );
+    _velocityView.percentage = ( ( note.velocityAsPercentage.floatValue - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    _lengthView.percentage =     ( ( ( ( note.length.floatValue / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    
+    [self updateView];
+    
+    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                           target:self
+                                                         selector:@selector(animateInNoteEditMode:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+    
+    // Make sure we fire even when the UI is tracking mouse down stuff
+    [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
+    [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
 }
 
 - (void) exitNoteEditMode
@@ -174,20 +157,16 @@
     
     [self updateView];
     
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
+    _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                           target:self
+                                                         selector:@selector(animateOutNoteEditMode:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
     
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
-                                                               target:self
-                                                             selector:@selector(animateOutNoteEditMode:)
-                                                             userInfo:nil
-                                                              repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-        
-        // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
-        
-    });
+    // Make sure we fire even when the UI is tracking mouse down stuff
+    [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
+    [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
 }
 
 - (void) animateInNoteEditMode:(NSTimer *)timer
@@ -259,39 +238,18 @@
     }
 }
 
-- (void) updateView
-{
-    [self.managedObjectContext performBlock:^(void) {
-        if( _pattern != [self.delegate valueForKey:@"currentPattern"] )
-            _pattern = [self.delegate valueForKey:@"currentPattern"];
-        
-        // Update PatternView sub view
-        NSError *requestError = nil;
-        NSFetchRequest *patternRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-        patternRequest.predicate = [NSPredicate predicateWithFormat:@"SELF == %@", _pattern];
-        NSArray *patternMatches = [self.managedObjectContext executeFetchRequest:patternRequest error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-        
-        _patternView.pattern = [patternMatches lastObject];
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            [super updateView];
-        });
-    }];
-}
-
 - (SequencerNote *) checkForNoteAtX:(uint)x y:(uint)y
 {
-    // See if there's a note there
     
-    NSError *requestError;
+    // Get the pattern
+    
+    NSNumber *currentPageId = [self.delegate valueForKey:@"currentPageId"];
+    
+    NSError *requestError = nil;
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y + 32 - self.height];
     
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:currentPageId.unsignedIntegerValue];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern.inPage.id == %@) AND (inPattern.id == %@) AND (row == %u)", currentPageId, pageState.currentPatternId, y + 32 - self.height];
     
     BOOL sortDirection = ( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
     noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
@@ -344,25 +302,18 @@
 // Both sliders
 - (void) eatsGridHorizontalSliderViewUpdated:(EatsGridHorizontalSliderView *)sender
 {
-    [self.managedObjectContext performBlock:^(void) {    
-        // Velocity
-        if(sender == _velocityView) {
-            _activeEditNote.velocityAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
-            //NSLog(@"Velocity %@", _activeEditNote.velocityAsPercentage);
-        
-        // Length
-        } else if(sender == _lengthView) {
-            _activeEditNote.length = [NSNumber numberWithInt:roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1 ];
-            //NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
-        }
-        
-        [self.managedObjectContext save:nil];
-        
-        // Jump out of the MOC's thread when we're done with MOs
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            [self updateView];
-        });
-    }];
+    // Velocity
+    if(sender == _velocityView) {
+        _activeEditNote.velocityAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
+        //NSLog(@"Velocity %@", _activeEditNote.velocityAsPercentage);
+    
+    // Length
+    } else if(sender == _lengthView) {
+        _activeEditNote.length = [NSNumber numberWithInt:roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1 ];
+        //NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
+    }
+    
+    [self updateView];
 }
 
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
@@ -385,7 +336,7 @@
                         lastPressedIsOld = NO;
                 }
             
-                [self.managedObjectContext performBlock:^(void) {
+                [self.managedObjectContext performBlockAndWait:^(void) {
                    
                     // See if we have a note there
                     SequencerNote *foundNote = [self checkForNoteAtX:x y:y];
@@ -394,12 +345,12 @@
                         
                         // Make a record of it first for keeping track of double taps
                         SequencerNote *lastNote = [NSDictionary dictionaryWithObjectsAndKeys:@"note", @"type",
-                                                                                            foundNote.step, @"step",
-                                                                                            foundNote.row, @"row",
-                                                                                            foundNote.velocityAsPercentage, @"velocityAsPercentage",
-                                                                                            foundNote.length, @"length",
-                                                                                            [NSDate date], @"time",
-                                                                                            nil];
+                                                   foundNote.step, @"step",
+                                                   foundNote.row, @"row",
+                                                   foundNote.velocityAsPercentage, @"velocityAsPercentage",
+                                                   foundNote.length, @"length",
+                                                   [NSDate date], @"time",
+                                                   nil];
                         [_lastTwoPresses addObject:lastNote];
                         
                         // If we're not in a double press remove the note (ie, the last note is recent, or we're in a different place on the grid)
@@ -411,12 +362,29 @@
                         // If we're not in a double press then add a new note
                         if( lastPressedIsOld || _lastX != x || _lastY != y ) {
                             
-                            NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
+                            // Get the pattern
+                            
+                            NSError *requestError = nil;
+                            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+                            
+                            NSNumber *currentPageId = [self.delegate valueForKey:@"currentPageId"];
+                            
+                            SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:currentPageId.unsignedIntegerValue];
+                            request.predicate = [NSPredicate predicateWithFormat:@"(inPage.id == %@) AND (id == %@)", currentPageId, pageState.currentPatternId];
+                            
+                            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+                            
+                            if( requestError )
+                                NSLog(@"Request error: %@", requestError);
+                            
+                            SequencerPattern *pattern = [matches lastObject];
+                            
+                            NSMutableSet *newNotesSet = [pattern.notes mutableCopy];
                             SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                             newNote.step = [NSNumber numberWithUnsignedInt:x];
                             newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
                             [newNotesSet addObject:newNote];
-                            _pattern.notes = newNotesSet;
+                            pattern.notes = newNotesSet;
                         }
                         
                         // Make a record that we pressed an empty point on the grid
@@ -425,14 +393,9 @@
                     }
                     
                     [self.managedObjectContext save:nil];
-                    
-                    // Jump out of the MOC's thread when we're done with MOs
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-                        [self updateView];
-                    });
-                    
-                    [self trackLastPressAtX:x y:y];
                 }];
+            
+                [self updateView];
             
         // Note edit mode
         } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
@@ -440,24 +403,23 @@
             // Keep track of presses to exit edit mode so that we don't trigger another view change if you double press to exit
             [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"editMode" forKey:@"type"]];
             [self exitNoteEditMode];
-            
-            [self trackLastPressAtX:x y:y];
+           
         }
+        
+        // Keep track of this for detecting when we're in the middle of a double press
+        _lastX = x;
+        _lastY = y;
+            
+        // Only keep track of the last two pressed objects
+        if( _lastTwoPresses.count > 2 )
+            [_lastTwoPresses removeObjectAtIndex:0];
+
+        //NSLog(@"%@", _lastTwoPresses);
+        
     }
 
-}
 
-- (void) trackLastPressAtX:(uint)x y:(uint)y
-{
-    // Keep track of this for detecting when we're in the middle of a double press
-    _lastX = x;
-    _lastY = y;
     
-    // Only keep track of the last two pressed objects
-    if( _lastTwoPresses.count > 2 )
-        [_lastTwoPresses removeObjectAtIndex:0];
-    
-    //NSLog(@"%@", _lastTwoPresses);
 }
 
 - (void) eatsGridPatternViewDoublePressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender
@@ -468,13 +430,28 @@
         // Check to see if we have a note to put back
         if( [[[_lastTwoPresses objectAtIndex:0] valueForKey:@"type"] isEqualToString:@"note"] ) {
             
-            __block SequencerNote *newNote;
-            
-            [self.managedObjectContext performBlock:^(void) {
+            [self.managedObjectContext performBlockAndWait:^(void) {
+                
+                // Get the pattern
+                
+                NSError *requestError = nil;
+                NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+                
+                NSNumber *currentPageId = [self.delegate valueForKey:@"currentPageId"];
+                
+                SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:currentPageId.unsignedIntegerValue];
+                request.predicate = [NSPredicate predicateWithFormat:@"(inPage.id == %@) AND (id == %@)", currentPageId, pageState.currentPatternId];
+                
+                NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+                
+                if( requestError )
+                    NSLog(@"Request error: %@", requestError);
+                
+                SequencerPattern *pattern = [matches lastObject];
                 
                 // Put the old note back in
-                NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
-                newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                NSMutableSet *newNotesSet = [pattern.notes mutableCopy];
+                SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                 
                 newNote.step = [[_lastTwoPresses objectAtIndex:0] valueForKey:@"step"];
                 newNote.row = [[_lastTwoPresses objectAtIndex:0] valueForKey:@"row"];
@@ -482,18 +459,13 @@
                 newNote.length = [[_lastTwoPresses objectAtIndex:0] valueForKey:@"length"];
                 
                 [newNotesSet addObject:newNote];
-                _pattern.notes = newNotesSet;
+                pattern.notes = newNotesSet;
                 
-                [self.managedObjectContext save:nil];
-                
-                // Jump out of the MOC's thread when we're done with MOs
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-                    [self enterNoteEditModeFor:newNote];
-                });
+                [self enterNoteEditModeFor:newNote];
                 
             }];
-            
-        // If not then we enter the play view
+        
+        // If not then we enter the other view
         } else if( [[[_lastTwoPresses objectAtIndex:0] valueForKey:@"type"] isEqualToString:@"none"] ) {
             [self showView:[NSNumber numberWithInt:EatsGridViewType_Play]];
         }

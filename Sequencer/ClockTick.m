@@ -30,7 +30,6 @@ typedef enum EatsStepAdvance {
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
 @property SequencerState                *sharedSequencerState;
-@property Sequencer                     *sequencer;
 
 @property uint              currentTick;
 @property NSMutableArray    *activeNotes;
@@ -42,26 +41,13 @@ typedef enum EatsStepAdvance {
 
 #pragma mark - Public methods
 
-- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context
+- (id)init
 {
     self = [super init];
     if (self) {
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
         _sharedSequencerState = [SequencerState sharedSequencerState];
-        _managedObjectContext = context;
-        
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            NSError *requestError = nil;
-            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-            
-            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-            
-            if( requestError )
-                NSLog(@"Request error: %@", requestError);
-            
-            _sequencer = [matches lastObject];
-        }];
     }
     return self;
 }
@@ -158,14 +144,22 @@ typedef enum EatsStepAdvance {
         [_activeNotes removeObjectsInArray:toRemove];
         
         
-        // TODO probably need to refresh MOs here?
+        // TODO probably need to fetch or refresh MOs here
         
         
-        [self.managedObjectContext performBlock:^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            NSError *requestError = nil;
+            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+            
+            if( requestError )
+                NSLog(@"Request error: %@", requestError);
+            
+            Sequencer *sequencer = [matches lastObject];
             
             // Update the current step for each page and send new notes
             
-            for(SequencerPage *page in _sequencer.pages) {
+            for(SequencerPage *page in sequencer.pages) {
                 
                 SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
                 
@@ -253,7 +247,7 @@ typedef enum EatsStepAdvance {
                     // TODO Pattern quantization doesn't do what it's supposed to! It just jumps depending on your position in the loop :(
                     
                     // Check if we need to advance the pattern (depending on where we are within it)
-                    if( pageState.nextPatternId && position % (_minQuantization / _sequencer.patternQuantization.intValue ) == 0 ) {
+                    if( pageState.nextPatternId && position % (_minQuantization / sequencer.patternQuantization.intValue ) == 0 ) {
                         pageState.currentPatternId = [pageState.nextPatternId copy];
                         pageState.nextPatternId = nil;
                     }
@@ -326,19 +320,20 @@ typedef enum EatsStepAdvance {
                 }
                 
             }
-            
-            // Tell the delegate to update the interface (doing this on main thread because it uses non-thread-safe NSManagedObjectContext)
-            if([_delegate respondsToSelector:@selector(updateUI)])
-                [_delegate performSelector:@selector(updateUI)];
-            
-            [self incrementTick];
-        }];
-
         
-    } else {
-        [self incrementTick];
+        }];
+        
+        // Tell the delegate to update the interface (doing this on main thread because it uses non-thread-safe NSManagedObjectContext)
+        if([_delegate respondsToSelector:@selector(updateUI)])
+            [_delegate performSelectorOnMainThread:@selector(updateUI)
+                                            withObject:nil
+                                         waitUntilDone:NO];
+        
     }
     
+    // Increment the tick
+    _currentTick++;
+    if(_currentTick >= _ticksPerMeasure) _currentTick = 0;
 }
 
 - (void) clockLateBy:(uint64_t)ns
@@ -367,13 +362,6 @@ typedef enum EatsStepAdvance {
         return EatsStepAdvance_None;
     }
     
-}
-
-- (void) incrementTick
-{
-    // Increment the tick
-    _currentTick++;
-    if(_currentTick >= _ticksPerMeasure) _currentTick = 0;
 }
 
 

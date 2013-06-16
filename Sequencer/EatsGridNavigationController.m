@@ -37,22 +37,9 @@
         
         _isActive = NO;
         _managedObjectContext = context;
+//        _sequencer = sequencer;
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
-        
-        // Get the sequencer
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            NSError *requestError = nil;
-            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-            
-            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-            
-            if( requestError )
-                NSLog(@"Request error: %@", requestError);
-            
-            _sequencer = [matches lastObject];
-
-        }];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridControllerNone:)
@@ -85,11 +72,7 @@
 - (void) updateGridView
 {
     if([_currentViewController respondsToSelector:@selector(updateView)] && _isActive) {
-        
-        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            [_currentViewController performSelector:@selector(updateView)];
-        //});
-        
+        [_currentViewController performSelector:@selector(updateView)];
     }
 }
 
@@ -157,21 +140,19 @@
 {
     [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     
-    [self.managedObjectContext performBlock:^(void) {
-        SequencerPage *page = [_sequencer.pages objectAtIndex:pageId.unsignedIntegerValue];
-        _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:pageId.unsignedIntegerValue];
-        _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
-        
-        [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
-    }];
+    _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:pageId.unsignedIntegerValue];
+    _currentPageId = pageId;
+    
+//    SequencerPage *page = [_sequencer.pages objectAtIndex:id.unsignedIntegerValue];
+//    _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
+    
+    [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 - (void) updatePattern
-{
-    [self.managedObjectContext performBlock:^(void) {
-        SequencerPage *page = _currentPattern.inPage;
-        _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
-    }];
+{   
+//    SequencerPage *page = _currentPattern.inPage;
+//    _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -180,7 +161,7 @@
                        context:(void *)context {
 
     if ( object == _currentSequencerPageState && [keyPath isEqual:@"currentPatternId"] ) {
-        [self updatePattern];
+        [self performSelectorOnMainThread:@selector(updatePattern) withObject:nil waitUntilDone:NO];
     }
 }
 

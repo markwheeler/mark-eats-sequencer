@@ -22,8 +22,7 @@ typedef enum EatsGridViewType{
 
 @protocol EatsGridViewDelegateProtocol
 @property BOOL                      isActive;
-@property Sequencer                 *sequencer;
-@property SequencerPattern          *currentPattern;
+@property NSNumber                  *currentPageId;
 @property SequencerPageState        *currentSequencerPageState;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
@@ -35,8 +34,7 @@ typedef enum EatsGridViewType{
 
 @property BOOL                      isActive;
 @property NSManagedObjectContext    *managedObjectContext;
-@property Sequencer                 *sequencer;
-@property SequencerPattern          *currentPattern;
+@property NSNumber                  *currentPageId;
 @property SequencerPageState        *currentSequencerPageState;
 
 - (id) initWithManagedObjectContext:(NSManagedObjectContext *)context;
