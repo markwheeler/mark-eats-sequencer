@@ -170,8 +170,8 @@
     
     // Set the prefs, making sure the width is divisible by 8
     self.sharedPreferences.gridType = EatsGridType_Monome;
-    self.sharedPreferences.gridWidth = w - (w % 8);
-    self.sharedPreferences.gridHeight = h - (h % 8);
+    self.sharedPreferences.gridWidth = 16; //w - (w % 8);
+    self.sharedPreferences.gridHeight = 8; //h - (h % 8);
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];

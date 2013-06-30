@@ -30,7 +30,7 @@
 
 #pragma mark - public methods
 
-- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue
 {
     self = [super init];
     if (self) {
@@ -39,6 +39,8 @@
         _managedObjectContext = context;
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
+        
+        _bigSerialQueue = queue;
         
         // Get the sequencer
         [self.managedObjectContext performBlockAndWait:^(void) {
@@ -64,7 +66,7 @@
                                                    object:nil];
         
         if(_sharedPreferences.gridType != EatsGridType_None) {
-            _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
+            _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext andQueue:_bigSerialQueue width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
             _currentView = EatsGridViewType_Sequencer;
         }
         
@@ -86,7 +88,7 @@
 {
     if([_currentViewController respondsToSelector:@selector(updateView)] && _isActive) {
         
-        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+        //dispatch_async(_bigSerialQueue, ^(void) { ****************************
             [_currentViewController performSelector:@selector(updateView)];
         //});
         
@@ -101,10 +103,10 @@
         _currentViewController = [[EatsGridIntroViewController alloc] initWithDelegate:self width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
         
     } else if([gridView intValue] == EatsGridViewType_Sequencer) {
-        _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
+        _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext andQueue:_bigSerialQueue width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
         
     } else if([gridView intValue] == EatsGridViewType_Play) {
-        _currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
+        _currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext andQueue:_bigSerialQueue width:_sharedPreferences.gridWidth height:_sharedPreferences.gridHeight];
         
     } else {
         _currentViewController = nil;

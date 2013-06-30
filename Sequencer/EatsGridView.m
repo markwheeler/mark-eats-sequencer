@@ -13,7 +13,7 @@
 
 @implementation EatsGridView
 
-- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h
+- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue width:(uint)w height:(uint)h
 {
     self = [super init];
     if (self) {
@@ -22,6 +22,8 @@
         _managedObjectContext = context;
         _width = w;
         _height = h;
+        
+        _bigSerialQueue = queue;
         
         [self setupView];
         

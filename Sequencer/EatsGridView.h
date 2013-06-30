@@ -23,7 +23,9 @@
 @property NSManagedObjectContext    *managedObjectContext;
 @property NSMutableSet              *subViews;
 
-- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context width:(uint)w height:(uint)h;
+@property dispatch_queue_t          bigSerialQueue;
+
+- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue width:(uint)w height:(uint)h;
 - (void) showView:(NSNumber *)gridView;
 - (void) setupView;
 - (void) updateView;

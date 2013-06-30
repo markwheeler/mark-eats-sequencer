@@ -158,14 +158,15 @@ typedef enum EatsStepAdvance {
         [_activeNotes removeObjectsInArray:toRemove];
         
         
-        // TODO probably need to refresh MOs here?
-        
-        
         [self.managedObjectContext performBlock:^(void) {
+            
             
             // Update the current step for each page and send new notes
             
             for(SequencerPage *page in _sequencer.pages) {
+                
+                // Refresh the MO
+                [self.managedObjectContext refreshObject:page mergeChanges:YES];
                 
                 SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
                 

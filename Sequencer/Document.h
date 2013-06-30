@@ -30,6 +30,8 @@
 @property NSManagedObjectContext    *childManagedObjectContext;
 @property Preferences               *sharedPreferences;
 
+@property dispatch_queue_t          bigSerialQueue;
+
 - (void) updateUI;
 - (void) clearPatternStartAlert;
 - (void) clearPattern;

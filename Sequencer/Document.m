@@ -106,6 +106,8 @@
     if (self) {
         // Add your subclass-specific initialization here.
 
+        _bigSerialQueue = dispatch_queue_create("com.MarkEatsSequencer.BigQueue", NULL);
+        
         self.isActive = NO;
         
         // Replace the NSPersistentDocument's MOC with a new one that can be used as a parent
@@ -239,7 +241,7 @@
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext];
+    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext andQueue:_bigSerialQueue];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
