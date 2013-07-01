@@ -476,22 +476,32 @@
 
 - (void) decrementBPM
 {
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
-        if( newBPM < 20 )
-            newBPM = 20;
-        _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-    }];   
+    dispatch_async(self.bigSerialQueue, ^(void) {
+    
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
+            if( newBPM < 20 )
+                newBPM = 20;
+            _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+            [self.managedObjectContext save:nil];
+        }];
+        
+    });
 }
 
 - (void) incrementBPM
 {
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
-        if( newBPM > 300 )
-            newBPM = 300;
-        _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-    }];
+    dispatch_async(self.bigSerialQueue, ^(void) {
+    
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
+            if( newBPM > 300 )
+                newBPM = 300;
+            _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+            [self.managedObjectContext save:nil];
+        }];
+        
+    });
 }
 
 - (void) clearIncrement:(NSTimer *)timer
