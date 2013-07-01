@@ -294,6 +294,7 @@
     
     uint pageId = 0;
     
+    // Set all other page pattern buttons to 0
     for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
         button.buttonState = EatsButtonViewState_Inactive;
         button.inactiveBrightness = 0;
@@ -313,15 +314,24 @@
                 else
                     button.buttonState = EatsButtonViewState_Inactive;
                 
+                __block BOOL isPatternAt = NO;
+                
+                [self.managedObjectContext performBlockAndWait:^(void) {
+                    if( [[[_currentPattern.inPage.patterns objectAtIndex:i] notes] count] )
+                        isPatternAt = YES;
+                }];
+                
                 if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
                     button.inactiveBrightness = 8;
+                else if( isPatternAt )
+                    button.inactiveBrightness = 5;
                 else
                     button.inactiveBrightness = 0;
                 i++;
             }
             
         // For other pages
-        } else {
+        } else if( pageState.playMode.intValue != EatsSequencerPlayMode_Pause )  {
             
             i = 0;
             for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
