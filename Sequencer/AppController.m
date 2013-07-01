@@ -173,6 +173,10 @@
     self.sharedPreferences.gridWidth = w - (w % 8);
     self.sharedPreferences.gridHeight = h - (h % 8);
     
+    // Fixed for testing
+//    self.sharedPreferences.gridWidth = 16;
+//    self.sharedPreferences.gridHeight = 8;
+    
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
 }

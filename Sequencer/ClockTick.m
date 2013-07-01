@@ -166,7 +166,8 @@ typedef enum EatsStepAdvance {
             
             for(SequencerPage *page in _sequencer.pages) {
                 
-                // Refresh the MO
+                // Refresh the MOs
+                [self.managedObjectContext refreshObject:_sequencer mergeChanges:YES];
                 [self.managedObjectContext refreshObject:page mergeChanges:YES];
                 
                 SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
