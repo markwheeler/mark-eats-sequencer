@@ -160,6 +160,7 @@ typedef enum EatsStepAdvance {
         
         [self.managedObjectContext performBlock:^(void) {
             
+            BOOL aPageNeedsToAdvance = NO;
             
             // Update the current step for each page and send new notes
             
@@ -175,6 +176,8 @@ typedef enum EatsStepAdvance {
                 
                 // If we need to advance and it's not paused
                 if( needsToAdvance != EatsStepAdvance_None && pageState.playMode.intValue != EatsSequencerPlayMode_Pause ) {
+                    
+                    aPageNeedsToAdvance = YES;
                     
                     // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
                     //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
@@ -328,8 +331,8 @@ typedef enum EatsStepAdvance {
                 
             }
             
-            // Tell the delegate to update the interface (doing this on main thread because it uses non-thread-safe NSManagedObjectContext)
-            if([_delegate respondsToSelector:@selector(updateUI)])
+            // Tell the delegate to update the interface MOVED THIS ABOVE FOR NOW SO IT ONLY GETS CALLED 
+            if( aPageNeedsToAdvance && [_delegate respondsToSelector:@selector(updateUI)] )
                 [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
             
             [self incrementTick];
