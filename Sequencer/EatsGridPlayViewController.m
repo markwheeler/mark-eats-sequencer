@@ -32,6 +32,8 @@
 @property NSMutableArray                    *pageButtons;
 @property NSMutableArray                    *patternButtons;
 @property NSMutableArray                    *patternsOnOtherPagesButtons;
+@property NSMutableArray                    *scrubOtherPagesButtons;
+
 @property NSArray                           *playModeButtons;
 @property NSArray                           *controlButtons;
 
@@ -105,8 +107,20 @@
         button.x = i;
         button.y = - (self.height / 2) + 2;
         button.visible = NO;
-        button.inactiveBrightness = 5;
         [_patternsOnOtherPagesButtons addObject:button];
+    }
+    
+    // Scrub buttons for other pages, if there's space
+    if( self.height > 8 ) {
+        _scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
+        for( int i = 0; i < self.width; i ++ ) {
+            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+            button.delegate = self;
+            button.x = i;
+            button.y = - 1;
+            button.visible = NO;
+            [_scrubOtherPagesButtons addObject:button];
+        }
     }
     
     // Play mode buttons
@@ -190,6 +204,8 @@
     [self.subViews addObjectsFromArray:_pageButtons];
     [self.subViews addObjectsFromArray:_patternButtons];
     [self.subViews addObjectsFromArray:_patternsOnOtherPagesButtons];
+    if( self.height > 8 )
+        [self.subViews addObjectsFromArray:_scrubOtherPagesButtons];
     [self.subViews addObjectsFromArray:_playModeButtons];
     [self.subViews addObjectsFromArray:_controlButtons];
     
@@ -237,6 +253,8 @@
         [self setPlayMode];
         [self setActivePageButton];
         [self setPatternButtonState];
+        if( self.height > 8 )
+            [self setScrubButtonState];
         [self setLoopBraceViewStartAndEnd];
         
         [super updateView];
@@ -284,8 +302,6 @@
 
 - (void) setPatternButtonState
 {
-    // TODO put a dim light if there are notes in the pattern
-
     __block uint currentPageId;
     
     [self.managedObjectContext performBlockAndWait:^(void) {
@@ -347,6 +363,31 @@
         pageId ++;
     }
 }
+
+- (void) setScrubButtonState
+{  
+    __block uint currentPageId;
+    
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        currentPageId = _currentPattern.inPage.id.unsignedIntValue;
+    }];
+    
+    uint pageId = 0;
+    
+    // Set all other page pattern buttons to 0
+    for ( EatsGridButtonView *button in _scrubOtherPagesButtons ) {
+        button.buttonState = EatsButtonViewState_Inactive;
+    }
+    
+    for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
+        
+        if( pageId != currentPageId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
+            [[_scrubOtherPagesButtons objectAtIndex:pageState.currentStep.unsignedIntValue] setButtonState:EatsButtonViewState_Active];
+        
+        pageId ++;
+    }
+}
+
 
 - (void) setLoopBraceViewStartAndEnd
 {
@@ -476,6 +517,13 @@
             button.visible = YES;
     }
     for (EatsGridButtonView *button in _patternsOnOtherPagesButtons) {
+        button.y += amount;
+        if( button.y < 0 )
+            button.visible = NO;
+        else
+            button.visible = YES;
+    }
+    for (EatsGridButtonView *button in _scrubOtherPagesButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
@@ -646,6 +694,25 @@
             }
         }
         
+        // Scrub buttons for other pages
+        if ( [_scrubOtherPagesButtons containsObject:sender] ) {
+            if ( buttonDown ) {
+                sender.buttonState = EatsButtonViewState_Down;
+                
+                uint pageId = 0;
+                
+                for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
+                    if( currentPageId != pageId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
+                        pageState.nextStep = [NSNumber numberWithUnsignedInteger:[_scrubOtherPagesButtons indexOfObject:sender]];
+                    
+                    pageId ++;
+                }
+                
+            } else {
+                sender.buttonState = EatsButtonViewState_Inactive;
+            }
+        }
+        
         // Play mode pause button
         if( sender == _pauseButton ) {
             if ( buttonDown ) {
@@ -778,7 +845,7 @@
                 [self stopClear];
             }
             
-            // Exit button
+        // Exit button
         } else if( sender == _exitButton ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
