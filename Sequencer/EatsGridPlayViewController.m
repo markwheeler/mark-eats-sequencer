@@ -77,7 +77,7 @@
         EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
         button.delegate = self;
         button.x = i;
-        button.y = - (self.height / 2) + 1;
+        button.y = - (self.height - 4) + 1;
         if( self.width < 16 )
             button.y ++;
         button.visible = NO;
@@ -94,20 +94,22 @@
         EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
         button.delegate = self;
         button.x = i;
-        button.y = - (self.height / 2) + 3;
+        button.y = - (self.height - 4) + 3;
         button.visible = NO;
         [_patternButtons addObject:button];
     }
     
     // Pattern buttons for other pages
-    _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
-    for( int i = 0; i < numberOfPatterns; i ++ ) {
-        EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
-        button.delegate = self;
-        button.x = i;
-        button.y = - (self.height / 2) + 2;
-        button.visible = NO;
-        [_patternsOnOtherPagesButtons addObject:button];
+    if( self.width > 8 ) {
+        _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+        for( int i = 0; i < numberOfPatterns; i ++ ) {
+            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+            button.delegate = self;
+            button.x = i;
+            button.y = - (self.height - 4) + 2;
+            button.visible = NO;
+            [_patternsOnOtherPagesButtons addObject:button];
+        }
     }
     
     // Scrub buttons for other pages, if there's space
@@ -140,7 +142,7 @@
     
     for( EatsGridButtonView *button in _playModeButtons ) {
         button.delegate = self;
-        button.y = - (self.height / 2) + 1;
+        button.y = - (self.height - 4) + 1;
         button.inactiveBrightness = 5;
         button.visible = NO;
     }
@@ -158,13 +160,13 @@
     
     _exitButton = [[EatsGridButtonView alloc] init];
     _exitButton.x = self.width - 1;
-    _exitButton.inactiveBrightness = 8;
+    _exitButton.inactiveBrightness = 5;
     
     _controlButtons = [NSArray arrayWithObjects:_bpmDecrementButton, _bpmIncrementButton, _clearButton, _exitButton, nil];
     
     for( EatsGridButtonView *button in _controlButtons ) {
         button.delegate = self;
-        button.y = - (self.height / 2) + 1;
+        button.y = - (self.height - 4) + 1;
         button.visible = NO;
     }
     
@@ -424,7 +426,7 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
         
         // Final frame
-        if( _animationFrame == self.height / 2 ) {
+        if( _animationFrame == self.height - 4 ) {
             _animationTimer = nil;
         } else {
             [self scheduleAnimateInTimer];
