@@ -316,10 +316,11 @@
 
 - (void) windowDidBecomeKey:(NSNotification *)aNotification
 {
-    if( !self.checkedForThingsOutsideGrid ) {
-        [self checkForThingsOutsideGrid];
-        self.checkedForThingsOutsideGrid = YES;
-    }
+    // Commented this out as it seems that just checking when a grid controller is connected should be enough?
+//    if( !self.checkedForThingsOutsideGrid ) {
+//        self.checkedForThingsOutsideGrid = YES;
+//        [self checkForThingsOutsideGrid];
+//    }
 }
 
 - (void) updateUI
@@ -547,26 +548,30 @@
     }
     
     // Get the notes
-    [self.managedObjectContext performBlock:^(void) {
-        NSError *requestError = nil;
-        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
-        
-        NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-
-        if( count > 0 && !self.notesOutsideGridAlert ) {
-             self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
-                                                          defaultButton:@"Leave notes"
-                                                        alternateButton:@"Remove notes"
-                                                            otherButton:nil
-                                              informativeTextWithFormat:@"Would you like to remove these %lu notes?", count];
+    
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            NSError *requestError = nil;
+            NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+            noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
             
-            [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
-        }
-    }];
+            NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
+            
+            if( requestError )
+                NSLog(@"Request error: %@", requestError);
+
+            if( count > 0 && !self.notesOutsideGridAlert ) {
+                 self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
+                                                              defaultButton:@"Leave notes"
+                                                            alternateButton:@"Remove notes"
+                                                                otherButton:nil
+                                                  informativeTextWithFormat:@"Would you like to remove these %lu notes?", count];
+                
+                [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+            }
+        }];
+    });
+
 }
 
 - (void) updateInterfaceToMatchGridSize
@@ -603,18 +608,31 @@
 - (void) notesOutsideGridAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if( returnCode == NSOKButton ) {
-        NSLog(@"Leave them");
+        //NSLog(@"Leave them");
         
     } else {
-        NSLog(@"Remove them");
+        //NSLog(@"Remove them");
         
-        // TODO remove all the notes
-        
-        if( ![NSThread isMainThread] ) NSLog(@"%s is NOT running on main thread", __func__);
-        
-        // Get the notes
-        
-        // Remove
+        // Remove the notes
+        dispatch_async(self.bigSerialQueue, ^(void) {
+            [self.managedObjectContext performBlockAndWait:^(void) {
+                
+                NSError *requestError = nil;
+                NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+                noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
+                
+                NSArray *matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
+                
+                if( requestError )
+                    NSLog(@"Request error: %@", requestError);
+                
+                for( SequencerNote *note in matches ) {
+                    [self.managedObjectContext deleteObject:note];
+                }
+            }];
+            
+            [self updateUI];
+        });
     }
     
     self.notesOutsideGridAlert = nil;
