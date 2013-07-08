@@ -54,7 +54,10 @@
     self.midiClockSourceName = [preferences objectForKey:@"midiClockSourceName"];
     self.sendMIDIClock = [preferences boolForKey:@"sendMIDIClock"];
     
-    self.enabledMIDIOutputNames = [[preferences arrayForKey:@"enabledMIDIOutputNames"] mutableCopy];
+    if( [preferences arrayForKey:@"enabledMIDIOutputNames"] )
+        self.enabledMIDIOutputNames = [[preferences arrayForKey:@"enabledMIDIOutputNames"] mutableCopy];
+    else
+        self.enabledMIDIOutputNames = [NSMutableArray arrayWithCapacity:16];
     
     self.loopFromScrubArea = [preferences boolForKey:@"loopFromScrubArea"];
 }
