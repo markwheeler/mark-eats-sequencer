@@ -122,7 +122,7 @@
                 else
                     stateModifier = 0.1;
                 
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > lengthBrightness )
+                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > lengthBrightness + stateModifier )
                     [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:[NSNumber numberWithFloat:lengthBrightness + stateModifier]];
                 
             }

@@ -7,6 +7,7 @@
 //
 
 #import "Sequencer.h"
+#import "SequencerPattern.h"
 
 @interface Sequencer (Utils)
 
@@ -17,5 +18,7 @@
           inManagedObjectContext:(NSManagedObjectContext *)context;
 
 + (uint) randomStepForPage:(SequencerPage *)page ofWidth:(uint)width;
+
++ (void) clearPattern:(SequencerPattern *)pattern;
 
 @end
