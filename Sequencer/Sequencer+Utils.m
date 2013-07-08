@@ -115,10 +115,5 @@
     return result;
 }
 
-+ (void) clearPattern:(SequencerPattern *)pattern
-{
-    pattern.notes = [NSSet set];
-}
-
 
 @end
