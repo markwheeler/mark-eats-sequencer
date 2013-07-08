@@ -7,14 +7,6 @@
 //
 
 #import "EatsDebugGridView.h"
-#import "SequencerState.h"
-#import "SequencerPageState.h"
-
-@interface EatsDebugGridView ()
-
-@property SequencerState        *sharedSequencerState;
-
-@end
 
 @implementation EatsDebugGridView
 
@@ -23,15 +15,10 @@
     self = [super initWithFrame:frame];
     if (self) {
         
-        self.columns = 16;
-        self.rows = 16;
+        self.columns = 32;
+        self.rows = 32;
         
-        self.gutter = 6;
-        
-        self.gridWidth = self.columns;
-        self.gridHeight = self.rows;
-        
-        self.currentPageId = 0;
+        self.gutter = 2;
     }
     
     return self;
@@ -39,28 +26,6 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    if( !self.managedObjectContext )
-        return;
-    
-    // Get the page state
-    SequencerState *sharedSequencerState = [SequencerState sharedSequencerState];
-    SequencerPageState *pageState = [sharedSequencerState.pageStates objectAtIndex:_currentPageId];
-    
-    // Get the notes
-    
-    __block NSArray *matches;
-    
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        NSError *requestError = nil;
-        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern.id == %u) AND (inPattern.inPage.id == %@)", _currentPageId, pageState.currentPatternId];
-        matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-    }];
-    
     // Background color for testing
     //[[NSColor colorWithCalibratedHue:0.5 saturation:0.7 brightness:1.0 alpha:1] set];
     //NSRectFill(dirtyRect);
@@ -86,43 +51,26 @@
             
             // Set clip so we can do an 'inner' stroke
             [roundedRect setClip];
-            
+
             // Colours
-            __block float fillBrightness;
-            __block float strokeBrightness;
+            float fillBrightness;
+            float strokeBrightness;
             
-            [self.managedObjectContext performBlockAndWait:^(void) {
+            // TODO – Notes
+            if( r == 99 && c == 99 ) {
+                fillBrightness = 0;
+                strokeBrightness = 0;
                 
-                // Notes
-                if( NSNotFound != [matches indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-                    
-                    if ( [[obj valueForKey:@"step"] isEqualTo:[NSNumber numberWithInt:c]] && [[obj valueForKey:@"row"] isEqualTo:[NSNumber numberWithInt:r]] ) {
-                        *stop = YES;
-                        return YES;
-                    }
-                    return NO;
-                    
-                }] ) {
-                    fillBrightness = 0;
-                    strokeBrightness = 0;
-                    
-                // Play head
-                } else if( c == pageState.currentStep.intValue ) {
-                    fillBrightness = 0.6;
-                    strokeBrightness = 0.5;
-                    
-                // Active area
-                } else if( c < _gridWidth && r < _gridHeight ) {
-                    fillBrightness = 0.85;
-                    strokeBrightness = 0.7;
-                    
-                // Inactive area
-                } else {
-                    fillBrightness = 0.9;
-                    strokeBrightness = 0.8;
-                }
-            }];
-            
+            // Active area
+            } else if( r < 8 && c < 16 ) {
+                fillBrightness = 0.85;
+                strokeBrightness = 0.7;
+                
+            // Inactive area
+            } else {
+                fillBrightness = 0.9;
+                strokeBrightness = 0.8;
+            }
             
             // Fill
             [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:fillBrightness alpha:1] set];
