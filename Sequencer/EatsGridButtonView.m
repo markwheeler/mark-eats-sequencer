@@ -16,7 +16,7 @@
     if (self) {
         _inactiveBrightness = 0;
         _downBrightness = 15;
-        _activeBrightness = 10;
+        _activeBrightness = 15;
     }
     return self;
 }
