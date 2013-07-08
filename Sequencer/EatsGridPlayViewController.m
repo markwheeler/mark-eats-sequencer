@@ -824,8 +824,6 @@
                     pageId ++;
                 }
                 
-                [self.delegate updateUI];
-                
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
             }
@@ -1015,9 +1013,8 @@
             pageState.nextStep = [NSNumber numberWithUnsignedInt:x];
             if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause )
                 pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-            
             [self updateView];
-            [self.delegate updateUI];
+            
         });
         
     }
