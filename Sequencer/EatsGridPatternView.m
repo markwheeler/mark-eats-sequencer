@@ -59,7 +59,15 @@
     [self.managedObjectContext performBlockAndWait:^(void) {
         
         [self.managedObjectContext refreshObject:_pattern mergeChanges:YES];
-    
+        
+        // Get the NSNumber objects ready so we don't have to create loads of them in the for loops
+        NSNumber *wipeBrighnessResult = [NSNumber numberWithInt:15 * self.opacity];
+        NSNumber *playheadBrighnessResult = [NSNumber numberWithInt:_playheadBrightness * self.opacity];
+        NSNumber *nextStepBrighnessResult = [NSNumber numberWithInt:_nextStepBrightness * self.opacity];
+        NSNumber *noteBrightnessResult = [NSNumber numberWithInt:_noteBrightness * self.opacity];
+        NSNumber *noteLengthBrightnessResult = [NSNumber numberWithInt:_noteLengthBrightness * self.opacity];
+        NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
+        
         SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
         // Generate the columns with playhead and nextStep
@@ -68,13 +76,13 @@
             // Generate the rows
             for(uint y = 0; y < self.height; y++) {
                 if( self.width * _wipe / 100 >= x + 1 )
-                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:15 * self.opacity] atIndex:y];
+                    [[viewArray objectAtIndex:x] insertObject:wipeBrighnessResult atIndex:y];
                 else if( pageState.currentPatternId.intValue == _pattern.id.intValue && x == pageState.currentStep.intValue )
-                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_playheadBrightness * self.opacity] atIndex:y];
+                    [[viewArray objectAtIndex:x] insertObject:playheadBrighnessResult atIndex:y];
                 else if( pageState.nextStep && x == pageState.nextStep.intValue )
-                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:_nextStepBrightness * self.opacity] atIndex:y];
+                    [[viewArray objectAtIndex:x] insertObject:nextStepBrighnessResult atIndex:y];
                 else
-                    [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
+                    [[viewArray objectAtIndex:x] insertObject:zero atIndex:y];
             }
         }
         
@@ -120,23 +128,23 @@
                     
                 }
                 
-                int lengthBrightness = _noteLengthBrightness;
-                
                 // Put in the active note while editing
                 if( note == _activeEditNote && _mode == EatsPatternViewMode_NoteEdit ) {
                     [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
-                    lengthBrightness = 12;
+                    noteLengthBrightnessResult = [NSNumber numberWithInt:12 * self.opacity];
                 }
                 
                 // Put the rest in (unless there's something brighter there)
                 else if( [[[viewArray objectAtIndex:note.step.intValue] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
-                    [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:_noteBrightness * self.opacity]];
+                    [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:noteBrightnessResult];
                 
                 // Put the length tails in
                 int tailDraw = note.step.intValue;
                 int length =  note.length.intValue - 1;
                 if( length > self.width - 1)
                     length = self.width - 1;
+                
+                
                 
                 for( int i = 0; i < length; i++ ) {
                     if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
@@ -149,8 +157,8 @@
                     else if( tailDraw >= self.width )
                         tailDraw -= self.width;
                     
-                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < lengthBrightness * self.opacity )
-                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:lengthBrightness * self.opacity]];
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessResult.intValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessResult];
                     
                 }
             }

@@ -16,6 +16,18 @@
 
 @property SequencerState        *sharedSequencerState;
 
+@property NSNumber              *noteBrightness;
+@property NSNumber              *lengthBrightness;
+@property NSNumber              *playheadBrightness;
+@property NSNumber              *nextStepBrightness;
+@property NSNumber              *backgroundBrightness;
+
+@property NSNumber              *noteBrightnessInactive;
+@property NSNumber              *lengthBrightnessInactive;
+@property NSNumber              *playheadBrightnessInactive;
+@property NSNumber              *nextStepBrightnessInactive;
+@property NSNumber              *backgroundBrightnessInactive;
+
 @end
 
 @implementation EatsDebugGridView
@@ -34,6 +46,21 @@
         self.gridHeight = self.rows;
         
         self.currentPageId = 0;
+        
+        // Brightness settings
+        self.noteBrightness = [NSNumber numberWithFloat:0.0];
+        self.lengthBrightness = [NSNumber numberWithFloat:0.6];
+        self.playheadBrightness = [NSNumber numberWithFloat:0.6];
+        self.nextStepBrightness = [NSNumber numberWithFloat:0.7];
+        self.backgroundBrightness = [NSNumber numberWithFloat:0.8];
+        
+        float stateModifier = 0.1;
+        
+        self.noteBrightnessInactive = [NSNumber numberWithFloat:self.noteBrightness.floatValue + 0.5];
+        self.lengthBrightnessInactive = [NSNumber numberWithFloat:self.lengthBrightness.floatValue + stateModifier];
+        self.playheadBrightnessInactive = [NSNumber numberWithFloat:self.playheadBrightness.floatValue + stateModifier];
+        self.nextStepBrightnessInactive = [NSNumber numberWithFloat:self.nextStepBrightness.floatValue + stateModifier];
+        self.backgroundBrightnessInactive = [NSNumber numberWithFloat:self.backgroundBrightness.floatValue + stateModifier];
     }
     
     return self;
@@ -43,13 +70,6 @@
 {
     if( !self.managedObjectContext )
         return;
-
-    // Brightness settings
-    float noteBrightness = 0.0;
-    float lengthBrightness = 0.6;
-    float playheadBrightness = 0.6;
-    float nextStepBrightness = 0.7;
-    float backgroundBrightness = 0.8;
     
     // Get the page state
     SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPageId];
@@ -57,7 +77,7 @@
     // Generate the columns with playhead and nextStep
     __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
     
-    __block float stateModifier;
+    __block BOOL active;
     
     for(uint x = 0; x < _columns; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:_rows] atIndex:x];
@@ -66,16 +86,28 @@
             
             // Active / inactive
             if( x < _gridWidth && y < _gridHeight )
-                stateModifier = 0;
+                active = YES;
             else
-                stateModifier = 0.1;
+                active = NO;
             
-            if( x == pageState.currentStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:playheadBrightness + stateModifier] atIndex:y];
-            else if( pageState.nextStep && x == pageState.nextStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:nextStepBrightness + stateModifier] atIndex:y];
-            else
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:backgroundBrightness + stateModifier] atIndex:y];
+            if( x == pageState.currentStep.intValue ) {
+                if( active )
+                    [[viewArray objectAtIndex:x] insertObject:_playheadBrightness atIndex:y];
+                else
+                    [[viewArray objectAtIndex:x] insertObject:_playheadBrightnessInactive atIndex:y];
+                
+            } else if( pageState.nextStep && x == pageState.nextStep.intValue ) {
+                if( active )
+                    [[viewArray objectAtIndex:x] insertObject:_nextStepBrightness atIndex:y];
+                else
+                    [[viewArray objectAtIndex:x] insertObject:_nextStepBrightnessInactive atIndex:y];
+                
+            } else {
+                if( active )
+                    [[viewArray objectAtIndex:x] insertObject:_backgroundBrightness atIndex:y];
+                else
+                    [[viewArray objectAtIndex:x] insertObject:_backgroundBrightnessInactive atIndex:y];
+            }
             
         }
     }
@@ -116,25 +148,25 @@
                     tailDraw -= _columns;
                 
                 // Active / inactive
-                if( tailDraw < _gridWidth && note.row.intValue < _gridHeight )
-                    stateModifier = 0;
-                else
-                    stateModifier = 0.1;
+                if( tailDraw < _gridWidth && note.row.intValue < _gridHeight ) {
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightness.floatValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightness];
+                } else {
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightnessInactive.floatValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightnessInactive];
+                }
                 
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > lengthBrightness + stateModifier )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:[NSNumber numberWithFloat:lengthBrightness + stateModifier]];
                 
             }
             
             // Active / inactive
             if( note.step.intValue < _gridWidth && note.row.intValue < _gridHeight )
-                stateModifier = 0;
+                // Put the notes in
+                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightness];
             else
-                stateModifier = 0.5;
+                // Put the notes in
+                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightnessInactive];
             
-            // Put the notes in
-            [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:[NSNumber numberWithFloat:noteBrightness + stateModifier]];
-
         }
 
     }];
