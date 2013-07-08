@@ -14,6 +14,7 @@
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
+#import "EatsDebugGridView.h"
 
 @interface Document ()
 
@@ -53,6 +54,8 @@
 @property (weak) IBOutlet NSPopUpButton         *stepLengthPopup;
 @property (weak) IBOutlet NSPopUpButton         *swingPopup;
 
+@property (weak) IBOutlet EatsDebugGridView     *debugGridView;
+
 @end
 
 
@@ -83,7 +86,7 @@
     _currentPage = currentPage;
     _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:currentPage.id.unsignedIntegerValue];
 
-    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@", currentPage];
+    [self updatePitchesPredicate];
     self.pitchesArrayController.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"row" ascending:NO]];
     
     self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self == %@", currentPage];
@@ -245,6 +248,7 @@
     
     // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext andQueue:_bigSerialQueue];
+    self.gridNavigationController.delegate = self;
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
@@ -320,6 +324,7 @@
 
 - (void) updateUI
 {
+    _debugGridView.needsDisplay = YES;
     [self.gridNavigationController updateGridView];
 }
 
@@ -353,6 +358,9 @@
 
 - (void) setupUI
 {
+    self.debugGridView.managedObjectContext = self.managedObjectContext;
+    self.debugGridView.needsDisplay = YES;
+    
     [self.stepQuantizationPopup removeAllItems];
     [self.patternQuantizationPopup removeAllItems];
     [self.stepLengthPopup removeAllItems];
@@ -390,6 +398,11 @@
     [self updateSwingPopup];
     [self updateCurrentPattern];
     [self updatePlayMode];
+    
+    [self.managedObjectContext performBlockAndWait:^(void){
+        _debugGridView.currentPageId = _currentPage.id.intValue;
+    }];
+    _debugGridView.needsDisplay = YES;
 }
 
 - (void) updateClockBPM
@@ -459,6 +472,11 @@
         [self updateStepLengthPopup];
     else if ( object == self.currentPage && [keyPath isEqual:@"swing"] )
         [self updateSwingPopup];
+}
+
+- (void) updatePitchesPredicate
+{
+    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@ AND row < %u", self.currentPage, self.sharedPreferences.gridHeight];
 }
 
 
@@ -548,13 +566,20 @@
 
 - (void) updateInterfaceToMatchGridSize
 {
+    // Debug view
+    self.debugGridView.gridWidth = self.sharedPreferences.gridWidth;
+    self.debugGridView.gridHeight = self.sharedPreferences.gridHeight;
+    self.debugGridView.needsDisplay = YES;
+    
+    // Pattern controls
     [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
     for( int i = 0; i < self.currentPatternSegmentedControl.segmentCount; i ++ ) {
         [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i] forSegment:i];
         [self.currentPatternSegmentedControl setWidth:28.0 forSegment:i];
     }
     
-    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@ AND row < %u", self.currentPage, self.sharedPreferences.gridHeight];
+    // Pitch list
+    [self updatePitchesPredicate];
 }
 
 - (void) editLabelAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo

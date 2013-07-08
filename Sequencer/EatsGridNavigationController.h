@@ -28,6 +28,7 @@ typedef enum EatsGridViewType{
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
 - (void) setNewPageId:(NSNumber *)id;
+- (void) updateUI;
 @end
 
 
@@ -39,11 +40,13 @@ typedef enum EatsGridViewType{
 @property SequencerPattern          *currentPattern;
 @property SequencerPageState        *currentSequencerPageState;
 @property dispatch_queue_t          bigSerialQueue;
+@property (weak) id                 delegate;
 
 - (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue;
 - (void) updateGridView;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
 - (void) setNewPageId:(NSNumber *)id;
+- (void) updateUI;
 
 @end
