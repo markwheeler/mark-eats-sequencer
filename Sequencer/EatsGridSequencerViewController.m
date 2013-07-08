@@ -21,7 +21,7 @@
 @interface EatsGridSequencerViewController ()
 
 @property SequencerPattern              *pattern;
-@property SequencerState                *sharedSequencerState;
+@property SequencerState                *sequencerState;
 @property SequencerNote                 *activeEditNote;
 @property NSMutableArray                *lastTwoPresses;
 @property uint                          lastX;
@@ -42,7 +42,7 @@
 {
     _lastTwoPresses = [NSMutableArray arrayWithCapacity:2];
     
-    _sharedSequencerState = [SequencerState sharedSequencerState];
+    _sequencerState = [self.delegate valueForKey:@"sequencerState"];
     _pattern = [self.delegate valueForKey:@"currentPattern"];
     
     // Create the sub views
@@ -55,6 +55,7 @@
     _patternView.mode = EatsPatternViewMode_Edit;
     _patternView.doublePressTime = DOUBLE_PRESS_TIME;
     _patternView.managedObjectContext = self.managedObjectContext;
+    _patternView.sequencerState = _sequencerState;
     _patternView.pattern = _pattern;
     _patternView.patternHeight = self.height;
     
@@ -308,7 +309,7 @@
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
     noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y];
     
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
     BOOL sortDirection = ( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
     noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
