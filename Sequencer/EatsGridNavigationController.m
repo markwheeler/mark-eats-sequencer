@@ -30,7 +30,7 @@
 
 #pragma mark - public methods
 
-- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencerState:(SequencerState *)sequencerState andQueue:(dispatch_queue_t)queue
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue
 {
     self = [super init];
     if (self) {
@@ -40,7 +40,6 @@
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
         
-        _sequencerState = sequencerState;
         _bigSerialQueue = queue;
         
         // Get the sequencer
@@ -82,6 +81,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
 }
+
 
 
 - (void) updateGridView
@@ -158,29 +158,23 @@
 
 - (void) setNewPageId:(NSNumber *)pageId
 {
-    dispatch_async(self.bigSerialQueue, ^(void) {
+    [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
+    
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        SequencerPage *page = [_sequencer.pages objectAtIndex:pageId.unsignedIntegerValue];
+        _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:pageId.unsignedIntegerValue];
+        _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
         
-        [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
-        
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            SequencerPage *page = [_sequencer.pages objectAtIndex:pageId.unsignedIntegerValue];
-            _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:pageId.unsignedIntegerValue];
-            _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
-            
-            [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
-        }];
-        
-    });
+        [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+    }];
 }
 
 - (void) updatePattern
 {
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            SequencerPage *page = _currentPattern.inPage;
-            _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
-        }];
-    });
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        SequencerPage *page = _currentPattern.inPage;
+        _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
+    }];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
