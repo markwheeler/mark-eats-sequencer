@@ -87,7 +87,7 @@
         
         SequencerNote *note = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:context];
         
-        note.row = [NSNumber numberWithInt:arc4random_uniform(8)];
+        note.row = [NSNumber numberWithInt:31 - arc4random_uniform(8)];
         note.step = [NSNumber numberWithInt:i];
         
         [notes addObject:note];

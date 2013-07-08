@@ -306,7 +306,7 @@
     
     NSError *requestError;
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y + 32 - self.height];
     
     SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
@@ -408,7 +408,7 @@
                 [self.managedObjectContext performBlockAndWait:^(void) {
                    
                     // See if we have a note there
-                    SequencerNote *foundNote = [self checkForNoteAtX:x y:self.height - 1 - y];
+                    SequencerNote *foundNote = [self checkForNoteAtX:x y:y];
                     
                     if( foundNote ) {
                         
@@ -434,7 +434,7 @@
                             NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
                             SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                             newNote.step = [NSNumber numberWithUnsignedInt:x];
-                            newNote.row = [NSNumber numberWithUnsignedInt:self.height - 1 - y];
+                            newNote.row = [NSNumber numberWithUnsignedInt:y + 32 - self.height];
                             [newNotesSet addObject:newNote];
                             _pattern.notes = newNotesSet;
                         }
