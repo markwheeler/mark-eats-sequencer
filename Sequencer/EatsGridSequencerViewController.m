@@ -450,6 +450,7 @@
                 }];
                 
                 [self updateView];
+                [self.delegate updateUI];
                 
             // Note edit mode
             } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
