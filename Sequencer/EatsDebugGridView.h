@@ -7,7 +7,6 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "SequencerState.h"
 
 @interface EatsDebugGridView : NSView
 
@@ -20,7 +19,6 @@
 
 @property uint currentPageId;
 
-@property SequencerState         *sequencerState;
 @property NSManagedObjectContext *managedObjectContext;
 
 @end
