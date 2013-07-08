@@ -25,6 +25,7 @@
 @interface EatsGridPatternView ()
 
 @property Preferences           *sharedPreferences;
+@property SequencerState        *sharedSequencerState;
 
 @property NSDictionary          *lastReleasedKey;
 
@@ -40,6 +41,7 @@
     self = [super init];
     if (self) {
         _sharedPreferences = [Preferences sharedPreferences];
+        _sharedSequencerState = [SequencerState sharedSequencerState];
         
         _playheadBrightness = PLAYHEAD_BRIGHTNESS;
         _nextStepBrightness = NEXT_STEP_BRIGHTNESS;
@@ -60,7 +62,7 @@
         
         [self.managedObjectContext refreshObject:_pattern mergeChanges:YES];
     
-        SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+        SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
         // Generate the columns with playhead and nextStep
         for(uint x = 0; x < self.width; x++) {
