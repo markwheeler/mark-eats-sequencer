@@ -84,7 +84,7 @@
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
     
     _currentPage = currentPage;
-    _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:currentPage.id.unsignedIntegerValue];
+    _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:currentPage.id.unsignedIntegerValue];
 
     [self updatePitchesPredicate];
     self.pitchesArrayController.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"row" ascending:NO]];
@@ -193,10 +193,10 @@
         }
         
         // Setup the SequencerState
-        SequencerState *sequencerState = [SequencerState sharedSequencerState];
-        [sequencerState createPageStates:SEQUENCER_PAGES];
+        _sequencerState = [[SequencerState alloc] init];
+        [_sequencerState createPageStates:SEQUENCER_PAGES];
         for( SequencerPage *page in self.sequencer.pages ) {
-            [[sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
+            [[_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
         }
     }];
     
@@ -217,7 +217,7 @@
     
     // Create a Clock and set it up
     
-    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.childManagedObjectContext];
+    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.childManagedObjectContext andSequencerState:self.sequencerState];
     self.clockTick.delegate = self;
     self.clockTick.ppqn = PPQN;
     self.clockTick.ticksPerMeasure = TICKS_PER_MEASURE;
@@ -247,7 +247,7 @@
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext andQueue:_bigSerialQueue];
+    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
     self.gridNavigationController.delegate = self;
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -285,6 +285,9 @@
                                              selector:@selector(externalClockBPM:)
                                                  name:@"ExternalClockBPM"
                                                object:nil];
+    
+    [self updateInterfaceToMatchGridSize];
+    [self checkForThingsOutsideGrid];
     
     // Start the clock right away
     //[self.clock startClock];
@@ -365,6 +368,7 @@
 - (void) setupUI
 {
     self.debugGridView.managedObjectContext = self.managedObjectContext;
+    self.debugGridView.sequencerState = self.sequencerState;
     self.debugGridView.needsDisplay = YES;
     
     [self.stepQuantizationPopup removeAllItems];
@@ -530,27 +534,32 @@
 
 - (void) checkForThingsOutsideGrid
 {
-    // Make sure all the loops etc fit within the connected grid size
-    for( SequencerPage *page in self.sequencer.pages ) {
-        if( page.loopStart.intValue >= self.sharedPreferences.gridWidth || page.loopEnd.intValue >= self.sharedPreferences.gridWidth ) {
-            page.loopStart = [NSNumber numberWithInt:0];
-            page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
-        }
-        
-        if( self.currentSequencerPageState.currentStep.intValue >= self.sharedPreferences.gridWidth )
-            self.currentSequencerPageState.currentStep = [page.loopEnd copy];
-        if( self.currentSequencerPageState.nextStep.intValue >= self.sharedPreferences.gridWidth )
-            self.currentSequencerPageState.nextStep = nil;
-        if( self.currentSequencerPageState.currentPatternId.intValue >= self.sharedPreferences.gridWidth )
-            self.currentSequencerPageState.currentPatternId = [NSNumber numberWithInt:0];
-        if( self.currentSequencerPageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
-            self.currentSequencerPageState.nextPatternId = nil;
-    }
-    
-    // Get the notes
     
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void) {
+            
+            // Make sure all the loops etc fit within the connected grid size
+            for( SequencerPage *page in self.sequencer.pages ) {
+                if( page.loopStart.intValue >= self.sharedPreferences.gridWidth || page.loopEnd.intValue >= self.sharedPreferences.gridWidth ) {
+                    
+                    page.loopStart = [NSNumber numberWithInt:0];
+                    page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
+                }
+                
+                SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.intValue];
+                
+                if( pageState.currentStep.intValue >= self.sharedPreferences.gridWidth )
+                    pageState.currentStep = [page.loopEnd copy];
+                if( pageState.nextStep.intValue >= self.sharedPreferences.gridWidth )
+                    pageState.nextStep = nil;
+                if( pageState.currentPatternId.intValue >= self.sharedPreferences.gridWidth )
+                    pageState.currentPatternId = [NSNumber numberWithInt:0];
+                if( pageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
+                    pageState.nextPatternId = nil;
+            }
+            
+            // Get the notes
+
             NSError *requestError = nil;
             NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
             noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
@@ -570,6 +579,8 @@
                 [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
             }
         }];
+        
+        [self.gridNavigationController updateGridView];
     });
 
 }
