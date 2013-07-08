@@ -696,8 +696,6 @@
         self.currentSequencerPageState.nextStep = nil;
         [self.gridNavigationController updateGridView];
     }
-    
-    [self updateUI];
 }
 
 
