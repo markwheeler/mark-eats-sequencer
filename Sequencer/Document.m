@@ -348,9 +348,14 @@
 
 - (void) clearPattern
 {
-    NSLog(@"Clear pattern");
-    
-    // TODO clear pattern
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            [Sequencer clearPattern:[_currentPage.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue]];
+        }];
+
+        [self updateUI];
+    });
 }
 
 
@@ -427,12 +432,12 @@
 
 - (void) updateCurrentPattern
 {
-    [self.currentPatternSegmentedControl setSelectedSegment:_currentSequencerPageState.currentPatternId.integerValue];
+    self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.currentPatternId.integerValue;
 }
 
 - (void) updatePlayMode
 {
-    self.pagePlaybackControls.selectedSegment = self.currentSequencerPageState.playMode.integerValue;
+    self.pagePlaybackControls.selectedSegment = _currentSequencerPageState.playMode.integerValue;
 }
 
 - (void) updateStepLengthPopup
