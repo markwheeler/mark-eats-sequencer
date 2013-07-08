@@ -23,7 +23,7 @@
 
 @property Sequencer                         *sequencer;
 @property SequencerPattern                  *currentPattern;
-@property SequencerState                    *sequencerState;
+@property SequencerState                    *sharedSequencerState;
 @property Preferences                       *sharedPreferences;
 
 @property EatsGridLoopBraceView             *loopBraceView;
@@ -61,7 +61,7 @@
 {
     // Get the sequencer
     _sequencer = [self.delegate valueForKey:@"sequencer"];
-    _sequencerState = [self.delegate valueForKey:@"sequencerState"];
+    _sharedSequencerState = [SequencerState sharedSequencerState];
     
     // Get the pattern
     _currentPattern = [self.delegate valueForKey:@"currentPattern"];
@@ -206,7 +206,6 @@
     _patternView = [[EatsGridPatternView alloc] init];
     _patternView.delegate = self;
     _patternView.managedObjectContext = self.managedObjectContext;
-    _patternView.sequencerState = _sequencerState;
     _patternView.x = 0;
     _patternView.y = 1;
     _patternView.width = self.width;
@@ -254,7 +253,7 @@
 - (void) updateView
 {
     dispatch_async(self.bigSerialQueue, ^(void) {
-        
+    
         [self.managedObjectContext performBlockAndWait:^(void) {
             if( _currentPattern != [self.delegate valueForKey:@"currentPattern"] )
                 _currentPattern = [self.delegate valueForKey:@"currentPattern"];
@@ -292,7 +291,7 @@
     __block EatsSequencerPlayMode playMode;
     
     [self.managedObjectContext performBlockAndWait:^(void) {
-        SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
+        SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
         playMode = pageState.playMode.intValue;
     }];
     
@@ -340,7 +339,7 @@
         button.inactiveBrightness = 0;
     }
     
-    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
+    for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
         
         uint i;
         
@@ -462,7 +461,7 @@
         button.buttonState = EatsButtonViewState_Inactive;
     }
     
-    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
+    for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
         
         if( pageId != currentPageId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
             [[_scrubOtherPagesButtons objectAtIndex:pageState.currentStep.unsignedIntValue] setButtonState:EatsButtonViewState_Active];
@@ -475,9 +474,10 @@
 - (void) setLoopBraceViewStartAndEnd
 {
     [self.managedObjectContext performBlockAndWait:^(void) {
-        [self.managedObjectContext refreshObject:_currentPattern.inPage mergeChanges:YES];
+        
         _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_currentPattern.inPage.loopStart.intValue width:self.width];
         _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_currentPattern.inPage.loopEnd.intValue width:self.width];
+        
     }];
 }
 
@@ -740,7 +740,7 @@
             currentPageId = _currentPattern.inPage.id.unsignedIntValue;
         }];
         
-        SequencerPageState *currentPageState = [_sequencerState.pageStates objectAtIndex:currentPageId];
+        SequencerPageState *currentPageState = [_sharedSequencerState.pageStates objectAtIndex:currentPageId];
         
         BOOL buttonDown = [down boolValue];
         
@@ -779,7 +779,7 @@
                     
                     uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
                     
-                    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns];
+                    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns];
                     pageState.nextPatternId = [NSNumber numberWithUnsignedInt:pressedPattern];
                     
                     
@@ -804,7 +804,7 @@
                 } else {
                     uint pageId = 0;
                     
-                    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
+                    for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
                         if( currentPageId != pageId )
                             pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]];
                         
@@ -825,7 +825,7 @@
                 
                 uint pageId = 0;
                 
-                for( SequencerPageState *pageState in _sequencerState.pageStates ) {
+                for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
                     if( currentPageId != pageId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
                         pageState.nextStep = [NSNumber numberWithUnsignedInteger:[_scrubOtherPagesButtons indexOfObject:sender]];
                     
@@ -1016,7 +1016,7 @@
             __block SequencerPageState *pageState;
             
             [self.managedObjectContext performBlockAndWait:^(void) {
-                pageState = [_sequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
+                pageState = [_sharedSequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
             }];
 
             // Scrub the loop
