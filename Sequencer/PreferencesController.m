@@ -191,6 +191,10 @@
     }
 }
 
+- (IBAction)supportsVariableBrightnessCheckbox:(NSButton *)sender {
+    [self.delegate performSelector:@selector(updateUI)];
+}
+
 - (IBAction) midiOutputCheckbox:(id)sender {
     // Get the name and search for it in the array of saved names
     NSString *nodeName = [[self.sharedCommunicationManager.midiManager.destArray lockObjectAtIndex:[sender clickedRow]] name];

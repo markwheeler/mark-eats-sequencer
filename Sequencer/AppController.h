@@ -18,6 +18,7 @@
 // Preferences controller delegate methods
 - (void) gridControllerNone;
 - (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
+- (void) updateUI;
 
 // MIDI delegate methods
 - (void) setupChanged;
