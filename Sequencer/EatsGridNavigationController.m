@@ -95,6 +95,12 @@
     }
 }
 
+- (void) updateUI
+{
+    if( [_delegate respondsToSelector:@selector(updateUI)] )
+       [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+}
+
 - (void) showView:(NSNumber *)gridView
 {    
     if([gridView intValue] == _currentView) return;
