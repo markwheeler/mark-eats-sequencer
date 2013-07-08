@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2061" systemVersion="12E55" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2061" systemVersion="12D78" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Sequencer" representedClassName="Sequencer" syncable="YES">
         <attribute name="bpm" attributeType="Float" minValueString="20" maxValueString="300" defaultValueString="100" syncable="YES"/>
-        <attribute name="patternQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="2" syncable="YES"/>
+        <attribute name="patternQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="4" syncable="YES"/>
         <attribute name="stepQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>
         <relationship name="pages" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPage" inverseName="inSequencer" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
