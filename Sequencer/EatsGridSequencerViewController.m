@@ -376,6 +376,8 @@
             }
             
             [self.managedObjectContext save:nil];
+            
+            [self.delegate updateUI];
         }];
         
     });
@@ -446,11 +448,12 @@
                     
                     [self.managedObjectContext save:nil];
                     
+                    [self.delegate updateUI];
+                    
                     [self trackLastPressAtX:x y:y];
                 }];
                 
                 [self updateView];
-                [self.delegate updateUI];
                 
             // Note edit mode
             } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
