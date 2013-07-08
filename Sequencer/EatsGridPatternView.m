@@ -59,8 +59,6 @@
     __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
     [self.managedObjectContext performBlockAndWait:^(void) {
-        
-        [self.managedObjectContext refreshObject:_pattern mergeChanges:YES];
     
         SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
     
