@@ -9,8 +9,6 @@
 #import "EatsDebugGridView.h"
 #import "SequencerState.h"
 #import "SequencerPageState.h"
-#import "SequencerPattern.h"
-#import "SequencerNote.h"
 
 @interface EatsDebugGridView ()
 
@@ -43,106 +41,25 @@
 {
     if( !self.managedObjectContext )
         return;
-
-    // Brightness settings
-    float noteBrightness = 0.0;
-    float lengthBrightness = 0.6;
-    float playheadBrightness = 0.6;
-    float nextStepBrightness = 0.7;
-    float backgroundBrightness = 0.8;
     
     // Get the page state
     SequencerState *sharedSequencerState = [SequencerState sharedSequencerState];
     SequencerPageState *pageState = [sharedSequencerState.pageStates objectAtIndex:_currentPageId];
     
-    // Generate the columns with playhead and nextStep
-    __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
+    // Get the notes
     
-    __block float stateModifier;
+    __block NSArray *matches;
     
-    for(uint x = 0; x < _columns; x++) {
-        [viewArray insertObject:[NSMutableArray arrayWithCapacity:_rows] atIndex:x];
-        // Generate the rows
-        for(uint y = 0; y < _rows; y++) {
-            
-            // Active / inactive
-            if( x < _gridWidth && y < _gridHeight )
-                stateModifier = 0;
-            else
-                stateModifier = 0.1;
-            
-            if( x == pageState.currentStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:playheadBrightness + stateModifier] atIndex:y];
-            else if( pageState.nextStep && x == pageState.nextStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:nextStepBrightness + stateModifier] atIndex:y];
-            else
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithFloat:backgroundBrightness + stateModifier] atIndex:y];
-            
-        }
-    }
-    
-    // Put all the notes in the viewArray
     [self.managedObjectContext performBlockAndWait:^(void) {
-        
-        NSArray *matches;
-        
         NSError *requestError = nil;
-        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
         
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %@) AND (inPage.id == %u)", pageState.currentPatternId, _currentPageId];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern.id == %u) AND (inPattern.inPage.id == %@)", _currentPageId, pageState.currentPatternId];
         matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
-        
-        SequencerPattern *pattern = [matches lastObject];
         
         if( requestError )
             NSLog(@"Request error: %@", requestError);
-        
-        for(SequencerNote *note in pattern.notes) {
-            
-            // Put the length tails in
-            int tailDraw = note.step.intValue;
-            int length =  note.length.intValue - 1;
-            if( length > _columns - 1)
-                length = _columns - 1;
-            
-            for( int i = 0; i < length; i++ ) {
-                if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                    tailDraw --;
-                else
-                    tailDraw ++;
-                
-                if( tailDraw < 0 )
-                    tailDraw += _columns;
-                else if( tailDraw >= _columns )
-                    tailDraw -= _columns;
-                
-                // Active / inactive
-                if( tailDraw < _gridWidth && note.row.intValue < _gridHeight )
-                    stateModifier = 0;
-                else
-                    stateModifier = 0.1;
-                
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > lengthBrightness )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:[NSNumber numberWithFloat:lengthBrightness + stateModifier]];
-                
-            }
-            
-            // Active / inactive
-            if( note.step.intValue < _gridWidth && note.row.intValue < _gridHeight )
-                stateModifier = 0;
-            else
-                stateModifier = 0.5;
-            
-            // Put the notes in
-            [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:[NSNumber numberWithFloat:noteBrightness + stateModifier]];
-
-        }
-
     }];
-    
-    
-    
-    // Draw the viewArray
     
     // Background color for testing
     //[[NSColor colorWithCalibratedHue:0.5 saturation:0.7 brightness:1.0 alpha:1] set];
@@ -170,16 +87,52 @@
             // Set clip so we can do an 'inner' stroke
             [roundedRect setClip];
             
+            // Colours
+            __block float fillBrightness;
+            __block float strokeBrightness;
+            
+            [self.managedObjectContext performBlockAndWait:^(void) {
+                
+                // Notes
+                if( NSNotFound != [matches indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+                    
+                    if ( [[obj valueForKey:@"step"] isEqualTo:[NSNumber numberWithInt:c]] && [[obj valueForKey:@"row"] isEqualTo:[NSNumber numberWithInt:r]] ) {
+                        *stop = YES;
+                        return YES;
+                    }
+                    return NO;
+                    
+                }] ) {
+                    fillBrightness = 0;
+                    strokeBrightness = 0;
+                    
+                // Play head
+                } else if( c == pageState.currentStep.intValue ) {
+                    fillBrightness = 0.6;
+                    strokeBrightness = 0.5;
+                    
+                // Active area
+                } else if( c < _gridWidth && r < _gridHeight ) {
+                    fillBrightness = 0.85;
+                    strokeBrightness = 0.7;
+                    
+                // Inactive area
+                } else {
+                    fillBrightness = 0.9;
+                    strokeBrightness = 0.8;
+                }
+            }];
+            
+            
             // Fill
-            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] alpha:1] set];
+            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:fillBrightness alpha:1] set];
             [roundedRect fill];
             
             
             // Stroke
-            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] - 0.1 alpha:1] set];
+            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:strokeBrightness alpha:1] set];
             [roundedRect setLineWidth:2.0];
             [roundedRect stroke];
-            
         }
     }
 }
