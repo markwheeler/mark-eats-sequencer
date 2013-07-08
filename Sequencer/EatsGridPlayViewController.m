@@ -379,7 +379,10 @@
                     button.inactiveBrightness = 8;
                 // Has some notes
                 else if( isPatternAt )
-                    button.inactiveBrightness = 5;
+                    button.inactiveBrightness = 6;
+                // Is active page
+                else if( pageId == currentPageId )
+                    button.inactiveBrightness = 3;
                 // Nothing
                 else
                     button.inactiveBrightness = 0;
@@ -414,7 +417,7 @@
                         button.inactiveBrightness = 8;
                     // Has some notes
                     else if( isPatternAt )
-                        button.inactiveBrightness = 5;
+                        button.inactiveBrightness = 6;
                     // Nothing
                     else
                         button.inactiveBrightness = 0;
@@ -766,8 +769,11 @@
                     if (numberOfPatterns > 16)
                         numberOfPatterns = 16;
                     
+                    uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
+                    
                     SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns];
-                    pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns];
+                    pageState.nextPatternId = [NSNumber numberWithUnsignedInt:pressedPattern];
+                    
                     
                     // Start fwd playback from loop start
                     if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause ) {
@@ -780,6 +786,10 @@
                         
                         pageState.nextStep = [NSNumber numberWithUnsignedInt:loopStart];
                         pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+                        
+                    // Pause a pattern that is playing
+                    } else if( pageState.currentPatternId.unsignedIntValue == pressedPattern ) {
+                        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
                     }
                 
                 // Smaller grids (change all patterns at once)
