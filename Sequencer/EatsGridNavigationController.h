@@ -12,7 +12,6 @@
 #import "Sequencer+Utils.h"
 #import "SequencerPattern.h"
 #import "SequencerPageState.h"
-#import "SequencerState.h"
 
 typedef enum EatsGridViewType{
     EatsGridViewType_None,
@@ -25,7 +24,6 @@ typedef enum EatsGridViewType{
 @property BOOL                      isActive;
 @property Sequencer                 *sequencer;
 @property SequencerPattern          *currentPattern;
-@property SequencerState            *sequencerState;
 @property SequencerPageState        *currentSequencerPageState;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
@@ -40,12 +38,11 @@ typedef enum EatsGridViewType{
 @property NSManagedObjectContext    *managedObjectContext;
 @property Sequencer                 *sequencer;
 @property SequencerPattern          *currentPattern;
-@property SequencerState            *sequencerState;
 @property SequencerPageState        *currentSequencerPageState;
 @property dispatch_queue_t          bigSerialQueue;
 @property (weak) id                 delegate;
 
-- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencerState:(SequencerState *)sequencerState andQueue:(dispatch_queue_t)queue;
+- (id) initWithManagedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue;
 - (void) updateGridView;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
