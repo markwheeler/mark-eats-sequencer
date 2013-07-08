@@ -14,4 +14,11 @@
 @property uint rows;
 @property uint gutter;
 
+@property uint gridWidth;
+@property uint gridHeight;
+
+@property uint currentPageId;
+
+@property NSManagedObjectContext *managedObjectContext;
+
 @end
