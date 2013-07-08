@@ -86,9 +86,9 @@
 
             if( scaleDifference < 0 ) scaleDifference = 0;
             
-            if( note.step.intValue < self.width && note.row.intValue >= 32 - _patternHeight ) {
+            if( note.step.intValue < self.width && note.row.intValue < _patternHeight ) {
                 
-                uint originalRow = [note.row unsignedIntValue] - 32 + _patternHeight;
+                uint originalRow = _patternHeight - 1 - note.row.unsignedIntValue; // Flip axes here
                 uint row = originalRow;
                 
                 float divisionFactorFloat = (float)_patternHeight / self.height;

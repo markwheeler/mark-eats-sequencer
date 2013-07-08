@@ -173,7 +173,7 @@
     self.sharedPreferences.gridWidth = w - (w % 8);
     self.sharedPreferences.gridHeight = h - (h % 8);
     
-    // Fixed for testing
+    // Fixed grid size for testing
 //    self.sharedPreferences.gridWidth = 8;
 //    self.sharedPreferences.gridHeight = 8;
     
