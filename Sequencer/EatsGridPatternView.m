@@ -78,21 +78,40 @@
             }
         }
         
+        
         // Work out how much we need to fold
         int scaleDifference = _patternHeight - self.height;
-        if( scaleDifference < 0 ) scaleDifference = 0;
         
         for(SequencerNote *note in _pattern.notes) {
+
+            if( scaleDifference < 0 ) scaleDifference = 0;
+            
             if( note.step.intValue < self.width && note.row.intValue >= 32 - _patternHeight ) {
                 
-                uint row = [note.row unsignedIntValue] - 32 + _patternHeight;
+                uint originalRow = [note.row unsignedIntValue] - 32 + _patternHeight;
+                uint row = originalRow;
+                
+                float divisionFactorFloat = (float)_patternHeight / self.height;
+                int divisionFactor = ceilf(divisionFactorFloat);
+                if ( divisionFactor % 2 )
+                    divisionFactor ++;
+                
+                // Note that pattern folding beyond half size is only supported 'from top'
                 
                 // Fold from top
                 if( _foldFrom == EatsPatternViewFoldFrom_Top ) {
-                    if( row < scaleDifference * 2 )
-                        row = row / 2;
-                    else
-                        row -= scaleDifference;
+                    
+                    for( int i = 1; i <= divisionFactor / 2; i ++ ) {
+                        
+                        int scaleDifferenceThisLoop = scaleDifference - ((self.height - 1) * (i - 1));
+                        if( originalRow < scaleDifferenceThisLoop * 2 ) {
+                            row = row / 2;
+                            
+                        } else {
+                            row -= scaleDifferenceThisLoop / i;
+                        }
+
+                    }
                     
                 // Fold from bottom
                 } else if( _foldFrom == EatsPatternViewFoldFrom_Bottom ) {
