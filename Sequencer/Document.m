@@ -82,7 +82,10 @@
     
     _currentPage = currentPage;
     _currentSequencerPageState = [[[SequencerState sharedSequencerState] pageStates] objectAtIndex:currentPage.id.unsignedIntegerValue];
+
     self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@", currentPage];
+    self.pitchesArrayController.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"row" ascending:NO]];
+    
     self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self == %@", currentPage];
     
     [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
@@ -524,7 +527,7 @@
     [self.managedObjectContext performBlock:^(void) {
         NSError *requestError = nil;
         NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row < %u)", self.sharedPreferences.gridWidth, 32 - self.sharedPreferences.gridHeight];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
         
         NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
         
@@ -550,6 +553,8 @@
         [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i] forSegment:i];
         [self.currentPatternSegmentedControl setWidth:28.0 forSegment:i];
     }
+    
+    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@ AND row < %u", self.currentPage, self.sharedPreferences.gridHeight];
 }
 
 - (void) editLabelAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
