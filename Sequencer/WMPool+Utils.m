@@ -31,9 +31,8 @@
     [noteSequence removeObjectsInRange:NSMakeRange(length, noteSequence.count - length)];
 
     //NSLog(@"%@", noteSequence );
-    
-    return noteSequence;
 
+    return [[noteSequence reverseObjectEnumerator] allObjects];
 }
 
 @end
