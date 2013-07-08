@@ -86,13 +86,8 @@
 
 - (void) updateGridView
 {
-    if([_currentViewController respondsToSelector:@selector(updateView)] && _isActive) {
-        
-        //dispatch_async(_bigSerialQueue, ^(void) { ****************************
-            [_currentViewController performSelector:@selector(updateView)];
-        //});
-        
-    }
+    if([_currentViewController respondsToSelector:@selector(updateView)] && _isActive)
+        [_currentViewController performSelector:@selector(updateView)];
 }
 
 - (void) updateUI
