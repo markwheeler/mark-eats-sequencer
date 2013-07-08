@@ -109,8 +109,8 @@
     [self.gridControllerConnectionTimer invalidate];
     
     self.sharedPreferences.gridType = EatsGridType_None;
-    self.sharedPreferences.gridWidth = 32;
-    self.sharedPreferences.gridHeight = 32;
+    self.sharedPreferences.gridWidth = 16;
+    self.sharedPreferences.gridHeight = 16;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
 }
