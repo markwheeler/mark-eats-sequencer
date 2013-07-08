@@ -85,22 +85,25 @@
     }
     
     // Pattern buttons
-    uint numberOfPatterns = self.width;
-    if( numberOfPatterns > 16 )
-        numberOfPatterns = 16;
+        uint numberOfPatterns = self.width;
+        if( numberOfPatterns > 16 )
+            numberOfPatterns = 16;
     
-    _patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
-    for( int i = 0; i < numberOfPatterns; i ++ ) {
-        EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
-        button.delegate = self;
-        button.x = i;
-        button.y = - (self.height - 4) + 3;
-        button.visible = NO;
-        [_patternButtons addObject:button];
+    // Pattern buttons for this page on small grids
+    if( self.height < 16 || self.width < 16 ) {
+        _patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+        for( int i = 0; i < numberOfPatterns; i ++ ) {
+            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+            button.delegate = self;
+            button.x = i;
+            button.y = - (self.height - 4) + 3;
+            button.visible = NO;
+            [_patternButtons addObject:button];
+        }
     }
     
-    // Pattern buttons for other pages
-    if( self.width > 8 ) {
+    // Pattern buttons for other pages on small grids
+    if( self.height < 16 && self.width > 8 ) {
         _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
         for( int i = 0; i < numberOfPatterns; i ++ ) {
             EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
@@ -109,6 +112,24 @@
             button.y = - (self.height - 4) + 2;
             button.visible = NO;
             [_patternsOnOtherPagesButtons addObject:button];
+        }
+    }
+    
+    // Pattern buttons for all pages on large grids
+    if( self.height > 8 && self.width > 8 ) {
+        _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns * 8];
+        // Rows
+        for( int i = 0; i < 8; i ++ ) {
+            // Columns
+            for( int j = 0; j < numberOfPatterns; j ++ ) {
+                EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+                button.delegate = self;
+                button.x = j;
+                button.y = - (self.height - 4) + 2 + i;
+                button.inactiveBrightness = 4;
+                button.visible = NO;
+                [_patternsOnOtherPagesButtons addObject:button];
+            }
         }
     }
     
@@ -322,43 +343,99 @@
         
         uint i;
         
-        // For this page
-        if( pageId == currentPageId ) {
+        // For large grids
+        if( self.height > 8 && self.width > 8 ) {
             
+            NSRange range;
+            range.length = self.width;
+            if (range.length > 16)
+                range.length = 16;
+            range.location = pageId * range.length;
+            
+            NSArray *patternsRow = [_patternsOnOtherPagesButtons subarrayWithRange:range];
+
             i = 0;
-            for ( EatsGridButtonView *button in _patternButtons ) {
-                if( i == pageState.currentPatternId.intValue )
-                    button.buttonState = EatsButtonViewState_Active;
-                else
-                    button.buttonState = EatsButtonViewState_Inactive;
+            for ( EatsGridButtonView *button in patternsRow ) {
                 
                 __block BOOL isPatternAt = NO;
                 
                 [self.managedObjectContext performBlockAndWait:^(void) {
-                    if( [[[_currentPattern.inPage.patterns objectAtIndex:i] notes] count] )
+                    SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
+                    if( [[[page.patterns objectAtIndex:i] notes] count] )
                         isPatternAt = YES;
                 }];
                 
+                // Activate playing
+                if( i == pageState.currentPatternId.intValue && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
+                    button.buttonState = EatsButtonViewState_Active;
+                else
+                    button.buttonState = EatsButtonViewState_Inactive;
+                
+                // Next or current but not yet playing pattern
                 if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
                     button.inactiveBrightness = 8;
+                // Not playing but current pattern
+                else if( i == pageState.currentPatternId.intValue )
+                    button.inactiveBrightness = 8;
+                // Has some notes
                 else if( isPatternAt )
                     button.inactiveBrightness = 5;
+                // Nothing
                 else
                     button.inactiveBrightness = 0;
                 i++;
             }
             
-        // For other pages
-        } else if( pageState.playMode.intValue != EatsSequencerPlayMode_Pause )  {
-            
-            i = 0;
-            for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
-                if( i == pageState.currentPatternId.intValue )
-                    button.buttonState = EatsButtonViewState_Active;
+        // For smaller grids
+        } else {
+            // For this page
+            if( pageId == currentPageId ) {
                 
-                if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
-                    button.inactiveBrightness = 8;
-                i++;
+                i = 0;
+                for ( EatsGridButtonView *button in _patternButtons ) {
+                    __block BOOL isPatternAt = NO;
+                    
+                    [self.managedObjectContext performBlockAndWait:^(void) {
+                        if( [[[_currentPattern.inPage.patterns objectAtIndex:i] notes] count] )
+                            isPatternAt = YES;
+                    }];
+                    
+                    // Activate playing
+                    if( i == pageState.currentPatternId.intValue && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
+                        button.buttonState = EatsButtonViewState_Active;
+                    else
+                        button.buttonState = EatsButtonViewState_Inactive;
+                    
+                    // Not playing but current pattern
+                    if( i == pageState.currentPatternId.intValue )
+                        button.inactiveBrightness = 10;
+                    // Next pattern
+                    else if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
+                        button.inactiveBrightness = 8;
+                    // Has some notes
+                    else if( isPatternAt )
+                        button.inactiveBrightness = 5;
+                    // Nothing
+                    else
+                        button.inactiveBrightness = 0;
+                    i++;
+                }
+                
+            // For other pages
+            } else if( pageState.playMode.intValue != EatsSequencerPlayMode_Pause )  {
+                
+                i = 0;
+                for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
+                    
+                    // Playing pattern
+                    if( i == pageState.currentPatternId.intValue )
+                        button.buttonState = EatsButtonViewState_Active;
+                    
+                    // Next pattern
+                    if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
+                        button.inactiveBrightness = 8;
+                    i++;
+                }
             }
         }
         
@@ -682,14 +759,41 @@
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
-                uint pageId = 0;
-                
-                for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
-                    if( currentPageId != pageId )
-                        pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]];
+                // For large grids
+                if( self.height > 8 && self.width > 8 ) {
                     
-                    pageId ++;
+                    uint numberOfPatterns = self.width;
+                    if (numberOfPatterns > 16)
+                        numberOfPatterns = 16;
+                    
+                    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns];
+                    pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns];
+                    
+                    // Start fwd playback from loop start
+                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause ) {
+                        
+                        __block uint loopStart;
+                        
+                        [self.managedObjectContext performBlockAndWait:^(void) {
+                            loopStart = [[[_sequencer.pages objectAtIndex:0] loopStart] unsignedIntValue];
+                        }];
+                        
+                        pageState.nextStep = [NSNumber numberWithUnsignedInt:loopStart];
+                        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+                    }
+                
+                // Smaller grids (change all patterns at once)
+                } else {
+                    uint pageId = 0;
+                    
+                    for( SequencerPageState *pageState in _sharedSequencerState.pageStates ) {
+                        if( currentPageId != pageId )
+                            pageState.nextPatternId = [NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]];
+                        
+                        pageId ++;
+                    }
                 }
+
                 
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
