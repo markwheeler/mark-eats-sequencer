@@ -10,6 +10,7 @@
 #import <Foundation/Foundation.h>
 #import "EatsClock.h"
 #import "Sequencer.h"
+#import "SequencerState.h"
 
 @protocol ClockTickDelegateProtocol
 @property BOOL isActive;
@@ -35,6 +36,6 @@
 - (void) clockTick:(uint64_t)ns;
 - (void) clockLateBy:(uint64_t)ns;
 
-- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context;
+- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencerState:(SequencerState *)sequencerState;
 
 @end

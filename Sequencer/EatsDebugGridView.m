@@ -52,8 +52,7 @@
     float backgroundBrightness = 0.8;
     
     // Get the page state
-    SequencerState *sharedSequencerState = [SequencerState sharedSequencerState];
-    SequencerPageState *pageState = [sharedSequencerState.pageStates objectAtIndex:_currentPageId];
+    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPageId];
     
     // Generate the columns with playhead and nextStep
     __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
