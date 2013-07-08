@@ -10,7 +10,6 @@
 #import <Foundation/Foundation.h>
 #import "EatsGridSubView.h"
 #import "SequencerPattern.h"
-#import "SequencerState.h"
 
 @class EatsGridPatternView;
 
@@ -37,7 +36,6 @@ typedef enum EatsPatternViewFoldFrom {
 
 @property NSManagedObjectContext    *managedObjectContext;
 @property SequencerPattern          *pattern;
-@property SequencerState            *sequencerState;
 
 @property uint                      patternHeight;
 @property SequencerNote             *activeEditNote;
