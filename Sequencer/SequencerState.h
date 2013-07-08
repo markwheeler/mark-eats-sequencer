@@ -12,6 +12,7 @@
 
 @property NSArray   *pageStates;
 
++ (id) sharedSequencerState;
 - (void) createPageStates:(uint)numberOfPages;
 
 @end
