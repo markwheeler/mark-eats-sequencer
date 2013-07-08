@@ -23,7 +23,6 @@
 
 @property Sequencer                 *sequencer;
 @property SequencerPage             *currentPage;
-@property SequencerState            *sequencerState;
 @property SequencerPageState        *currentSequencerPageState;
 
 @property BOOL                      isActive;
