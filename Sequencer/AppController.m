@@ -181,12 +181,6 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
 }
 
-- (void) updateUI
-{
-    EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
-    [documentController.lastActiveDocument updateUI];
-}
-
 
 
 #pragma mark - MIDI Manager delegate methods

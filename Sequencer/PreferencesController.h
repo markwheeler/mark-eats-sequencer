@@ -14,7 +14,6 @@
 
 - (void) gridControllerNone;
 - (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
-- (void) updateUI;
 
 @end
 
