@@ -29,7 +29,7 @@ typedef enum EatsStepAdvance {
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
-@property SequencerState                *sharedSequencerState;
+@property SequencerState                *sequencerState;
 @property Sequencer                     *sequencer;
 
 @property uint              currentTick;
@@ -42,13 +42,13 @@ typedef enum EatsStepAdvance {
 
 #pragma mark - Public methods
 
-- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context
+- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencerState:(SequencerState *)sequencerState
 {
     self = [super init];
     if (self) {
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
-        _sharedSequencerState = [SequencerState sharedSequencerState];
+        _sequencerState = sequencerState;
         _managedObjectContext = context;
         
         [self.managedObjectContext performBlockAndWait:^(void) {
@@ -170,7 +170,7 @@ typedef enum EatsStepAdvance {
                 [self.managedObjectContext refreshObject:_sequencer mergeChanges:YES];
                 [self.managedObjectContext refreshObject:page mergeChanges:YES];
                 
-                SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
+                SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
                 
                 // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
                 EatsStepAdvance needsToAdvance = [self needToAdvanceStep:page];
@@ -332,7 +332,7 @@ typedef enum EatsStepAdvance {
                 
             }
             
-            // Tell the delegate to update the interface MOVED THIS ABOVE FOR NOW SO IT ONLY GETS CALLED 
+            // Tell the delegate to update the interface
             if( aPageNeedsToAdvance && [_delegate respondsToSelector:@selector(updateUI)] )
                 [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
             
@@ -358,7 +358,7 @@ typedef enum EatsStepAdvance {
 
 - (EatsStepAdvance) needToAdvanceStep:(SequencerPage *)page
 {
-    SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
+    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
     
     // If the page has been scrubbed
     if( pageState.nextStep && _currentTick % (_ticksPerMeasure / page.inSequencer.stepQuantization.intValue) == 0 ) {
@@ -428,7 +428,7 @@ typedef enum EatsStepAdvance {
         
         // Calculate swing
         SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
-        SequencerPageState *pageState = [_sharedSequencerState.pageStates objectAtIndex:pageForNote.id.unsignedIntegerValue];
+        SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:pageForNote.id.unsignedIntegerValue];
         uint64_t nsSwing = 0;
         
         // We only add swing when playing forward or reverse
