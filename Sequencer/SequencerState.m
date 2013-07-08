@@ -11,16 +11,6 @@
 
 @implementation SequencerState
 
-+ (id) sharedSequencerState
-{
-    static SequencerState *sharedSequencerState = nil;
-    @synchronized(self) {
-        if (sharedSequencerState == nil)
-            sharedSequencerState = [[self alloc] init];
-    }
-    return sharedSequencerState;
-}
-
 - (void) createPageStates:(uint)numberOfPages
 {
     NSMutableArray *pages = [NSMutableArray arrayWithCapacity:numberOfPages];
