@@ -700,16 +700,8 @@
 {
     if( _patternView.wipe >= 100 ) {
         [self stopClear];
-
-        dispatch_async(self.bigSerialQueue, ^(void) {
-            
-            [self.managedObjectContext performBlockAndWait:^(void) {
-                [Sequencer clearPattern:_currentPattern];
-                [self.managedObjectContext save:nil];
-            }];
-            
-            [self.delegate updateUI];
-        });
+        NSLog(@"TODO: Clear pattern");
+        // TODO: Link this back to the document method to avoid doubling up? Or create a method in Sequencer that clears?
         
     } else {
         _patternView.wipe = _patternView.wipe + 10;
