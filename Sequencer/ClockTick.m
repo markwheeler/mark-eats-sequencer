@@ -248,13 +248,23 @@ typedef enum EatsStepAdvance {
                     // OK now we know what the step is we can get on with acting upon it!
                     
                     
-                    // Position of step in the loop 0 - minQuantization
+                    // Position of step in the loop 0 - minQuantization (unless loop is shorter)
                     uint position = ( pageState.currentStep.intValue * ( _minQuantization / page.stepLength.intValue ) );
                     
-                    // TODO Pattern quantization doesn't do what it's supposed to! It just jumps depending on your position in the loop :(
+                    // Use the appropriate value if pattern quantization is set to none
+                    int patternQuantization = _sequencer.patternQuantization.intValue;
+                    if( patternQuantization == 0 )
+                        patternQuantization = _sharedPreferences.gridWidth;
+                    
+                    // Position of step within loop 0 – minQuantization
+                    int positionWithinLoop;
+                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                        positionWithinLoop = ( ((_sharedPreferences.gridWidth - 1 - pageState.currentStep.floatValue) / _sharedPreferences.gridWidth) * _minQuantization );
+                    else
+                        positionWithinLoop = ( (pageState.currentStep.floatValue / _sharedPreferences.gridWidth) * _minQuantization );
                     
                     // Check if we need to advance the pattern (depending on where we are within it)
-                    if( pageState.nextPatternId && position % (_minQuantization / _sequencer.patternQuantization.intValue ) == 0 ) {
+                    if( pageState.nextPatternId && positionWithinLoop % (_minQuantization / patternQuantization ) == 0 ) {
                         pageState.currentPatternId = [pageState.nextPatternId copy];
                         pageState.nextPatternId = nil;
                     }

@@ -310,7 +310,7 @@
 											<int key="NSvFlags">256</int>
 											<string key="NSFrameSize">{88, 306}</string>
 											<reference key="NSSuperview" ref="426589572"/>
-											<reference key="NSNextKeyView" ref="865576460"/>
+											<reference key="NSNextKeyView" ref="26908012"/>
 											<string key="NSReuseIdentifierKey">_NS:13</string>
 											<bool key="NSEnabled">YES</bool>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -461,7 +461,7 @@
 							</array>
 							<string key="NSFrame">{{475, 55}, {90, 308}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
-							<reference key="NSNextKeyView" ref="26908012"/>
+							<reference key="NSNextKeyView" ref="426589572"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<int key="NSsFlags">133650</int>
 							<reference key="NSVScroller" ref="865576460"/>

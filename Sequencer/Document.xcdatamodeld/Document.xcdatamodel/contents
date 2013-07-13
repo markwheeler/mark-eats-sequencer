@@ -2,7 +2,7 @@
 <model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2061" systemVersion="12E55" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Sequencer" representedClassName="Sequencer" syncable="YES">
         <attribute name="bpm" attributeType="Float" minValueString="20" maxValueString="300" defaultValueString="100" syncable="YES"/>
-        <attribute name="patternQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="2" syncable="YES"/>
+        <attribute name="patternQuantization" attributeType="Integer 16" minValueString="0" maxValueString="32" defaultValueString="2" syncable="YES"/>
         <attribute name="stepQuantization" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>
         <relationship name="pages" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPage" inverseName="inSequencer" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
@@ -43,7 +43,7 @@
         <relationship name="inPage" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="pitches" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="103"/>
+        <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="105"/>
         <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
         <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="238"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>

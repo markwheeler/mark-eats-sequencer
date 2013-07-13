@@ -23,4 +23,6 @@
 @property SequencerState         *sequencerState;
 @property NSManagedObjectContext *managedObjectContext;
 
+@property BOOL                   patternQuantizationOn;
+
 @end

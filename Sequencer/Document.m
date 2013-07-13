@@ -32,7 +32,8 @@
 @property EatsGridNavigationController  *gridNavigationController;
 @property ScaleGeneratorSheetController *scaleGeneratorSheetController;
 
-@property NSMutableArray                *quantizationArray;
+@property NSMutableArray                *stepQuantizationArray;
+@property NSMutableArray                *patternQuantizationArray;
 @property NSArray                       *swingArray;
 
 @property NSAlert                       *notesOutsideGridAlert;
@@ -155,8 +156,8 @@
         // Get the prefs singleton
         self.sharedPreferences = [Preferences sharedPreferences];
         
-        // Create the quantization settings
-        self.quantizationArray = [NSMutableArray array];
+        // Create the step quantization settings
+        self.stepQuantizationArray = [NSMutableArray array];
         int quantizationSetting = MIN_QUANTIZATION;
         while ( quantizationSetting >= MAX_QUANTIZATION ) {
             
@@ -167,7 +168,7 @@
             else
                 [quantization setObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] forKey:@"label"];
             
-            [self.quantizationArray insertObject:quantization atIndex:0];
+            [self.stepQuantizationArray insertObject:quantization atIndex:0];
             quantizationSetting = quantizationSetting / 2;
         }
         
@@ -356,6 +357,8 @@
 - (void) updateUI
 {
     _debugGridView.needsDisplay = YES;
+    [self updateCurrentPattern];
+    
     [self.gridNavigationController updateGridView];
 }
 
@@ -400,14 +403,14 @@
     self.debugGridView.needsDisplay = YES;
     
     [self.stepQuantizationPopup removeAllItems];
-    [self.patternQuantizationPopup removeAllItems];
     [self.stepLengthPopup removeAllItems];
     
-    for( NSDictionary *quantization in self.quantizationArray) {
+    for( NSDictionary *quantization in self.stepQuantizationArray) {
         [self.stepQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
-        [self.patternQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
         [self.stepLengthPopup addItemWithTitle:[quantization valueForKey:@"label"]];
     }
+    
+    [self setupPatternQuantizationPopup];
     
     [self updateStepQuantizationPopup];
     [self updatePatternQuantizationPopup];
@@ -431,6 +434,35 @@
     self.rowPitchesTableView.delegate = self;
 }
 
+- (void) setupPatternQuantizationPopup
+{
+    [self.patternQuantizationPopup removeAllItems];
+    
+    // Create the pattern quantization settings
+    self.patternQuantizationArray = [NSMutableArray array];
+    int quantizationSetting = self.sharedPreferences.gridWidth;
+    while ( quantizationSetting >= MAX_QUANTIZATION ) {
+        
+        NSMutableDictionary *quantization = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:quantizationSetting], @"quantization", nil];
+        
+        if( quantizationSetting == 1)
+            [quantization setObject:[NSString stringWithFormat:@"1 loop"] forKey:@"label"];
+        else
+            [quantization setObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] forKey:@"label"];
+        
+        [self.patternQuantizationArray insertObject:quantization atIndex:0];
+        quantizationSetting = quantizationSetting / 2;
+    }
+    
+    NSDictionary *zeroQuantization = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"quantization", [NSString stringWithFormat:@"None"], @"label", nil];
+    [self.patternQuantizationArray insertObject:zeroQuantization atIndex:0];
+    
+    // Put them in the popup
+    for( NSDictionary *quantization in self.patternQuantizationArray) {
+        [self.patternQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
+    }
+}
+
 - (void) updateSequencerPageUI
 {
     [self updateStepLengthPopup];
@@ -452,21 +484,51 @@
 
 - (void) updateStepQuantizationPopup
 {
-    [self.stepQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+    [self.stepQuantizationPopup selectItemAtIndex:[self.stepQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
         return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.stepQuantization];
     }]];
 }
 
 - (void) updatePatternQuantizationPopup
 {
-    [self.patternQuantizationPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+    NSUInteger index = [self.patternQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
         return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencer.patternQuantization];
-    }]];
+    }];
+    
+    if( index == NSNotFound )
+        index = self.patternQuantizationPopup.itemArray.count - 1;
+    
+    [self.patternQuantizationPopup selectItemAtIndex:index];
+    
+    if( [[self.patternQuantizationArray objectAtIndex:index] valueForKey:@"quantization"] == 0 )
+        self.debugGridView.patternQuantizationOn = NO;
+    else
+        self.debugGridView.patternQuantizationOn = YES;
+    
 }
 
 - (void) updateCurrentPattern
 {
-    self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.currentPatternId.integerValue;
+    __block BOOL patternQuantizationOn = NO;
+    
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            if( self.sequencer.patternQuantization.unsignedIntValue > 0 )
+                patternQuantizationOn = YES;
+            
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                
+                // If pattern quantization is disabled
+                if( !patternQuantizationOn && _currentSequencerPageState.nextPatternId ) {
+                    self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.nextPatternId.intValue;
+                    
+                } else {
+                    self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.currentPatternId.intValue;
+                }
+                
+            });
+        }];
+    });
 }
 
 - (void) updatePlayMode
@@ -476,7 +538,7 @@
 
 - (void) updateStepLengthPopup
 {
-    [self.stepLengthPopup selectItemAtIndex:[self.quantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+    [self.stepLengthPopup selectItemAtIndex:[self.stepQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
         return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPage.stepLength];
     }]];
 }
@@ -609,13 +671,15 @@
                 NSLog(@"Request error: %@", requestError);
 
             if( count > 0 && !self.notesOutsideGridAlert ) {
-                 self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
-                                                              defaultButton:@"Leave notes"
-                                                            alternateButton:@"Remove notes"
-                                                                otherButton:nil
-                                                  informativeTextWithFormat:@"Would you like to remove these %lu notes?", count];
-                
-                [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
+                                                                  defaultButton:@"Leave notes"
+                                                                alternateButton:@"Remove notes"
+                                                                    otherButton:nil
+                                                      informativeTextWithFormat:@"Would you like to remove these %lu notes?", count];
+                    
+                    [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+                });
             }
         }];
         
@@ -650,6 +714,10 @@
             [self updatePitchesPredicateForPage:currentPageId];
         });
     });
+    
+    // Pattern quantization
+    [self setupPatternQuantizationPopup];
+    [self updatePatternQuantizationPopup];
 }
 
 - (void) editLabelAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
@@ -734,7 +802,7 @@
 {
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
-            self.sequencer.stepQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+            self.sequencer.stepQuantization = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
         }];
     });
 }
@@ -743,7 +811,7 @@
 {
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
-            self.sequencer.patternQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+            self.sequencer.patternQuantization = [[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
         }];
     });
 }
@@ -781,8 +849,25 @@
 
 - (IBAction)currentPatternSegmentedControl:(NSSegmentedControl *)sender
 {
+    __block BOOL patternQuantizationOn = NO;
+    
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            if( self.sequencer.patternQuantization.unsignedIntValue > 0 )
+                patternQuantizationOn = YES;
+        }];
+    });
+    
     self.currentSequencerPageState.nextPatternId = [NSNumber numberWithInteger:sender.selectedSegment];
-    [sender setSelectedSegment:self.currentSequencerPageState.currentPatternId.integerValue];
+    
+    // If pattern quantization is disabled
+    if( !patternQuantizationOn ) {
+        [self updateUI];
+        [self.gridNavigationController updateGridView];
+        
+    } else {
+        [sender setSelectedSegment:self.currentSequencerPageState.currentPatternId.integerValue];
+    }
 }
 
 - (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
@@ -876,7 +961,7 @@
 {
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
-            self.currentPage.stepLength = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+            self.currentPage.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
         }];
     });
 }

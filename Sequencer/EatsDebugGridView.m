@@ -11,6 +11,7 @@
 #import "SequencerPageState.h"
 #import "SequencerPattern.h"
 #import "SequencerNote.h"
+#import "Sequencer+Utils.h"
 
 @interface EatsDebugGridView ()
 
@@ -112,13 +113,23 @@
         }
     }
     
-    // Put all the notes in the viewArray
+        // Put all the notes in the viewArray
         NSArray *matches;
         
         NSError *requestError = nil;
         NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+    
+        int patternId;
+    
+        // If pattern quantization is disabled
+        //NSLog(@"%i", _sequencer.patternQuantization.intValue);
+        if( !_patternQuantizationOn && pageState.nextPatternId )
+            patternId = pageState.nextPatternId.intValue;
+
+        else
+            patternId = pageState.currentPatternId.intValue;
         
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %@) AND (inPage.id == %u)", pageState.currentPatternId, _currentPageId];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %i) AND (inPage.id == %u)", patternId, _currentPageId];
         matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
         
         SequencerPattern *pattern = [matches lastObject];

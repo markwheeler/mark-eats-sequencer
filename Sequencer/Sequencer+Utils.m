@@ -26,7 +26,7 @@
     NSMutableOrderedSet *setOfPages = [NSMutableOrderedSet orderedSetWithCapacity:numberOfPages];
     for( int i = 0; i < numberOfPages; i++) {
         
-        // Create a page and setup the channels (TODO: make this a method on SequencerPage)
+        // Create a page and setup the channels
         
         SequencerPage *page = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerPage" inManagedObjectContext:context];
         uint channel = i;
@@ -41,7 +41,6 @@
         page.loopEnd = [NSNumber numberWithUnsignedInt: 31];
         
         // Create the default pitches
-        // TODO Make these line up better with the grid (tonic note on last row?)
         
         NSArray *sequenceOfNotes;
         
