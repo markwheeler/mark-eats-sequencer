@@ -24,7 +24,8 @@
 typedef enum EatsPatternViewMode {
     EatsPatternViewMode_Edit,
     EatsPatternViewMode_NoteEdit,
-    EatsPatternViewMode_Play
+    EatsPatternViewMode_Play,
+    EatsPatternViewMode_Locked
 } EatsPatternViewMode;
 
 typedef enum EatsPatternViewFoldFrom {

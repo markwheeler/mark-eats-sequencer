@@ -89,9 +89,12 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
+    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
+    
+    _patternView.mode = EatsPatternViewMode_Locked;
+    
     dispatch_async(self.bigSerialQueue, ^(void) {
     
-        if( _animationTimer ) return;
         _animationFrame = 0;
         
         __block int noteRow;
@@ -105,12 +108,12 @@
         }];
         
         // Display sliders at bottom
-        if( noteRow < 32 - ( self.height / 2 ) ) {
+        if( noteRow > ( self.height / 2 ) - 1 ) {
             _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
             _velocityView.y = self.height - 1;
             _velocityView.visible = YES;
             
-            // Display sliders at top
+        // Display sliders at top
         } else {
             _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
             _patternView.y = 1;
@@ -120,7 +123,6 @@
         
         _patternView.height = self.height - 1;
         _patternView.activeEditNote = note;
-        _patternView.mode = EatsPatternViewMode_NoteEdit;
         
         _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
         _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
@@ -153,9 +155,12 @@
 
 - (void) exitNoteEditMode
 {
+    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
+    
+    _patternView.mode = EatsPatternViewMode_Locked;
+    
     dispatch_async(self.bigSerialQueue, ^(void) {
     
-        if( _animationTimer ) return;
         _animationFrame = 0;
         
         // To bottom
@@ -227,6 +232,9 @@
         _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
         
         if( _animationFrame == 1 ) { // Final frame
+
+            _patternView.mode = EatsPatternViewMode_NoteEdit;
+            
             [timer invalidate];
             _animationTimer = nil;
         }
@@ -261,13 +269,14 @@
         _patternView.noteBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
         _patternView.noteLengthBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
         
-        _patternView.activeEditNote = nil;
-        _patternView.mode = EatsPatternViewMode_Edit;
-        
-        _activeEditNote = nil;
-        
-        
         if( _animationFrame == 1 ) { // Final frame
+            
+            _patternView.activeEditNote = nil;
+            _patternView.mode = EatsPatternViewMode_Edit;
+            
+            _activeEditNote = nil;
+
+            
             [timer invalidate];
             _animationTimer = nil;
         }
@@ -388,6 +397,8 @@
 
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
 {
+    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
+    
     dispatch_async(self.bigSerialQueue, ^(void) {
         
         // The logic in this function is kind of messy given how complex it is to know when a user is double pressing vs adding/removing
@@ -486,6 +497,7 @@
 
 - (void) eatsGridPatternViewDoublePressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender
 {
+    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
     
     dispatch_async(self.bigSerialQueue, ^(void) {
     
