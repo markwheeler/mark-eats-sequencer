@@ -58,8 +58,6 @@
     
     [self.managedObjectContext performBlockAndWait:^(void) {
         
-        [self.managedObjectContext refreshObject:_pattern mergeChanges:YES];
-        
         // Get the NSNumber objects ready so we don't have to create loads of them in the for loops
         NSNumber *wipeBrighnessResult = [NSNumber numberWithInt:15 * self.opacity];
         NSNumber *playheadBrighnessResult = [NSNumber numberWithInt:_playheadBrightness * self.opacity];

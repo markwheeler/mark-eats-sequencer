@@ -373,10 +373,10 @@
                     button.buttonState = EatsButtonViewState_Inactive;
                 
                 // Next or current but not yet playing pattern
-                if( i == pageState.nextPatternId.intValue && pageState.nextPatternId )
+                if( i == pageState.nextPatternId.intValue && pageState.nextPatternId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
                     button.inactiveBrightness = 8;
                 // Not playing but current pattern
-                else if( i == pageState.currentPatternId.intValue )
+                else if( i == pageState.currentPatternId.intValue && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
                     button.inactiveBrightness = 8;
                 // Has some notes
                 else if( isPatternAt )
@@ -475,7 +475,6 @@
 - (void) setLoopBraceViewStartAndEnd
 {
     [self.managedObjectContext performBlockAndWait:^(void) {
-        [self.managedObjectContext refreshObject:_currentPattern.inPage mergeChanges:YES];
         _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:_currentPattern.inPage.loopStart.intValue width:self.width];
         _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:_currentPattern.inPage.loopEnd.intValue width:self.width];
     }];
@@ -483,7 +482,7 @@
 
 - (void) setLoopStart:(NSNumber *)startStep andEnd:(NSNumber *)endStep
 {
-    [self.managedObjectContext performBlockAndWait:^(void) {
+    [self.managedObjectContext performBlock:^(void) {
         _currentPattern.inPage.loopStart = startStep;
         _currentPattern.inPage.loopEnd = endStep;
         [self.managedObjectContext save:nil];

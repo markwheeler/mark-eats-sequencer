@@ -113,8 +113,6 @@
     }
     
     // Put all the notes in the viewArray
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        
         NSArray *matches;
         
         NSError *requestError = nil;
@@ -168,9 +166,6 @@
                 [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightnessInactive];
             
         }
-
-    }];
-    
     
     
     // Draw the viewArray

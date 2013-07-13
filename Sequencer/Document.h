@@ -19,7 +19,7 @@
 #import "SequencerState.h"
 #import "SequencerPageState.h"
 
-@interface Document : NSPersistentDocument <ClockTickDelegateProtocol>
+@interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate>
 
 @property Sequencer                 *sequencer;
 @property SequencerPage             *currentPage;
@@ -28,7 +28,7 @@
 
 @property BOOL                      isActive;
 
-@property NSManagedObjectContext    *childManagedObjectContext;
+@property NSManagedObjectContext    *managedObjectContextForMainThread;
 @property Preferences               *sharedPreferences;
 
 @property dispatch_queue_t          bigSerialQueue;

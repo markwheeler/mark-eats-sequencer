@@ -83,18 +83,38 @@
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
     
-    _currentPage = currentPage;
-    _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:currentPage.id.unsignedIntegerValue];
-
-    [self updatePitchesPredicate];
+    [self.currentPage removeObserver:self forKeyPath:@"stepLength"];
+    [self.currentPage removeObserver:self forKeyPath:@"swing"];
+    
     self.pitchesArrayController.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"row" ascending:NO]];
     
-    self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self == %@", currentPage];
+    __block NSNumber *pageId;
+
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+
+            pageId = currentPage.id;
+            
+            _currentPage = currentPage;
+            _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:pageId.unsignedIntegerValue];
+            
+        }];
+        
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            
+            [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+            [self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
+            
+            [self.currentPage addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
+            [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
+            
+            [self updatePitchesPredicateForPage:pageId.intValue];
+            self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self.id == %@", pageId];
+            
+            [self updateSequencerPageUI];
+        });
+    });
     
-    [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
-    
-    [self updateSequencerPageUI];
 }
 
 - (SequencerPage *) currentPage
@@ -116,15 +136,23 @@
         
         self.isActive = NO;
         
-        // Replace the NSPersistentDocument's MOC with a new one that can be used as a parent
-        NSManagedObjectContext *parentMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        // Replace the NSPersistentDocument's MOC with a new one that has a PrivateQueue and can be used as a parent
+        NSManagedObjectContext *parentMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
         parentMOC.persistentStoreCoordinator = self.managedObjectContext.persistentStoreCoordinator;
+        parentMOC.undoManager = self.managedObjectContext.undoManager;
         self.managedObjectContext = parentMOC;
         
-        // Create a child MOC with a private queue for use in background threads etc
-        self.childManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-        self.childManagedObjectContext.parentContext = self.managedObjectContext;
+        // Create a child MOC for use on the main thead in bindings etc
+        self.managedObjectContextForMainThread = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        self.managedObjectContextForMainThread.parentContext = self.managedObjectContext;
         
+        // Register for MOC notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(parentMOCSaved:)
+                                                     name:NSManagedObjectContextDidSaveNotification
+                                                   object:self.managedObjectContext];
+        
+        // Get the prefs singleton
         self.sharedPreferences = [Preferences sharedPreferences];
         
         // Create the quantization settings
@@ -217,14 +245,13 @@
     
     // Create a Clock and set it up
     
-    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.childManagedObjectContext andSequencerState:self.sequencerState];
+    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:self.sequencerState];
     self.clockTick.delegate = self;
     self.clockTick.ppqn = PPQN;
     self.clockTick.ticksPerMeasure = TICKS_PER_MEASURE;
     self.clockTick.midiClockPPQN = MIDI_CLOCK_PPQN;
     self.clockTick.minQuantization = MIN_QUANTIZATION;
     self.clockTick.qnPerMeasure = QN_PER_MEASURE;
-    self.clockTick.managedObjectContext = self.childManagedObjectContext;
     
     self.clock = [[EatsClock alloc] init];
     self.clock.delegate = self.clockTick;
@@ -247,7 +274,7 @@
     [self.currentPage addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.childManagedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
+    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
     self.gridNavigationController.delegate = self;
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -356,6 +383,7 @@
         
         [self.managedObjectContext performBlockAndWait:^(void) {
             [Sequencer clearPattern:[_currentPage.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue]];
+            [self.managedObjectContext save:nil];
         }];
 
         [self updateUI];
@@ -367,7 +395,7 @@
 
 - (void) setupUI
 {
-    self.debugGridView.managedObjectContext = self.managedObjectContext;
+    self.debugGridView.managedObjectContext = self.managedObjectContextForMainThread;
     self.debugGridView.sequencerState = self.sequencerState;
     self.debugGridView.needsDisplay = YES;
     
@@ -400,6 +428,7 @@
     // Table view default sort
     NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: YES];
     [self.rowPitchesTableView setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    self.rowPitchesTableView.delegate = self;
 }
 
 - (void) updateSequencerPageUI
@@ -484,14 +513,24 @@
         [self updateSwingPopup];
 }
 
-- (void) updatePitchesPredicate
+- (void) updatePitchesPredicateForPage:(int)pageId
 {
-    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage == %@ AND row < %u", self.currentPage, self.sharedPreferences.gridHeight];
+    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage.id == %i AND row < %u", pageId, self.sharedPreferences.gridHeight];
 }
 
 
 
 #pragma mark - Private methods
+
+- (void) parentMOCSaved:(NSNotification *)notification
+{
+    [self.managedObjectContextForMainThread mergeChangesFromContextDidSaveNotification:notification];
+}
+
+- (void) childMOCChanged
+{
+    [self.managedObjectContextForMainThread save:nil];
+}
 
 - (void) externalClockStart:(NSNotification *)notification
 {
@@ -600,7 +639,17 @@
     }
     
     // Pitch list
-    [self updatePitchesPredicate];
+    __block int currentPageId;
+    
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            currentPageId = _currentPage.id.intValue;
+        }];
+        
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            [self updatePitchesPredicateForPage:currentPageId];
+        });
+    });
 }
 
 - (void) editLabelAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
@@ -654,8 +703,21 @@
 #pragma mark - Interface actions
 
 - (IBAction)bpmStepper:(NSStepper *)sender
+{    
+    [self childMOCChanged];
+    
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
+            [self.managedObjectContext save:nil];
+        }];
+    });
+}
+
+
+- (IBAction)bpmTextField:(NSTextField *)sender
 {
-    self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
+    [self childMOCChanged];
 }
 
 - (IBAction)sequencerPlaybackControls:(NSSegmentedControl *)sender
@@ -670,17 +732,29 @@
 
 - (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
 {
-    self.sequencer.stepQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.sequencer.stepQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+        }];
+    });
 }
 
 - (IBAction) patternQuantizationPopup:(NSPopUpButton *)sender
 {
-    self.sequencer.patternQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.sequencer.patternQuantization = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+        }];
+    });
 }
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
 {
-    self.currentPage = [self.sequencer.pages objectAtIndex:sender.selectedSegment];
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.currentPage = [self.sequencer.pages objectAtIndex:sender.selectedSegment];
+        }];
+    });
 }
 
 - (IBAction) editLabelButton:(NSButton *)sender
@@ -688,7 +762,12 @@
     // Make a text field, add it to an alert and then show it so you can edit the page name
     
     NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
-    accessoryTextField.stringValue = self.currentPage.name;
+    
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            accessoryTextField.stringValue = self.currentPage.name;
+        }];
+    });
     
     NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
                                                  defaultButton:@"OK"
@@ -734,37 +813,49 @@
     [self updateUI];
 }
 
+- (void)controlTextDidEndEditing:(NSNotification *)obj
+{
+    [self childMOCChanged];
+}
 
 - (IBAction) scalesOpenSheetButton:(NSButton *)sender {
     if (!self.scaleGeneratorSheetController) {
         self.scaleGeneratorSheetController = [[ScaleGeneratorSheetController alloc] init];
         [self.scaleGeneratorSheetController beginSheetModalForWindow:self.documentWindow completionHandler:^(NSUInteger returnCode) {
             
+        NSString *noteName = self.scaleGeneratorSheetController.tonicNoteName;
+        NSString *scaleMode = self.scaleGeneratorSheetController.scaleMode;
+            
             // Generate the scale
             if (returnCode == NSOKButton) {
                 
-                // Check what note the user entered
-                NSString *noteName = self.scaleGeneratorSheetController.tonicNoteName;
-                WMNote *tonicNote;
-                if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
-                    tonicNote = [[WMPool pool] noteWithMidiNoteNumber:noteName.intValue]; // Lookup by MIDI value if they enetered a number
-                else
-                    tonicNote = [[WMPool pool] noteWithShortName:noteName]; // Otherwise use the short name
-                
-                // If we found a note then generate the sequence
-                if( tonicNote ) {
-                    // Generate pitches
-                    NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:self.scaleGeneratorSheetController.scaleMode length:32];
-                    
-                    // Put them into the page
-                    int r = 0;
-                    
-                    for( WMNote *note in sequenceOfNotes ) {
-                        SequencerRowPitch *rowPitch = [self.currentPage.pitches objectAtIndex:r];
-                        rowPitch.pitch = [NSNumber numberWithInt:note.midiNoteNumber];
-                        r++;
-                    }
-                }
+                dispatch_async(self.bigSerialQueue, ^(void) {
+                    [self.managedObjectContext performBlock:^(void) {
+                        // Check what note the user entered
+                        WMNote *tonicNote;
+                        if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
+                            tonicNote = [[WMPool pool] noteWithMidiNoteNumber:noteName.intValue]; // Lookup by MIDI value if they enetered a number
+                        else
+                            tonicNote = [[WMPool pool] noteWithShortName:noteName]; // Otherwise use the short name
+                        
+                        // If we found a note then generate the sequence
+                        if( tonicNote ) {
+
+                            // Generate pitches
+                            NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:scaleMode length:32];
+
+                            // Put them into the page
+                            int r = 0;
+                            
+                            for( WMNote *note in sequenceOfNotes ) {
+                                SequencerRowPitch *rowPitch = [self.currentPage.pitches objectAtIndex:r];
+                                rowPitch.pitch = [NSNumber numberWithInt:note.midiNoteNumber];
+                                r++;
+                            }
+                        }
+                        [self.managedObjectContext save:nil];
+                    }];
+                });
                 
             // Cancel
             } else if (returnCode == NSCancelButton) {
@@ -783,15 +874,28 @@
 
 - (IBAction) stepLengthPopup:(NSPopUpButton *)sender
 {
-    self.currentPage.stepLength = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.currentPage.stepLength = [[self.quantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+        }];
+    });
 }
 
 - (IBAction)swingPopup:(NSPopUpButton *)sender
 {
     NSUInteger index = [sender indexOfSelectedItem];
     
-    self.currentPage.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
-    self.currentPage.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.currentPage.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
+            self.currentPage.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
+        }];
+    });
+}
+
+- (IBAction)velocityGrooveCheckbox:(NSButton *)sender
+{
+    [self childMOCChanged];
 }
 
 @end
