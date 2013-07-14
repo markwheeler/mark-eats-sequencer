@@ -325,6 +325,7 @@
     // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
     self.gridNavigationController.delegate = self;
+    self.gridNavigationController.isActive = self.isActive;
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
@@ -400,8 +401,9 @@
 
 - (void) updateUI
 {
-    _debugGridView.needsDisplay = YES;
     [self updateCurrentPattern];
+    
+    _debugGridView.needsDisplay = YES;
     
     [self.gridNavigationController updateGridView];
 }
@@ -546,7 +548,7 @@
     
     [self.patternQuantizationPopup selectItemAtIndex:index];
     
-    if( [[self.patternQuantizationArray objectAtIndex:index] valueForKey:@"quantization"] == 0 )
+    if( [[[self.patternQuantizationArray objectAtIndex:index] valueForKey:@"quantization"] intValue] == 0 )
         self.debugGridView.patternQuantizationOn = NO;
     else
         self.debugGridView.patternQuantizationOn = YES;
@@ -850,17 +852,20 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
             self.sequencer.stepQuantization = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+            [self.managedObjectContext save:nil];
         }];
     });
 }
 
 - (IBAction) patternQuantizationPopup:(NSPopUpButton *)sender
 {
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
             self.sequencer.patternQuantization = [[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+            [self.managedObjectContext save:nil];
         }];
     });
+    [self updateUI];
 }
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender

@@ -122,7 +122,6 @@
         int patternId;
     
         // If pattern quantization is disabled
-        //NSLog(@"%i", _sequencer.patternQuantization.intValue);
         if( !_patternQuantizationOn && pageState.nextPatternId )
             patternId = pageState.nextPatternId.intValue;
 
