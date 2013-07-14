@@ -43,7 +43,7 @@
         <relationship name="inPage" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPage" inverseName="pitches" inverseEntity="SequencerPage" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="105"/>
+        <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="103"/>
         <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
         <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="238"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>

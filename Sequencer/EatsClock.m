@@ -92,10 +92,10 @@
     return self;
 }
 
-- (void) dealloc
-{
-    NSLog(@"%s", __func__);
-}
+//- (void) dealloc
+//{
+//    NSLog(@"%s", __func__);
+//}
 
 - (void) startClock
 {

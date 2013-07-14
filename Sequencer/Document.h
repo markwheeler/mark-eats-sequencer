@@ -21,8 +21,9 @@
 
 @interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate>
 
+@property Sequencer                 *sequencerOnMainThread;
+@property SequencerPage             *currentPageOnMainThread;
 @property Sequencer                 *sequencer;
-@property SequencerPage             *currentPage;
 @property SequencerState            *sequencerState;
 @property SequencerPageState        *currentSequencerPageState;
 

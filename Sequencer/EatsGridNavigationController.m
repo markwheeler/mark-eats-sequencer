@@ -71,6 +71,9 @@
             _currentView = EatsGridViewType_Sequencer;
         }
         
+        _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:0];
+        [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
+        
         // Set the page and keep an eye on pattern changes
         [self setNewPageId:[NSNumber numberWithInt:0]];
 
@@ -166,9 +169,9 @@
             SequencerPage *page = [_sequencer.pages objectAtIndex:pageId.unsignedIntegerValue];
             _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:pageId.unsignedIntegerValue];
             _currentPattern =  [page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue];
-            
-            [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
         }];
+        
+        [_currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
         
     });
 }
