@@ -42,7 +42,7 @@
 @property NSAlert                       *clearPatternAlert;
 @property BOOL                          checkedForThingsOutsideGrid;
 
-@property (weak) IBOutlet NSWindow              *documentWindow;
+@property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
 
