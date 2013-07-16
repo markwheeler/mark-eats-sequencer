@@ -58,6 +58,7 @@
 @property (weak) IBOutlet NSPopUpButton         *swingPopup;
 
 @property (weak) IBOutlet EatsDebugGridView     *debugGridView;
+@property (weak) IBOutlet NSImageView           *clockLateIndicator;
 
 @end
 
@@ -447,6 +448,8 @@
 
 - (void) setupUI
 {
+    self.clockLateIndicator.alphaValue = 0.0;
+    
     self.debugGridView.managedObjectContext = self.managedObjectContextForMainThread;
     self.debugGridView.sequencerState = self.sequencerState;
     self.debugGridView.needsDisplay = YES;
@@ -813,6 +816,16 @@
     }
     
     self.notesOutsideGridAlert = nil;
+}
+
+- (void) showClockLateIndicator
+{
+    self.clockLateIndicator.alphaValue = 1.0;
+    
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:0.3];
+    [[self.clockLateIndicator animator] setAlphaValue:0.0];
+    [NSAnimationContext endGrouping];
 }
 
 

@@ -71,7 +71,7 @@
         
         _clockStatus = EatsClockStatus_Stopped;
         
-        _bufferTimeInNs = 20000000; // 20ms
+        _bufferTimeInNs = 10000000; // 10ms
         
         _tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTick", NULL);
         

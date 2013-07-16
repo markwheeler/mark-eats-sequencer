@@ -57,6 +57,7 @@
 		4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C4172C215900D0614C /* SequencerPageState.m */; };
 		4D7FC0C8172C218C00D0614C /* SequencerState.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C7172C218C00D0614C /* SequencerState.m */; };
 		4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */; };
+		4D97BCC517951D2B00198BEC /* RedDot.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D97BCC417951D2B00198BEC /* RedDot.pdf */; };
 		4D9A774E1719B08200D5379F /* PreferencesSyncIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */; };
 		4D9A77521719B78900D5379F /* PreferencesOutputIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */; };
 		4D9A77541719BC4400D5379F /* PreferencesInputIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */; };
@@ -189,6 +190,7 @@
 		4D7FC0C7172C218C00D0614C /* SequencerState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerState.m; sourceTree = "<group>"; };
 		4D82B13917117AEF00AD8222 /* EatsDebugGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDebugGridView.h; sourceTree = "<group>"; };
 		4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDebugGridView.m; sourceTree = "<group>"; };
+		4D97BCC417951D2B00198BEC /* RedDot.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = RedDot.pdf; sourceTree = "<group>"; };
 		4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesSyncIconTemplate.pdf; sourceTree = "<group>"; };
 		4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesOutputIconTemplate.pdf; sourceTree = "<group>"; };
 		4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesInputIconTemplate.pdf; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				4D97BCC417951D2B00198BEC /* RedDot.pdf */,
 				4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */,
 				4D1C40361712150A000F773D /* page-forward-icon.png */,
 				4D1C40371712150A000F773D /* page-forward-icon@2x.png */,
@@ -576,6 +579,7 @@
 				4DADBEE3171A10610091F952 /* NotesArrayScripts.rb in Resources */,
 				4DADBEE4171A10610091F952 /* scales.json in Resources */,
 				4DADBEE5171A10610091F952 /* WMRubyData.rb in Resources */,
+				4D97BCC517951D2B00198BEC /* RedDot.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

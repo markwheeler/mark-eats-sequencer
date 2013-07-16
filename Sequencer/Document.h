@@ -37,5 +37,6 @@
 - (void) updateUI;
 - (void) clearPatternStartAlert;
 - (void) clearPattern;
+- (void) showClockLateIndicator;
 
 @end

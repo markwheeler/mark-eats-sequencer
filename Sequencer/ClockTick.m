@@ -354,8 +354,10 @@ typedef enum EatsStepAdvance {
 
 - (void) clockLateBy:(uint64_t)ns
 {
-    // TODO: Create a visual indicator for this
     //NSLog(@"\nClock tick was late by: %fms", (Float64)ns / 1000000.0);
+    
+    if( [_delegate respondsToSelector:@selector(showClockLateIndicator)] )
+        [_delegate performSelectorOnMainThread:@selector(showClockLateIndicator) withObject:nil waitUntilDone:NO];
 }
 
 
