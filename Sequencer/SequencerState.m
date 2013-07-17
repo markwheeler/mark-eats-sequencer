@@ -18,6 +18,7 @@
         SequencerPageState *pageState = [[SequencerPageState alloc] init];
         pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
         pageState.currentPatternId = [NSNumber numberWithInt:0];
+        pageState.inLoop = YES;
         [pages addObject:pageState];
     }
     self.pageStates = [NSArray arrayWithArray:pages];

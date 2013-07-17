@@ -176,9 +176,6 @@ typedef enum EatsStepAdvance {
                     
                     aPageNeedsToAdvance = YES;
                     
-                    // TODO: Something in these lines is causing a memory leak if it's running when we close the document.
-                    //       Seems to be anything that sets the page's properties means this class doesn't get released quick enough.
-                    
                     // If the page has been scrubbed
                     if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
                         pageState.currentStep = [pageState.nextStep copy];

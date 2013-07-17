@@ -665,6 +665,22 @@
 - (void) externalClockZero:(NSNotification *)notification
 {
     [self.clock setClockToZero];
+    
+    //Reset the play positions of all the active loops
+    int i = 0;
+    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
+        if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause || pageState.playMode.intValue == EatsSequencerPlayMode_Forward ) {
+            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopEnd] copy];
+            pageState.inLoop = YES;
+        } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopStart] copy];
+            pageState.inLoop = YES;
+        }
+        i ++;
+    }
+    
+    [self updateUI];
+    [self.gridNavigationController updateGridView];
 }
 
 - (void) externalClockStop:(NSNotification *)notification
