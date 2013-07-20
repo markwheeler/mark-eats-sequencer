@@ -41,6 +41,8 @@
 @property NSAlert                       *notesOutsideGridAlert;
 @property NSAlert                       *clearPatternAlert;
 @property BOOL                          checkedForThingsOutsideGrid;
+@property uint                          indexOflastSelectedScaleMode;
+@property NSString                      *lastTonicNoteName;
 
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
 @property (weak) IBOutlet NSArrayController     *pitchesArrayController;
@@ -136,7 +138,8 @@
     self = [super init];
     if (self) {
         // Add your subclass-specific initialization here.
-
+        
+        // Create the serial queue
         _bigSerialQueue = dispatch_queue_create("com.MarkEatsSequencer.BigQueue", NULL);
         
         self.isActive = NO;
@@ -227,6 +230,12 @@
 {
     self.setupComplete = YES;
     
+    // How this works:
+    // This document's MOC is the parent and has a private queue. It's used across the app
+    // There is a child MOC with a main queue type that is used with bindings etc.
+    // There is another child MOC which is reserved only for use on the tickQueue and is only used for reading data – just for when we need to know what to play
+    // Method below are used for keeping the MOCs in sync (parentMOCSaved: and childMOCChanged)
+    
     // Replace the NSPersistentDocument's MOC with a new one that has a PrivateQueue and can be used as a parent
     NSManagedObjectContext *parentMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [parentMOC performBlockAndWait:^(void) {
@@ -238,6 +247,10 @@
     // Create a child MOC for use on the main thead in bindings etc
     self.managedObjectContextForMainThread = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     self.managedObjectContextForMainThread.parentContext = self.managedObjectContext;
+    
+    // Create a child MOC for use on the tickQueue
+    self.managedObjectContextForTickQueue = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    self.managedObjectContextForTickQueue.parentContext = self.managedObjectContext;
     
     // Register for MOC notifications
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -294,7 +307,7 @@
     
     // Create a Clock and set it up
     
-    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:self.sequencerState];
+    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.managedObjectContextForTickQueue andSequencerState:self.sequencerState];
     self.clockTick.delegate = self;
     self.clockTick.ppqn = PPQN;
     self.clockTick.ticksPerMeasure = TICKS_PER_MEASURE;
@@ -632,6 +645,9 @@
 - (void) parentMOCSaved:(NSNotification *)notification
 {
     [self.managedObjectContextForMainThread mergeChangesFromContextDidSaveNotification:notification];
+    [self.managedObjectContextForTickQueue performBlock:^(void){
+        [self.managedObjectContextForTickQueue mergeChangesFromContextDidSaveNotification:notification];
+    }];
     
     // This snippet is from http://cutecoder.org/featured/asynchronous-core-data-document/
     // It nudges the file modified date to prevent 'file has been changed by another application' errors
@@ -648,6 +664,9 @@
 - (void) childMOCChanged
 {
     [self.managedObjectContextForMainThread save:nil];
+    [self.managedObjectContext performBlock:^(void) {
+        [self.managedObjectContext save:nil];
+    }];
 }
 
 - (void) externalClockStart:(NSNotification *)notification
@@ -666,21 +685,7 @@
 {
     [self.clock setClockToZero];
     
-    //Reset the play positions of all the active loops
-    int i = 0;
-    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
-        if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause || pageState.playMode.intValue == EatsSequencerPlayMode_Forward ) {
-            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopEnd] copy];
-            pageState.inLoop = YES;
-        } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopStart] copy];
-            pageState.inLoop = YES;
-        }
-        i ++;
-    }
-    
-    [self updateUI];
-    [self.gridNavigationController updateGridView];
+    [self resetPlayPositions];
 }
 
 - (void) externalClockStop:(NSNotification *)notification
@@ -708,6 +713,25 @@
 - (void) gridControllerNone:(NSNotification *)notification
 {
     [self updateInterfaceToMatchGridSize];
+}
+
+- (void) resetPlayPositions
+{
+    //Reset the play positions of all the active loops
+    int i = 0;
+    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
+        if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause || pageState.playMode.intValue == EatsSequencerPlayMode_Forward ) {
+            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopEnd] copy];
+            pageState.inLoop = YES;
+        } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopStart] copy];
+            pageState.inLoop = YES;
+        }
+        i ++;
+    }
+    
+    [self updateUI];
+    [self.gridNavigationController updateGridView];
 }
 
 - (void) checkForThingsOutsideGrid
@@ -775,7 +799,7 @@
     // Pattern controls
     [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
     for( int i = 0; i < self.currentPatternSegmentedControl.segmentCount; i ++ ) {
-        [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i] forSegment:i];
+        [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i + 1] forSegment:i];
         [self.currentPatternSegmentedControl setWidth:28.0 forSegment:i];
     }
     
@@ -868,10 +892,14 @@
 
 - (IBAction)sequencerPlaybackControls:(NSSegmentedControl *)sender
 {
-    if( sender.selectedSegment == 0 )
-        [self.clock stopClock];
-    else
+    if( sender.selectedSegment == 0 ) {
+        if( self.clock.clockStatus == EatsClockStatus_Stopped )
+            [self resetPlayPositions];
+        else
+            [self.clock stopClock];
+    } else {
         [self.clock startClock];
+    }
 }
 
 
@@ -975,13 +1003,20 @@
 - (IBAction) scalesOpenSheetButton:(NSButton *)sender {
     if (!self.scaleGeneratorSheetController) {
         self.scaleGeneratorSheetController = [[ScaleGeneratorSheetController alloc] init];
+        
+        self.scaleGeneratorSheetController.indexOfLastSelectedScaleMode = self.indexOflastSelectedScaleMode;
+        if( self.lastTonicNoteName )
+            self.scaleGeneratorSheetController.tonicNoteName = self.lastTonicNoteName;
+        
         [self.scaleGeneratorSheetController beginSheetModalForWindow:self.documentWindow completionHandler:^(NSUInteger returnCode) {
             
-        NSString *noteName = self.scaleGeneratorSheetController.tonicNoteName;
-        NSString *scaleMode = self.scaleGeneratorSheetController.scaleMode;
+            NSString *noteName = self.scaleGeneratorSheetController.tonicNoteName;
+            NSString *scaleMode = self.scaleGeneratorSheetController.scaleMode;
             
             // Generate the scale
             if (returnCode == NSOKButton) {
+                
+                self.indexOflastSelectedScaleMode = self.scaleGeneratorSheetController.indexOfLastSelectedScaleMode;
                 
                 int pageId = self.currentPageOnMainThread.id.intValue;
                 
@@ -1010,6 +1045,9 @@
                                 rowPitch.pitch = [NSNumber numberWithInt:note.midiNoteNumber];
                                 r++;
                             }
+                            
+                            // Remember what scale was just generated
+                            self.lastTonicNoteName = tonicNote.shortName;
                         }
                         [self.managedObjectContext save:nil];
                     }];
@@ -1038,6 +1076,7 @@
         [self.managedObjectContext performBlock:^(void) {
             SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
             page.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+            [self.managedObjectContext save:nil];
         }];
     });
 }
@@ -1052,6 +1091,7 @@
             SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
             page.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
             page.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
+            [self.managedObjectContext save:nil];
         }];
     });
 }

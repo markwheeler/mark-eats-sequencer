@@ -37,6 +37,7 @@
 		4D61162B16E4386700140AF8 /* Sequencer+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162A16E4386700140AF8 /* Sequencer+Utils.m */; };
 		4D61163016E43B9600140AF8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D61162F16E43B9600140AF8 /* AppController.m */; };
 		4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */; };
+		4D64B2211797A059007BD78F /* EatsPlusOneValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D64B2201797A059007BD78F /* EatsPlusOneValueTransformer.m */; };
 		4D6D735A170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */; };
 		4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
 		4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
@@ -159,6 +160,8 @@
 		4D61162E16E43B9600140AF8 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		4D61162F16E43B9600140AF8 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		4D62864116F594DE003FC16F /* ScaleGeneratorSheet.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScaleGeneratorSheet.xib; sourceTree = "<group>"; };
+		4D64B21F1797A059007BD78F /* EatsPlusOneValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsPlusOneValueTransformer.h; sourceTree = "<group>"; };
+		4D64B2201797A059007BD78F /* EatsPlusOneValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsPlusOneValueTransformer.m; sourceTree = "<group>"; };
 		4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalSelectionView.h; sourceTree = "<group>"; };
 		4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalSelectionView.m; sourceTree = "<group>"; };
 		4D7515A116E4557000A8E3F2 /* VVBasics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVBasics.framework; sourceTree = "<group>"; };
@@ -399,6 +402,8 @@
 				4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */,
 				4DD0B5B716E702320025AB1C /* EatsGridPlayViewController.h */,
 				4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */,
+				4D64B21F1797A059007BD78F /* EatsPlusOneValueTransformer.h */,
+				4D64B2201797A059007BD78F /* EatsPlusOneValueTransformer.m */,
 				4D1AEF08171B026600317D56 /* EatsWMNoteValueTransformer.h */,
 				4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */,
 				4DADBEE9171A1F890091F952 /* WMPool+Utils.h */,
@@ -637,6 +642,7 @@
 				4D7FC0C2172C20FD00D0614C /* SequencerPatternIdInPlaylist.m in Sources */,
 				4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */,
 				4D7FC0C8172C218C00D0614C /* SequencerState.m in Sources */,
+				4D64B2211797A059007BD78F /* EatsPlusOneValueTransformer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

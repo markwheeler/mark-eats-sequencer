@@ -30,6 +30,7 @@
 @property BOOL                      isActive;
 
 @property NSManagedObjectContext    *managedObjectContextForMainThread;
+@property NSManagedObjectContext    *managedObjectContextForTickQueue;
 @property Preferences               *sharedPreferences;
 
 @property dispatch_queue_t          bigSerialQueue;

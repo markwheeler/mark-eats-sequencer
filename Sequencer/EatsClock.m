@@ -73,7 +73,10 @@
         
         _bufferTimeInNs = 10000000; // 10ms
         
+        // Create the serial queue and make it high priority
         _tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTick", NULL);
+        dispatch_queue_t globalHigh = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+        dispatch_set_target_queue(_tickQueue, globalHigh);
         
         kern_return_t kernError;
         mach_timebase_info_data_t timebaseInfo;

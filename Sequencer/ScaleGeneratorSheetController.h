@@ -16,4 +16,6 @@
 @property NSString                   *scaleMode;
 @property NSString                   *tonicNoteName;
 
+@property uint                       indexOfLastSelectedScaleMode;
+
 @end
