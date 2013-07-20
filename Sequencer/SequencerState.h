@@ -10,6 +10,7 @@
 
 @interface SequencerState : NSObject
 
+@property NSNumber  *bpm;
 @property NSArray   *pageStates;
 
 - (void) createPageStates:(uint)numberOfPages;

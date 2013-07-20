@@ -1711,22 +1711,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.bpm</string>
-						<reference key="source" ref="429705853"/>
-						<reference key="destination" ref="371356270"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="429705853"/>
-							<reference key="NSDestination" ref="371356270"/>
-							<string key="NSLabel">value: selection.bpm</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.bpm</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">101631</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled: self.sharedPreferences.midiClockSourceName</string>
 						<reference key="source" ref="429705853"/>
 						<reference key="destination" ref="512844837"/>
@@ -1747,19 +1731,19 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.bpm</string>
-						<reference key="source" ref="709941088"/>
-						<reference key="destination" ref="371356270"/>
+						<string key="label">value: self.sequencerState.bpm</string>
+						<reference key="source" ref="429705853"/>
+						<reference key="destination" ref="512844837"/>
 						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="709941088"/>
-							<reference key="NSDestination" ref="371356270"/>
-							<string key="NSLabel">value: selection.bpm</string>
+							<reference key="NSSource" ref="429705853"/>
+							<reference key="NSDestination" ref="512844837"/>
+							<string key="NSLabel">value: self.sequencerState.bpm</string>
 							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.bpm</string>
+							<string key="NSKeyPath">self.sequencerState.bpm</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">101632</int>
+					<int key="connectionID">104869</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -1780,6 +1764,22 @@
 						</object>
 					</object>
 					<int key="connectionID">104048</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: self.sequencerState.bpm</string>
+						<reference key="source" ref="709941088"/>
+						<reference key="destination" ref="512844837"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="709941088"/>
+							<reference key="NSDestination" ref="512844837"/>
+							<string key="NSLabel">value: self.sequencerState.bpm</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">self.sequencerState.bpm</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">104873</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -3842,11 +3842,6 @@
 						<reference key="parent" ref="568628114"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">104785</int>
-						<reference key="object" ref="27996126"/>
-						<reference key="parent" ref="568628114"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">104791</int>
 						<reference key="object" ref="1023339885"/>
 						<reference key="parent" ref="568628114"/>
@@ -3932,6 +3927,11 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">104859</int>
 						<reference key="object" ref="518713348"/>
+						<reference key="parent" ref="568628114"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">104905</int>
+						<reference key="object" ref="27996126"/>
 						<reference key="parent" ref="568628114"/>
 					</object>
 				</array>
@@ -4146,7 +4146,6 @@
 				<string key="104746.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104754.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104764.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="104785.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104791.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104792.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104793.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -4158,6 +4157,7 @@
 				<string key="104854.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104857.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104859.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="104905.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="5.IBWindowTemplateEditedContentRect">{{133, 170}, {507, 413}}</string>
 				<array class="NSMutableArray" key="6.IBNSViewMetadataConstraints">
@@ -4231,13 +4231,82 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">104863</int>
+			<int key="maxID">104921</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">Document</string>
 					<string key="superclassName">NSPersistentDocument</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="bpmStepper:">NSStepper</string>
+						<string key="bpmTextField:">NSTextField</string>
+						<string key="currentPageSegmentedControl:">NSSegmentedControl</string>
+						<string key="currentPatternSegmentedControl:">NSSegmentedControl</string>
+						<string key="editLabelButton:">NSButton</string>
+						<string key="pagePlaybackControls:">NSSegmentedControl</string>
+						<string key="patternQuantizationPopup:">NSPopUpButton</string>
+						<string key="scalesOpenSheetButton:">NSButton</string>
+						<string key="sequencerPlaybackControls:">NSSegmentedControl</string>
+						<string key="stepLengthPopup:">NSPopUpButton</string>
+						<string key="stepQuantizationPopup:">NSPopUpButton</string>
+						<string key="swingPopup:">NSPopUpButton</string>
+						<string key="velocityGrooveCheckbox:">NSButton</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="bpmStepper:">
+							<string key="name">bpmStepper:</string>
+							<string key="candidateClassName">NSStepper</string>
+						</object>
+						<object class="IBActionInfo" key="bpmTextField:">
+							<string key="name">bpmTextField:</string>
+							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBActionInfo" key="currentPageSegmentedControl:">
+							<string key="name">currentPageSegmentedControl:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="currentPatternSegmentedControl:">
+							<string key="name">currentPatternSegmentedControl:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="editLabelButton:">
+							<string key="name">editLabelButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="pagePlaybackControls:">
+							<string key="name">pagePlaybackControls:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="patternQuantizationPopup:">
+							<string key="name">patternQuantizationPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="scalesOpenSheetButton:">
+							<string key="name">scalesOpenSheetButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="sequencerPlaybackControls:">
+							<string key="name">sequencerPlaybackControls:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="stepLengthPopup:">
+							<string key="name">stepLengthPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="stepQuantizationPopup:">
+							<string key="name">stepQuantizationPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="swingPopup:">
+							<string key="name">swingPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="velocityGrooveCheckbox:">
+							<string key="name">velocityGrooveCheckbox:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="clockLateIndicator">NSImageView</string>
 						<string key="currentPageSegmentedControl">NSSegmentedControl</string>
