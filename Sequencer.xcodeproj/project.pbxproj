@@ -49,12 +49,6 @@
 		4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B716E45EB900A8E3F2 /* EatsClock.m */; };
 		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
 		4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */; };
-		4D7FC0B3172C20FC00D0614C /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0B2172C20FC00D0614C /* SequencerPage.m */; };
-		4D7FC0B6172C20FD00D0614C /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0B5172C20FD00D0614C /* SequencerPattern.m */; };
-		4D7FC0B9172C20FD00D0614C /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0B8172C20FD00D0614C /* SequencerRowPitch.m */; };
-		4D7FC0BC172C20FD00D0614C /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0BB172C20FD00D0614C /* Sequencer.m */; };
-		4D7FC0BF172C20FD00D0614C /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0BE172C20FD00D0614C /* SequencerNote.m */; };
-		4D7FC0C2172C20FD00D0614C /* SequencerPatternIdInPlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C1172C20FD00D0614C /* SequencerPatternIdInPlaylist.m */; };
 		4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C4172C215900D0614C /* SequencerPageState.m */; };
 		4D7FC0C8172C218C00D0614C /* SequencerState.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C7172C218C00D0614C /* SequencerState.m */; };
 		4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */; };
@@ -95,6 +89,13 @@
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
+		4DFAE984179B8BB00076153D /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE983179B8BB00076153D /* SequencerPage.m */; };
+		4DFAE987179B8BB00076153D /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE986179B8BB00076153D /* SequencerNote.m */; };
+		4DFAE98A179B8BB00076153D /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE989179B8BB00076153D /* Sequencer.m */; };
+		4DFAE98D179B8BB00076153D /* SequencerPatternIdInPlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE98C179B8BB00076153D /* SequencerPatternIdInPlaylist.m */; };
+		4DFAE990179B8BB00076153D /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE98F179B8BB00076153D /* SequencerRowPitch.m */; };
+		4DFAE993179B8BB00076153D /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE992179B8BB00076153D /* SequencerPattern.m */; };
+		4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -175,18 +176,6 @@
 		4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsExternalClockCalculator.m; sourceTree = "<group>"; };
 		4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsMonome.h; sourceTree = "<group>"; };
 		4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMonome.m; sourceTree = "<group>"; };
-		4D7FC0B1172C20FC00D0614C /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
-		4D7FC0B2172C20FC00D0614C /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
-		4D7FC0B4172C20FD00D0614C /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
-		4D7FC0B5172C20FD00D0614C /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
-		4D7FC0B7172C20FD00D0614C /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
-		4D7FC0B8172C20FD00D0614C /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
-		4D7FC0BA172C20FD00D0614C /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
-		4D7FC0BB172C20FD00D0614C /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
-		4D7FC0BD172C20FD00D0614C /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
-		4D7FC0BE172C20FD00D0614C /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
-		4D7FC0C0172C20FD00D0614C /* SequencerPatternIdInPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternIdInPlaylist.h; sourceTree = "<group>"; };
-		4D7FC0C1172C20FD00D0614C /* SequencerPatternIdInPlaylist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternIdInPlaylist.m; sourceTree = "<group>"; };
 		4D7FC0C3172C215900D0614C /* SequencerPageState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPageState.h; sourceTree = "<group>"; };
 		4D7FC0C4172C215900D0614C /* SequencerPageState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPageState.m; sourceTree = "<group>"; };
 		4D7FC0C6172C218C00D0614C /* SequencerState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerState.h; sourceTree = "<group>"; };
@@ -251,6 +240,21 @@
 		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
+		4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Document 2.xcdatamodel"; sourceTree = "<group>"; };
+		4DFAE982179B8BB00076153D /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
+		4DFAE983179B8BB00076153D /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
+		4DFAE985179B8BB00076153D /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
+		4DFAE986179B8BB00076153D /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
+		4DFAE988179B8BB00076153D /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
+		4DFAE989179B8BB00076153D /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
+		4DFAE98B179B8BB00076153D /* SequencerPatternIdInPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternIdInPlaylist.h; sourceTree = "<group>"; };
+		4DFAE98C179B8BB00076153D /* SequencerPatternIdInPlaylist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternIdInPlaylist.m; sourceTree = "<group>"; };
+		4DFAE98E179B8BB00076153D /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
+		4DFAE98F179B8BB00076153D /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
+		4DFAE991179B8BB00076153D /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
+		4DFAE992179B8BB00076153D /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
+		4DFAE994179B94F10076153D /* EatsGridHorizontalShiftView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalShiftView.h; sourceTree = "<group>"; };
+		4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalShiftView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -308,6 +312,8 @@
 				4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */,
 				4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */,
 				4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */,
+				4DFAE994179B94F10076153D /* EatsGridHorizontalShiftView.h */,
+				4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */,
 				4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */,
 				4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */,
 				4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */,
@@ -438,20 +444,20 @@
 			isa = PBXGroup;
 			children = (
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
+				4DFAE991179B8BB00076153D /* SequencerPattern.h */,
+				4DFAE992179B8BB00076153D /* SequencerPattern.m */,
+				4DFAE98E179B8BB00076153D /* SequencerRowPitch.h */,
+				4DFAE98F179B8BB00076153D /* SequencerRowPitch.m */,
+				4DFAE98B179B8BB00076153D /* SequencerPatternIdInPlaylist.h */,
+				4DFAE98C179B8BB00076153D /* SequencerPatternIdInPlaylist.m */,
+				4DFAE988179B8BB00076153D /* Sequencer.h */,
+				4DFAE989179B8BB00076153D /* Sequencer.m */,
+				4DFAE985179B8BB00076153D /* SequencerNote.h */,
+				4DFAE986179B8BB00076153D /* SequencerNote.m */,
+				4DFAE982179B8BB00076153D /* SequencerPage.h */,
+				4DFAE983179B8BB00076153D /* SequencerPage.m */,
 				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
 				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
-				4D7FC0C0172C20FD00D0614C /* SequencerPatternIdInPlaylist.h */,
-				4D7FC0C1172C20FD00D0614C /* SequencerPatternIdInPlaylist.m */,
-				4D7FC0BD172C20FD00D0614C /* SequencerNote.h */,
-				4D7FC0BE172C20FD00D0614C /* SequencerNote.m */,
-				4D7FC0BA172C20FD00D0614C /* Sequencer.h */,
-				4D7FC0BB172C20FD00D0614C /* Sequencer.m */,
-				4D7FC0B7172C20FD00D0614C /* SequencerRowPitch.h */,
-				4D7FC0B8172C20FD00D0614C /* SequencerRowPitch.m */,
-				4D7FC0B4172C20FD00D0614C /* SequencerPattern.h */,
-				4D7FC0B5172C20FD00D0614C /* SequencerPattern.m */,
-				4D7FC0B1172C20FC00D0614C /* SequencerPage.h */,
-				4D7FC0B2172C20FC00D0614C /* SequencerPage.m */,
 			);
 			name = "Core Data";
 			sourceTree = "<group>";
@@ -634,15 +640,16 @@
 				4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */,
 				4DADBEEB171A1F8A0091F952 /* WMPool+Utils.m in Sources */,
 				4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */,
-				4D7FC0B3172C20FC00D0614C /* SequencerPage.m in Sources */,
-				4D7FC0B6172C20FD00D0614C /* SequencerPattern.m in Sources */,
-				4D7FC0B9172C20FD00D0614C /* SequencerRowPitch.m in Sources */,
-				4D7FC0BC172C20FD00D0614C /* Sequencer.m in Sources */,
-				4D7FC0BF172C20FD00D0614C /* SequencerNote.m in Sources */,
-				4D7FC0C2172C20FD00D0614C /* SequencerPatternIdInPlaylist.m in Sources */,
 				4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */,
 				4D7FC0C8172C218C00D0614C /* SequencerState.m in Sources */,
 				4D64B2211797A059007BD78F /* EatsPlusOneValueTransformer.m in Sources */,
+				4DFAE984179B8BB00076153D /* SequencerPage.m in Sources */,
+				4DFAE987179B8BB00076153D /* SequencerNote.m in Sources */,
+				4DFAE98A179B8BB00076153D /* Sequencer.m in Sources */,
+				4DFAE98D179B8BB00076153D /* SequencerPatternIdInPlaylist.m in Sources */,
+				4DFAE990179B8BB00076153D /* SequencerRowPitch.m in Sources */,
+				4DFAE993179B8BB00076153D /* SequencerPattern.m in Sources */,
+				4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -814,9 +821,10 @@
 		4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */,
 				4D6115E716E431BD00140AF8 /* Document.xcdatamodel */,
 			);
-			currentVersion = 4D6115E716E431BD00140AF8 /* Document.xcdatamodel */;
+			currentVersion = 4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */;
 			path = Document.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

@@ -26,6 +26,7 @@
 @property SequencerState                    *sequencerState;
 @property Preferences                       *sharedPreferences;
 
+@property EatsGridHorizontalShiftView       *transposeView;
 @property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
 
@@ -133,7 +134,7 @@
         }
     }
     
-    // Scrub buttons for other pages, if there's space
+    // Scrub buttons for other pages and transpose slider, if there's space
     if( self.height > 8 ) {
         _scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
         for( int i = 0; i < self.width; i ++ ) {
@@ -144,6 +145,15 @@
             button.visible = NO;
             [_scrubOtherPagesButtons addObject:button];
         }
+        
+        _transposeView = [[EatsGridHorizontalShiftView alloc] init];
+        _transposeView.delegate = self;
+        _transposeView.x = 0;
+        _transposeView.y = - 2;
+        _transposeView.width = self.width;
+        _transposeView.height = 1;
+        _transposeView.zeroStep = ( self.width / 2 ) - 1;
+        _transposeView.visible = NO;
     }
     
     // Play mode buttons
@@ -228,8 +238,10 @@
     [self.subViews addObjectsFromArray:_pageButtons];
     [self.subViews addObjectsFromArray:_patternButtons];
     [self.subViews addObjectsFromArray:_patternsOnOtherPagesButtons];
-    if( self.height > 8 )
+    if( self.height > 8 ) {
         [self.subViews addObjectsFromArray:_scrubOtherPagesButtons];
+        [self.subViews addObject:_transposeView];
+    }
     [self.subViews addObjectsFromArray:_playModeButtons];
     [self.subViews addObjectsFromArray:_controlButtons];
     
@@ -284,8 +296,10 @@
         [self setPlayMode];
         [self setActivePageButton];
         [self setPatternButtonState];
-        if( self.height > 8 )
+        if( self.height > 8 ) {
+            [self setTransposeAmount];
             [self setScrubButtonState];
+        }
         [self setLoopBraceViewStartAndEnd];
         
         [super updateView];
@@ -475,6 +489,17 @@
     }
 }
 
+- (void) setTransposeAmount
+{
+    __block int transpose;
+    
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        transpose = _currentPattern.inPage.transpose.intValue;
+    }];
+    
+    _transposeView.shift = transpose;
+}
+
 - (void) setScrubButtonState
 {  
     __block uint currentPageId;
@@ -602,6 +627,14 @@
 
 - (void) animateIncrement:(int)amount
 {
+    if( _transposeView ) {
+        _transposeView.y += amount;
+        if( _transposeView.y < 0 )
+            _transposeView.visible = NO;
+        else
+            _transposeView.visible = YES;
+    }
+    
     _loopBraceView.y += amount;
     if( _loopBraceView.y < 0 )
         _loopBraceView.visible = NO;
@@ -1020,6 +1053,18 @@
             }
         }
             
+    });
+    
+    [self updateView];
+}
+
+- (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
+{
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void){
+            _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
+            [self.managedObjectContext save:nil];
+        }];
     });
     
     [self updateView];

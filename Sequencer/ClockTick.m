@@ -271,7 +271,14 @@ typedef enum EatsStepAdvance {
                     
                     for( SequencerNote *note in [[page.patterns objectAtIndex:pageState.currentPatternId.intValue] notes] ) {
                         
-                        int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue]; // TODO add transpose value here
+                        int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
+                        
+                        // Transpose
+                        pitch += page.transpose.intValue;
+                        if( pitch < 0 )
+                           pitch = 0;
+                        if( pitch > 127 )
+                           pitch = 127;
                         
                         // Play it!
                         if( note.step.intValue == pageState.currentStep.intValue ) {

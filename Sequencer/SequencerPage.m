@@ -2,7 +2,7 @@
 //  SequencerPage.m
 //  Sequencer
 //
-//  Created by Mark Wheeler on 27/04/2013.
+//  Created by Mark Wheeler on 20/07/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
@@ -24,6 +24,7 @@
 @dynamic swingAmount;
 @dynamic swingType;
 @dynamic velocityGroove;
+@dynamic transpose;
 @dynamic inSequencer;
 @dynamic patterns;
 @dynamic pitches;

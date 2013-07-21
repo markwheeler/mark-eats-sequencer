@@ -222,6 +222,15 @@
         [self completeSetupOncePersistentStoreIsReady];
 }
 
+-(BOOL) configurePersistentStoreCoordinatorForURL:(NSURL *)url ofType:(NSString *)fileType modelConfiguration:(NSString *)configuration storeOptions:(NSDictionary *)storeOptions error:(NSError **)error
+{
+    NSMutableDictionary *newOptions = [NSMutableDictionary dictionaryWithDictionary:storeOptions];
+    [newOptions setValue:@"YES" forKey:NSMigratePersistentStoresAutomaticallyOption];
+    [newOptions setValue:@"TRUE" forKey:NSInferMappingModelAutomaticallyOption];
+    
+    return [super configurePersistentStoreCoordinatorForURL:url ofType:fileType modelConfiguration:configuration storeOptions:newOptions error:error];
+}
+
 - (void) completeSetupOncePersistentStoreIsReady
 {
     self.setupComplete = YES;
@@ -867,16 +876,17 @@
 
 #pragma mark - Interface actions
 
+- (IBAction)bpmTextField:(NSTextField *)sender
+{
+    if( !_sequencerState.bpm )
+        _sequencerState.bpm = [NSNumber numberWithInt:100];
+}
+
 - (IBAction)bpmStepper:(NSStepper *)sender
 {
     _sequencerState.bpm = [NSNumber numberWithFloat:roundf( _sequencerState.bpm.floatValue )];
 }
 
-
-- (IBAction)bpmTextField:(NSTextField *)sender
-{
-    [self childMOCChanged];
-}
 
 - (IBAction)sequencerPlaybackControls:(NSSegmentedControl *)sender
 {
@@ -889,7 +899,6 @@
         [self.clock startClock];
     }
 }
-
 
 
 - (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
@@ -1087,6 +1096,21 @@
 - (IBAction)velocityGrooveCheckbox:(NSButton *)sender
 {
     [self childMOCChanged];
+}
+
+
+- (IBAction)transposeTextField:(NSTextField *)sender
+{
+    if( !_currentPageOnMainThread.transpose )
+        _currentPageOnMainThread.transpose = [NSNumber numberWithInt:0];
+    [self childMOCChanged];
+    [self.gridNavigationController updateGridView];
+}
+
+- (IBAction)transposeStepper:(NSStepper *)sender
+{
+    [self childMOCChanged];
+    [self.gridNavigationController updateGridView];
 }
 
 @end
