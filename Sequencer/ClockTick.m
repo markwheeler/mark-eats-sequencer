@@ -88,14 +88,9 @@ typedef enum EatsStepAdvance {
     if( _sharedPreferences.sendMIDIClock
        && _sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
-        // Send song position 0
-        VVMIDIMessage *msg = nil;
-        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :ns];
-        if (msg != nil)
-            [_sharedCommunicationManager.midiManager sendMsg:msg];
         
         // Send start
-        msg = nil;
+        VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createWithType:VVMIDIStartVal channel:0 timestamp:ns];
         if (msg != nil)
             [_sharedCommunicationManager.midiManager sendMsg:msg];
@@ -117,6 +112,19 @@ typedef enum EatsStepAdvance {
     
     [self stopNotes:_activeNotes atTime:ns];
     [_activeNotes removeAllObjects];
+}
+
+- (void) songPositionZero
+{
+    if( _sharedPreferences.sendMIDIClock
+       && _sharedPreferences.midiClockSourceName == nil
+       && [[_delegate valueForKey:@"isActive"] boolValue] ) {
+        // Send song position 0
+        VVMIDIMessage *msg = nil;
+        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :mach_absolute_time()];
+        if (msg != nil)
+            [_sharedCommunicationManager.midiManager sendMsg:msg];
+    }
 }
 
 - (void) clockTick:(uint64_t)ns

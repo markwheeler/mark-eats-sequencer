@@ -721,6 +721,9 @@
 
 - (void) resetPlayPositions
 {
+
+    [self.clockTick songPositionZero];
+    
     //Reset the play positions of all the active loops
     int i = 0;
     for( SequencerPageState *pageState in _sequencerState.pageStates ) {
