@@ -60,6 +60,7 @@
         self.enabledMIDIOutputNames = [NSMutableArray arrayWithCapacity:16];
     
     self.loopFromScrubArea = [preferences boolForKey:@"loopFromScrubArea"];
+    self.modeSwitchMethod = [preferences objectForKey:@"modeSwitchMethod"];
 }
 
 - (void) savePreferences
@@ -88,6 +89,7 @@
     [preferences setObject:self.enabledMIDIOutputNames forKey:@"enabledMIDIOutputNames"];
     
     [preferences setBool:self.loopFromScrubArea forKey:@"loopFromScrubArea"];
+    [preferences setObject:self.modeSwitchMethod forKey:@"modeSwitchMethod"];
     
     [preferences synchronize];
 }

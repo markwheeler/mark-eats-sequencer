@@ -21,15 +21,18 @@
 #define NEXT_STEP_BRIGHTNESS 8
 #define NOTE_BRIGHTNESS 15
 #define NOTE_LENGTH_BRIGHTNESS 10
+#define LONG_PRESS_TIME 0.4
 
 @interface EatsGridPatternView ()
 
 @property Preferences           *sharedPreferences;
 
 @property NSDictionary          *lastReleasedKey;
-
+@property NSDictionary          *lastLongPressKey;
 @property NSDictionary          *lastDownKey;
 @property BOOL                  setSelection;
+
+@property NSTimer               *longPressTimer;
 
 @end
 
@@ -238,36 +241,74 @@
         
     }
     
-    // Clear up after tracking selection
+    // Clear up
     if( _mode != EatsPatternViewMode_Play ) {
         _lastDownKey = nil;
         _setSelection = NO;
+    } else if( _mode != EatsPatternViewMode_Edit ) {
+        _lastLongPressKey = nil;
     }
     
-    // In edit mode we check for double presses
+    // In edit mode we check for double presses or long presses
     if ( _mode == EatsPatternViewMode_Edit ) {
         
-        if( !down ) {
+        // Double presses
+        if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_DoublePress ) {
             
-            // Check for double presses
-            if(_lastReleasedKey
-               && [[_lastReleasedKey valueForKey:@"time"] timeIntervalSinceNow] > -_doublePressTime
-               && [[_lastReleasedKey valueForKey:@"x"] intValue] == x
-               && [[_lastReleasedKey valueForKey:@"y"] intValue] == y) {
+            if( !down ) {
+            
+                // Check for double presses
+                if(_lastReleasedKey
+                   && [[_lastReleasedKey valueForKey:@"time"] timeIntervalSinceNow] > -_doublePressTime
+                   && [[_lastReleasedKey valueForKey:@"x"] intValue] == x
+                   && [[_lastReleasedKey valueForKey:@"y"] intValue] == y) {
+                    
+                    // Send the double press to delegate
+                    NSDictionary *xy = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                        [NSNumber numberWithUnsignedInt:y], @"y",
+                                        nil];
+                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewDoublePressAt: sender:)])
+                        [self.delegate performSelector:@selector(eatsGridPatternViewDoublePressAt: sender:) withObject:xy withObject:self];
+                    
+                } else {
+                    // Log the last release
+                    _lastReleasedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
+                                        [NSNumber numberWithUnsignedInt:y], @"y",
+                                        [NSDate date], @"time",
+                                        nil];
+                }
                 
-                // Send the double press to delegate
-                NSDictionary *xy = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                    [NSNumber numberWithUnsignedInt:y], @"y",
-                                    nil];
-                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewDoublePressAt: sender:)])
-                    [self.delegate performSelector:@selector(eatsGridPatternViewDoublePressAt: sender:) withObject:xy withObject:self];
+            }
+            
+        // Long presses
+        } else if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_LongPress ) {
+            
+            // Down
+            if( down ) {
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    
+                    [_longPressTimer invalidate];
+                    _longPressTimer = [NSTimer scheduledTimerWithTimeInterval:LONG_PRESS_TIME
+                                                                       target:self
+                                                                     selector:@selector(longPressTimeout:)
+                                                                     userInfo:nil
+                                                                      repeats:NO];
+                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                    
+                    // Make sure we fire even when the UI is tracking mouse down stuff
+                    [runloop addTimer:_longPressTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:_longPressTimer forMode: NSEventTrackingRunLoopMode];
+                });
                 
+                // Log the last press
+                _lastLongPressKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+                
+            // Release
             } else {
-                // Log the last release
-                _lastReleasedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                    [NSNumber numberWithUnsignedInt:y], @"y",
-                                    [NSDate date], @"time",
-                                    nil];
+                if( _lastLongPressKey && [[_lastLongPressKey valueForKey:@"x"] intValue] == x && [[_lastLongPressKey valueForKey:@"y"] intValue] == y ) {
+                    _lastLongPressKey = nil;
+                    [_longPressTimer invalidate];
+                }
             }
             
         }
@@ -275,7 +316,6 @@
     
     // These two modes always receive all presses
     if( _mode == EatsPatternViewMode_Edit || _mode == EatsPatternViewMode_NoteEdit ) {
-        
         // Send the press to delegate
         NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
                                 [NSNumber numberWithUnsignedInt:y], @"y",
@@ -285,6 +325,17 @@
             [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
     }
 
+}
+
+- (void) longPressTimeout:(NSTimer *)sender
+{
+    if( _lastLongPressKey ) {
+        // Send the long press to delegate
+        if([self.delegate respondsToSelector:@selector(eatsGridPatternViewLongPressAt: sender:)])
+            [self.delegate performSelector:@selector(eatsGridPatternViewLongPressAt: sender:) withObject:_lastLongPressKey withObject:self];
+        
+        _lastLongPressKey = nil;
+    }
 }
 
 

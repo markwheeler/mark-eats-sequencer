@@ -13,6 +13,7 @@
 #import "SequencerNote.h"
 #import "SequencerState.h"
 #import "SequencerPageState.h"
+#import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
 #define NOTE_EDIT_FADE_AMOUNT 6
@@ -20,12 +21,15 @@
 
 @interface EatsGridSequencerViewController ()
 
+@property Preferences                   *sharedPreferences;
+
 @property SequencerPattern              *pattern;
 @property SequencerState                *sequencerState;
 @property SequencerNote                 *activeEditNote;
 @property NSMutableArray                *lastTwoPresses;
 @property uint                          lastX;
 @property uint                          lastY;
+@property BOOL                          lastDownWasInEditMode;
 
 @property EatsGridPatternView           *patternView;
 @property EatsGridHorizontalSliderView  *velocityView;
@@ -40,6 +44,8 @@
 
 - (void) setupView
 {
+    _sharedPreferences = [Preferences sharedPreferences];
+    
     _lastTwoPresses = [NSMutableArray arrayWithCapacity:2];
     
     _sequencerState = [self.delegate valueForKey:@"sequencerState"];
@@ -407,75 +413,117 @@
         uint y = [[xyDown valueForKey:@"y"] unsignedIntValue];
         BOOL down = [[xyDown valueForKey:@"down"] boolValue];
         
+        // Down is what we check when in double press mode and note edit exiting
         if( down ) {
         
             // Edit mode
             if( sender.mode == EatsPatternViewMode_Edit ) {
+                
+                // Double press
+                if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_DoublePress ) {
+                    // We check if the last press was a note and if it is a note, if it was pressed a while ago or recently
+                    BOOL lastPressedIsOld = YES;
+                    if( _lastTwoPresses.lastObject && [[_lastTwoPresses.lastObject valueForKey:@"type"] isEqualToString:@"note"]) {
+                        if( [[_lastTwoPresses.lastObject valueForKey:@"time"] timeIntervalSinceNow] > - DOUBLE_PRESS_TIME )
+                            lastPressedIsOld = NO;
+                    }
+                
+                    [self.managedObjectContext performBlockAndWait:^(void) {
+                       
+                        // See if we have a note there
+                        SequencerNote *foundNote = [self checkForNoteAtX:x y:self.height - 1 - y];
+                        
+                        if( foundNote ) {
+                            
+                            // Make a record of it first for keeping track of double taps
+                            SequencerNote *lastNote = [NSDictionary dictionaryWithObjectsAndKeys:@"note", @"type",
+                                                                                                foundNote.step, @"step",
+                                                                                                foundNote.row, @"row",
+                                                                                                foundNote.velocityAsPercentage, @"velocityAsPercentage",
+                                                                                                foundNote.length, @"length",
+                                                                                                [NSDate date], @"time",
+                                                                                                nil];
+                            [_lastTwoPresses addObject:lastNote];
+                            
+                            // If we're not in a double press remove the note (ie, the last note is recent, or we're in a different place on the grid)
+                            if( lastPressedIsOld || _lastX != x || _lastY != y )
+                                [self.managedObjectContext deleteObject:foundNote];
+                            
+                        } else {
+                            
+                            // If we're not in a double press then add a new note
+                            if( lastPressedIsOld || _lastX != x || _lastY != y || _sharedPreferences.modeSwitchMethod.intValue != EatsModeSwitchMethod_DoublePress ) {
+                                
+                                NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
+                                SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                                newNote.step = [NSNumber numberWithUnsignedInt:x];
+                                newNote.row = [NSNumber numberWithUnsignedInt:self.height - 1 - y];
+                                [newNotesSet addObject:newNote];
+                                _pattern.notes = newNotesSet;
+                            }
+                            
+                            // Make a record that we pressed an empty point on the grid
+                            [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"none" forKey:@"type"]];
+                            
+                        }
+                        
+                        [self.managedObjectContext save:nil];
+                        
+                        [self.delegate updateUI];
+                        
+                        [self trackLastPressAtX:x y:y];
+                    }];
+                
+                    [self updateView];
                     
-                // We check if the last press was a note and if it is a note, if it was pressed a while ago or recently
-                BOOL lastPressedIsOld = YES;
-                if( _lastTwoPresses.lastObject && [[_lastTwoPresses.lastObject valueForKey:@"type"] isEqualToString:@"note"]) {
-                    if( [[_lastTwoPresses.lastObject valueForKey:@"time"] timeIntervalSinceNow] > - DOUBLE_PRESS_TIME )
-                        lastPressedIsOld = NO;
+                } else if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_LongPress ) {
+                    _lastDownWasInEditMode = YES;
                 }
+                
+            // Note edit mode
+            } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
+                
+                if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_DoublePress ) {
+                    
+                    // Keep track of presses to exit edit mode so that we don't trigger another view change if you double press to exit
+                    [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"editMode" forKey:@"type"]];
+                    [self trackLastPressAtX:x y:y];
+                    
+                } else if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_LongPress ) {
+                    _lastDownWasInEditMode = NO;
+                }
+                
+                [self exitNoteEditMode];
+            }
             
+        }
+        
+        // Release is what we use in long press mode
+        if( !down && _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_LongPress && sender.mode == EatsPatternViewMode_Edit && _lastDownWasInEditMode ) {
+                
                 [self.managedObjectContext performBlockAndWait:^(void) {
-                   
+                    
                     // See if we have a note there
                     SequencerNote *foundNote = [self checkForNoteAtX:x y:self.height - 1 - y];
                     
                     if( foundNote ) {
-                        
-                        // Make a record of it first for keeping track of double taps
-                        SequencerNote *lastNote = [NSDictionary dictionaryWithObjectsAndKeys:@"note", @"type",
-                                                                                            foundNote.step, @"step",
-                                                                                            foundNote.row, @"row",
-                                                                                            foundNote.velocityAsPercentage, @"velocityAsPercentage",
-                                                                                            foundNote.length, @"length",
-                                                                                            [NSDate date], @"time",
-                                                                                            nil];
-                        [_lastTwoPresses addObject:lastNote];
-                        
-                        // If we're not in a double press remove the note (ie, the last note is recent, or we're in a different place on the grid)
-                        if( lastPressedIsOld || _lastX != x || _lastY != y )
-                            [self.managedObjectContext deleteObject:foundNote];
+                        [self.managedObjectContext deleteObject:foundNote];
                         
                     } else {
-                        
-                        // If we're not in a double press then add a new note
-                        if( lastPressedIsOld || _lastX != x || _lastY != y ) {
-                            
-                            NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
-                            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
-                            newNote.step = [NSNumber numberWithUnsignedInt:x];
-                            newNote.row = [NSNumber numberWithUnsignedInt:self.height - 1 - y];
-                            [newNotesSet addObject:newNote];
-                            _pattern.notes = newNotesSet;
-                        }
-                        
-                        // Make a record that we pressed an empty point on the grid
-                        [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"none" forKey:@"type"]];
-                        
+                        NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
+                        SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                        newNote.step = [NSNumber numberWithUnsignedInt:x];
+                        newNote.row = [NSNumber numberWithUnsignedInt:self.height - 1 - y];
+                        [newNotesSet addObject:newNote];
+                        _pattern.notes = newNotesSet;
                     }
                     
                     [self.managedObjectContext save:nil];
                     
                     [self.delegate updateUI];
-                    
-                    [self trackLastPressAtX:x y:y];
                 }];
                 
                 [self updateView];
-                
-            // Note edit mode
-            } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
-                
-                // Keep track of presses to exit edit mode so that we don't trigger another view change if you double press to exit
-                [_lastTwoPresses addObject:[NSDictionary dictionaryWithObject:@"editMode" forKey:@"type"]];
-                [self exitNoteEditMode];
-                
-                [self trackLastPressAtX:x y:y];
-            }
         }
         
     });
@@ -535,6 +583,25 @@
             
         }
     
+    });
+}
+
+- (void) eatsGridPatternViewLongPressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender
+{
+    uint x = [[xy valueForKey:@"x"] unsignedIntValue];
+    uint y = [[xy valueForKey:@"y"] unsignedIntValue];
+    
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            
+            // See if we have a note there
+            SequencerNote *foundNote = [self checkForNoteAtX:x y:self.height - 1 - y];
+            
+            if( foundNote )
+                [self enterNoteEditModeFor:foundNote];
+            else
+                [self showView:[NSNumber numberWithInt:EatsGridViewType_Play]];
+        }];
     });
 }
 
