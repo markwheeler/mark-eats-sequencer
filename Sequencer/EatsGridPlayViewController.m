@@ -754,9 +754,6 @@
     
     // If pattern quantization is disabled
     if( patternQuantization == 0 ) {
-        
-        // TODO here
-        
         [self.delegate updateUI];
     }
 }

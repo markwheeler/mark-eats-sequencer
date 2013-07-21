@@ -121,15 +121,6 @@
 }
 
 
-// TODO remove this, just for testing
-//- (BOOL)configurePersistentStoreCoordinatorForURL:(NSURL *)url ofType:(NSString *)fileType modelConfiguration:(NSString *)configuration storeOptions:(NSDictionary *)storeOptions error:(NSError **)error
-//{
-//    NSLog(@"Configuring the thing... (if this doesn't get fired then we'll crash??)");
-//    
-//    return [super configurePersistentStoreCoordinatorForURL:url ofType:fileType modelConfiguration:configuration storeOptions:storeOptions error:error];
-//}
-
-
 
 #pragma mark - Public methods
 
@@ -150,6 +141,7 @@
         // Create the SequencerState
         _sequencerState = [[SequencerState alloc] init];
         [_sequencerState createPageStates:SEQUENCER_PAGES];
+        [self.sequencerState addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
         
         // Create the step quantization settings
         self.stepQuantizationArray = [NSMutableArray array];
@@ -330,7 +322,6 @@
     [self updateSequencerPageUI];
     
     // KVO
-    [self.sequencerState addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencerOnMainThread addObserver:self forKeyPath:@"stepQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencerOnMainThread addObserver:self forKeyPath:@"patternQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     // Seems odd to comment these out as you would think that would throw an error when setCurrentPage is called... but it works?!
