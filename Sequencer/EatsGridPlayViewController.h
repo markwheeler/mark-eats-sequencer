@@ -10,13 +10,13 @@
 #import "EatsGridView.h"
 #import "EatsGridButtonView.h"
 #import "EatsGridLoopBraceView.h"
-#import "EatsGridHorizontalShiftView.h"
+#import "EatsGridHorizontalEndPullView.h"
 #import "EatsGridPatternView.h"
 
-@interface EatsGridPlayViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridButtonViewDelegateProtocol, EatsGridLoopBraceViewDelegateProtocol, EatsGridHorizontalShiftViewDelegateProtocol, EatsGridPatternViewDelegateProtocol>
+@interface EatsGridPlayViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridButtonViewDelegateProtocol, EatsGridLoopBraceViewDelegateProtocol, EatsGridHorizontalEndPullViewDelegateProtocol, EatsGridPatternViewDelegateProtocol>
 
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender;
-- (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender;
+- (void) eatsGridHorizontalEndPullViewUpdated:(EatsGridHorizontalEndPullView *)sender;
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender;
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
 

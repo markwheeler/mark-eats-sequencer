@@ -26,7 +26,7 @@
 @property SequencerState                    *sequencerState;
 @property Preferences                       *sharedPreferences;
 
-@property EatsGridHorizontalShiftView       *transposeView;
+@property EatsGridHorizontalEndPullView     *transposeView;
 @property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
 
@@ -146,13 +146,12 @@
             [_scrubOtherPagesButtons addObject:button];
         }
         
-        _transposeView = [[EatsGridHorizontalShiftView alloc] init];
+        _transposeView = [[EatsGridHorizontalEndPullView alloc] init];
         _transposeView.delegate = self;
         _transposeView.x = 0;
         _transposeView.y = - 2;
         _transposeView.width = self.width;
         _transposeView.height = 1;
-        _transposeView.zeroStep = ( self.width / 2 ) - 1;
         _transposeView.visible = NO;
     }
     
@@ -497,7 +496,13 @@
         transpose = _currentPattern.inPage.transpose.intValue;
     }];
     
-    _transposeView.shift = transpose;
+    if( transpose > 0 ) {
+        _transposeView.leftValue = transpose;
+        _transposeView.rightValue = 0;
+    } else {
+        _transposeView.leftValue = 0;
+        _transposeView.rightValue = transpose * -1;
+    }
 }
 
 - (void) setScrubButtonState
@@ -1058,11 +1063,17 @@
     [self updateView];
 }
 
-- (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
+- (void) eatsGridHorizontalEndPullViewUpdated:(EatsGridHorizontalEndPullView *)sender
 {
     dispatch_sync(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void){
-            _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
+            
+            if( _transposeView.leftValue > 0 ) {
+                _currentPattern.inPage.transpose = [NSNumber numberWithUnsignedInt:_transposeView.leftValue];
+            } else {
+                _currentPattern.inPage.transpose = [NSNumber numberWithInt:(int)_transposeView.rightValue * -1];
+            }
+            
             [self.managedObjectContext save:nil];
         }];
     });

@@ -62,6 +62,7 @@
 		4DA8A91D170B8805001C26EB /* WMNoteCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A915170B8805001C26EB /* WMNoteCollection.m */; };
 		4DA8A91E170B8805001C26EB /* WMPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A917170B8805001C26EB /* WMPool.m */; };
 		4DA8A91F170B8805001C26EB /* WMScale.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A919170B8805001C26EB /* WMScale.m */; };
+		4DAC2D7F179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DAC2D7E179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m */; };
 		4DADBEC51719FA910091F952 /* SequencerAppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */; };
 		4DADBEDF171A10610091F952 /* chords.json in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBED7171A10610091F952 /* chords.json */; };
 		4DADBEE0171A10610091F952 /* log.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBED8171A10610091F952 /* log.txt */; };
@@ -198,6 +199,8 @@
 		4DA8A917170B8805001C26EB /* WMPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMPool.m; sourceTree = "<group>"; };
 		4DA8A918170B8805001C26EB /* WMScale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMScale.h; sourceTree = "<group>"; };
 		4DA8A919170B8805001C26EB /* WMScale.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMScale.m; sourceTree = "<group>"; };
+		4DAC2D7D179CF04B00267EC3 /* EatsGridHorizontalEndPullView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalEndPullView.h; sourceTree = "<group>"; };
+		4DAC2D7E179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalEndPullView.m; sourceTree = "<group>"; };
 		4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = SequencerAppIcon.icns; path = ../../SequencerAppIcon.icns; sourceTree = "<group>"; };
 		4DADBED7171A10610091F952 /* chords.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chords.json; sourceTree = "<group>"; };
 		4DADBED8171A10610091F952 /* log.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = log.txt; sourceTree = "<group>"; };
@@ -240,7 +243,7 @@
 		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
-		4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Document 2.xcdatamodel"; sourceTree = "<group>"; };
+		4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Document 2.xcdatamodel"; sourceTree = "<group>"; };
 		4DFAE982179B8BB00076153D /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
 		4DFAE983179B8BB00076153D /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
 		4DFAE985179B8BB00076153D /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
@@ -314,6 +317,8 @@
 				4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */,
 				4DFAE994179B94F10076153D /* EatsGridHorizontalShiftView.h */,
 				4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */,
+				4DAC2D7D179CF04B00267EC3 /* EatsGridHorizontalEndPullView.h */,
+				4DAC2D7E179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m */,
 				4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */,
 				4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */,
 				4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */,
@@ -650,6 +655,7 @@
 				4DFAE990179B8BB00076153D /* SequencerRowPitch.m in Sources */,
 				4DFAE993179B8BB00076153D /* SequencerPattern.m in Sources */,
 				4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */,
+				4DAC2D7F179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
