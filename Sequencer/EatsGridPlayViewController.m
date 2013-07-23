@@ -26,7 +26,7 @@
 @property SequencerState                    *sequencerState;
 @property Preferences                       *sharedPreferences;
 
-@property EatsGridHorizontalEndPullView     *transposeView;
+@property EatsGridHorizontalShiftView       *transposeView;
 @property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
 
@@ -146,7 +146,7 @@
             [_scrubOtherPagesButtons addObject:button];
         }
         
-        _transposeView = [[EatsGridHorizontalEndPullView alloc] init];
+        _transposeView = [[EatsGridHorizontalShiftView alloc] init];
         _transposeView.delegate = self;
         _transposeView.x = 0;
         _transposeView.y = - 2;
@@ -491,18 +491,15 @@
 - (void) setTransposeAmount
 {
     __block int transpose;
+    __block uint transposeZeroStep;
     
     [self.managedObjectContext performBlockAndWait:^(void) {
         transpose = _currentPattern.inPage.transpose.intValue;
+        transposeZeroStep = _currentPattern.inPage.transposeZeroStep.unsignedIntValue;
     }];
     
-    if( transpose > 0 ) {
-        _transposeView.leftValue = transpose;
-        _transposeView.rightValue = 0;
-    } else {
-        _transposeView.leftValue = 0;
-        _transposeView.rightValue = transpose * -1;
-    }
+    _transposeView.shift = transpose;
+    _transposeView.zeroStep = transposeZeroStep;
 }
 
 - (void) setScrubButtonState
@@ -1063,17 +1060,12 @@
     [self updateView];
 }
 
-- (void) eatsGridHorizontalEndPullViewUpdated:(EatsGridHorizontalEndPullView *)sender
+- (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
 {
     dispatch_sync(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void){
-            
-            if( _transposeView.leftValue > 0 ) {
-                _currentPattern.inPage.transpose = [NSNumber numberWithUnsignedInt:_transposeView.leftValue];
-            } else {
-                _currentPattern.inPage.transpose = [NSNumber numberWithInt:(int)_transposeView.rightValue * -1];
-            }
-            
+            _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
+            _currentPattern.inPage.transposeZeroStep = [NSNumber numberWithUnsignedInt:sender.zeroStep];
             [self.managedObjectContext save:nil];
         }];
     });

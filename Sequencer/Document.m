@@ -755,6 +755,9 @@
                     page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
                 }
                 
+                if( page.transposeZeroStep.intValue >= self.sharedPreferences.gridWidth )
+                    page.transposeZeroStep = [NSNumber numberWithUnsignedInt:(self.sharedPreferences.gridWidth) / 2 - 1];
+                
                 SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.intValue];
                 
                 if( pageState.currentStep.intValue >= self.sharedPreferences.gridWidth )

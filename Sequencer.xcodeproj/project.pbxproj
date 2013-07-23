@@ -83,6 +83,12 @@
 		4DC19BE61719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */; };
 		4DC940A9170064B6005FD88D /* ScaleGeneratorSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */; };
 		4DC940AE170068E9005FD88D /* JCSSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC940AD170068E9005FD88D /* JCSSheetController.m */; };
+		4DCAA829179E47940070B0B2 /* SequencerPatternIdInPlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCAA828179E47940070B0B2 /* SequencerPatternIdInPlaylist.m */; };
+		4DCAA82C179E47940070B0B2 /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCAA82B179E47940070B0B2 /* SequencerRowPitch.m */; };
+		4DCAA82F179E47940070B0B2 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCAA82E179E47940070B0B2 /* SequencerPattern.m */; };
+		4DCAA832179E47940070B0B2 /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCAA831179E47940070B0B2 /* Sequencer.m */; };
+		4DCAA835179E47940070B0B2 /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCAA834179E47940070B0B2 /* SequencerPage.m */; };
+		4DCAA838179E47940070B0B2 /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCAA837179E47940070B0B2 /* SequencerNote.m */; };
 		4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */; };
 		4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCF8E3A16E44AD7002EDD46 /* EatsCommunicationManager.m */; };
 		4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */; };
@@ -90,12 +96,6 @@
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
-		4DFAE984179B8BB00076153D /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE983179B8BB00076153D /* SequencerPage.m */; };
-		4DFAE987179B8BB00076153D /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE986179B8BB00076153D /* SequencerNote.m */; };
-		4DFAE98A179B8BB00076153D /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE989179B8BB00076153D /* Sequencer.m */; };
-		4DFAE98D179B8BB00076153D /* SequencerPatternIdInPlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE98C179B8BB00076153D /* SequencerPatternIdInPlaylist.m */; };
-		4DFAE990179B8BB00076153D /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE98F179B8BB00076153D /* SequencerRowPitch.m */; };
-		4DFAE993179B8BB00076153D /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE992179B8BB00076153D /* SequencerPattern.m */; };
 		4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */; };
 /* End PBXBuildFile section */
 
@@ -229,6 +229,18 @@
 		4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScaleGeneratorSheetController.m; sourceTree = "<group>"; };
 		4DC940AC170068E9005FD88D /* JCSSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JCSSheetController.h; sourceTree = "<group>"; };
 		4DC940AD170068E9005FD88D /* JCSSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JCSSheetController.m; sourceTree = "<group>"; };
+		4DCAA827179E47940070B0B2 /* SequencerPatternIdInPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternIdInPlaylist.h; sourceTree = "<group>"; };
+		4DCAA828179E47940070B0B2 /* SequencerPatternIdInPlaylist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternIdInPlaylist.m; sourceTree = "<group>"; };
+		4DCAA82A179E47940070B0B2 /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
+		4DCAA82B179E47940070B0B2 /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
+		4DCAA82D179E47940070B0B2 /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
+		4DCAA82E179E47940070B0B2 /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
+		4DCAA830179E47940070B0B2 /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
+		4DCAA831179E47940070B0B2 /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
+		4DCAA833179E47940070B0B2 /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
+		4DCAA834179E47940070B0B2 /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
+		4DCAA836179E47940070B0B2 /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
+		4DCAA837179E47940070B0B2 /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
 		4DCF8E2916E446D6002EDD46 /* PreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesController.h; sourceTree = "<group>"; };
 		4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesController.m; sourceTree = "<group>"; };
 		4DCF8E3916E44AD7002EDD46 /* EatsCommunicationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsCommunicationManager.h; sourceTree = "<group>"; };
@@ -244,18 +256,6 @@
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 		4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Document 2.xcdatamodel"; sourceTree = "<group>"; };
-		4DFAE982179B8BB00076153D /* SequencerPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPage.h; sourceTree = "<group>"; };
-		4DFAE983179B8BB00076153D /* SequencerPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPage.m; sourceTree = "<group>"; };
-		4DFAE985179B8BB00076153D /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
-		4DFAE986179B8BB00076153D /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
-		4DFAE988179B8BB00076153D /* Sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sequencer.h; sourceTree = "<group>"; };
-		4DFAE989179B8BB00076153D /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
-		4DFAE98B179B8BB00076153D /* SequencerPatternIdInPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPatternIdInPlaylist.h; sourceTree = "<group>"; };
-		4DFAE98C179B8BB00076153D /* SequencerPatternIdInPlaylist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPatternIdInPlaylist.m; sourceTree = "<group>"; };
-		4DFAE98E179B8BB00076153D /* SequencerRowPitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerRowPitch.h; sourceTree = "<group>"; };
-		4DFAE98F179B8BB00076153D /* SequencerRowPitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerRowPitch.m; sourceTree = "<group>"; };
-		4DFAE991179B8BB00076153D /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
-		4DFAE992179B8BB00076153D /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
 		4DFAE994179B94F10076153D /* EatsGridHorizontalShiftView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalShiftView.h; sourceTree = "<group>"; };
 		4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalShiftView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -449,18 +449,18 @@
 			isa = PBXGroup;
 			children = (
 				4D6115E616E431BD00140AF8 /* Document.xcdatamodeld */,
-				4DFAE991179B8BB00076153D /* SequencerPattern.h */,
-				4DFAE992179B8BB00076153D /* SequencerPattern.m */,
-				4DFAE98E179B8BB00076153D /* SequencerRowPitch.h */,
-				4DFAE98F179B8BB00076153D /* SequencerRowPitch.m */,
-				4DFAE98B179B8BB00076153D /* SequencerPatternIdInPlaylist.h */,
-				4DFAE98C179B8BB00076153D /* SequencerPatternIdInPlaylist.m */,
-				4DFAE988179B8BB00076153D /* Sequencer.h */,
-				4DFAE989179B8BB00076153D /* Sequencer.m */,
-				4DFAE985179B8BB00076153D /* SequencerNote.h */,
-				4DFAE986179B8BB00076153D /* SequencerNote.m */,
-				4DFAE982179B8BB00076153D /* SequencerPage.h */,
-				4DFAE983179B8BB00076153D /* SequencerPage.m */,
+				4DCAA836179E47940070B0B2 /* SequencerNote.h */,
+				4DCAA837179E47940070B0B2 /* SequencerNote.m */,
+				4DCAA833179E47940070B0B2 /* SequencerPage.h */,
+				4DCAA834179E47940070B0B2 /* SequencerPage.m */,
+				4DCAA830179E47940070B0B2 /* Sequencer.h */,
+				4DCAA831179E47940070B0B2 /* Sequencer.m */,
+				4DCAA82D179E47940070B0B2 /* SequencerPattern.h */,
+				4DCAA82E179E47940070B0B2 /* SequencerPattern.m */,
+				4DCAA82A179E47940070B0B2 /* SequencerRowPitch.h */,
+				4DCAA82B179E47940070B0B2 /* SequencerRowPitch.m */,
+				4DCAA827179E47940070B0B2 /* SequencerPatternIdInPlaylist.h */,
+				4DCAA828179E47940070B0B2 /* SequencerPatternIdInPlaylist.m */,
 				4D61162916E4386700140AF8 /* Sequencer+Utils.h */,
 				4D61162A16E4386700140AF8 /* Sequencer+Utils.m */,
 			);
@@ -648,14 +648,14 @@
 				4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */,
 				4D7FC0C8172C218C00D0614C /* SequencerState.m in Sources */,
 				4D64B2211797A059007BD78F /* EatsPlusOneValueTransformer.m in Sources */,
-				4DFAE984179B8BB00076153D /* SequencerPage.m in Sources */,
-				4DFAE987179B8BB00076153D /* SequencerNote.m in Sources */,
-				4DFAE98A179B8BB00076153D /* Sequencer.m in Sources */,
-				4DFAE98D179B8BB00076153D /* SequencerPatternIdInPlaylist.m in Sources */,
-				4DFAE990179B8BB00076153D /* SequencerRowPitch.m in Sources */,
-				4DFAE993179B8BB00076153D /* SequencerPattern.m in Sources */,
 				4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */,
 				4DAC2D7F179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m in Sources */,
+				4DCAA829179E47940070B0B2 /* SequencerPatternIdInPlaylist.m in Sources */,
+				4DCAA82C179E47940070B0B2 /* SequencerRowPitch.m in Sources */,
+				4DCAA82F179E47940070B0B2 /* SequencerPattern.m in Sources */,
+				4DCAA832179E47940070B0B2 /* Sequencer.m in Sources */,
+				4DCAA835179E47940070B0B2 /* SequencerPage.m in Sources */,
+				4DCAA838179E47940070B0B2 /* SequencerNote.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

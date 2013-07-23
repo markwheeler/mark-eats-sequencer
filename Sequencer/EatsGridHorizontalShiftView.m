@@ -8,6 +8,15 @@
 
 #import "EatsGridHorizontalShiftView.h"
 
+#define TAIL_LENGTH 3
+
+@interface EatsGridHorizontalShiftView ()
+
+@property NSDictionary          *lastDownKey;
+@property BOOL                  setSelection;
+
+@end
+
 @implementation EatsGridHorizontalShiftView
 
 - (NSArray *) viewArray
@@ -22,12 +31,23 @@
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
             
-            if( x == _zeroStep || x == _zeroStep + _shift )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( ( _shift > 0 && x > _zeroStep && x < _zeroStep + _shift ) || ( _shift < 0 && x < _zeroStep && (int)x > (int)_zeroStep + _shift ) )
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
-            else
-                [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
+            int brightness;
+            
+            if( x == _zeroStep ) {
+                brightness = 15;
+            } else if ( _shift > 0 && x > _zeroStep && x <= _zeroStep + _shift ) {
+                brightness = 8;
+                if( (int)x >= (int)_zeroStep + _shift - TAIL_LENGTH )
+                    brightness += ( x - ( (int)_zeroStep + _shift - TAIL_LENGTH ) + 1 );
+            } else if ( _shift < 0 && x < _zeroStep && (int)x >= (int)_zeroStep + _shift ) {
+                brightness = 8;
+                if( (int)x <= (int)_zeroStep + _shift + TAIL_LENGTH )
+                    brightness += ( ( (int)_zeroStep + _shift + TAIL_LENGTH + 1 ) - x );
+            } else {
+                brightness = 0;
+            }
+            
+            [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:brightness * self.opacity] atIndex:y];
         }
     }
     
@@ -38,10 +58,35 @@
 {
     // Down
     if( down ) {
-        _shift = x - (int)_zeroStep;
         
-        if([self.delegate respondsToSelector:@selector(eatsGridHorizontalShiftViewUpdated:)])
-            [self.delegate performSelector:@selector(eatsGridHorizontalShiftViewUpdated:) withObject:self];
+        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] unsignedIntValue] == _zeroStep ) {
+            _zeroStep = x;
+            
+            _setSelection = YES;
+            
+            if([self.delegate respondsToSelector:@selector(eatsGridHorizontalShiftViewUpdated:)])
+                [self.delegate performSelector:@selector(eatsGridHorizontalShiftViewUpdated:) withObject:self];
+            
+        } else {
+            // Log the last press
+            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+        }
+        
+        
+    // Release
+    } else {
+        
+        // Remove lastDownKey if it's this one etc
+        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if (!_setSelection ) {
+                _shift = x - (int)_zeroStep;
+                
+                if([self.delegate respondsToSelector:@selector(eatsGridHorizontalShiftViewUpdated:)])
+                    [self.delegate performSelector:@selector(eatsGridHorizontalShiftViewUpdated:) withObject:self];
+            }
+            _lastDownKey = nil;
+            _setSelection = NO;
+        }
     }
 }
 

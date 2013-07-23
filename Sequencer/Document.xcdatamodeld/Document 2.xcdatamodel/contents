@@ -23,6 +23,7 @@
         <attribute name="swingAmount" optional="YES" attributeType="Integer 16" minValueString="50" maxValueString="80" defaultValueString="50" syncable="YES"/>
         <attribute name="swingType" attributeType="Integer 16" minValueString="1" maxValueString="64" defaultValueString="16" syncable="YES"/>
         <attribute name="transpose" attributeType="Integer 16" minValueString="-127" maxValueString="127" defaultValueString="0" syncable="YES"/>
+        <attribute name="transposeZeroStep" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="7" syncable="YES"/>
         <attribute name="velocityGroove" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
         <relationship name="inSequencer" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Sequencer" inverseName="pages" inverseEntity="Sequencer" syncable="YES"/>
         <relationship name="patterns" optional="YES" toMany="YES" maxCount="32" deletionRule="Nullify" ordered="YES" destinationEntity="SequencerPattern" inverseName="inPage" inverseEntity="SequencerPattern" syncable="YES"/>
@@ -46,7 +47,7 @@
     <elements>
         <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="103"/>
         <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
-        <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="253"/>
+        <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="270"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>
         <element name="SequencerPatternIdInPlaylist" positionX="-20" positionY="198" width="128" height="73"/>
         <element name="SequencerRowPitch" positionX="-11" positionY="44" width="128" height="88"/>

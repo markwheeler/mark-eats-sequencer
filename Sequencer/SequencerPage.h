@@ -2,7 +2,7 @@
 //  SequencerPage.h
 //  Sequencer
 //
-//  Created by Mark Wheeler on 20/07/2013.
+//  Created by Mark Wheeler on 22/07/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
@@ -21,8 +21,9 @@
 @property (nonatomic, retain) NSNumber * stepLength;
 @property (nonatomic, retain) NSNumber * swingAmount;
 @property (nonatomic, retain) NSNumber * swingType;
-@property (nonatomic, retain) NSNumber * velocityGroove;
 @property (nonatomic, retain) NSNumber * transpose;
+@property (nonatomic, retain) NSNumber * velocityGroove;
+@property (nonatomic, retain) NSNumber * transposeZeroStep;
 @property (nonatomic, retain) Sequencer *inSequencer;
 @property (nonatomic, retain) NSOrderedSet *patterns;
 @property (nonatomic, retain) NSOrderedSet *pitches;
