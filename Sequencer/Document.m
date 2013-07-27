@@ -15,6 +15,7 @@
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
 #import "EatsDebugGridView.h"
+#import "EatsWMNoteValueTransformer.h"
 
 @interface Document ()
 
@@ -45,7 +46,6 @@
 @property NSString                      *lastTonicNoteName;
 
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
-@property (weak) IBOutlet NSArrayController     *pitchesArrayController;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
 
 @property (weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
@@ -92,8 +92,7 @@
     
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
-    
-    self.pitchesArrayController.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"row" ascending:NO]];
+    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
     
     __block NSNumber *pageId;
 
@@ -107,8 +106,9 @@
     
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentPageOnMainThread addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
     
-    [self updatePitchesPredicateForPage:pageId.intValue];
+    [self updatePitches];
     self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self.id == %@", pageId];
     
     [self updateSequencerPageUI];
@@ -141,7 +141,7 @@
         // Create the SequencerState
         _sequencerState = [[SequencerState alloc] init];
         [_sequencerState createPageStates:SEQUENCER_PAGES];
-        [self.sequencerState addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
+        [_sequencerState addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
         
         // Create the step quantization settings
         self.stepQuantizationArray = [NSMutableArray array];
@@ -180,6 +180,7 @@
     
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
+    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
 }
 
 - (NSString *) windowNibName
@@ -338,6 +339,7 @@
     //[self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
     //[self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     //[self.currentPageOnMainThread addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
+    //[self.currentPageOnMainThread addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
@@ -640,11 +642,45 @@
         [self updateStepLengthPopup];
     else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"swing"] )
         [self updateSwingPopup];
+    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transpose"] )
+        [self updatePitches];
 }
 
-- (void) updatePitchesPredicateForPage:(int)pageId
+- (void) updatePitches
 {
-    self.pitchesArrayController.fetchPredicate = [NSPredicate predicateWithFormat:@"inPage.id == %i AND row < %u", pageId, self.sharedPreferences.gridHeight];
+    NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:_sharedPreferences.gridHeight];
+    
+    for( int i = 0; i < _sharedPreferences.gridHeight; i ++ ) {
+        
+        NSNumber *pitch = [[_currentPageOnMainThread.pitches objectAtIndex:i] pitch];
+        
+        NSMutableDictionary *tableRow = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:_sharedPreferences.gridHeight - i], @"row",
+                                                                                          pitch, @"pitch",
+                                                                                          nil];
+        if( _currentPageOnMainThread.transpose.intValue ) {
+            NSString *transposedNote;
+            
+            int transposedPitch = pitch.intValue + _currentPageOnMainThread.transpose.intValue;
+            if( transposedPitch > 127 )
+                transposedPitch = 127;
+            else if( transposedPitch < 0 )
+                transposedPitch = 0;
+            
+            if( transposedPitch > pitch.intValue )
+                transposedNote = [NSString stringWithFormat:@"↑"];
+            else if( transposedPitch < pitch.intValue )
+                transposedNote = [NSString stringWithFormat:@"↓"];
+            else
+                transposedNote = [NSString stringWithFormat:@"  "];
+            
+            transposedNote = [NSString stringWithFormat:@"%@ %@", transposedNote, [[[WMPool pool] noteWithMidiNoteNumber:transposedPitch] shortName]];
+            [tableRow setObject:transposedNote forKey:@"transposedPitch"];
+        }
+        
+        [newArray addObject:tableRow];
+    }
+    
+    self.currentPagePitches = newArray;
 }
 
 
@@ -814,7 +850,7 @@
     }
     
     // Pitch list
-    [self updatePitchesPredicateForPage:_currentPageOnMainThread.id.intValue];
+    [self updatePitches];
     
     // Pattern quantization
     [self setupPatternQuantizationPopup];
@@ -1000,6 +1036,10 @@
 
 - (void)controlTextDidEndEditing:(NSNotification *)obj
 {
+    NSInteger rowIndex = self.rowPitchesTableView.numberOfRows - 1 - self.rowPitchesTableView.selectedRow;
+    SequencerRowPitch *rowPitch = [_currentPageOnMainThread.pitches objectAtIndex:rowIndex];
+    rowPitch.pitch = [[_currentPagePitches objectAtIndex:rowIndex] valueForKey:@"pitch"];
+    
     [self childMOCChanged];
 }
 
@@ -1024,7 +1064,7 @@
                 int pageId = self.currentPageOnMainThread.id.intValue;
                 
                 dispatch_async(self.bigSerialQueue, ^(void) {
-                    [self.managedObjectContext performBlock:^(void) {
+                    [self.managedObjectContext performBlockAndWait:^(void) {
                         // Check what note the user entered
                         WMNote *tonicNote;
                         if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
@@ -1054,6 +1094,7 @@
                         }
                         [self.managedObjectContext save:nil];
                     }];
+                    [self updatePitches];
                 });
                 
             // Cancel

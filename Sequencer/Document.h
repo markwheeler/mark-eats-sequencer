@@ -26,6 +26,7 @@
 @property Sequencer                 *sequencer;
 @property SequencerState            *sequencerState;
 @property SequencerPageState        *currentSequencerPageState;
+@property NSArray                   *currentPagePitches;
 
 @property BOOL                      isActive;
 
