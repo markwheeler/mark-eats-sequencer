@@ -27,7 +27,6 @@
 
 @property Preferences           *sharedPreferences;
 
-@property NSDictionary          *lastReleasedKey;
 @property NSDictionary          *lastLongPressKey;
 @property NSDictionary          *lastDownKey;
 @property BOOL                  setSelection;
@@ -48,7 +47,6 @@
         _nextStepBrightness = NEXT_STEP_BRIGHTNESS;
         _noteBrightness = NOTE_BRIGHTNESS;
         _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
-        _doublePressTime = 0.4; // Default
     }
     return self;
 }
@@ -249,68 +247,35 @@
         _lastLongPressKey = nil;
     }
     
-    // In edit mode we check for double presses or long presses
+    // In edit mode we check for long presses
     if ( _mode == EatsPatternViewMode_Edit ) {
         
-        // Double presses
-        if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_DoublePress ) {
-            
-            if( !down ) {
-            
-                // Check for double presses
-                if(_lastReleasedKey
-                   && [[_lastReleasedKey valueForKey:@"time"] timeIntervalSinceNow] > -_doublePressTime
-                   && [[_lastReleasedKey valueForKey:@"x"] intValue] == x
-                   && [[_lastReleasedKey valueForKey:@"y"] intValue] == y) {
-                    
-                    // Send the double press to delegate
-                    NSDictionary *xy = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                        [NSNumber numberWithUnsignedInt:y], @"y",
-                                        nil];
-                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewDoublePressAt: sender:)])
-                        [self.delegate performSelector:@selector(eatsGridPatternViewDoublePressAt: sender:) withObject:xy withObject:self];
-                    
-                } else {
-                    // Log the last release
-                    _lastReleasedKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
-                                        [NSNumber numberWithUnsignedInt:y], @"y",
-                                        [NSDate date], @"time",
-                                        nil];
-                }
+        // Down
+        if( down ) {
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
                 
+                [_longPressTimer invalidate];
+                _longPressTimer = [NSTimer scheduledTimerWithTimeInterval:LONG_PRESS_TIME
+                                                                   target:self
+                                                                 selector:@selector(longPressTimeout:)
+                                                                 userInfo:nil
+                                                                  repeats:NO];
+                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                
+                // Make sure we fire even when the UI is tracking mouse down stuff
+                [runloop addTimer:_longPressTimer forMode: NSRunLoopCommonModes];
+                [runloop addTimer:_longPressTimer forMode: NSEventTrackingRunLoopMode];
+            });
+            
+            // Log the last press
+            _lastLongPressKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            
+        // Release
+        } else {
+            if( _lastLongPressKey && [[_lastLongPressKey valueForKey:@"x"] intValue] == x && [[_lastLongPressKey valueForKey:@"y"] intValue] == y ) {
+                _lastLongPressKey = nil;
+                [_longPressTimer invalidate];
             }
-            
-        // Long presses
-        } else if( _sharedPreferences.modeSwitchMethod.intValue == EatsModeSwitchMethod_LongPress ) {
-            
-            // Down
-            if( down ) {
-                dispatch_async(dispatch_get_main_queue(), ^(void) {
-                    
-                    [_longPressTimer invalidate];
-                    _longPressTimer = [NSTimer scheduledTimerWithTimeInterval:LONG_PRESS_TIME
-                                                                       target:self
-                                                                     selector:@selector(longPressTimeout:)
-                                                                     userInfo:nil
-                                                                      repeats:NO];
-                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                    
-                    // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:_longPressTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:_longPressTimer forMode: NSEventTrackingRunLoopMode];
-                });
-                
-                // Log the last press
-                _lastLongPressKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
-                
-            // Release
-            } else {
-                if( _lastLongPressKey && [[_lastLongPressKey valueForKey:@"x"] intValue] == x && [[_lastLongPressKey valueForKey:@"y"] intValue] == y ) {
-                    _lastLongPressKey = nil;
-                    [_longPressTimer invalidate];
-                }
-            }
-            
         }
     }
     

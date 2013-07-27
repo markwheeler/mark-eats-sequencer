@@ -17,7 +17,6 @@
 @protocol EatsGridPatternViewDelegateProtocol
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender;
 @optional
-- (void) eatsGridPatternViewDoublePressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender;
 - (void) eatsGridPatternViewLongPressAt:(NSDictionary *)xy sender:(EatsGridPatternView *)sender;
 - (void) eatsGridPatternViewSelection:(NSDictionary *)selection sender:(EatsGridPatternView *)sender;
 @end
@@ -51,6 +50,5 @@ typedef enum EatsPatternViewFoldFrom {
 @property uint                      nextStepBrightness;
 @property uint                      noteBrightness;
 @property uint                      noteLengthBrightness;
-@property float                     doublePressTime;
 
 @end

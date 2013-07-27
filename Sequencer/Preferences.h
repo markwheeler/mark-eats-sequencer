@@ -16,11 +16,6 @@ typedef enum EatsGridType{
     EatsGridType_Launchpad
 } EatsGridType;
 
-typedef enum EatsModeSwitchMethod{
-    EatsModeSwitchMethod_LongPress,
-    EatsModeSwitchMethod_DoublePress
-} EatsModeSwitchMethod;
-
 @interface Preferences : NSObject
 
 @property uint              gridWidth;
@@ -38,7 +33,6 @@ typedef enum EatsModeSwitchMethod{
 @property BOOL              sendMIDIClock;
 
 @property BOOL              loopFromScrubArea;
-@property NSNumber          *modeSwitchMethod;
 
 + (id) sharedPreferences;
 - (void) loadPreferences;
