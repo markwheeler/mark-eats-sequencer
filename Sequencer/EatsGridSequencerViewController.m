@@ -412,6 +412,8 @@
                 
                 _lastDownWasInEditMode = YES;
                 
+                [self updateView];
+                
             // Note edit mode
             } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
                 

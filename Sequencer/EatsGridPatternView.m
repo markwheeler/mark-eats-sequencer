@@ -21,6 +21,7 @@
 #define NEXT_STEP_BRIGHTNESS 8
 #define NOTE_BRIGHTNESS 15
 #define NOTE_LENGTH_BRIGHTNESS 10
+#define PRESS_BRIGHTNESS 15
 #define LONG_PRESS_TIME 0.4
 
 @interface EatsGridPatternView ()
@@ -28,8 +29,7 @@
 @property Preferences           *sharedPreferences;
 
 @property NSDictionary          *lastLongPressKey;
-@property NSDictionary          *lastDownKey;
-@property BOOL                  setSelection;
+@property NSMutableOrderedSet   *currentlyDownKeys;
 
 @property NSTimer               *longPressTimer;
 
@@ -47,6 +47,9 @@
         _nextStepBrightness = NEXT_STEP_BRIGHTNESS;
         _noteBrightness = NOTE_BRIGHTNESS;
         _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
+        _pressBrightness = PRESS_BRIGHTNESS;
+        
+        _currentlyDownKeys = [[NSMutableOrderedSet alloc] initWithCapacity:4];
     }
     return self;
 }
@@ -165,33 +168,59 @@
         
     }];
     
+    // Put in any down keys
+    if( _mode == EatsPatternViewMode_Edit ) {
+        
+        NSNumber *pressBrightnessResult = [NSNumber numberWithInt:_pressBrightness * self.opacity];
+        
+        for( NSDictionary *key in _currentlyDownKeys ) {
+            [[viewArray objectAtIndex:[[key valueForKey:@"x"] intValue]] replaceObjectAtIndex:[[key valueForKey:@"y"] intValue] withObject:pressBrightnessResult];
+        }
+    }
+    
     return viewArray;
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
 {
+    // Remove down keys
+    if( !down && ( _mode == EatsPatternViewMode_Play || _mode == EatsPatternViewMode_Edit ) ) {
+        [self removeDownKeyAtX:x y:y];
+    }
+    
     // In play mode we check for selections
     if( _mode == EatsPatternViewMode_Play ) {
         
         // Down
         if( down ) {
             
-            if( _sharedPreferences.loopFromScrubArea && _lastDownKey ) {
+            if( _sharedPreferences.loopFromScrubArea && _currentlyDownKeys.count ) {
                 
                 // Set a selection
                 int loopEndX = x - 1;
                 if( loopEndX < 0 )
                     loopEndX += self.width;
                 
-                _setSelection = YES;
-                
-                NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[_lastDownKey valueForKey:@"x"], @"start",
+                NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[[_currentlyDownKeys lastObject] valueForKey:@"x"], @"start",
                                            [NSNumber numberWithInt:loopEndX], @"end",
                                            nil];
                 if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
                     [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
                 
+                
             } else {
+                
+                if( _sharedPreferences.loopFromScrubArea ) {
+                    
+                    // Reset the loop
+                    NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"start",
+                                               [NSNumber numberWithUnsignedInt:self.width], @"end",
+                                               nil];
+                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
+                        [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                    
+                    
+                }
                 
                 // Send the press to delegate
                 NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
@@ -200,32 +229,12 @@
                                         nil];
                 if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
                     [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
-                
-                if( _sharedPreferences.loopFromScrubArea ) {
-                    // Log the last press
-                    _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
-                }
             }
             
             
             
         // Release
         } else {
-            
-            // Remove lastDownKey if it's this one and set the selection to all
-            if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
-                if (!_setSelection ) {
-                    
-                    NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"start",
-                                                                                         [NSNumber numberWithUnsignedInt:self.width], @"end",
-                                                                                         nil];
-                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
-                        [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
-                    
-                }
-                _lastDownKey = nil;
-                _setSelection = NO;
-            }
             
             // Send the press to delegate
             NSDictionary *xyDown = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x",
@@ -240,10 +249,7 @@
     }
     
     // Clear up
-    if( _mode != EatsPatternViewMode_Play ) {
-        _lastDownKey = nil;
-        _setSelection = NO;
-    } else if( _mode != EatsPatternViewMode_Edit ) {
+    if( _mode != EatsPatternViewMode_Edit ) {
         _lastLongPressKey = nil;
     }
     
@@ -289,7 +295,13 @@
         if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
             [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
     }
-
+    
+    // Add down keys
+    if( down && ( _mode == EatsPatternViewMode_Play || _mode == EatsPatternViewMode_Edit ) ) {
+        [_currentlyDownKeys addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil]];
+        
+    }
+    
 }
 
 - (void) longPressTimeout:(NSTimer *)sender
@@ -299,9 +311,25 @@
         if([self.delegate respondsToSelector:@selector(eatsGridPatternViewLongPressAt: sender:)])
             [self.delegate performSelector:@selector(eatsGridPatternViewLongPressAt: sender:) withObject:_lastLongPressKey withObject:self];
         
+        [self removeDownKeyAtX:[[_lastLongPressKey valueForKey:@"x"] unsignedIntValue] y:[[_lastLongPressKey valueForKey:@"y"] unsignedIntValue]];
+        
         _lastLongPressKey = nil;
     }
 }
 
+- (void) removeDownKeyAtX:(uint)x y:(uint)y
+{
+    NSDictionary *keyToRemove;
+    
+    for( NSDictionary *key in _currentlyDownKeys ) {
+        if( [[key valueForKey:@"x"] intValue] == x && [[key valueForKey:@"y"] intValue] == y ) {
+            keyToRemove = key;
+            break;
+        }
+    }
+    
+    if( keyToRemove )
+        [_currentlyDownKeys removeObject:keyToRemove];
+}
 
 @end

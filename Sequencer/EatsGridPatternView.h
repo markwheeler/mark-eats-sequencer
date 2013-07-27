@@ -50,5 +50,6 @@ typedef enum EatsPatternViewFoldFrom {
 @property uint                      nextStepBrightness;
 @property uint                      noteBrightness;
 @property uint                      noteLengthBrightness;
+@property uint                      pressBrightness;
 
 @end
