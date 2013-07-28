@@ -167,7 +167,7 @@
 
 - (void) dealloc
 {
-    NSLog(@"%s", __func__);
+    //NSLog(@"%s", __func__);
     
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
@@ -227,7 +227,7 @@
 {
     NSMutableDictionary *newOptions = [NSMutableDictionary dictionaryWithDictionary:storeOptions];
     [newOptions setValue:@"YES" forKey:NSMigratePersistentStoresAutomaticallyOption];
-    [newOptions setValue:@"YES" forKey:NSInferMappingModelAutomaticallyOption]; // Set this to NO if we want to use a mapping model
+    [newOptions setValue:@"TRUE" forKey:NSInferMappingModelAutomaticallyOption];
     
     return [super configurePersistentStoreCoordinatorForURL:url ofType:fileType modelConfiguration:configuration storeOptions:newOptions error:error];
 }

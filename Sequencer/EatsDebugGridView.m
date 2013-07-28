@@ -76,9 +76,9 @@
     SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPageId];
     
     // Generate the columns with playhead and nextStep
-    NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
+    __block NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
     
-    BOOL active;
+    __block BOOL active;
     
     for(uint x = 0; x < _columns; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:_rows] atIndex:x];
@@ -112,70 +112,70 @@
             
         }
     }
-
-    // Put all the notes in the viewArray
-    NSArray *matches;
     
-    NSError *requestError = nil;
-    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-
-    int patternId;
-
-    // If pattern quantization is disabled
-    if( !_patternQuantizationOn && pageState.nextPatternId )
-        patternId = pageState.nextPatternId.intValue;
-
-    else
-        patternId = pageState.currentPatternId.intValue;
-    
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %i) AND (inPage.id == %u)", patternId, _currentPageId];
-    matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
-    
-    SequencerPattern *pattern = [matches lastObject];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-    
-    for(SequencerNote *note in pattern.notes) {
+        // Put all the notes in the viewArray
+        NSArray *matches;
         
-        // Put the length tails in
-        int tailDraw = note.step.intValue;
-        int length =  note.length.intValue - 1;
-        if( length > _columns - 1)
-            length = _columns - 1;
+        NSError *requestError = nil;
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
+    
+        int patternId;
+    
+        // If pattern quantization is disabled
+        if( !_patternQuantizationOn && pageState.nextPatternId )
+            patternId = pageState.nextPatternId.intValue;
+
+        else
+            patternId = pageState.currentPatternId.intValue;
         
-        for( int i = 0; i < length; i++ ) {
-            if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                tailDraw --;
-            else
-                tailDraw ++;
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %i) AND (inPage.id == %u)", patternId, _currentPageId];
+        matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
+        
+        SequencerPattern *pattern = [matches lastObject];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        for(SequencerNote *note in pattern.notes) {
             
-            if( tailDraw < 0 )
-                tailDraw += _columns;
-            else if( tailDraw >= _columns )
-                tailDraw -= _columns;
+            // Put the length tails in
+            int tailDraw = note.step.intValue;
+            int length =  note.length.intValue - 1;
+            if( length > _columns - 1)
+                length = _columns - 1;
             
-            // Active / inactive
-            if( tailDraw < _gridWidth && note.row.intValue < _gridHeight ) {
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightness.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightness];
-            } else {
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightnessInactive.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightnessInactive];
+            for( int i = 0; i < length; i++ ) {
+                if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                    tailDraw --;
+                else
+                    tailDraw ++;
+                
+                if( tailDraw < 0 )
+                    tailDraw += _columns;
+                else if( tailDraw >= _columns )
+                    tailDraw -= _columns;
+                
+                // Active / inactive
+                if( tailDraw < _gridWidth && note.row.intValue < _gridHeight ) {
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightness.floatValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightness];
+                } else {
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightnessInactive.floatValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightnessInactive];
+                }
+                
+                
             }
             
+            // Active / inactive
+            if( note.step.intValue < _gridWidth && note.row.intValue < _gridHeight )
+                // Put the notes in
+                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightness];
+            else
+                // Put the notes in
+                [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightnessInactive];
             
         }
-        
-        // Active / inactive
-        if( note.step.intValue < _gridWidth && note.row.intValue < _gridHeight )
-            // Put the notes in
-            [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightness];
-        else
-            // Put the notes in
-            [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightnessInactive];
-        
-    }
     
     
     // Draw the viewArray

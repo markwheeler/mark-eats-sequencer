@@ -38,20 +38,20 @@
             page.name = [NSString stringWithFormat:@"Drums %i", channel - 9];
         else
             page.name = [NSString stringWithFormat:@"Page %i", i + 1];
-        page.loopEnd = [NSNumber numberWithUnsignedInt: 15];
+        page.loopEnd = [NSNumber numberWithUnsignedInt: 31];
         
         // Create the default pitches
         
         NSArray *sequenceOfNotes;
         
         if (channel == 10 || channel == 11)
-            sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"B0" scaleMode:WMScaleModeChromatic length:16];  // Drum map
+            sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"B0" scaleMode:WMScaleModeChromatic length:32];  // Drum map
         else
-            sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"C3" scaleMode:WMScaleModeIonianMajor length:16]; // C major
+            sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:@"C3" scaleMode:WMScaleModeIonianMajor length:32]; // C major
         
         // Put it in to the sequencer page
-        NSMutableOrderedSet *setOfRowPitches = [NSMutableOrderedSet orderedSetWithCapacity:16];
-        for( int r = 0; r < 16; r ++ ) {
+        NSMutableOrderedSet *setOfRowPitches = [NSMutableOrderedSet orderedSetWithCapacity:32];
+        for( int r = 0; r < 32; r ++ ) {
             SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:context];
             rowPitch.row = [NSNumber numberWithInt:r];
             rowPitch.pitch = [NSNumber numberWithInt:[[sequenceOfNotes objectAtIndex:r] midiNoteNumber]];
@@ -61,8 +61,8 @@
         
 
         // Create the empty SequencerPatterns
-        NSMutableOrderedSet *setOfPatterns = [NSMutableOrderedSet orderedSetWithCapacity:16];
-        for( int j = 0; j < 16; j++) {
+        NSMutableOrderedSet *setOfPatterns = [NSMutableOrderedSet orderedSetWithCapacity:32];
+        for( int j = 0; j < 32; j++) {
             SequencerPattern *pattern = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerPattern" inManagedObjectContext:context];
             pattern.id = [NSNumber numberWithInt:j];
             [setOfPatterns addObject:pattern];
