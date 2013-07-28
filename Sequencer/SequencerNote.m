@@ -2,7 +2,7 @@
 //  SequencerNote.m
 //  Sequencer
 //
-//  Created by Mark Wheeler on 22/07/2013.
+//  Created by Mark Wheeler on 27/07/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
@@ -15,7 +15,7 @@
 @dynamic length;
 @dynamic row;
 @dynamic step;
-@dynamic velocityAsPercentage;
+@dynamic velocity;
 @dynamic inPattern;
 
 @end

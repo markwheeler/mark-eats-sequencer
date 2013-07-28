@@ -314,7 +314,7 @@ typedef enum EatsStepAdvance {
                             
                             //Set the basic note properties
                             int channel = page.channel.intValue;
-                            int velocity = floor( 127 * ([note.velocityAsPercentage floatValue] / 100.0 ) );
+                            int velocity = note.velocity.intValue;
                             
                             // Calculate swing and velocity
                             

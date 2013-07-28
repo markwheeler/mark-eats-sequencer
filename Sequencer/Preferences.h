@@ -33,6 +33,7 @@ typedef enum EatsGridType{
 @property BOOL              sendMIDIClock;
 
 @property BOOL              loopFromScrubArea;
+@property NSNumber          *defaultMIDINoteVelocity;
 
 + (id) sharedPreferences;
 - (void) loadPreferences;

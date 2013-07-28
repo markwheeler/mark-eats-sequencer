@@ -10,7 +10,7 @@
         <attribute name="length" attributeType="Integer 16" minValueString="1" maxValueString="32" defaultValueString="1" syncable="YES"/>
         <attribute name="row" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="step" attributeType="Integer 16" minValueString="0" maxValueString="31" defaultValueString="0" indexed="YES" syncable="YES"/>
-        <attribute name="velocityAsPercentage" attributeType="Float" minValueString="0" maxValueString="100" defaultValueString="50" syncable="YES"/>
+        <attribute name="velocity" attributeType="Integer 16" minValueString="0" maxValueString="127" defaultValueString="64" syncable="YES"/>
         <relationship name="inPattern" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="SequencerPattern" inverseName="notes" inverseEntity="SequencerPattern" syncable="YES"/>
     </entity>
     <entity name="SequencerPage" representedClassName="SequencerPage" syncable="YES">
@@ -46,7 +46,7 @@
     </entity>
     <elements>
         <element name="Sequencer" positionX="-423" positionY="-45" width="128" height="103"/>
-        <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="118"/>
+        <element name="SequencerNote" positionX="169" positionY="-126" width="128" height="120"/>
         <element name="SequencerPage" positionX="-245" positionY="-72" width="128" height="270"/>
         <element name="SequencerPattern" positionX="-36" positionY="-108" width="128" height="88"/>
         <element name="SequencerPatternIdInPlaylist" positionX="-20" positionY="198" width="128" height="73"/>

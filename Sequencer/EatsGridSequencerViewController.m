@@ -97,12 +97,12 @@
         _animationFrame = 0;
         
         __block int noteRow;
-        __block float noteVelocityAsPercentage;
+        __block int noteVelocity;
         __block float noteLength;
         
         [self.managedObjectContext performBlockAndWait:^(void) {
             noteRow = note.row.intValue;
-            noteVelocityAsPercentage = note.velocityAsPercentage.floatValue;
+            noteVelocity = note.velocity.intValue;
             noteLength = note.length.floatValue;
         }];
         
@@ -128,8 +128,20 @@
         
         _activeEditNote = note;
         
+        
+        // Set sliders
+        
+        float oneStepOf127 = 127.0  / _velocityView.width;
+        float range = 127.0 - oneStepOf127;
+        
+        float percentageForVelocitySlider = 100.0 * ( (noteVelocity - oneStepOf127 ) / range );
+        if( percentageForVelocitySlider < 0 )
+            percentageForVelocitySlider = 0;
+        
+        //NSLog(@"Percentage for slider %f velocity %i", percentageForVelocitySlider, noteVelocity);
+        _velocityView.percentage = percentageForVelocitySlider;
+        
         float stepPercentage = ( 100.0 / _velocityView.width );
-        _velocityView.percentage = ( ( noteVelocityAsPercentage - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
         _lengthView.percentage = ( ( ( ( noteLength / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
         
     });
@@ -375,8 +387,15 @@
         [self.managedObjectContext performBlockAndWait:^(void) {
             // Velocity
             if(sender == _velocityView) {
-                _activeEditNote.velocityAsPercentage = [NSNumber numberWithFloat:(100.0 - (100.0 / sender.width) ) * (sender.percentage / 100.0) + (100.0 / sender.width)];
-                //NSLog(@"Velocity %@", _activeEditNote.velocityAsPercentage);
+                
+                float oneStepOf127 = 127.0 / sender.width;
+                float range = 127.0 - oneStepOf127;
+                
+                float newVelocity = range * (sender.percentage / 100.0);
+                newVelocity += oneStepOf127;
+                
+                _activeEditNote.velocity = [NSNumber numberWithInt:roundf( newVelocity ) ];
+                //NSLog(@"Velocity %@ / Percentage %f", _activeEditNote.velocity, sender.percentage);
             
             // Length
             } else if(sender == _lengthView) {
@@ -440,6 +459,7 @@
                         SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                         newNote.step = [NSNumber numberWithUnsignedInt:x];
                         newNote.row = [NSNumber numberWithUnsignedInt:self.height - 1 - y];
+                        newNote.velocity = [_sharedPreferences.defaultMIDINoteVelocity copy];
                         [newNotesSet addObject:newNote];
                         _pattern.notes = newNotesSet;
                     }
