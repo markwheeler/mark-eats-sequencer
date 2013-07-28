@@ -1042,7 +1042,9 @@
         } else if( sender == _exitButton ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
-            } else {
+                
+            // We check to make sure the exit button was pressed in this view (not just being released after transitioning from sequencer mode)
+            } else if( sender.buttonState == EatsButtonViewState_Down ) {
                 
                 if( _clearTimer )
                     [self stopClear];
