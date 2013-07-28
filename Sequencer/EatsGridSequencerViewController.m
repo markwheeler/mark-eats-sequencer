@@ -451,9 +451,11 @@
                     // See if we have a note there
                     SequencerNote *foundNote = [self checkForNoteAtX:x y:self.height - 1 - y];
                     
+                    // Remove
                     if( foundNote ) {
                         [self.managedObjectContext deleteObject:foundNote];
                         
+                    // Add
                     } else {
                         NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
                         SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
