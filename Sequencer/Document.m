@@ -757,7 +757,8 @@
 
 - (void) resetPlayPositions
 {
-
+    if( self.clock.clockStatus != EatsClockStatus_Stopped )
+        [self.clockTick clockSongStop:0];
     [self.clockTick songPositionZero];
     
     //Reset the play positions of all the active loops
@@ -938,6 +939,8 @@
         else
             [self.clock stopClock];
     } else {
+        if( self.clock.clockStatus != EatsClockStatus_Stopped )
+            [self resetPlayPositions];
         [self.clock startClock];
     }
 }

@@ -32,6 +32,9 @@ typedef enum EatsStepAdvance {
 @property SequencerState                *sequencerState;
 @property Sequencer                     *sequencer;
 
+@property double        machTimeToNsFactor;
+@property double        nsToMachTimeFactor;
+
 @property uint              currentTick;
 @property NSMutableArray    *activeNotes;
 
@@ -50,6 +53,18 @@ typedef enum EatsStepAdvance {
         _sharedPreferences = [Preferences sharedPreferences];
         _sequencerState = sequencerState;
         _managedObjectContext = context;
+        
+        kern_return_t kernError;
+        mach_timebase_info_data_t timebaseInfo;
+        
+        kernError = mach_timebase_info(&timebaseInfo);
+        if (kernError != KERN_SUCCESS) {
+            NSLog(@"Error getting mach_timebase");
+        } else {
+            // Set the time factors so we can work in ns
+            _machTimeToNsFactor = (double)timebaseInfo.numer / timebaseInfo.denom;
+            _nsToMachTimeFactor = 1.0 / _machTimeToNsFactor;
+        }
         
         [self.managedObjectContext performBlockAndWait:^(void) {
             NSError *requestError = nil;
@@ -77,7 +92,6 @@ typedef enum EatsStepAdvance {
 
 - (void) clockSongStart:(uint64_t)ns
 {
-    
     // Create the objects needed for keeping track of active notes
     if(!_activeNotes) {
         _activeNotes = [NSMutableArray arrayWithCapacity:32];
@@ -88,6 +102,9 @@ typedef enum EatsStepAdvance {
     if( _sharedPreferences.sendMIDIClock
        && _sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
+        
+        if( !ns )
+            ns = (uint64_t)(mach_absolute_time() * _machTimeToNsFactor);
         
         // Send start
         VVMIDIMessage *msg = nil;
@@ -102,6 +119,10 @@ typedef enum EatsStepAdvance {
     if( _sharedPreferences.sendMIDIClock
        && _sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
+        
+        if( !ns )
+            ns = (uint64_t)(mach_absolute_time() * _machTimeToNsFactor);
+        
         // Send stop
         VVMIDIMessage *msg = nil;
         msg = [VVMIDIMessage createWithType:VVMIDIStopVal channel:0 timestamp:ns];
@@ -121,7 +142,7 @@ typedef enum EatsStepAdvance {
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
-        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :mach_absolute_time()];
+        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :(uint64_t)(mach_absolute_time() * _machTimeToNsFactor)];
         if (msg != nil)
             [_sharedCommunicationManager.midiManager sendMsg:msg];
     }
