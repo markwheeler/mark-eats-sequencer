@@ -82,6 +82,8 @@
 }
 
 - (void) dealloc {
+    NSLog(@"%s", __func__);
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
 }
