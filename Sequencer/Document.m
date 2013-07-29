@@ -506,7 +506,7 @@
     }
     
     // Table view default sort
-    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: YES];
+    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: NO];
     [self.rowPitchesTableView setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     self.rowPitchesTableView.delegate = self;
 }
@@ -655,7 +655,7 @@
         
         NSNumber *pitch = [[_currentPageOnMainThread.pitches objectAtIndex:i] pitch];
         
-        NSMutableDictionary *tableRow = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:_sharedPreferences.gridHeight - i], @"row",
+        NSMutableDictionary *tableRow = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:i + 1], @"row",
                                                                                           pitch, @"pitch",
                                                                                           nil];
         if( _currentPageOnMainThread.transpose.intValue ) {
