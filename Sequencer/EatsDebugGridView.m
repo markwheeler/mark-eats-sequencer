@@ -67,6 +67,25 @@
     return self;
 }
 
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
+- (BOOL) becomeFirstResponder
+{
+    self.needsDisplay = YES;
+    
+    return [super becomeFirstResponder];
+}
+
+- (BOOL) resignFirstResponder
+{
+    self.needsDisplay = YES;
+    
+    return [super becomeFirstResponder];
+}
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     if( !self.managedObjectContext )
@@ -179,14 +198,27 @@
     
     
     // Draw the viewArray
+
+    // Focus ring
+    [NSGraphicsContext saveGraphicsState];
     
-    // Background color for testing
-    //[[NSColor colorWithCalibratedHue:0.5 saturation:0.7 brightness:1.0 alpha:1] set];
-    //NSRectFill(dirtyRect);
+    if( self.window.firstResponder == self ) {
+        NSSetFocusRingStyle(NSFocusRingBelow);
+    }
+    
+    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSInsetRect([self bounds], 4.0, 5.0)];
+    [[NSColor windowBackgroundColor] set];
+    [path stroke];
+    [path fill];
+    
+    [NSGraphicsContext restoreGraphicsState];
+    
+    // Margin to allow focus ring to fit
+    CGFloat margin = 10;
     
     // Set the square size and corner radius – use floor() around these two lines to make squares sit 'on pixel'
-    CGFloat squareWidth = ((self.bounds.size.width + _gutter) / _columns) - _gutter;
-    CGFloat squareHeight = ((self.bounds.size.height + _gutter) / _rows) - _gutter;
+    CGFloat squareWidth = ((self.bounds.size.width - ( margin * 2 ) + _gutter) / _columns) - _gutter;
+    CGFloat squareHeight = ((self.bounds.size.height - ( margin * 2 )  + _gutter) / _rows) - _gutter;
     
     CGFloat squareSize;
     if(squareWidth < squareHeight) squareSize = squareWidth;
@@ -200,7 +232,7 @@
     for( int r = 0; r < _rows; r++ ){
         for( int c = 0; c < _columns; c++ ) {
             // Draw shape
-            NSRect rect = NSMakeRect((squareSize + _gutter) * c, (squareSize + _gutter) * r, squareSize, squareSize);
+            NSRect rect = NSMakeRect(margin + ((squareSize + _gutter) * c), margin + ((squareSize + _gutter) * r), squareSize, squareSize);
             NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect: rect xRadius:cornerRadius yRadius:cornerRadius];
             
             // Set clip so we can do an 'inner' stroke
