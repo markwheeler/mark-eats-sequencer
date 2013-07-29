@@ -167,8 +167,6 @@
 
 - (void) dealloc
 {
-    NSLog(@"%s", __func__);
-    
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
     [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
     
@@ -181,6 +179,8 @@
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
+    
+    NSLog(@"Document deallocated OK"); // TODO: Remove this for final release
 }
 
 - (NSString *) windowNibName
@@ -392,13 +392,14 @@
 
 - (void) windowWillClose:(NSNotification *)notification
 {
+    [self.clock stopClock];
+    
     // Save BPM into Core Data
+    // TODO: This is causeing a retain that means the document never deallocs
     [self.managedObjectContext performBlockAndWait:^(void) {
         self.sequencer.bpm = self.sequencerState.bpm;
         [self.managedObjectContext save:nil];
     }];
-    
-    [self.clock stopClock];
 }
 
 + (BOOL) autosavesInPlace
@@ -1079,7 +1080,7 @@
                         if( tonicNote ) {
 
                             // Generate pitches
-                            NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:scaleMode length:32];
+                            NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:scaleMode length:16];
 
                             // Put them into the page
                             int r = 0;
