@@ -44,9 +44,12 @@
 @property BOOL                          checkedForThingsOutsideGrid;
 @property uint                          indexOflastSelectedScaleMode;
 @property NSString                      *lastTonicNoteName;
+@property NSPoint                       pageViewFrameOrigin;
 
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
+
+@property (weak) IBOutlet NSView *pageView;
 
 @property (weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
 @property (weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
@@ -191,6 +194,8 @@
 
 - (void) windowControllerDidLoadNib:(NSWindowController *)aController
 {
+    self.pageViewFrameOrigin = self.pageView.frame.origin;
+    
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     
@@ -845,7 +850,7 @@
     [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
     for( int i = 0; i < self.currentPatternSegmentedControl.segmentCount; i ++ ) {
         [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i + 1] forSegment:i];
-        [self.currentPatternSegmentedControl setWidth:28.0 forSegment:i];
+        [self.currentPatternSegmentedControl setWidth:22.5 forSegment:i];
     }
     
     // Pitch list
@@ -919,7 +924,6 @@
 
 - (IBAction)bpmTextField:(NSTextField *)sender
 {
-    // TODO
     if( !_sequencerOnMainThread.bpm )
         _sequencerOnMainThread.bpm = [NSNumber numberWithInt:100];
     
@@ -977,25 +981,42 @@
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
 {
-    self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:sender.selectedSegment];
-}
+    // Edit name
+    if( sender.selectedSegment == _currentPageOnMainThread.id.integerValue ) {
+        // Make a text field, add it to an alert and then show it so you can edit the page name
+        
+        NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
+        
+        accessoryTextField.stringValue = self.currentPageOnMainThread.name;
+        
+        NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
+                                                  defaultButton:@"OK"
+                                                alternateButton:@"Cancel"
+                                                    otherButton:nil
+                                      informativeTextWithFormat:@""];
+        [editLabelAlert setAccessoryView:accessoryTextField];
+        
+        [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+        
+    // Otherwise switch page with an animation
+    } else {
+        self.pageView.alphaValue = 0.0;
+        
+        NSRect frame = self.pageView.frame;
+        if( sender.selectedSegment > _currentPageOnMainThread.id.integerValue )
+            frame.origin.x += 100.0;
+        else if ( sender.selectedSegment < _currentPageOnMainThread.id.integerValue )
+            frame.origin.x -= 100.0;
+        self.pageView.frame = frame;
+        
+        self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:sender.selectedSegment];
 
-- (IBAction) editLabelButton:(NSButton *)sender
-{
-    // Make a text field, add it to an alert and then show it so you can edit the page name
-    
-    NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
-
-    accessoryTextField.stringValue = self.currentPageOnMainThread.name;
-    
-    NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
-                                                 defaultButton:@"OK"
-                                               alternateButton:@"Cancel"
-                                                   otherButton:nil
-                                     informativeTextWithFormat:@""];
-    [editLabelAlert setAccessoryView:accessoryTextField];
-
-    [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:0.2];
+        [[self.pageView animator] setAlphaValue:1.0];
+        [[self.pageView animator] setFrameOrigin:self.pageViewFrameOrigin];
+        [NSAnimationContext endGrouping];
+    }
 }
 
 - (IBAction)currentPatternSegmentedControl:(NSSegmentedControl *)sender
