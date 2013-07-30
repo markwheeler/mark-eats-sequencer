@@ -141,7 +141,6 @@
         // Create the SequencerState
         _sequencerState = [[SequencerState alloc] init];
         [_sequencerState createPageStates:SEQUENCER_PAGES];
-        [_sequencerState addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
         
         // Create the step quantization settings
         self.stepQuantizationArray = [NSMutableArray array];
@@ -172,7 +171,7 @@
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    [self.sequencerState removeObserver:self forKeyPath:@"bpm"];
+    [self.sequencerOnMainThread removeObserver:self forKeyPath:@"bpm"];
     [self.sequencerOnMainThread removeObserver:self forKeyPath:@"stepQuantization"];
     [self.sequencerOnMainThread removeObserver:self forKeyPath:@"patternQuantization"];
     
@@ -290,7 +289,6 @@
     for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
         [[_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
     }
-    _sequencerState.bpm = [self.sequencerOnMainThread.bpm copy];
     
     // Get the sequencer and page for background thread stuff
     [self.managedObjectContext performBlockAndWait:^(void) {
@@ -332,6 +330,7 @@
     [self updateSequencerPageUI];
     
     // KVO
+    [self.sequencerOnMainThread addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencerOnMainThread addObserver:self forKeyPath:@"stepQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     [self.sequencerOnMainThread addObserver:self forKeyPath:@"patternQuantization" options:NSKeyValueObservingOptionNew context:NULL];
     // Seems odd to comment these out as you would think that would throw an error when setCurrentPage is called... but it works?!
@@ -393,13 +392,6 @@
 - (void) windowWillClose:(NSNotification *)notification
 {
     [self.clock stopClock];
-    
-    // Save BPM into Core Data
-    // TODO: This is causeing a retain that means the document never deallocs
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        self.sequencer.bpm = self.sequencerState.bpm;
-        [self.managedObjectContext save:nil];
-    }];
 }
 
 + (BOOL) autosavesInPlace
@@ -554,8 +546,8 @@
 
 - (void) updateClockBPM
 {
-    self.clock.bpm = self.sequencerState.bpm.floatValue;
-    self.clockTick.bpm = self.sequencerState.bpm.floatValue;
+    self.clock.bpm = self.sequencerOnMainThread.bpm.floatValue;
+    self.clockTick.bpm = self.sequencerOnMainThread.bpm.floatValue;
 }
 
 - (void) updateStepQuantizationPopup
@@ -627,7 +619,7 @@
                         change:(NSDictionary *)change
                        context:(void *)context {
     
-    if ( object == self.sequencerState && [keyPath isEqual:@"bpm"] )
+    if ( object == self.sequencerOnMainThread && [keyPath isEqual:@"bpm"] )
         [self updateClockBPM];
     else if ( object == self.sequencerOnMainThread && [keyPath isEqual:@"stepQuantization"] )
         [self updateStepQuantizationPopup];
@@ -742,7 +734,12 @@
 
 - (void) externalClockBPM:(NSNotification *)notification
 {
-    _sequencerState.bpm = [notification.userInfo valueForKey:@"bpm"];
+    dispatch_async(_bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            _sequencer.bpm = [notification.userInfo valueForKey:@"bpm"];
+            [self.managedObjectContext save:nil];
+        }];
+    });
 }
 
 - (void) gridControllerConnected:(NSNotification *)notification
@@ -922,13 +919,23 @@
 
 - (IBAction)bpmTextField:(NSTextField *)sender
 {
-    if( !_sequencerState.bpm )
-        _sequencerState.bpm = [NSNumber numberWithInt:100];
+    // TODO
+    if( !_sequencerOnMainThread.bpm )
+        _sequencerOnMainThread.bpm = [NSNumber numberWithInt:100];
+    
+    [self childMOCChanged];
 }
 
 - (IBAction)bpmStepper:(NSStepper *)sender
 {
-    _sequencerState.bpm = [NSNumber numberWithFloat:roundf( _sequencerState.bpm.floatValue )];
+    [self childMOCChanged];
+    
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
+            [self.managedObjectContext save:nil];
+        }];
+    });
 }
 
 
