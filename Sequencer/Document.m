@@ -798,6 +798,8 @@
                 if( page.transposeZeroStep.intValue >= self.sharedPreferences.gridWidth )
                     page.transposeZeroStep = [NSNumber numberWithUnsignedInt:(self.sharedPreferences.gridWidth) / 2 - 1];
                 
+                [self.managedObjectContext save:nil];
+                
                 SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.intValue];
                 
                 if( pageState.currentStep.intValue >= self.sharedPreferences.gridWidth )
