@@ -1388,7 +1388,7 @@
     else if( keyCode.intValue == 18 ) {
         int nextPatternId;
         if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 8;
+            nextPatternId = 10;
         else
             nextPatternId = 0;
         
@@ -1401,7 +1401,7 @@
     } else if( keyCode.intValue == 19 ) {
         int nextPatternId;
         if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 9;
+            nextPatternId = 11;
         else
             nextPatternId = 1;
         
@@ -1414,7 +1414,7 @@
     } else if( keyCode.intValue == 20 ) {
         int nextPatternId;
         if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 10;
+            nextPatternId = 12;
         else
             nextPatternId = 2;
         
@@ -1427,7 +1427,7 @@
     } else if( keyCode.intValue == 21 ) {
         int nextPatternId;
         if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 11;
+            nextPatternId = 13;
         else
             nextPatternId = 3;
         
@@ -1440,7 +1440,7 @@
     } else if( keyCode.intValue == 23 ) {
         int nextPatternId;
         if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 12;
+            nextPatternId = 14;
         else
             nextPatternId = 4;
         
@@ -1453,7 +1453,7 @@
     } else if( keyCode.intValue == 22 ) {
         int nextPatternId;
         if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 13;
+            nextPatternId = 15;
         else
             nextPatternId = 5;
         
@@ -1464,29 +1464,47 @@
         
     // 7
     } else if( keyCode.intValue == 26 ) {
-        int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 14;
-        else
-            nextPatternId = 6;
+        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+            int nextPatternId = 6;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
-        else
-            [self setCurrentPagePattern:nextPatternId];
+            if( modifierFlags.intValue & NSAlternateKeyMask )
+                [self setAllPagePatterns:nextPatternId];
+            else
+                [self setCurrentPagePattern:nextPatternId];
+        }
         
     // 8
     } else if( keyCode.intValue == 28 ) {
-        int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
-            nextPatternId = 15;
-        else
-            nextPatternId = 7;
+        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+            int nextPatternId = 7;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
-        else
-            [self setCurrentPagePattern:nextPatternId];
+            if( modifierFlags.intValue & NSAlternateKeyMask )
+                [self setAllPagePatterns:nextPatternId];
+            else
+                [self setCurrentPagePattern:nextPatternId];
+        }
+        
+    // 9
+    } else if( keyCode.intValue == 25 ) {
+        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+            int nextPatternId = 8;
+            
+            if( modifierFlags.intValue & NSAlternateKeyMask )
+                [self setAllPagePatterns:nextPatternId];
+            else
+                [self setCurrentPagePattern:nextPatternId];
+        }
+        
+    // 0
+    } else if( keyCode.intValue == 29 ) {
+        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+            int nextPatternId = 9;
+            
+            if( modifierFlags.intValue & NSAlternateKeyMask )
+                [self setAllPagePatterns:nextPatternId];
+            else
+                [self setCurrentPagePattern:nextPatternId];
+        }
     
     // Play mode
     // p
@@ -1511,8 +1529,8 @@
         [self incrementCurrentPageTranspose];
     
     // Log the rest
-    else
-        NSLog(@"keyDown code: %@ withModifierFlags: %@", keyCode, modifierFlags );
+//    else
+//        NSLog(@"keyDown code: %@ withModifierFlags: %@", keyCode, modifierFlags );
 }
 
 @end
