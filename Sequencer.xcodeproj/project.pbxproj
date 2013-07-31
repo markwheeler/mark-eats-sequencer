@@ -95,6 +95,7 @@
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
+		4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7DA3317A815F400538081 /* KeyboardInputView.m */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 		4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */; };
 /* End PBXBuildFile section */
@@ -253,6 +254,8 @@
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
 		4DF1FD971708FB4500AB043B /* EatsSwingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsSwingUtils.h; sourceTree = "<group>"; };
 		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
+		4DF7DA3217A815F400538081 /* KeyboardInputView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyboardInputView.h; sourceTree = "<group>"; };
+		4DF7DA3317A815F400538081 /* KeyboardInputView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeyboardInputView.m; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 		4DFAE981179B8B6F0076153D /* Document 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Document 2.xcdatamodel"; sourceTree = "<group>"; };
@@ -383,6 +386,8 @@
 				4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */,
 				4D6115DD16E431BD00140AF8 /* Document.h */,
 				4D6115DE16E431BD00140AF8 /* Document.m */,
+				4DF7DA3217A815F400538081 /* KeyboardInputView.h */,
+				4DF7DA3317A815F400538081 /* KeyboardInputView.m */,
 				4D7515B616E45EB900A8E3F2 /* EatsClock.h */,
 				4D7515B716E45EB900A8E3F2 /* EatsClock.m */,
 				4D36B25416FBB32C008057FC /* ClockTick.h */,
@@ -656,6 +661,7 @@
 				4D96579317A4B3DE005576E3 /* SequencerRowPitch.m in Sources */,
 				4D96579617A4B3DE005576E3 /* SequencerPage.m in Sources */,
 				4D96579917A4B3DE005576E3 /* Sequencer.m in Sources */,
+				4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

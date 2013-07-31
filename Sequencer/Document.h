@@ -18,8 +18,9 @@
 #import "Preferences.h"
 #import "SequencerState.h"
 #import "SequencerPageState.h"
+#import "KeyboardInputView.h"
 
-@interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate>
+@interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate, KeyboardInputViewDelegateProtocol>
 
 @property Sequencer                 *sequencerOnMainThread;
 @property SequencerPage             *currentPageOnMainThread;
@@ -40,5 +41,7 @@
 - (void) clearPatternStartAlert;
 - (void) clearPattern;
 - (void) showClockLateIndicator;
+
+- (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 
 @end

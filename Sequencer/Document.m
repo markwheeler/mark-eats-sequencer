@@ -49,7 +49,7 @@
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
 @property (weak) IBOutlet NSObjectController    *pageObjectController;
 
-@property (weak) IBOutlet NSView *pageView;
+@property (weak) IBOutlet KeyboardInputView *pageView;
 
 @property (weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
 @property (weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
@@ -194,10 +194,11 @@
 
 - (void) windowControllerDidLoadNib:(NSWindowController *)aController
 {
-    self.pageViewFrameOrigin = self.pageView.frame.origin;
-    
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
+    
+    self.pageViewFrameOrigin = self.pageView.frame.origin;
+    self.pageView.delegate = self;
     
     self.managedObjectContextForMainThread = self.managedObjectContext;
     
@@ -922,6 +923,194 @@
 
 
 
+#pragma mark – Document actions
+
+- (void) toggleSequencerPlayback
+{
+    if( self.clock.clockStatus == EatsClockStatus_Stopped ) {
+        [self resetPlayPositions];
+        [self.clock startClock];
+        self.sequencerPlaybackControls.selectedSegment = 1;
+    } else {
+        [self.clock stopClock];
+        self.sequencerPlaybackControls.selectedSegment = 0;
+    }
+}
+
+- (void) showPage:(uint)pageId
+{
+    if( self.currentPageOnMainThread.id.intValue == pageId )
+        return;
+    
+    // Switch page with an animation
+    
+    self.currentPageSegmentedControl.selectedSegment = pageId;
+    
+    self.pageView.alphaValue = 0.0;
+    
+    NSRect frame = self.pageView.frame;
+    if( pageId > _currentPageOnMainThread.id.integerValue )
+        frame.origin.x += 100.0;
+    else if ( pageId < _currentPageOnMainThread.id.integerValue )
+        frame.origin.x -= 100.0;
+    self.pageView.frame = frame;
+    
+    self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
+    
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:0.2];
+    [[self.pageView animator] setAlphaValue:1.0];
+    [[self.pageView animator] setFrameOrigin:self.pageViewFrameOrigin];
+    [NSAnimationContext endGrouping];
+}
+
+- (void) showPreviousPage
+{
+    int newPageId = self.currentPageOnMainThread.id.intValue - 1;
+    if( newPageId < 0 )
+        newPageId = SEQUENCER_PAGES - 1;
+    [self showPage:newPageId];
+}
+
+- (void) showNextPage
+{
+    int newPageId = self.currentPageOnMainThread.id.intValue + 1;
+    if( newPageId >= SEQUENCER_PAGES )
+        newPageId = 0;
+    [self showPage:newPageId];
+}
+
+- (void) decrementBPM
+{
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
+            if( newBPM < 20 )
+                newBPM = 20;
+            _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+            [self.managedObjectContext save:nil];
+        }];
+        
+    });
+}
+
+- (void) incrementBPM
+{
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
+            if( newBPM > 300 )
+                newBPM = 300;
+            _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
+            [self.managedObjectContext save:nil];
+        }];
+        
+    });
+}
+
+- (void) setCurrentPagePattern:(int)patternId
+{
+    BOOL patternQuantizationOn = NO;
+    
+    if( self.sequencerOnMainThread.patternQuantization.unsignedIntValue > 0 )
+        patternQuantizationOn = YES;
+    
+    self.currentSequencerPageState.nextPatternId = [NSNumber numberWithInt:patternId];
+    
+    // If pattern quantization is disabled
+    if( !patternQuantizationOn ) {
+        [self updateUI];
+        [self.gridNavigationController updateGridView];
+        
+    } else {
+        self.currentPatternSegmentedControl.selectedSegment = self.currentSequencerPageState.currentPatternId.integerValue;
+    }
+}
+
+- (void) setAllPagePatterns:(int)patternId
+{
+    BOOL patternQuantizationOn = NO;
+    
+    if( self.sequencerOnMainThread.patternQuantization.unsignedIntValue > 0 )
+        patternQuantizationOn = YES;
+    
+    for( SequencerPageState *pageState in self.sequencerState.pageStates ) {
+        pageState.nextPatternId = [NSNumber numberWithInt:patternId];   
+    }
+    
+    // If pattern quantization is disabled
+    if( !patternQuantizationOn ) {
+        [self updateUI];
+        [self.gridNavigationController updateGridView];
+        
+    } else {
+        self.currentPatternSegmentedControl.selectedSegment = self.currentSequencerPageState.currentPatternId.integerValue;
+    }
+}
+
+- (void) setCurrentPagePlayMode:(EatsSequencerPlayMode)playMode
+{
+    if( self.currentSequencerPageState.playMode.intValue == playMode )
+        return;
+    
+    self.currentSequencerPageState.playMode = [NSNumber numberWithInteger:playMode];
+    
+    self.currentSequencerPageState.nextStep = nil;
+    
+    [self.gridNavigationController updateGridView];
+    [self updateUI];
+}
+
+- (void) decrementCurrentPageTranspose
+{
+    int pageId = _currentPageOnMainThread.id.intValue;
+    
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            
+            SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
+            
+            int newTranspose = page.transpose.intValue - 1;
+            if( newTranspose < - 127 )
+                newTranspose = -127;
+            
+            page.transpose = [NSNumber numberWithInt:newTranspose];
+            [self.managedObjectContext save:nil];
+        }];
+        
+    });
+    
+    [self.gridNavigationController updateGridView];
+}
+
+- (void) incrementCurrentPageTranspose
+{
+    int pageId = _currentPageOnMainThread.id.intValue;
+    
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            
+            SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
+            
+            int newTranspose = page.transpose.intValue + 1;
+            if( newTranspose > 127 )
+                newTranspose = 127;
+            
+            page.transpose = [NSNumber numberWithInt:newTranspose];
+            [self.managedObjectContext save:nil];
+        }];
+        
+    });
+    
+    [self.gridNavigationController updateGridView];
+}
+
+
+
 #pragma mark - Interface actions
 
 - (IBAction)bpmTextField:(NSTextField *)sender
@@ -1000,72 +1189,20 @@
         
         [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
         
-    // Otherwise switch page with an animation
+    // Otherwise switch page
     } else {
-        self.pageView.alphaValue = 0.0;
-        
-        NSRect frame = self.pageView.frame;
-        if( sender.selectedSegment > _currentPageOnMainThread.id.integerValue )
-            frame.origin.x += 100.0;
-        else if ( sender.selectedSegment < _currentPageOnMainThread.id.integerValue )
-            frame.origin.x -= 100.0;
-        self.pageView.frame = frame;
-        
-        self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:sender.selectedSegment];
-
-        [NSAnimationContext beginGrouping];
-        [[NSAnimationContext currentContext] setDuration:0.2];
-        [[self.pageView animator] setAlphaValue:1.0];
-        [[self.pageView animator] setFrameOrigin:self.pageViewFrameOrigin];
-        [NSAnimationContext endGrouping];
+        [self showPage:(uint)sender.selectedSegment];
     }
 }
 
 - (IBAction)currentPatternSegmentedControl:(NSSegmentedControl *)sender
 {
-    BOOL patternQuantizationOn = NO;
-    
-    if( self.sequencerOnMainThread.patternQuantization.unsignedIntValue > 0 )
-        patternQuantizationOn = YES;
-    
-    self.currentSequencerPageState.nextPatternId = [NSNumber numberWithInteger:sender.selectedSegment];
-    
-    // If pattern quantization is disabled
-    if( !patternQuantizationOn ) {
-        [self updateUI];
-        [self.gridNavigationController updateGridView];
-        
-    } else {
-        [sender setSelectedSegment:self.currentSequencerPageState.currentPatternId.integerValue];
-    }
+    [self setCurrentPagePattern:(int)sender.selectedSegment];
 }
 
 - (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
 {
-    self.currentSequencerPageState.playMode = [NSNumber numberWithInteger:sender.selectedSegment];
-    
-    // Pause
-    if( sender.selectedSegment == EatsSequencerPlayMode_Pause ) {
-        self.currentSequencerPageState.nextStep = nil;
-        [self.gridNavigationController updateGridView];
-        
-    // Forward
-    } else if( sender.selectedSegment == EatsSequencerPlayMode_Forward ) {
-        self.currentSequencerPageState.nextStep = nil;
-        [self.gridNavigationController updateGridView];
-        
-    // Reverse
-    } else if( sender.selectedSegment == EatsSequencerPlayMode_Reverse ) {
-        self.currentSequencerPageState.nextStep = nil;
-        [self.gridNavigationController updateGridView];
-        
-    // Random
-    } else if( sender.selectedSegment == EatsSequencerPlayMode_Random ) {
-        self.currentSequencerPageState.nextStep = nil;
-        [self.gridNavigationController updateGridView];
-    }
-    
-    [self updateUI];
+    [self setCurrentPagePlayMode:(int)sender.selectedSegment];
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)obj
@@ -1192,6 +1329,190 @@
 {
     [self childMOCChanged];
     [self.gridNavigationController updateGridView];
+}
+
+
+
+#pragma mark - Keyboard shortcuts
+
+- (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
+{
+    // Sequencer playback
+    // Space
+    if( keyCode.intValue == 49 )
+       [self toggleSequencerPlayback];
+    
+    // BPM
+    // -
+    else if( keyCode.intValue == 27 )
+        [self decrementBPM];
+    // +
+    else if( keyCode.intValue == 24 )
+        [self incrementBPM];
+
+    // Pages
+    // F1
+    else if( keyCode.intValue == 122 )
+        [self showPage:0];
+    // F2
+    else if( keyCode.intValue == 120 )
+        [self showPage:1];
+    // F3
+    else if( keyCode.intValue == 99 )
+        [self showPage:2];
+    // F4
+    else if( keyCode.intValue == 118 )
+        [self showPage:3];
+    // F5
+    else if( keyCode.intValue == 96 )
+        [self showPage:4];
+    // F6
+    else if( keyCode.intValue == 97 )
+        [self showPage:5];
+    // F7
+    else if( keyCode.intValue == 98 )
+        [self showPage:6];
+    // F8
+    else if( keyCode.intValue == 100 )
+        [self showPage:7];
+    
+    // Left
+    else if( keyCode.intValue == 123 )
+        [self showPreviousPage];
+    // Right
+    else if( keyCode.intValue == 124 )
+        [self showNextPage];
+    
+    // Patterns
+    // 1
+    else if( keyCode.intValue == 18 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 8;
+        else
+            nextPatternId = 0;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 2
+    } else if( keyCode.intValue == 19 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 9;
+        else
+            nextPatternId = 1;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 3
+    } else if( keyCode.intValue == 20 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 10;
+        else
+            nextPatternId = 2;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 4
+    } else if( keyCode.intValue == 21 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 11;
+        else
+            nextPatternId = 3;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 5
+    } else if( keyCode.intValue == 23 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 12;
+        else
+            nextPatternId = 4;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 6
+    } else if( keyCode.intValue == 22 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 13;
+        else
+            nextPatternId = 5;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 7
+    } else if( keyCode.intValue == 26 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 14;
+        else
+            nextPatternId = 6;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+        
+    // 8
+    } else if( keyCode.intValue == 28 ) {
+        int nextPatternId;
+        if( modifierFlags.intValue & NSShiftKeyMask )
+            nextPatternId = 15;
+        else
+            nextPatternId = 7;
+        
+        if( modifierFlags.intValue & NSAlternateKeyMask )
+            [self setAllPagePatterns:nextPatternId];
+        else
+            [self setCurrentPagePattern:nextPatternId];
+    
+    // Play mode
+    // p
+    } else if( keyCode.intValue == 35 )
+        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Pause];
+    // >
+    else if( keyCode.intValue == 47 )
+        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Forward];
+    // <
+    else if( keyCode.intValue == 43 )
+        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Reverse];
+    // ?
+    else if( keyCode.intValue == 44 )
+        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Random];
+    
+    // Transpose
+    // [
+    else if( keyCode.intValue == 33 )
+        [self decrementCurrentPageTranspose];
+    // ]
+    else if( keyCode.intValue == 30 )
+        [self incrementCurrentPageTranspose];
+    
+    // Log the rest
+    else
+        NSLog(@"keyDown code: %@ withModifierFlags: %@", keyCode, modifierFlags );
 }
 
 @end
