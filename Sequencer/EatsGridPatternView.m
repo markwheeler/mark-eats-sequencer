@@ -173,7 +173,8 @@
         
         NSNumber *pressBrightnessResult = [NSNumber numberWithInt:_pressBrightness * self.opacity];
         
-        for( NSDictionary *key in _currentlyDownKeys ) {
+        NSDictionary *currentlyDownKeys = [_currentlyDownKeys copy]; // Copy it so it can't get mutated while we're enumerating
+        for( NSDictionary *key in currentlyDownKeys ) {
             [[viewArray objectAtIndex:[[key valueForKey:@"x"] intValue]] replaceObjectAtIndex:[[key valueForKey:@"y"] intValue] withObject:pressBrightnessResult];
         }
     }
