@@ -86,6 +86,69 @@
     return [super becomeFirstResponder];
 }
 
+- (void)cut:(id)sender {
+    if( [self.delegate respondsToSelector:@selector(cutPattern:inPage:)] )
+       [self.delegate performSelector:@selector(cutPattern:inPage:) withObject:[NSNumber numberWithUnsignedInt:[self getCurrentPatternId]] withObject:[NSNumber numberWithUnsignedInt:_currentPageId]];
+}
+
+- (void)copy:(id)sender {
+    if( [self.delegate respondsToSelector:@selector(copyPattern:inPage:)] )
+        [self.delegate performSelector:@selector(copyPattern:inPage:) withObject:[NSNumber numberWithUnsignedInt:[self getCurrentPatternId]] withObject:[NSNumber numberWithUnsignedInt:_currentPageId]];
+}
+
+- (void)paste:(id)sender {
+    if( [self.delegate respondsToSelector:@selector(pastePattern:inPage:)] )
+        [self.delegate performSelector:@selector(pastePattern:inPage:) withObject:[NSNumber numberWithUnsignedInt:[self getCurrentPatternId]] withObject:[NSNumber numberWithUnsignedInt:_currentPageId]];
+}
+
+- (uint) getCurrentPatternId
+{
+    // Get the page state
+    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPageId];
+    
+    uint patternId;
+    
+    // If pattern quantization is disabled
+    if( !_patternQuantizationOn && pageState.nextPatternId )
+        patternId = pageState.nextPatternId.unsignedIntValue;
+    
+    else
+        patternId = pageState.currentPatternId.unsignedIntValue;
+    
+    return patternId;
+}
+
+- (BOOL) validateMenuItem:(id <NSValidatedUserInterfaceItem>)menuItem
+{
+    SEL menuAction = menuItem.action;
+    
+    if ( menuAction == @selector(cut:) || menuAction == @selector(copy:) )
+    {
+        
+        NSError *requestError = nil;
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+        
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"inPattern.id == %u AND (inPattern.inPage.id == %u)", [self getCurrentPatternId], _currentPageId];
+        
+        NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        
+        if ( count ) {
+            return YES;
+        } else {
+            return NO;
+        }
+        
+    // TODO could check if we have something valid in the clipboard before enabling the 'paste' item
+        
+    } else {
+        return YES;
+    }
+}
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     if( !self.managedObjectContext )
@@ -137,17 +200,8 @@
     
     NSError *requestError = nil;
     NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-
-    int patternId;
-
-    // If pattern quantization is disabled
-    if( !_patternQuantizationOn && pageState.nextPatternId )
-        patternId = pageState.nextPatternId.intValue;
-
-    else
-        patternId = pageState.currentPatternId.intValue;
     
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %i) AND (inPage.id == %u)", patternId, _currentPageId];
+    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %i) AND (inPage.id == %u)", [self getCurrentPatternId], _currentPageId];
     matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
     
     SequencerPattern *pattern = [matches lastObject];

@@ -9,6 +9,12 @@
 #import <Cocoa/Cocoa.h>
 #import "SequencerState.h"
 
+@protocol EatsDebugGridViewProtocol
+- (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
+- (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
+- (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
+@end
+
 @interface EatsDebugGridView : NSView
 
 @property uint columns;
@@ -24,5 +30,7 @@
 @property NSManagedObjectContext *managedObjectContext;
 
 @property BOOL                   patternQuantizationOn;
+
+@property (weak) id             delegate;
 
 @end

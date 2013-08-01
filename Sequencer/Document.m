@@ -14,7 +14,6 @@
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
-#import "EatsDebugGridView.h"
 #import "EatsWMNoteValueTransformer.h"
 
 @interface Document ()
@@ -473,6 +472,7 @@
 {
     self.clockLateIndicator.alphaValue = 0.0;
     
+    self.debugGridView.delegate = self;
     self.debugGridView.managedObjectContext = self.managedObjectContextForMainThread;
     self.debugGridView.sequencerState = self.sequencerState;
     self.debugGridView.needsDisplay = YES;
@@ -1107,6 +1107,22 @@
     });
     
     [self.gridNavigationController updateGridView];
+}
+
+- (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
+{
+    [self copyPattern:patternId inPage:pageId];
+    [self clearPattern];
+}
+
+- (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
+{
+    NSLog(@"TODO: Copy from pattern %@ in page %@", patternId, pageId);
+}
+
+- (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
+{
+    NSLog(@"TODO: Paste to pattern %@ in page %@", patternId, pageId);
 }
 
 
