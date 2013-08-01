@@ -324,51 +324,70 @@
 - (SequencerNote *) checkForNoteAtX:(uint)x y:(uint)y
 {
     // See if there's a note there
-    
-    NSError *requestError;
-    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y];
-    
-    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
-    
-    BOOL sortDirection = ( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
-    noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
-    
-    NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
 
-    // Look through all the notes on the row, checking their length
-    for( SequencerNote *note in noteMatches ) {
-        int endPoint;
+    // If we are showing note length on the grid then then we need to look through all the notes on the row, checking their length
+    if( _sharedPreferences.showNoteLengthOnGrid ) {
+    
+        NSError *requestError;
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y];
         
-        // When in reverse
-        if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-            endPoint = note.step.intValue - note.length.intValue + 1;
+        SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
+        
+        BOOL sortDirection = ( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) ? NO : YES;
+        noteRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
+        
+        NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+
+        for( SequencerNote *note in noteMatches ) {
             
-            // If it's wrapping
-            if( endPoint < 0 && ( x <= note.step.intValue || x >= endPoint + self.width ) ) {
-                return note;
+            int endPoint;
             
-            // If it's not wrapping
-            } else if( x <= note.step.intValue && x >= endPoint ) {
-                return note;
-            }
-            
-        // When playing forwards
-        } else {
-            endPoint = note.step.intValue + note.length.intValue - 1;
-            
-            // If it's wrapping and we're going forwards
-            if( endPoint >= self.width && ( x >= note.step.intValue || x <= endPoint - self.width ) ) {
-                return note;
+            // When in reverse
+            if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+                endPoint = note.step.intValue - note.length.intValue + 1;
                 
-            // If it's not wrapping
-            } else if( x >= note.step.intValue && x <= endPoint ) {
-                return note;
+                // If it's wrapping
+                if( endPoint < 0 && ( x <= note.step.intValue || x >= endPoint + self.width ) ) {
+                    return note;
+                
+                // If it's not wrapping
+                } else if( x <= note.step.intValue && x >= endPoint ) {
+                    return note;
+                }
+                
+            // When playing forwards
+            } else {
+                endPoint = note.step.intValue + note.length.intValue - 1;
+                
+                // If it's wrapping and we're going forwards
+                if( endPoint >= self.width && ( x >= note.step.intValue || x <= endPoint - self.width ) ) {
+                    return note;
+                    
+                // If it's not wrapping
+                } else if( x >= note.step.intValue && x <= endPoint ) {
+                    return note;
+                }
             }
         }
+        
+    // If we're not showing note length on the grid then this is much simpler!
+    } else {
+        
+        NSError *requestError;
+        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (step == %u) AND (row == %u)", _pattern, x, y];
+        
+        NSArray *noteMatches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        if( noteMatches.count )
+            return [noteMatches lastObject];
     }
     
     // Return nil if we didn't find one

@@ -32,6 +32,7 @@ typedef enum EatsGridType{
 @property NSString          *midiClockSourceName;
 @property BOOL              sendMIDIClock;
 
+@property BOOL              showNoteLengthOnGrid;
 @property BOOL              loopFromScrubArea;
 @property NSNumber          *defaultMIDINoteVelocity;
 

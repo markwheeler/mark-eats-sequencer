@@ -35,6 +35,7 @@
 - (NSDictionary *) defaultPreferences
 {
     return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"gridAutoConnect",
+                                                      [NSNumber numberWithBool:YES], @"showNoteLengthOnGrid",
                                                       [NSNumber numberWithInteger:64], @"defaultMIDINoteVelocity",
                                                       nil];
 }
@@ -60,7 +61,8 @@
         self.enabledMIDIOutputNames = [[preferences arrayForKey:@"enabledMIDIOutputNames"] mutableCopy];
     else
         self.enabledMIDIOutputNames = [NSMutableArray arrayWithCapacity:16];
-    
+
+    self.showNoteLengthOnGrid = [preferences boolForKey:@"showNoteLengthOnGrid"];
     self.loopFromScrubArea = [preferences boolForKey:@"loopFromScrubArea"];
     self.defaultMIDINoteVelocity = [preferences objectForKey:@"defaultMIDINoteVelocity"];
 }
@@ -89,7 +91,8 @@
         [self.enabledMIDIOutputNames removeObjectAtIndex:0];
     }
     [preferences setObject:self.enabledMIDIOutputNames forKey:@"enabledMIDIOutputNames"];
-    
+
+    [preferences setBool:self.showNoteLengthOnGrid forKey:@"showNoteLengthOnGrid"];
     [preferences setBool:self.loopFromScrubArea forKey:@"loopFromScrubArea"];
     [preferences setObject:self.defaultMIDINoteVelocity forKey:@"defaultMIDINoteVelocity"];
     

@@ -234,5 +234,9 @@
         self.sharedPreferences.midiClockSourceName = [[self.sharedCommunicationManager.midiManager findSourceNodeNamed:[sender titleOfSelectedItem]] name];
     }
 }
+- (IBAction)showNoteLengthOnGridCheckbox:(NSButton *)sender
+{
+    [self.delegate performSelector:@selector(updateUI)];
+}
 
 @end

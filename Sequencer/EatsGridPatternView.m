@@ -140,28 +140,31 @@
                 else if( [[[viewArray objectAtIndex:note.step.intValue] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
                     [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:row withObject:noteBrightnessResult];
                 
-                // Put the length tails in
-                int tailDraw = note.step.intValue;
-                int length =  note.length.intValue - 1;
-                if( length > self.width - 1)
-                    length = self.width - 1;
-                
-                
-                
-                for( int i = 0; i < length; i++ ) {
-                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                        tailDraw --;
-                    else
-                        tailDraw ++;
+                // Put the length tails in when appropriate
+                if( _sharedPreferences.showNoteLengthOnGrid || note == _activeEditNote ) {
                     
-                    if( tailDraw < 0 )
-                        tailDraw += self.width;
-                    else if( tailDraw >= self.width )
-                        tailDraw -= self.width;
+                    int tailDraw = note.step.intValue;
+                    int length =  note.length.intValue - 1;
+                    if( length > self.width - 1)
+                        length = self.width - 1;
                     
-                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessResult.intValue )
-                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessResult];
                     
+                    
+                    for( int i = 0; i < length; i++ ) {
+                        if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
+                            tailDraw --;
+                        else
+                            tailDraw ++;
+                        
+                        if( tailDraw < 0 )
+                            tailDraw += self.width;
+                        else if( tailDraw >= self.width )
+                            tailDraw -= self.width;
+                        
+                        if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessResult.intValue )
+                            [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessResult];
+                        
+                    }
                 }
             }
         }
