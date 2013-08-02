@@ -141,12 +141,31 @@
         } else {
             return NO;
         }
+    
+    } else if ( menuAction == @selector(paste:) ) {
         
-    // TODO could check if we have something valid in the clipboard before enabling the 'paste' item
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        if( [[pasteboard.types lastObject] isEqual: self.pasteboardType] )
+            return YES;
+        else
+            return NO;
         
     } else {
         return YES;
     }
+}
+
+- (void)keyDown:(NSEvent *)theEvent {
+    
+    if( self.window.firstResponder == self ) {
+        if( [_delegate respondsToSelector:@selector(keyDownFromEatsDebugGridView:withModifierFlags:)] )
+            [_delegate performSelector:@selector(keyDownFromEatsDebugGridView:withModifierFlags:)
+                            withObject:[NSNumber numberWithUnsignedShort:theEvent.keyCode]
+                            withObject:[NSNumber numberWithUnsignedInteger:theEvent.modifierFlags]];
+        
+    }
+    
+    [super keyDown:theEvent];
 }
 
 - (void)drawRect:(NSRect)dirtyRect

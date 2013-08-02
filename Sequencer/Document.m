@@ -27,6 +27,8 @@
 
 #define SEQUENCER_PAGES 8
 
+#define SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE @"com.MarkEats.Sequencer.SequencerNotesData";
+
 @property BOOL                          setupComplete;
 
 @property EatsClock                     *clock;
@@ -444,25 +446,19 @@
 
 - (void) clearPatternAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-    if( returnCode == NSOKButton )
-        [self clearPattern];
-    self.clearPatternAlert = nil;
-}
-
-- (void) clearPattern
-{
-    int pageId = self.currentPageOnMainThread.id.intValue;
-    
-    dispatch_async(self.bigSerialQueue, ^(void) {
+    if( returnCode == NSOKButton ) {
+                uint patternId;
         
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
-            [Sequencer clearPattern:[page.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.unsignedIntegerValue]];
-            [self.managedObjectContext save:nil];
-        }];
-
-        [self updateUI];
-    });
+        // If pattern quantization is disabled
+        if( _sequencerOnMainThread.patternQuantization.intValue == 0 && _currentSequencerPageState.nextPatternId )
+            patternId = _currentSequencerPageState.nextPatternId.unsignedIntValue;
+        
+        else
+            patternId = _currentSequencerPageState.currentPatternId.unsignedIntValue;
+        
+        [self clearPattern:[NSNumber numberWithInt:patternId] inPage:_currentPageOnMainThread.id];
+    }
+    self.clearPatternAlert = nil;
 }
 
 
@@ -475,6 +471,7 @@
     self.debugGridView.delegate = self;
     self.debugGridView.managedObjectContext = self.managedObjectContextForMainThread;
     self.debugGridView.sequencerState = self.sequencerState;
+    self.debugGridView.pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
     self.debugGridView.needsDisplay = YES;
     
     [self.stepQuantizationPopup removeAllItems];
@@ -1109,20 +1106,85 @@
     [self.gridNavigationController updateGridView];
 }
 
+- (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
+{
+    dispatch_sync(self.bigSerialQueue, ^(void) {
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId.intValue];
+            [Sequencer clearPattern:[page.patterns objectAtIndex:patternId.intValue]];
+            [self.managedObjectContext save:nil];
+        }];
+    });
+    
+    [self updateUI];
+}
+
 - (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
 {
     [self copyPattern:patternId inPage:pageId];
-    [self clearPattern];
+    [self clearPattern:patternId inPage:pageId];
 }
 
 - (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
 {
-    NSLog(@"TODO: Copy from pattern %@ in page %@", patternId, pageId);
+    // In order to avoid doing anything complicated and making the core data stuff support coding, here we just turn notes into an array of
+    // dictionary objects and then make them into NSData
+    
+    SequencerPattern *pattern = [[[_sequencerOnMainThread.pages objectAtIndex:pageId.unsignedIntValue] patterns] objectAtIndex:patternId.unsignedIntValue];
+    
+    if( pattern.notes.count ) {
+        
+        NSMutableArray *notesArray = [NSMutableArray arrayWithCapacity:pattern.notes.count];
+        
+        for( SequencerNote *note in pattern.notes) {
+            NSDictionary *noteProperties = [NSDictionary dictionaryWithObjectsAndKeys:note.length, @"length",
+                                                                                     note.row, @"row",
+                                                                                     note.step, @"step",
+                                                                                     note.velocity, @"velocity",
+                                                                                     nil];
+            [notesArray addObject:noteProperties];
+        }
+        
+        NSData *notesData = [NSKeyedArchiver archivedDataWithRootObject:notesArray];
+        
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        [pasteboard clearContents];
+        
+        NSString *pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
+        NSArray *pasteboardTypes = [NSArray arrayWithObject:pasteboardType];
+        [pasteboard declareTypes:pasteboardTypes owner:nil];
+        
+        [pasteboard setData:notesData forType:pasteboardType];
+    }
 }
 
 - (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
 {
-    NSLog(@"TODO: Paste to pattern %@ in page %@", patternId, pageId);
+    NSString *pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
+    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+    
+    NSData *notesData = [pasteboard dataForType:pasteboardType];
+    if( notesData ) {
+        NSArray *newNotes = [NSKeyedUnarchiver unarchiveObjectWithData:notesData];
+        
+        NSMutableSet *newNotesSet = [NSMutableSet setWithCapacity:newNotes.count];
+            
+        for( NSDictionary *noteProperties in newNotes ) {
+            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContextForMainThread];
+            newNote.length = [noteProperties valueForKey:@"length"];
+            newNote.row = [noteProperties valueForKey:@"row"];
+            newNote.step = [noteProperties valueForKey:@"step"];
+            newNote.velocity = [noteProperties valueForKey:@"velocity"];
+            [newNotesSet addObject:newNote];
+        }
+        
+        SequencerPattern *pattern = [[[_sequencerOnMainThread.pages objectAtIndex:pageId.unsignedIntValue] patterns] objectAtIndex:patternId.unsignedIntValue];
+        pattern.notes = newNotesSet;
+
+        [self childMOCChanged];
+        [self updateUI];
+    }
 }
 
 
@@ -1350,6 +1412,14 @@
 
 
 #pragma mark - Keyboard shortcuts
+
+- (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
+{
+    // Clear
+    // Backspace
+    if( keyCode.intValue == 51 )
+        [self clearPatternStartAlert];
+}
 
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {

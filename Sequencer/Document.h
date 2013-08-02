@@ -21,7 +21,7 @@
 #import "EatsDebugGridView.h"
 #import "KeyboardInputView.h"
 
-@interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate, KeyboardInputViewDelegateProtocol, EatsDebugGridViewProtocol>
+@interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate, KeyboardInputViewDelegateProtocol, EatsDebugGridViewDelegateProtocol>
 
 @property Sequencer                 *sequencerOnMainThread;
 @property SequencerPage             *currentPageOnMainThread;
@@ -40,13 +40,14 @@
 
 - (void) updateUI;
 - (void) clearPatternStartAlert;
-- (void) clearPattern;
 - (void) showClockLateIndicator;
 
+- (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
 - (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
 - (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
 - (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
 
+- (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 
 @end
