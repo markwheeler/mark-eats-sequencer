@@ -12,7 +12,7 @@
 				<string>seq</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string></string>
+			<string>SequencerDocIcon</string>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
 				<string>application/octet-stream</string>
@@ -46,7 +46,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>4 Alpha</string>
+	<string>5 Alpha</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.music</string>
 	<key>LSMinimumSystemVersion</key>

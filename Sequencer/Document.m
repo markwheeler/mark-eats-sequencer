@@ -1419,6 +1419,10 @@
     // Backspace
     if( keyCode.intValue == 51 )
         [self clearPatternStartAlert];
+    
+    // Send the rest to the main keyboard input handling
+    else
+        [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
 }
 
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags

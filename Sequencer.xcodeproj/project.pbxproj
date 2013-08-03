@@ -52,6 +52,7 @@
 		4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C4172C215900D0614C /* SequencerPageState.m */; };
 		4D7FC0C8172C218C00D0614C /* SequencerState.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7FC0C7172C218C00D0614C /* SequencerState.m */; };
 		4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */; };
+		4D84F2B617AD98A8001119FD /* SequencerDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4D84F2B517AD98A8001119FD /* SequencerDocIcon.icns */; };
 		4D96578A17A4B3DE005576E3 /* SequencerPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D96578917A4B3DE005576E3 /* SequencerPattern.m */; };
 		4D96578D17A4B3DE005576E3 /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D96578C17A4B3DE005576E3 /* SequencerNote.m */; };
 		4D96579017A4B3DE005576E3 /* SequencerPatternIdInPlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D96578F17A4B3DE005576E3 /* SequencerPatternIdInPlaylist.m */; };
@@ -184,6 +185,7 @@
 		4D7FC0C7172C218C00D0614C /* SequencerState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerState.m; sourceTree = "<group>"; };
 		4D82B13917117AEF00AD8222 /* EatsDebugGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDebugGridView.h; sourceTree = "<group>"; };
 		4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDebugGridView.m; sourceTree = "<group>"; };
+		4D84F2B517AD98A8001119FD /* SequencerDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = SequencerDocIcon.icns; sourceTree = "<group>"; };
 		4D96578817A4B3DE005576E3 /* SequencerPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerPattern.h; sourceTree = "<group>"; };
 		4D96578917A4B3DE005576E3 /* SequencerPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerPattern.m; sourceTree = "<group>"; };
 		4D96578B17A4B3DE005576E3 /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 			children = (
 				4D97BCC417951D2B00198BEC /* RedDot.pdf */,
 				4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */,
+				4D84F2B517AD98A8001119FD /* SequencerDocIcon.icns */,
 				4D1C40361712150A000F773D /* page-forward-icon.png */,
 				4D1C40371712150A000F773D /* page-forward-icon@2x.png */,
 				4D1C40381712150A000F773D /* page-pause-icon.png */,
@@ -601,6 +604,7 @@
 				4DADBEE4171A10610091F952 /* scales.json in Resources */,
 				4DADBEE5171A10610091F952 /* WMRubyData.rb in Resources */,
 				4D97BCC517951D2B00198BEC /* RedDot.pdf in Resources */,
+				4D84F2B617AD98A8001119FD /* SequencerDocIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
