@@ -9,7 +9,6 @@
 #import "EatsDebugGridView.h"
 #import "SequencerState.h"
 #import "SequencerPageState.h"
-#import "SequencerPattern.h"
 #import "SequencerNote.h"
 #import "Sequencer+Utils.h"
 
@@ -124,19 +123,7 @@
     
     if ( menuAction == @selector(cut:) || menuAction == @selector(copy:) )
     {
-        
-        NSError *requestError = nil;
-        NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"inPattern.id == %u AND (inPattern.inPage.id == %u)", [self getCurrentPatternId], _currentPageId];
-        
-        NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-        
-        
-        if ( count ) {
+        if ( _currentPattern.notes.count ) {
             return YES;
         } else {
             return NO;
@@ -170,7 +157,7 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    if( !self.managedObjectContext )
+    if( !self.currentPattern )
         return;
     
     // Get the page state
@@ -214,21 +201,10 @@
         }
     }
 
-    // Put all the notes in the viewArray
-    NSArray *matches;
+    // Put all the notes in the viewArray    
+//    NSLog(@"Drawing from pattern %@", _currentPattern);
     
-    NSError *requestError = nil;
-    NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerPattern"];
-    
-    noteRequest.predicate = [NSPredicate predicateWithFormat:@"(id == %i) AND (inPage.id == %u)", [self getCurrentPatternId], _currentPageId];
-    matches = [self.managedObjectContext executeFetchRequest:noteRequest error:&requestError];
-    
-    SequencerPattern *pattern = [matches lastObject];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-    
-    for(SequencerNote *note in pattern.notes) {
+    for(SequencerNote *note in _currentPattern.notes) {
         
         // Put the length tails in
         int tailDraw = note.step.intValue;

@@ -422,7 +422,10 @@
                 //NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
             }
             
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
             
             [self.delegate updateUI];
         }];
@@ -485,7 +488,10 @@
                         _pattern.notes = newNotesSet;
                     }
                     
-                    [self.managedObjectContext save:nil];
+                    NSError *saveError = nil;
+                    [self.managedObjectContext save:&saveError];
+                    if( saveError )
+                        NSLog(@"Save error: %@", saveError);
                     
                     [self.delegate updateUI];
                 }];

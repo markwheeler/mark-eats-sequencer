@@ -540,7 +540,10 @@
     [self.managedObjectContext performBlock:^(void) {
         _currentPattern.inPage.loopStart = startStep;
         _currentPattern.inPage.loopEnd = endStep;
-        [self.managedObjectContext save:nil];
+        NSError *saveError = nil;
+        [self.managedObjectContext save:&saveError];
+        if( saveError )
+            NSLog(@"Save error: %@", saveError);
     }];
 }
 
@@ -737,7 +740,10 @@
             if( newBPM < 20 )
                 newBPM = 20;
             _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
         
     });
@@ -752,7 +758,10 @@
             if( newBPM > 300 )
                 newBPM = 300;
             _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
         
     });
@@ -767,7 +776,10 @@
             
             [self.managedObjectContext performBlockAndWait:^(void) {
                 [Sequencer clearPattern:_currentPattern];
-                [self.managedObjectContext save:nil];
+                NSError *saveError = nil;
+                [self.managedObjectContext save:&saveError];
+                if( saveError )
+                    NSLog(@"Save error: %@", saveError);
             }];
             
             [self.delegate updateUI];
@@ -1082,7 +1094,10 @@
         [self.managedObjectContext performBlockAndWait:^(void){
             _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
             _currentPattern.inPage.transposeZeroStep = [NSNumber numberWithUnsignedInt:sender.zeroStep];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
     

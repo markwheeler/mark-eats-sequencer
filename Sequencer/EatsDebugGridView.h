@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SequencerState.h"
+#import "SequencerPattern.h"
 
 @protocol EatsDebugGridViewDelegateProtocol
 - (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
@@ -28,7 +29,7 @@
 @property uint currentPageId;
 
 @property SequencerState         *sequencerState;
-@property NSManagedObjectContext *managedObjectContext;
+@property SequencerPattern       *currentPattern;
 
 @property NSString               *pasteboardType;
 

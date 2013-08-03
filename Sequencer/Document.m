@@ -292,6 +292,8 @@
         [self childMOCChanged];
     }
     
+    [self logDebugInfo];
+    
     // Setup the SequencerState
     for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
         [[_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
@@ -469,7 +471,6 @@
     self.clockLateIndicator.alphaValue = 0.0;
     
     self.debugGridView.delegate = self;
-    self.debugGridView.managedObjectContext = self.managedObjectContextForMainThread;
     self.debugGridView.sequencerState = self.sequencerState;
     self.debugGridView.pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
     self.debugGridView.needsDisplay = YES;
@@ -588,9 +589,11 @@
     // If pattern quantization is disabled
     if( !patternQuantizationOn && _currentSequencerPageState.nextPatternId ) {
         self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.nextPatternId.intValue;
+        self.debugGridView.currentPattern = [_currentPageOnMainThread.patterns objectAtIndex:_currentSequencerPageState.nextPatternId.intValue];
         
     } else {
         self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.currentPatternId.intValue;
+        self.debugGridView.currentPattern = [_currentPageOnMainThread.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.intValue];
     }
 }
 
@@ -704,9 +707,17 @@
 
 - (void) childMOCChanged
 {
-    [self.managedObjectContextForMainThread save:nil];
+    NSError *saveMainError = nil;
+    [self.managedObjectContextForMainThread save:&saveMainError];
+    if( saveMainError )
+        NSLog(@"Save error: %@", saveMainError);
+
+    
     [self.managedObjectContext performBlock:^(void) {
-        [self.managedObjectContext save:nil];
+        NSError *saveError = nil;
+        [self.managedObjectContext save:&saveError];
+        if( saveError )
+            NSLog(@"Save error: %@", saveError);
     }];
 }
 
@@ -740,7 +751,10 @@
     dispatch_async(_bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
             _sequencer.bpm = [notification.userInfo valueForKey:@"bpm"];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
 }
@@ -796,7 +810,10 @@
                 if( page.transposeZeroStep.intValue >= self.sharedPreferences.gridWidth )
                     page.transposeZeroStep = [NSNumber numberWithUnsignedInt:(self.sharedPreferences.gridWidth) / 2 - 1];
                 
-                [self.managedObjectContext save:nil];
+                NSError *saveError = nil;
+                [self.managedObjectContext save:&saveError];
+                if( saveError )
+                    NSLog(@"Save error: %@", saveError);
                 
                 SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.intValue];
                 
@@ -898,7 +915,10 @@
                 for( SequencerNote *note in matches ) {
                     [self.managedObjectContext deleteObject:note];
                 }
-                [self.managedObjectContext save:nil];
+                NSError *saveError = nil;
+                [self.managedObjectContext save:&saveError];
+                if( saveError )
+                    NSLog(@"Save error: %@", saveError);
             }];
             
             [self updateUI];
@@ -916,6 +936,20 @@
     [[NSAnimationContext currentContext] setDuration:0.3];
     [[self.clockLateIndicator animator] setAlphaValue:0.0];
     [NSAnimationContext endGrouping];
+}
+
+- (void) logDebugInfo
+{
+    NSLog(@"---- Debug info ----");
+    NSLog(@"MOC (parent) %@", self.managedObjectContext);
+    NSLog(@"Main thread MOC (child) %@", self.managedObjectContextForMainThread);
+    NSLog(@"sequencerOnMainThread.pages %li", (unsigned long)_sequencerOnMainThread.pages.count);
+    NSLog(@"currentPageOnMainThread.patterns %li", (unsigned long)_currentPageOnMainThread.patterns.count);
+    NSLog(@"currentPageOnMainThread.pattern 0 notes %li", (unsigned long)[[[_currentPageOnMainThread.patterns objectAtIndex:0] notes] count]);
+    NSLog(@"sequencer.pages %li", (unsigned long)_sequencer.pages.count);
+    NSLog(@"sequencer page 0 patterns %li", (unsigned long)[[[_sequencer.pages objectAtIndex:0 ] patterns ]count] );
+    NSLog(@"sequencer page 0 pattern 0 notes %li", (unsigned long)[[[[[_sequencer.pages objectAtIndex:0 ] patterns] objectAtIndex:0] notes] count] );
+    NSLog(@"--------------------");
 }
 
 
@@ -986,7 +1020,10 @@
             if( newBPM < 20 )
                 newBPM = 20;
             _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
         
     });
@@ -1001,7 +1038,10 @@
             if( newBPM > 300 )
                 newBPM = 300;
             _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
         
     });
@@ -1075,7 +1115,10 @@
                 newTranspose = -127;
             
             page.transpose = [NSNumber numberWithInt:newTranspose];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
         
     });
@@ -1098,7 +1141,10 @@
                 newTranspose = 127;
             
             page.transpose = [NSNumber numberWithInt:newTranspose];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
         
     });
@@ -1113,7 +1159,10 @@
         [self.managedObjectContext performBlockAndWait:^(void) {
             SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId.intValue];
             [Sequencer clearPattern:[page.patterns objectAtIndex:patternId.intValue]];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
     
@@ -1206,7 +1255,10 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
             self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
 }
@@ -1232,7 +1284,10 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlock:^(void) {
             self.sequencer.stepQuantization = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
 }
@@ -1242,7 +1297,10 @@
     dispatch_sync(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void) {
             self.sequencer.patternQuantization = [[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
     [self updateUI];
@@ -1341,7 +1399,10 @@
                             // Remember what scale was just generated
                             self.lastTonicNoteName = tonicNote.shortName;
                         }
-                        [self.managedObjectContext save:nil];
+                        NSError *saveError = nil;
+                        [self.managedObjectContext save:&saveError];
+                        if( saveError )
+                            NSLog(@"Save error: %@", saveError);
                     }];
                     [self updatePitches];
                 });
@@ -1369,7 +1430,10 @@
         [self.managedObjectContext performBlock:^(void) {
             SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
             page.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
 }
@@ -1384,7 +1448,10 @@
             SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
             page.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
             page.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
-            [self.managedObjectContext save:nil];
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
         }];
     });
 }
@@ -1617,6 +1684,11 @@
     // ]
     else if( keyCode.intValue == 30 )
         [self incrementCurrentPageTranspose];
+    
+    // Debug info
+    // d
+    else if( keyCode.intValue == 2 )
+        [self logDebugInfo];
     
     // Log the rest
 //    else
