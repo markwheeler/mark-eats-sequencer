@@ -80,9 +80,10 @@
                                                       userInfo:inputInfo];
 }
 
-- (void) sendButtonInputNotificationId:(uint)id down:(BOOL)down
+// TODO
+- (void) sendButtonInputNotificationId:(uint)inputId down:(BOOL)down
 {
-    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:id], @"id",
+    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:inputId], @"inputId",
                                                                          [NSNumber numberWithBool:down], @"down",
                                                                          nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"ButtonInput"
@@ -90,9 +91,9 @@
                                                       userInfo:inputInfo];
 }
 
-- (void) sendValueInputNotificationId:(uint)id value:(float)value
+- (void) sendValueInputNotificationId:(uint)inputId value:(float)value
 {
-    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:id], @"id",
+    NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:inputId], @"inputId",
                                                                          [NSNumber numberWithFloat:value], @"value",
                                                                          nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"ValueInput"
