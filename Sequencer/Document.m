@@ -134,6 +134,8 @@
     if (self) {
         // Add your subclass-specific initialization here.
         
+        //NSLog(@"---- Init Document ----");
+        
         // Create the serial queue
         _bigSerialQueue = dispatch_queue_create("com.MarkEatsSequencer.BigQueue", NULL);
         
@@ -248,17 +250,19 @@
     // There is another child MOC which is reserved only for use on the tickQueue and is only used for reading data – just for when we need to know what to play
     // Method below are used for keeping the MOCs in sync (parentMOCSaved: and childMOCChanged)
     
+    NSUndoManager *undoManager = self.managedObjectContext.undoManager;
+    
     // Replace the NSPersistentDocument's MOC with a new one that has a PrivateQueue and can be used as a parent
     NSManagedObjectContext *parentMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [parentMOC performBlockAndWait:^(void) {
         parentMOC.persistentStoreCoordinator = self.managedObjectContext.persistentStoreCoordinator;
-        parentMOC.undoManager = self.managedObjectContext.undoManager;
     }];
     self.managedObjectContext = parentMOC;
     
     // Create a child MOC for use on the main thead in bindings etc
     self.managedObjectContextForMainThread = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     self.managedObjectContextForMainThread.parentContext = self.managedObjectContext;
+    self.managedObjectContextForMainThread.undoManager = undoManager;
     
     // Create a child MOC for use on the tickQueue
     self.managedObjectContextForTickQueue = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
@@ -281,35 +285,60 @@
         NSLog(@"Request error: %@", requestError);
     
     if( [matches count] ) {
+        // Get an existing Sequencer
         self.sequencerOnMainThread = [matches lastObject];
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            // Get the sequencer for background thread stuff
+            NSError *requestError = nil;
+            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
+            
+            if( requestError )
+                NSLog(@"Request error: %@", requestError);
+            
+            self.sequencer = [matches lastObject];
+        }];
+        
     } else {
         // Create initial structure
-        self.sequencerOnMainThread = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContextForMainThread];
+        [self.managedObjectContextForMainThread processPendingChanges];
+        [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
         
-        // Add dummy data (can be useful for testing, just adds 16 random notes)
-        //[Sequencer addDummyDataToSequencer:self.sequencerOnMainThread inManagedObjectContext:self.managedObjectContextForMainThread];
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            self.sequencer = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContext];
+            
+            // Add dummy data (can be useful for testing, just adds 16 random notes)
+            //[Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
+            
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
+        }];
         
-        [self childMOCChanged];
+        [self.managedObjectContextForMainThread processPendingChanges];
+        [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
+        
+        // Get the sequencer for main thread stuff
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+        NSArray *matches = [self.managedObjectContextForMainThread executeFetchRequest:request error:&requestError];
+        
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        self.sequencerOnMainThread = [matches lastObject];
+        
+        // TODO Remove this once confident that creation bugs are all fixed
+        if( [[[self.sequencerOnMainThread.pages objectAtIndex:0] pitches] count] == 0 || [[[self.sequencerOnMainThread.pages objectAtIndex:0] patterns] count] == 0 )
+            NSLog(@"WARNING: Page 0 has no pitches or patterns");
     }
-    
-    [self logDebugInfo];
     
     // Setup the SequencerState
     for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
         [[_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
     }
-    
-    // Get the sequencer and page for background thread stuff
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        NSError *requestError = nil;
-        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-        
-        self.sequencer = [matches lastObject];
-    }];
     
     // Setup UI
     [self setupUI];
@@ -318,7 +347,6 @@
     self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:0];
     
     // Create a Clock and set it up
-    
     self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.managedObjectContextForTickQueue andSequencerState:self.sequencerState];
     self.clockTick.delegate = self;
     self.clockTick.ppqn = PPQN;
@@ -413,7 +441,10 @@
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     if( documentController.lastActiveDocument != self ) {
         [documentController setActiveDocument:self];
-        [self updateUI];
+        
+        // Added this check as in theory we might not be ready
+        if( _currentPageOnMainThread )
+            [self updateUI];
     }
 }
 
@@ -542,8 +573,6 @@
     [self updateSwingPopup];
     [self updateCurrentPattern];
     [self updatePlayMode];
-    
-    _debugGridView.currentPageId = _currentPageOnMainThread.id.intValue;
 
     _debugGridView.needsDisplay = YES;
 }
@@ -688,21 +717,24 @@
 
 - (void) parentMOCSaved:(NSNotification *)notification
 {
-    [self.managedObjectContextForMainThread mergeChangesFromContextDidSaveNotification:notification];
-    [self.managedObjectContextForTickQueue performBlock:^(void){
-        [self.managedObjectContextForTickQueue mergeChangesFromContextDidSaveNotification:notification];
-    }];
-    
-    // This snippet is from http://cutecoder.org/featured/asynchronous-core-data-document/
-    // It nudges the file modified date to prevent 'file has been changed by another application' errors
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* fileURL = [self fileURL];
-    NSDictionary* fileAttributes = [fileManager attributesOfItemAtPath:[fileURL path] error:nil];
-    NSDate* modificationDate = fileAttributes[NSFileModificationDate];
-    if (modificationDate) {
-        // set the modification date to prevent NSDocument's "file was saved by another application" error.
-        [self setFileModificationDate:modificationDate];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self.managedObjectContextForMainThread mergeChangesFromContextDidSaveNotification:notification];
+        
+        [self.managedObjectContextForTickQueue performBlockAndWait:^(void){
+            [self.managedObjectContextForTickQueue mergeChangesFromContextDidSaveNotification:notification];
+        }];
+        
+        // This snippet is from http://cutecoder.org/featured/asynchronous-core-data-document/
+        // It nudges the file modified date to prevent 'file has been changed by another application' errors
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        NSURL* fileURL = [self fileURL];
+        NSDictionary* fileAttributes = [fileManager attributesOfItemAtPath:[fileURL path] error:nil];
+        NSDate* modificationDate = fileAttributes[NSFileModificationDate];
+        if (modificationDate) {
+            // set the modification date to prevent NSDocument's "file was saved by another application" error.
+            [self setFileModificationDate:modificationDate];
+        }
+    });
 }
 
 - (void) childMOCChanged
@@ -711,7 +743,6 @@
     [self.managedObjectContextForMainThread save:&saveMainError];
     if( saveMainError )
         NSLog(@"Save error: %@", saveMainError);
-
     
     [self.managedObjectContext performBlock:^(void) {
         NSError *saveError = nil;
@@ -748,8 +779,13 @@
 
 - (void) externalClockBPM:(NSNotification *)notification
 {
-    dispatch_async(_bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
+    // We don't want this showing up in undo history
+    [self.managedObjectContextForMainThread processPendingChanges];
+    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
+    
+    dispatch_sync(_bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            
             _sequencer.bpm = [notification.userInfo valueForKey:@"bpm"];
             NSError *saveError = nil;
             [self.managedObjectContext save:&saveError];
@@ -757,6 +793,9 @@
                 NSLog(@"Save error: %@", saveError);
         }];
     });
+    
+    [self.managedObjectContextForMainThread processPendingChanges];
+    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
 }
 
 - (void) gridControllerConnected:(NSNotification *)notification
@@ -795,8 +834,10 @@
 
 - (void) checkForThingsOutsideGrid
 {
+    [self.managedObjectContextForMainThread processPendingChanges];
+    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
     
-    dispatch_async(self.bigSerialQueue, ^(void) {
+    dispatch_sync(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void) {
             
             // Make sure all the loops etc fit within the connected grid size
@@ -853,6 +894,9 @@
         
         [self.gridNavigationController updateGridView];
     });
+    
+    [self.managedObjectContextForMainThread processPendingChanges];
+    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
 
 }
 
@@ -941,14 +985,12 @@
 - (void) logDebugInfo
 {
     NSLog(@"---- Debug info ----");
-    NSLog(@"MOC (parent) %@", self.managedObjectContext);
-    NSLog(@"Main thread MOC (child) %@", self.managedObjectContextForMainThread);
-    NSLog(@"sequencerOnMainThread.pages %li", (unsigned long)_sequencerOnMainThread.pages.count);
-    NSLog(@"currentPageOnMainThread.patterns %li", (unsigned long)_currentPageOnMainThread.patterns.count);
-    NSLog(@"currentPageOnMainThread.pattern 0 notes %li", (unsigned long)[[[_currentPageOnMainThread.patterns objectAtIndex:0] notes] count]);
-    NSLog(@"sequencer.pages %li", (unsigned long)_sequencer.pages.count);
-    NSLog(@"sequencer page 0 patterns %li", (unsigned long)[[[_sequencer.pages objectAtIndex:0 ] patterns ]count] );
-    NSLog(@"sequencer page 0 pattern 0 notes %li", (unsigned long)[[[[[_sequencer.pages objectAtIndex:0 ] patterns] objectAtIndex:0] notes] count] );
+    NSLog(@"Grid type %i", _sharedPreferences.gridType);
+    NSLog(@"Grid supports variable brightness %i", _sharedPreferences.gridSupportsVariableBrightness);
+    NSLog(@"Grid width %u", _sharedPreferences.gridWidth);
+    NSLog(@"Grid height %u", _sharedPreferences.gridHeight);
+    NSLog(@"sequencerOnMainThread %@", _sequencerOnMainThread);
+    NSLog(@"sequencerOnMainThread.pages[0] %@", [_sequencerOnMainThread.pages objectAtIndex:0]);
     NSLog(@"--------------------");
 }
 

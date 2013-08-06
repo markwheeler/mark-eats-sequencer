@@ -26,8 +26,6 @@
 @property uint gridWidth;
 @property uint gridHeight;
 
-@property uint currentPageId;
-
 @property SequencerState         *sequencerState;
 @property SequencerPattern       *currentPattern;
 
@@ -35,6 +33,6 @@
 
 @property BOOL                   patternQuantizationOn;
 
-@property (weak) id             delegate;
+@property (weak) id              delegate;
 
 @end

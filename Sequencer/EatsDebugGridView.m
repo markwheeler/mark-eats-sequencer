@@ -8,6 +8,7 @@
 
 #import "EatsDebugGridView.h"
 #import "SequencerState.h"
+#import "SequencerPage.h"
 #import "SequencerPageState.h"
 #import "SequencerNote.h"
 #import "Sequencer+Utils.h"
@@ -44,8 +45,6 @@
         
         self.gridWidth = self.columns;
         self.gridHeight = self.rows;
-        
-        self.currentPageId = 0;
         
         // Brightness settings
         self.noteBrightness = [NSNumber numberWithFloat:0.0];
@@ -87,34 +86,17 @@
 
 - (void)cut:(id)sender {
     if( [self.delegate respondsToSelector:@selector(cutPattern:inPage:)] )
-       [self.delegate performSelector:@selector(cutPattern:inPage:) withObject:[NSNumber numberWithUnsignedInt:[self getCurrentPatternId]] withObject:[NSNumber numberWithUnsignedInt:_currentPageId]];
+       [self.delegate performSelector:@selector(cutPattern:inPage:) withObject:_currentPattern.id withObject:_currentPattern.inPage.id];
 }
 
 - (void)copy:(id)sender {
     if( [self.delegate respondsToSelector:@selector(copyPattern:inPage:)] )
-        [self.delegate performSelector:@selector(copyPattern:inPage:) withObject:[NSNumber numberWithUnsignedInt:[self getCurrentPatternId]] withObject:[NSNumber numberWithUnsignedInt:_currentPageId]];
+        [self.delegate performSelector:@selector(copyPattern:inPage:) withObject:_currentPattern.id withObject:_currentPattern.inPage.id];
 }
 
 - (void)paste:(id)sender {
     if( [self.delegate respondsToSelector:@selector(pastePattern:inPage:)] )
-        [self.delegate performSelector:@selector(pastePattern:inPage:) withObject:[NSNumber numberWithUnsignedInt:[self getCurrentPatternId]] withObject:[NSNumber numberWithUnsignedInt:_currentPageId]];
-}
-
-- (uint) getCurrentPatternId
-{
-    // Get the page state
-    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPageId];
-    
-    uint patternId;
-    
-    // If pattern quantization is disabled
-    if( !_patternQuantizationOn && pageState.nextPatternId )
-        patternId = pageState.nextPatternId.unsignedIntValue;
-    
-    else
-        patternId = pageState.currentPatternId.unsignedIntValue;
-    
-    return patternId;
+        [self.delegate performSelector:@selector(pastePattern:inPage:) withObject:_currentPattern.id withObject:_currentPattern.inPage.id];
 }
 
 - (BOOL) validateMenuItem:(id <NSValidatedUserInterfaceItem>)menuItem
@@ -161,7 +143,7 @@
         return;
     
     // Get the page state
-    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPageId];
+    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
     
     // Generate the columns with playhead and nextStep
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
@@ -202,7 +184,6 @@
     }
 
     // Put all the notes in the viewArray    
-//    NSLog(@"Drawing from pattern %@", _currentPattern);
     
     for(SequencerNote *note in _currentPattern.notes) {
         
