@@ -1715,8 +1715,8 @@
     // <
     else if( keyCode.intValue == 43 )
         [self setCurrentPagePlayMode:EatsSequencerPlayMode_Reverse];
-    // ?
-    else if( keyCode.intValue == 44 )
+    // ? (without any modifier)
+    else if( keyCode.intValue == 44 && modifierFlags.intValue == 256 )
         [self setCurrentPagePlayMode:EatsSequencerPlayMode_Random];
     
     // Transpose

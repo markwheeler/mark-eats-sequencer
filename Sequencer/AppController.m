@@ -357,10 +357,25 @@
 
 
 
+#pragma mark - Private methods
+
+- (void) openUserGuide
+{
+    // Open the user guide PDF from the bundle resources folder
+    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"Mark Eats Sequencer User Guide" ofType:@"pdf"];
+    
+    if( ![[NSWorkspace sharedWorkspace] openFile:filePath] ) {
+        NSLog(@"Failed to open file: %@",filePath);
+    }
+
+}
+
+
 
 #pragma mark - Interface actions
 
-- (IBAction) PreferencesMenuItem:(NSMenuItem *)sender {
+- (IBAction) PreferencesMenuItem:(NSMenuItem *)sender
+{
     [self.preferencesController showWindow:self];
 }
 
@@ -368,6 +383,25 @@
 {
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     [documentController.currentDocument clearPatternStartAlert];
+}
+
+- (IBAction)helpUserGuideMenuItem:(NSMenuItem *)sender
+{
+    [self openUserGuide];
+}
+
+- (IBAction)helpFeedbackMenuItem:(NSMenuItem *)sender
+{
+    NSURL *url = [NSURL URLWithString:@"http://markeats.uservoice.com"];
+    if( ![[NSWorkspace sharedWorkspace] openURL:url] )
+        NSLog(@"Failed to open url: %@",[url description]);
+}
+
+- (IBAction)helpWebsiteMenuItem:(NSMenuItem *)sender
+{
+    NSURL *url = [NSURL URLWithString:@"http://www.markeats.com"];
+    if( ![[NSWorkspace sharedWorkspace] openURL:url] )
+        NSLog(@"Failed to open url: %@",[url description]);
 }
 
 @end
