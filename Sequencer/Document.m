@@ -1010,8 +1010,10 @@
     }
 }
 
-- (void) showPage:(uint)pageId
+- (void) showPage:(uint)pageId from:(int)direction;
 {
+    // Direction can be -1 (from left), 0 (calculate automatically), or 1 (from right)
+    
     if( self.currentPageOnMainThread.id.intValue == pageId )
         return;
     
@@ -1024,14 +1026,20 @@
     float distanceToAnimate = 100.0;
     
     NSRect frame = self.pageView.frame;
-    if( pageId == 0 && _currentPageOnMainThread.id.intValue == SEQUENCER_PAGES - 1 )
-        frame.origin.x += distanceToAnimate;
-    else if ( pageId == SEQUENCER_PAGES - 1 && _currentPageOnMainThread.id.intValue == 0 )
+    
+    if( direction < 0 ) {
         frame.origin.x -= distanceToAnimate;
-    else if( pageId > _currentPageOnMainThread.id.integerValue )
+        
+    } else if( direction > 0 ) {
         frame.origin.x += distanceToAnimate;
-    else if ( pageId < _currentPageOnMainThread.id.integerValue )
-        frame.origin.x -= distanceToAnimate;
+        
+    } else {
+        if( pageId > _currentPageOnMainThread.id.integerValue )
+            frame.origin.x += distanceToAnimate;
+        else if ( pageId < _currentPageOnMainThread.id.integerValue )
+            frame.origin.x -= distanceToAnimate;
+    }
+    
     self.pageView.frame = frame;
     
     self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
@@ -1048,7 +1056,7 @@
     int newPageId = self.currentPageOnMainThread.id.intValue - 1;
     if( newPageId < 0 )
         newPageId = SEQUENCER_PAGES - 1;
-    [self showPage:newPageId];
+    [self showPage:newPageId from:-1];
 }
 
 - (void) showNextPage
@@ -1056,7 +1064,7 @@
     int newPageId = self.currentPageOnMainThread.id.intValue + 1;
     if( newPageId >= SEQUENCER_PAGES )
         newPageId = 0;
-    [self showPage:newPageId];
+    [self showPage:newPageId from:1];
 }
 
 - (void) decrementBPM
@@ -1375,7 +1383,7 @@
         
     // Otherwise switch page
     } else {
-        [self showPage:(uint)sender.selectedSegment];
+        [self showPage:(uint)sender.selectedSegment from:0];
     }
 }
 
@@ -1558,28 +1566,28 @@
     // Pages
     // F1
     else if( keyCode.intValue == 122 )
-        [self showPage:0];
+        [self showPage:0 from:0];
     // F2
     else if( keyCode.intValue == 120 )
-        [self showPage:1];
+        [self showPage:1 from:0];
     // F3
     else if( keyCode.intValue == 99 )
-        [self showPage:2];
+        [self showPage:2 from:0];
     // F4
     else if( keyCode.intValue == 118 )
-        [self showPage:3];
+        [self showPage:3 from:0];
     // F5
     else if( keyCode.intValue == 96 )
-        [self showPage:4];
+        [self showPage:4 from:0];
     // F6
     else if( keyCode.intValue == 97 )
-        [self showPage:5];
+        [self showPage:5 from:0];
     // F7
     else if( keyCode.intValue == 98 )
-        [self showPage:6];
+        [self showPage:6 from:0];
     // F8
     else if( keyCode.intValue == 100 )
-        [self showPage:7];
+        [self showPage:7 from:0];
     
     // Left
     else if( keyCode.intValue == 123 )
@@ -1751,13 +1759,6 @@
 - (void) swipeBack
 {
     [self showPreviousPage];
-}
-
-- (void) swipeAmount:(NSNumber *)delta
-{
-    NSRect frame = self.pageView.frame;
-    frame.origin.x = self.pageViewFrameOrigin.x - delta.floatValue * 10;
-    self.pageView.frame = frame;
 }
 
 @end

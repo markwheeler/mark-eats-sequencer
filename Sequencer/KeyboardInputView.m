@@ -14,11 +14,6 @@
 
 @property NSMutableDictionary   *twoFingersTouches;
 
-//@property CGFloat currentSum;
-//@property NSTimer *drawTimer;
-//@property CGFloat scrollDeltaX;
-//@property CGFloat scrollDeltaY;
-
 @end
 
 @implementation KeyboardInputView
@@ -115,66 +110,5 @@
     }
     
 }
-
-// Swipe code is based on
-// https://github.com/Kapeli/SwipableWebView/blob/master/Swipable%20WebView/DHSwipeClipView.m
-//
-//- (void)scrollWheel:(NSEvent *)event
-//{
-//    if(![NSEvent isSwipeTrackingFromScrollEventsEnabled]) {
-//        [super scrollWheel:event];
-//        return;
-//    }
-//    if([event phase] == NSEventPhaseBegan) {
-//        _currentSum = 0;
-//        _scrollDeltaX = 0;
-//        _scrollDeltaY = 0;
-//        
-//    } else if([event phase] == NSEventPhaseChanged) {
-//        _scrollDeltaX += [event scrollingDeltaX];
-//        _scrollDeltaY += [event scrollingDeltaY];
-//        
-//        CGFloat flippedDeltaX = _scrollDeltaX * -1;
-//        // Draw the back/forward indicators
-//        _currentSum = flippedDeltaX/1000;
-//        [self launchDrawTimer];
-//        return;
-//        
-//    } else if([event phase] == NSEventPhaseEnded) {
-//        if( _currentSum < -SWIPE_MINIMUM_LENGTH ) {
-//            if( [_delegate respondsToSelector:@selector(swipeBack)] )
-//                [_delegate performSelector:@selector(swipeBack)];
-//            
-//        } else if( _currentSum >= SWIPE_MINIMUM_LENGTH ) {
-//            if( [_delegate respondsToSelector:@selector(swipeForward)] )
-//                [_delegate performSelector:@selector(swipeForward)];
-//        }
-//        if(_currentSum != 0) {
-//            _currentSum = 0;
-//            [self launchDrawTimer];
-//        }
-//    } else if([event phase] == NSEventPhaseMayBegin || [event phase] == NSEventPhaseCancelled) {
-//        if(_currentSum != 0) {
-//            _currentSum = 0;
-//            [self launchDrawTimer];
-//        }
-//    }
-//    [super scrollWheel:event];
-//}
-//
-//- (void) launchDrawTimer
-//{   
-//    // A timer is needed because events are queued and processing and drawing
-//    // takes longer than they are delivered, so the queue fills up
-//    if(!_drawTimer || ![_drawTimer isValid]) {
-//        self.drawTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f/25 target:self selector:@selector(drawSwipe) userInfo:nil repeats:NO];
-//    }
-//}
-//
-//- (void) drawSwipe
-//{
-//    if( [_delegate respondsToSelector:@selector(swipeAmount:)] )
-//        [_delegate performSelector:@selector(swipeAmount:) withObject:[NSNumber numberWithFloat:_currentSum]];
-//}
 
 @end

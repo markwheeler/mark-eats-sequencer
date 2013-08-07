@@ -51,6 +51,5 @@
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 - (void) swipeForward;
 - (void) swipeBack;
-- (void) swipeAmount:(NSNumber *)delta;
 
 @end
