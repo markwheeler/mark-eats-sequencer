@@ -10,6 +10,10 @@
 
 @protocol KeyboardInputViewDelegateProtocol
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+@optional
+- (void) swipeBack;
+- (void) swipeForward;
+- (void) swipeAmount:(NSNumber *)delta;
 @end
 
 @interface KeyboardInputView : NSView

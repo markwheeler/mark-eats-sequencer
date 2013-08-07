@@ -1021,11 +1021,17 @@
     
     self.pageView.alphaValue = 0.0;
     
+    float distanceToAnimate = 100.0;
+    
     NSRect frame = self.pageView.frame;
-    if( pageId > _currentPageOnMainThread.id.integerValue )
-        frame.origin.x += 100.0;
+    if( pageId == 0 && _currentPageOnMainThread.id.intValue == SEQUENCER_PAGES - 1 )
+        frame.origin.x += distanceToAnimate;
+    else if ( pageId == SEQUENCER_PAGES - 1 && _currentPageOnMainThread.id.intValue == 0 )
+        frame.origin.x -= distanceToAnimate;
+    else if( pageId > _currentPageOnMainThread.id.integerValue )
+        frame.origin.x += distanceToAnimate;
     else if ( pageId < _currentPageOnMainThread.id.integerValue )
-        frame.origin.x -= 100.0;
+        frame.origin.x -= distanceToAnimate;
     self.pageView.frame = frame;
     
     self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
@@ -1520,7 +1526,7 @@
 
 
 
-#pragma mark - Keyboard shortcuts
+#pragma mark - Keyboard and trackpad input
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
@@ -1735,6 +1741,23 @@
     // Log the rest
 //    else
 //        NSLog(@"keyDown code: %@ withModifierFlags: %@", keyCode, modifierFlags );
+}
+
+- (void) swipeForward
+{
+    [self showNextPage];
+}
+
+- (void) swipeBack
+{
+    [self showPreviousPage];
+}
+
+- (void) swipeAmount:(NSNumber *)delta
+{
+    NSRect frame = self.pageView.frame;
+    frame.origin.x = self.pageViewFrameOrigin.x - delta.floatValue * 10;
+    self.pageView.frame = frame;
 }
 
 @end
