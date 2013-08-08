@@ -277,35 +277,23 @@
     
     
     // Setup the Core Data object
-    NSError *requestError = nil;
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-    NSArray *matches = [self.managedObjectContextForMainThread executeFetchRequest:request error:&requestError];
+    [self.managedObjectContextForMainThread processPendingChanges];
+    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
     
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-    
-    if( [matches count] ) {
-        // Get an existing Sequencer
-        self.sequencerOnMainThread = [matches lastObject];
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        NSError *requestError = nil;
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
         
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            // Get the sequencer for background thread stuff
-            NSError *requestError = nil;
-            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-            
-            if( requestError )
-                NSLog(@"Request error: %@", requestError);
-            
+        if( requestError )
+            NSLog(@"Request error: %@", requestError);
+        
+        if( [matches count] ) {
+            // Get an existing Sequencer
             self.sequencer = [matches lastObject];
-        }];
-        
-    } else {
-        // Create initial structure
-        [self.managedObjectContextForMainThread processPendingChanges];
-        [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
-        
-        [self.managedObjectContext performBlockAndWait:^(void) {
+            
+        } else {
+            // Create initial structure
             self.sequencer = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContext];
             
             // Add dummy data (can be useful for testing, just adds 16 random notes)
@@ -315,25 +303,25 @@
             [self.managedObjectContext save:&saveError];
             if( saveError )
                 NSLog(@"Save error: %@", saveError);
-        }];
-        
-        [self.managedObjectContextForMainThread processPendingChanges];
-        [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
-        
-        // Get the sequencer for main thread stuff
-        NSError *requestError = nil;
-        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-        NSArray *matches = [self.managedObjectContextForMainThread executeFetchRequest:request error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-        
-        self.sequencerOnMainThread = [matches lastObject];
-        
-        // TODO Remove this once confident that creation bugs are all fixed
-        if( [[[self.sequencerOnMainThread.pages objectAtIndex:0] pitches] count] == 0 || [[[self.sequencerOnMainThread.pages objectAtIndex:0] patterns] count] == 0 )
-            NSLog(@"WARNING: Page 0 has no pitches or patterns");
-    }
+        }
+    }];
+    
+    // Get the sequencer for main thread stuff
+    NSError *requestError = nil;
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
+    NSArray *matches = [self.managedObjectContextForMainThread executeFetchRequest:request error:&requestError];
+    
+    if( requestError )
+        NSLog(@"Request error: %@", requestError);
+    
+    self.sequencerOnMainThread = [matches lastObject];
+    
+    [self.managedObjectContextForMainThread processPendingChanges];
+    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
+    
+    // TODO Remove this once confident that creation bugs are all fixed
+    if( [[[self.sequencerOnMainThread.pages objectAtIndex:0] pitches] count] == 0 || [[[self.sequencerOnMainThread.pages objectAtIndex:0] patterns] count] == 0 )
+        NSLog(@"WARNING: Page 0 has no pitches or patterns");
     
     // Setup the SequencerState
     for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
