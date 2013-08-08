@@ -53,6 +53,9 @@
         self.externalClockCalculator = [[EatsExternalClockCalculator alloc] init];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        
+        // Firing this with a delay just so all the windows have time to draw etc (might be a better approach but this works!)
+        [self performSelector:@selector(checkForFirstRun) withObject:nil afterDelay:0.5];
     }
     
     return self;
@@ -358,6 +361,41 @@
 
 
 #pragma mark - Private methods
+
+- (void) checkForFirstRun
+{
+    // Check if this is a new install
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    if ( ![userDefaults valueForKey:@"version"] ) {
+        [self showWelcomeMessage];
+        // Add version number to NSUserDefaults for first version
+        [userDefaults setFloat:[[NSBundle.mainBundle.infoDictionary objectForKey:@"CFBundleVersion"] floatValue] forKey:@"version"];
+    }
+    
+    if ([[NSUserDefaults standardUserDefaults] floatForKey:@"version"] == [[NSBundle.mainBundle.infoDictionary objectForKey:@"CFBundleVersion"] floatValue] ) {
+        // Same version, no need to do anything
+        
+    } else {
+        [self showWelcomeMessage];
+        // Update version number
+        [userDefaults setFloat:[[NSBundle.mainBundle.infoDictionary objectForKey:@"CFBundleVersion"] floatValue] forKey:@"version"];
+    }
+}
+
+- (void) showWelcomeMessage
+{
+    NSAlert *welcomeAlert = [NSAlert alertWithMessageText:@"Would you like to view the User Guide?"
+                                            defaultButton:@"Open User Guide"
+                                          alternateButton:@"Not now"
+                                              otherButton:nil
+                                informativeTextWithFormat:@"The User Guide is always available from the Help menu should you wish to view it another time."];
+    
+    NSInteger result = [welcomeAlert runModal];
+    if (result == NSOKButton) {
+        [self openUserGuide];
+    }
+}
 
 - (void) openUserGuide
 {
