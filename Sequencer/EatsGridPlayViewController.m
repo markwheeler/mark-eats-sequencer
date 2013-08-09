@@ -54,6 +54,9 @@
 @property uint                              animationFrame;
 @property int                               animationSpeedMultiplier;
 
+@property NSDictionary                      *lastDownPatternKey;
+@property BOOL                              copiedPattern;
+
 @end
 
 @implementation EatsGridPlayViewController
@@ -86,9 +89,9 @@
     }
     
     // Pattern buttons
-        uint numberOfPatterns = self.width;
-        if( numberOfPatterns > 16 )
-            numberOfPatterns = 16;
+    uint numberOfPatterns = self.width;
+    if( numberOfPatterns > 16 )
+        numberOfPatterns = 16;
     
     // Pattern buttons for this page on small grids
     if( self.height < 16 || self.width < 16 ) {
@@ -320,7 +323,7 @@
     for ( EatsGridButtonView *button in _playModeButtons ) {
         if( i == playMode )
             button.buttonState = EatsButtonViewState_Active;
-        else
+        else if( button.buttonState != EatsButtonViewState_Down )
             button.buttonState = EatsButtonViewState_Inactive;
         i++;
     }
@@ -338,7 +341,7 @@
     for ( EatsGridButtonView *button in _pageButtons ) {
         if( i == currentPageId )
             button.buttonState = EatsButtonViewState_Active;
-        else
+        else if( button.buttonState != EatsButtonViewState_Down )
             button.buttonState = EatsButtonViewState_Inactive;
         i++;
     }
@@ -359,7 +362,8 @@
     
     // Set all other page pattern buttons to 0
     for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
-        button.buttonState = EatsButtonViewState_Inactive;
+        if( button.buttonState != EatsButtonViewState_Down )
+            button.buttonState = EatsButtonViewState_Inactive;
         button.inactiveBrightness = 0;
     }
     
@@ -393,7 +397,7 @@
                 if( patternQuantizationOn ) {
                     if( i == pageState.currentPatternId.intValue && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
                         button.buttonState = EatsButtonViewState_Active;
-                    else
+                    else if( button.buttonState != EatsButtonViewState_Down )
                         button.buttonState = EatsButtonViewState_Inactive;
                     
                 } else {
@@ -401,7 +405,7 @@
                        || ( i == pageState.currentPatternId.intValue && !pageState.nextPatternId && pageId == currentPageId )
                        || ( i == pageState.currentPatternId.intValue && pageState.playMode.intValue != EatsSequencerPlayMode_Pause ) ) {
                         button.buttonState = EatsButtonViewState_Active;
-                    } else
+                    } else if( button.buttonState != EatsButtonViewState_Down )
                         button.buttonState = EatsButtonViewState_Inactive;
                 }
                 
@@ -441,13 +445,13 @@
                     if( patternQuantizationOn ) {
                         if( i == pageState.currentPatternId.intValue && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
                             button.buttonState = EatsButtonViewState_Active;
-                        else
+                        else if( button.buttonState != EatsButtonViewState_Down )
                             button.buttonState = EatsButtonViewState_Inactive;
                         
                     } else {
                         if( ( i == pageState.nextPatternId.intValue && pageState.nextPatternId ) || ( i == pageState.currentPatternId.intValue && !pageState.nextPatternId ) )
                             button.buttonState = EatsButtonViewState_Active;
-                        else
+                        else if( button.buttonState != EatsButtonViewState_Down )
                             button.buttonState = EatsButtonViewState_Inactive;
                     }
                     
@@ -514,7 +518,8 @@
     
     // Set all other page pattern buttons to 0
     for ( EatsGridButtonView *button in _scrubOtherPagesButtons ) {
-        button.buttonState = EatsButtonViewState_Inactive;
+        if( button.buttonState != EatsButtonViewState_Down )
+            button.buttonState = EatsButtonViewState_Inactive;
     }
     
     for( SequencerPageState *pageState in _sequencerState.pageStates ) {
@@ -800,9 +805,8 @@
     _clearButton.buttonState = EatsButtonViewState_Inactive;
 }
 
-- (void) setPattern:(int)patternId forPage:(int)pageId
+- (void) setPattern:(uint)patternId forPage:(uint)pageId
 {
-    
     SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:pageId];
     
     __block uint patternQuantization;
@@ -817,6 +821,34 @@
     if( patternQuantization == 0 ) {
         [self.delegate updateUI];
     }
+}
+
+- (void) startStopPattern:(uint)patternId forPage:(uint)pageId
+{
+    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:pageId];
+    
+    // Start fwd playback from loop start
+    if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause ) {
+        
+        __block uint loopStart;
+        
+        [self.managedObjectContext performBlockAndWait:^(void) {
+            loopStart = [[[_sequencer.pages objectAtIndex:0] loopStart] unsignedIntValue];
+        }];
+        
+        pageState.nextStep = [NSNumber numberWithUnsignedInt:loopStart];
+        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
+        
+    // Pause a pattern that is playing
+    } else if( pageState.currentPatternId.unsignedIntValue == patternId ) {
+        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+    }
+}
+
+- (void) copyPattern:(uint)fromPatternId fromPage:(uint)fromPageId toPattern:(uint)toPatternId toPage:(uint)toPageId
+{
+    // Copy pattern
+    NSLog(@"TODO: Copy from page %u, pattern %u --> to --> page %u, pattern %u", fromPageId, fromPatternId, toPageId, toPatternId);
 }
 
 
@@ -849,65 +881,105 @@
         
         // Pattern buttons
         if ( [_patternButtons containsObject:sender] ) {
+            
+            uint pressedPattern = (uint)[_patternButtons indexOfObject:sender];
+            
+            
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
-                [self setPattern:(int)[_patternButtons indexOfObject:sender] forPage:currentPageId];
+                if( _lastDownPatternKey ) {
+                    // Copy pattern
+                    [self copyPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:currentPageId toPattern:pressedPattern toPage:currentPageId];
+                    _copiedPattern = YES;
+                    
+                } else {
+                    // Keep track of last down
+                    _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPattern], @"pattern", nil];
+                }
                 
+            // Release
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
+                
+                if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                    
+                    if( !_copiedPattern ) {
+                        // Change pattern
+                        [self setPattern:pressedPattern forPage:currentPageId];
+                        [self startStopPattern:pressedPattern forPage:currentPageId];
+                    }
+                
+                    _lastDownPatternKey = nil;
+                    _copiedPattern = NO;
+                }
             }
         }
         
         // Pattern buttons for other pages
         if ( [_patternsOnOtherPagesButtons containsObject:sender] ) {
-            if ( buttonDown ) {
-                sender.buttonState = EatsButtonViewState_Down;
+            
+            // For large grids
+            if( self.height > 8 && self.width > 8 ) {
                 
-                // For large grids
-                if( self.height > 8 && self.width > 8 ) {
+                uint numberOfPatterns = self.width;
+                if (numberOfPatterns > 16)
+                    numberOfPatterns = 16;
+                
+                uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
+                uint pressedPage = (uint)[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns;
+                
+                if ( buttonDown ) {
+                    sender.buttonState = EatsButtonViewState_Down;
                     
-                    uint numberOfPatterns = self.width;
-                    if (numberOfPatterns > 16)
-                        numberOfPatterns = 16;
-                    
-                    uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
-                    uint pressedPage = (uint)[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns;
-                    
-                    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:pressedPage];
-                    [self setPattern:pressedPattern forPage:pressedPage];
-                    
-                    
-                    // Start fwd playback from loop start
-                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause ) {
+                    if( _lastDownPatternKey ) {
+                        // Copy pattern
+                        [self copyPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:[[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] toPattern:pressedPattern toPage:pressedPage];
+                        _copiedPattern = YES;
                         
-                        __block uint loopStart;
-                        
-                        [self.managedObjectContext performBlockAndWait:^(void) {
-                            loopStart = [[[_sequencer.pages objectAtIndex:0] loopStart] unsignedIntValue];
-                        }];
-                        
-                        pageState.nextStep = [NSNumber numberWithUnsignedInt:loopStart];
-                        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Forward];
-                        
-                    // Pause a pattern that is playing
-                    } else if( pageState.currentPatternId.unsignedIntValue == pressedPattern ) {
-                        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
+                    } else {
+                        // Keep track of last down
+                        _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPage], @"page",
+                                               [NSNumber numberWithUnsignedInt:pressedPattern], @"pattern",
+                                               nil];
                     }
-                
-                // Smaller grids (change all patterns at once)
+                    
+                // Release
                 } else {
+                    sender.buttonState = EatsButtonViewState_Inactive;
+                    
+                    if( _lastDownPatternKey
+                       && [[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] == pressedPage
+                       && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                        
+                        if( !_copiedPattern ) {
+                            // Change pattern
+                            [self setPattern:pressedPattern forPage:pressedPage];
+                            [self startStopPattern:pressedPattern forPage:pressedPage];
+                        }
+                        
+                        _lastDownPatternKey = nil;
+                        _copiedPattern = NO;
+
+                    }
+                    
+                }
+            
+            // Smaller grids (change all patterns at once)
+            } else {
+                
+                if ( buttonDown ) {
+                    sender.buttonState = EatsButtonViewState_Down;
                     
                     for( uint pageId = 0; pageId < _sequencerState.pageStates.count; pageId ++ ) {
                         if( currentPageId != pageId )
                             [self setPattern:(int)[_patternsOnOtherPagesButtons indexOfObject:sender] forPage:pageId];
                     }
-
+                    
+                } else {
+                    sender.buttonState = EatsButtonViewState_Inactive;
                 }
 
-                
-            } else {
-                sender.buttonState = EatsButtonViewState_Inactive;
             }
         }
         
