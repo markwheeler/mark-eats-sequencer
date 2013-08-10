@@ -96,6 +96,7 @@
     
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
+    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"pitches"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
     
     __block NSNumber *pageId;
@@ -110,6 +111,7 @@
     
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
+    [self.currentPageOnMainThread addObserver:self forKeyPath:@"pitches" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
     
     [self updatePitches];
@@ -183,6 +185,7 @@
     
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
+    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"pitches"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
     
     NSLog(@"Document deallocated OK"); // TODO: Remove this for final release
@@ -362,8 +365,7 @@
     //[self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
     //[self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
     //[self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
-    //[self.currentPageOnMainThread addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
-    //[self.currentPageOnMainThread addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
+    // ...etc...
     
     // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
@@ -594,6 +596,7 @@
     else
         self.debugGridView.patternQuantizationOn = YES;
     
+    [self updateUI];
 }
 
 - (void) updateCurrentPattern
@@ -658,7 +661,9 @@
         [self updateStepLengthPopup];
     else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"swing"] )
         [self updateSwingPopup];
-    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transpose"] )
+    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"pitches"] ) {
+        [self updatePitches];
+    } else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transpose"] )
         [self updatePitches];
 }
 
@@ -1343,7 +1348,6 @@
                 NSLog(@"Save error: %@", saveError);
         }];
     });
-    [self updateUI]; // WARNING: This one will be a problem
 }
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
@@ -1383,10 +1387,23 @@
 
 - (void)controlTextDidEndEditing:(NSNotification *)obj
 {
+    // We re-create the pitches so that it will trigger KVO
+    NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:_currentPageOnMainThread.pitches.count];
+    
+    for( SequencerRowPitch *rowPitch in _currentPageOnMainThread.pitches ) {
+        SequencerRowPitch *newRowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContext];
+        newRowPitch.row = rowPitch.row;
+        newRowPitch.pitch = rowPitch.pitch;
+        [newPitches addObject:rowPitch];
+    }
+    
+    // Then modify the appropriate row
     NSInteger rowIndex = self.rowPitchesTableView.numberOfRows - 1 - self.rowPitchesTableView.selectedRow;
-    SequencerRowPitch *rowPitch = [_currentPageOnMainThread.pitches objectAtIndex:rowIndex];
+    SequencerRowPitch *rowPitch = [newPitches objectAtIndex:rowIndex];
     rowPitch.pitch = [[_currentPagePitches objectAtIndex:rowIndex] valueForKey:@"pitch"];
     
+    // And update the page
+    _currentPageOnMainThread.pitches = newPitches;
     [self childMOCChanged];
 }
 
@@ -1411,7 +1428,7 @@
                 int pageId = self.currentPageOnMainThread.id.intValue;
                 
                 dispatch_async(self.bigSerialQueue, ^(void) {
-                    [self.managedObjectContext performBlockAndWait:^(void) {
+                    [self.managedObjectContext performBlock:^(void) {
                         // Check what note the user entered
                         WMNote *tonicNote;
                         if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
@@ -1421,20 +1438,25 @@
                         
                         // If we found a note then generate the sequence
                         if( tonicNote ) {
-
+                            
                             // Generate pitches
                             NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:scaleMode length:16];
 
                             // Put them into the page
-                            int r = 0;
+                            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
+                            NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:sequenceOfNotes.count];
                             
+                            int r = 0;
                             for( WMNote *note in sequenceOfNotes ) {
                                 
-                                SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
-                                SequencerRowPitch *rowPitch = [page.pitches objectAtIndex:r];
+                                SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContext];
+                                rowPitch.row = [NSNumber numberWithInt:r];
                                 rowPitch.pitch = [NSNumber numberWithInt:note.midiNoteNumber];
+                                [newPitches addObject:rowPitch];
                                 r++;
                             }
+                            
+                            page.pitches = newPitches;
                             
                             // Remember what scale was just generated
                             self.lastTonicNoteName = tonicNote.shortName;
@@ -1444,7 +1466,6 @@
                         if( saveError )
                             NSLog(@"Save error: %@", saveError);
                     }];
-                    [self updatePitches]; // WARNING: Problem
                 });
                 
             // Cancel
