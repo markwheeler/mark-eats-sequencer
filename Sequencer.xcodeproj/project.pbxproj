@@ -12,18 +12,6 @@
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
 		4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */; };
 		4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */; };
-		4D1C403E1712150A000F773D /* page-forward-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C40361712150A000F773D /* page-forward-icon.png */; };
-		4D1C403F1712150A000F773D /* page-forward-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C40371712150A000F773D /* page-forward-icon@2x.png */; };
-		4D1C40401712150A000F773D /* page-pause-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C40381712150A000F773D /* page-pause-icon.png */; };
-		4D1C40411712150A000F773D /* page-pause-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C40391712150A000F773D /* page-pause-icon@2x.png */; };
-		4D1C40421712150A000F773D /* page-random-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C403A1712150A000F773D /* page-random-icon.png */; };
-		4D1C40431712150A000F773D /* page-random-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C403B1712150A000F773D /* page-random-icon@2x.png */; };
-		4D1C40441712150A000F773D /* page-reverse-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C403C1712150A000F773D /* page-reverse-icon.png */; };
-		4D1C40451712150A000F773D /* page-reverse-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C403D1712150A000F773D /* page-reverse-icon@2x.png */; };
-		4D1C404C17121834000F773D /* sequencer-stop-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C404817121834000F773D /* sequencer-stop-icon.png */; };
-		4D1C404D17121834000F773D /* sequencer-stop-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C404917121834000F773D /* sequencer-stop-icon@2x.png */; };
-		4D1C405017121875000F773D /* sequencer-play-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C404E17121875000F773D /* sequencer-play-icon.png */; };
-		4D1C405117121875000F773D /* sequencer-play-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1C404F17121875000F773D /* sequencer-play-icon@2x.png */; };
 		4D2772461709C8EA00A8069B /* EatsVelocityUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */; };
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D5250E817ADD860007B1E2A /* SequencerPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D5250E717ADD860007B1E2A /* SequencerPage.m */; };
@@ -32,6 +20,11 @@
 		4D5250F117ADD860007B1E2A /* SequencerRowPitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D5250F017ADD860007B1E2A /* SequencerRowPitch.m */; };
 		4D5250F417ADD860007B1E2A /* Sequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D5250F317ADD860007B1E2A /* Sequencer.m */; };
 		4D5250F717ADD860007B1E2A /* SequencerNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D5250F617ADD860007B1E2A /* SequencerNote.m */; };
+		4D54CAC117B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */; };
+		4D54CAC217B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */; };
+		4D54CAC417B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */; };
+		4D54CAC517B60E3B00139D6D /* PlaybackStopIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CAC017B60E3B00139D6D /* PlaybackStopIconTemplate.pdf */; };
+		4D54CAC717B612D500139D6D /* PlaybackRandomIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CAC617B612D500139D6D /* PlaybackRandomIconTemplate.pdf */; };
 		4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D6115CB16E431BD00140AF8 /* Cocoa.framework */; };
 		4D6115D616E431BD00140AF8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D6115D416E431BD00140AF8 /* InfoPlist.strings */; };
 		4D6115D816E431BD00140AF8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6115D716E431BD00140AF8 /* main.m */; };
@@ -129,18 +122,6 @@
 		4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsWMNoteValueTransformer.m; sourceTree = "<group>"; };
 		4D1B31A216EBDB9E00140B51 /* EatsDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsDocumentController.h; sourceTree = "<group>"; };
 		4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDocumentController.m; sourceTree = "<group>"; };
-		4D1C40361712150A000F773D /* page-forward-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-forward-icon.png"; sourceTree = "<group>"; };
-		4D1C40371712150A000F773D /* page-forward-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-forward-icon@2x.png"; sourceTree = "<group>"; };
-		4D1C40381712150A000F773D /* page-pause-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-pause-icon.png"; sourceTree = "<group>"; };
-		4D1C40391712150A000F773D /* page-pause-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-pause-icon@2x.png"; sourceTree = "<group>"; };
-		4D1C403A1712150A000F773D /* page-random-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-random-icon.png"; sourceTree = "<group>"; };
-		4D1C403B1712150A000F773D /* page-random-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-random-icon@2x.png"; sourceTree = "<group>"; };
-		4D1C403C1712150A000F773D /* page-reverse-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-reverse-icon.png"; sourceTree = "<group>"; };
-		4D1C403D1712150A000F773D /* page-reverse-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "page-reverse-icon@2x.png"; sourceTree = "<group>"; };
-		4D1C404817121834000F773D /* sequencer-stop-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sequencer-stop-icon.png"; sourceTree = "<group>"; };
-		4D1C404917121834000F773D /* sequencer-stop-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sequencer-stop-icon@2x.png"; sourceTree = "<group>"; };
-		4D1C404E17121875000F773D /* sequencer-play-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sequencer-play-icon.png"; sourceTree = "<group>"; };
-		4D1C404F17121875000F773D /* sequencer-play-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sequencer-play-icon@2x.png"; sourceTree = "<group>"; };
 		4D2772441709C8EA00A8069B /* EatsVelocityUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsVelocityUtils.h; sourceTree = "<group>"; };
 		4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsVelocityUtils.m; sourceTree = "<group>"; };
 		4D36B25416FBB32C008057FC /* ClockTick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClockTick.h; sourceTree = "<group>"; };
@@ -157,6 +138,11 @@
 		4D5250F317ADD860007B1E2A /* Sequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sequencer.m; sourceTree = "<group>"; };
 		4D5250F517ADD860007B1E2A /* SequencerNote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerNote.h; sourceTree = "<group>"; };
 		4D5250F617ADD860007B1E2A /* SequencerNote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerNote.m; sourceTree = "<group>"; };
+		4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackPauseIconTemplate.pdf; sourceTree = "<group>"; };
+		4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackPlayIconTemplate.pdf; sourceTree = "<group>"; };
+		4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackReverseIconTemplate.pdf; sourceTree = "<group>"; };
+		4D54CAC017B60E3B00139D6D /* PlaybackStopIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackStopIconTemplate.pdf; sourceTree = "<group>"; };
+		4D54CAC617B612D500139D6D /* PlaybackRandomIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackRandomIconTemplate.pdf; sourceTree = "<group>"; };
 		4D6115C816E431BD00140AF8 /* Sequencer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sequencer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6115CB16E431BD00140AF8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4D6115CE16E431BD00140AF8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -286,25 +272,18 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				4D54CAC617B612D500139D6D /* PlaybackRandomIconTemplate.pdf */,
+				4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */,
+				4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */,
+				4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */,
+				4D54CAC017B60E3B00139D6D /* PlaybackStopIconTemplate.pdf */,
 				4D97BCC417951D2B00198BEC /* RedDot.pdf */,
 				4DADBEC41719FA910091F952 /* SequencerAppIcon.icns */,
 				4D84F2B517AD98A8001119FD /* SequencerDocIcon.icns */,
-				4D1C40361712150A000F773D /* page-forward-icon.png */,
-				4D1C40371712150A000F773D /* page-forward-icon@2x.png */,
-				4D1C40381712150A000F773D /* page-pause-icon.png */,
-				4D1C40391712150A000F773D /* page-pause-icon@2x.png */,
-				4D1C403A1712150A000F773D /* page-random-icon.png */,
-				4D1C403B1712150A000F773D /* page-random-icon@2x.png */,
-				4D1C403C1712150A000F773D /* page-reverse-icon.png */,
-				4D1C403D1712150A000F773D /* page-reverse-icon@2x.png */,
 				4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */,
 				4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */,
 				4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */,
 				4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */,
-				4D1C404E17121875000F773D /* sequencer-play-icon.png */,
-				4D1C404F17121875000F773D /* sequencer-play-icon@2x.png */,
-				4D1C404817121834000F773D /* sequencer-stop-icon.png */,
-				4D1C404917121834000F773D /* sequencer-stop-icon@2x.png */,
 				4DC19BE11719AB380094B0D8 /* ShadowRule.png */,
 				4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */,
 			);
@@ -581,18 +560,6 @@
 				4D6115E516E431BD00140AF8 /* MainMenu.xib in Resources */,
 				4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */,
 				4D62864216F594DE003FC16F /* ScaleGeneratorSheet.xib in Resources */,
-				4D1C403E1712150A000F773D /* page-forward-icon.png in Resources */,
-				4D1C403F1712150A000F773D /* page-forward-icon@2x.png in Resources */,
-				4D1C40401712150A000F773D /* page-pause-icon.png in Resources */,
-				4D1C40411712150A000F773D /* page-pause-icon@2x.png in Resources */,
-				4D1C40421712150A000F773D /* page-random-icon.png in Resources */,
-				4D1C40431712150A000F773D /* page-random-icon@2x.png in Resources */,
-				4D1C40441712150A000F773D /* page-reverse-icon.png in Resources */,
-				4D1C40451712150A000F773D /* page-reverse-icon@2x.png in Resources */,
-				4D1C404C17121834000F773D /* sequencer-stop-icon.png in Resources */,
-				4D1C404D17121834000F773D /* sequencer-stop-icon@2x.png in Resources */,
-				4D1C405017121875000F773D /* sequencer-play-icon.png in Resources */,
-				4D1C405117121875000F773D /* sequencer-play-icon@2x.png in Resources */,
 				4DC19BE31719AB380094B0D8 /* ShadowRule.png in Resources */,
 				4DC19BE41719AB380094B0D8 /* ShadowRule@2x.png in Resources */,
 				4DC19BE61719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf in Resources */,
@@ -610,6 +577,11 @@
 				4D97BCC517951D2B00198BEC /* RedDot.pdf in Resources */,
 				4D84F2B617AD98A8001119FD /* SequencerDocIcon.icns in Resources */,
 				4D6B1F5817B0CA72000F50CE /* Mark Eats Sequencer User Guide.pdf in Resources */,
+				4D54CAC117B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf in Resources */,
+				4D54CAC217B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf in Resources */,
+				4D54CAC417B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf in Resources */,
+				4D54CAC517B60E3B00139D6D /* PlaybackStopIconTemplate.pdf in Resources */,
+				4D54CAC717B612D500139D6D /* PlaybackRandomIconTemplate.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -213,7 +213,7 @@
 						<object class="NSTextField" id="457112200">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{22, 543}, {36, 17}}</string>
+							<string key="NSFrame">{{22, 546}, {36, 17}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="709941088"/>
@@ -247,7 +247,7 @@
 						<object class="NSPopUpButton" id="649355084">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{549, 537}, {83, 26}}</string>
+							<string key="NSFrame">{{549, 540}, {83, 26}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="686193757"/>
@@ -323,7 +323,7 @@
 						<object class="NSTextField" id="728036264">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{512, 543}, {40, 17}}</string>
+							<string key="NSFrame">{{512, 546}, {40, 17}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="649355084"/>
@@ -344,7 +344,7 @@
 						<object class="NSTextField" id="686193757">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{645, 543}, {55, 17}}</string>
+							<string key="NSFrame">{{645, 546}, {55, 17}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="289654253"/>
@@ -482,16 +482,16 @@
 										<double key="NSSegmentItemWidth">38</double>
 										<object class="NSCustomResource" key="NSSegmentItemImage">
 											<string key="NSClassName">NSImage</string>
-											<string key="NSResourceName">sequencer-stop-icon</string>
+											<string key="NSResourceName">PlaybackStopIconTemplate</string>
 										</object>
 										<bool key="NSSegmentItemSelected">YES</bool>
 										<int key="NSSegmentItemImageScaling">2</int>
 									</object>
 									<object class="NSSegmentItem">
 										<double key="NSSegmentItemWidth">38</double>
-										<object class="NSCustomResource" key="NSSegmentItemImage">
+										<object class="NSCustomResource" key="NSSegmentItemImage" id="607765445">
 											<string key="NSClassName">NSImage</string>
-											<string key="NSResourceName">sequencer-play-icon</string>
+											<string key="NSResourceName">PlaybackPlayIconTemplate</string>
 										</object>
 										<int key="NSSegmentItemTag">1</int>
 										<int key="NSSegmentItemImageScaling">2</int>
@@ -504,7 +504,7 @@
 						<object class="NSTextField" id="931578586">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{407, 543}, {90, 17}}</string>
+							<string key="NSFrame">{{407, 546}, {90, 17}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="728036264"/>
@@ -558,7 +558,7 @@
 						<object class="NSPopUpButton" id="289654253">
 							<reference key="NSNextResponder" ref="568628114"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{703, 537}, {82, 26}}</string>
+							<string key="NSFrame">{{703, 540}, {82, 26}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="287790741"/>
@@ -752,7 +752,7 @@
 								<object class="NSTextField" id="193933176">
 									<reference key="NSNextResponder" ref="463324255"/>
 									<int key="NSvFlags">268</int>
-									<string key="NSFrame">{{442, 421}, {81, 17}}</string>
+									<string key="NSFrame">{{442, 424}, {81, 17}}</string>
 									<reference key="NSSuperview" ref="463324255"/>
 									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="1073648405"/>
@@ -1340,17 +1340,14 @@
 												<double key="NSSegmentItemWidth">38</double>
 												<object class="NSCustomResource" key="NSSegmentItemImage">
 													<string key="NSClassName">NSImage</string>
-													<string key="NSResourceName">page-pause-icon</string>
+													<string key="NSResourceName">PlaybackPauseIconTemplate</string>
 												</object>
 												<string key="NSSegmentItemLabel"/>
 												<int key="NSSegmentItemImageScaling">2</int>
 											</object>
 											<object class="NSSegmentItem">
 												<double key="NSSegmentItemWidth">38</double>
-												<object class="NSCustomResource" key="NSSegmentItemImage">
-													<string key="NSClassName">NSImage</string>
-													<string key="NSResourceName">page-forward-icon</string>
-												</object>
+												<reference key="NSSegmentItemImage" ref="607765445"/>
 												<string key="NSSegmentItemLabel"/>
 												<int key="NSSegmentItemTag">1</int>
 												<bool key="NSSegmentItemSelected">YES</bool>
@@ -1360,7 +1357,7 @@
 												<double key="NSSegmentItemWidth">38</double>
 												<object class="NSCustomResource" key="NSSegmentItemImage">
 													<string key="NSClassName">NSImage</string>
-													<string key="NSResourceName">page-reverse-icon</string>
+													<string key="NSResourceName">PlaybackReverseIconTemplate</string>
 												</object>
 												<int key="NSSegmentItemImageScaling">2</int>
 											</object>
@@ -1368,7 +1365,7 @@
 												<double key="NSSegmentItemWidth">38</double>
 												<object class="NSCustomResource" key="NSSegmentItemImage">
 													<string key="NSClassName">NSImage</string>
-													<string key="NSResourceName">page-random-icon</string>
+													<string key="NSResourceName">PlaybackRandomIconTemplate</string>
 												</object>
 												<int key="NSSegmentItemImageScaling">2</int>
 											</object>
@@ -4432,7 +4429,7 @@
 				<string key="103713.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="104077.IBNSViewMetadataTranslatesAutoresizingMaskIntoConstraints"/>
 				<string key="104077.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<integer value="0" key="104078.IBNSSegmentedControlInspectorSelectedSegmentMetadataKey"/>
+				<integer value="1" key="104078.IBNSSegmentedControlInspectorSelectedSegmentMetadataKey"/>
 				<string key="104078.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104205.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="104208.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -4518,7 +4515,7 @@
 				<string key="106532.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="106533.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="106534.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<integer value="1" key="106535.IBNSSegmentedControlInspectorSelectedSegmentMetadataKey"/>
+				<integer value="3" key="106535.IBNSSegmentedControlInspectorSelectedSegmentMetadataKey"/>
 				<string key="106535.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="106536.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="106537.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -4698,80 +4695,6 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">Document</string>
 					<string key="superclassName">NSPersistentDocument</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="bpmStepper:">NSStepper</string>
-						<string key="bpmTextField:">NSTextField</string>
-						<string key="currentPageSegmentedControl:">NSSegmentedControl</string>
-						<string key="currentPatternSegmentedControl:">NSSegmentedControl</string>
-						<string key="pagePlaybackControls:">NSSegmentedControl</string>
-						<string key="patternQuantizationPopup:">NSPopUpButton</string>
-						<string key="scalesOpenSheetButton:">NSButton</string>
-						<string key="sequencerPlaybackControls:">NSSegmentedControl</string>
-						<string key="stepLengthPopup:">NSPopUpButton</string>
-						<string key="stepQuantizationPopup:">NSPopUpButton</string>
-						<string key="swingPopup:">NSPopUpButton</string>
-						<string key="transposeStepper:">NSStepper</string>
-						<string key="transposeTextField:">NSTextField</string>
-						<string key="velocityGrooveCheckbox:">NSButton</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="bpmStepper:">
-							<string key="name">bpmStepper:</string>
-							<string key="candidateClassName">NSStepper</string>
-						</object>
-						<object class="IBActionInfo" key="bpmTextField:">
-							<string key="name">bpmTextField:</string>
-							<string key="candidateClassName">NSTextField</string>
-						</object>
-						<object class="IBActionInfo" key="currentPageSegmentedControl:">
-							<string key="name">currentPageSegmentedControl:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="currentPatternSegmentedControl:">
-							<string key="name">currentPatternSegmentedControl:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="pagePlaybackControls:">
-							<string key="name">pagePlaybackControls:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="patternQuantizationPopup:">
-							<string key="name">patternQuantizationPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="scalesOpenSheetButton:">
-							<string key="name">scalesOpenSheetButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="sequencerPlaybackControls:">
-							<string key="name">sequencerPlaybackControls:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="stepLengthPopup:">
-							<string key="name">stepLengthPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="stepQuantizationPopup:">
-							<string key="name">stepQuantizationPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="swingPopup:">
-							<string key="name">swingPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="transposeStepper:">
-							<string key="name">transposeStepper:</string>
-							<string key="candidateClassName">NSStepper</string>
-						</object>
-						<object class="IBActionInfo" key="transposeTextField:">
-							<string key="name">transposeTextField:</string>
-							<string key="candidateClassName">NSTextField</string>
-						</object>
-						<object class="IBActionInfo" key="velocityGrooveCheckbox:">
-							<string key="name">velocityGrooveCheckbox:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="clockLateIndicator">NSImageView</string>
 						<string key="currentPageSegmentedControl">NSSegmentedControl</string>
@@ -4885,14 +4808,13 @@
 			<string key="NSMenuCheckmark">{11, 11}</string>
 			<string key="NSMenuMixedState">{10, 3}</string>
 			<string key="NSSwitch">{15, 15}</string>
+			<string key="PlaybackPauseIconTemplate">{128, 128}</string>
+			<string key="PlaybackPlayIconTemplate">{128, 128}</string>
+			<string key="PlaybackRandomIconTemplate">{128, 128}</string>
+			<string key="PlaybackReverseIconTemplate">{128, 128}</string>
+			<string key="PlaybackStopIconTemplate">{128, 128}</string>
 			<string key="RedDot">{12, 12}</string>
 			<string key="ShadowRule">{10, 8}</string>
-			<string key="page-forward-icon">{9, 15}</string>
-			<string key="page-pause-icon">{11, 15}</string>
-			<string key="page-random-icon">{16, 15}</string>
-			<string key="page-reverse-icon">{9, 15}</string>
-			<string key="sequencer-play-icon">{9, 15}</string>
-			<string key="sequencer-stop-icon">{11, 15}</string>
 		</dictionary>
 		<bool key="IBDocument.UseAutolayout">YES</bool>
 	</data>
