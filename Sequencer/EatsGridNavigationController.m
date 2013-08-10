@@ -152,7 +152,7 @@
         
     } else if(_sharedPreferences.gridType == EatsGridType_Launchpad && _sharedPreferences.gridMIDINodeName) {
         //if(![_deviceInterface isKindOfClass:[EatsLaunchpad class])
-        //    _deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:_gridMIDINodeName];
+        //    _deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:_sharedPreferences.gridMIDINodeName];
         
     }
     

@@ -427,12 +427,10 @@
             if( saveError )
                 NSLog(@"Save error: %@", saveError);
             
-            [self.delegate updateUI];
+            [self.delegate updateUI]; // WARNING: This one will be a problem
         }];
         
     });
-    
-    [self updateView];
 }
 
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
@@ -493,10 +491,8 @@
                     if( saveError )
                         NSLog(@"Save error: %@", saveError);
                     
-                    [self.delegate updateUI];
+                    [self.delegate updateUI]; // WARNING: This one will be a problem
                 }];
-                
-                [self updateView];
         }
         
     });

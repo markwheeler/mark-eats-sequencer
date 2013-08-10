@@ -4695,6 +4695,80 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">Document</string>
 					<string key="superclassName">NSPersistentDocument</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="bpmStepper:">NSStepper</string>
+						<string key="bpmTextField:">NSTextField</string>
+						<string key="currentPageSegmentedControl:">NSSegmentedControl</string>
+						<string key="currentPatternSegmentedControl:">NSSegmentedControl</string>
+						<string key="pagePlaybackControls:">NSSegmentedControl</string>
+						<string key="patternQuantizationPopup:">NSPopUpButton</string>
+						<string key="scalesOpenSheetButton:">NSButton</string>
+						<string key="sequencerPlaybackControls:">NSSegmentedControl</string>
+						<string key="stepLengthPopup:">NSPopUpButton</string>
+						<string key="stepQuantizationPopup:">NSPopUpButton</string>
+						<string key="swingPopup:">NSPopUpButton</string>
+						<string key="transposeStepper:">NSStepper</string>
+						<string key="transposeTextField:">NSTextField</string>
+						<string key="velocityGrooveCheckbox:">NSButton</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="bpmStepper:">
+							<string key="name">bpmStepper:</string>
+							<string key="candidateClassName">NSStepper</string>
+						</object>
+						<object class="IBActionInfo" key="bpmTextField:">
+							<string key="name">bpmTextField:</string>
+							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBActionInfo" key="currentPageSegmentedControl:">
+							<string key="name">currentPageSegmentedControl:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="currentPatternSegmentedControl:">
+							<string key="name">currentPatternSegmentedControl:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="pagePlaybackControls:">
+							<string key="name">pagePlaybackControls:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="patternQuantizationPopup:">
+							<string key="name">patternQuantizationPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="scalesOpenSheetButton:">
+							<string key="name">scalesOpenSheetButton:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBActionInfo" key="sequencerPlaybackControls:">
+							<string key="name">sequencerPlaybackControls:</string>
+							<string key="candidateClassName">NSSegmentedControl</string>
+						</object>
+						<object class="IBActionInfo" key="stepLengthPopup:">
+							<string key="name">stepLengthPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="stepQuantizationPopup:">
+							<string key="name">stepQuantizationPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="swingPopup:">
+							<string key="name">swingPopup:</string>
+							<string key="candidateClassName">NSPopUpButton</string>
+						</object>
+						<object class="IBActionInfo" key="transposeStepper:">
+							<string key="name">transposeStepper:</string>
+							<string key="candidateClassName">NSStepper</string>
+						</object>
+						<object class="IBActionInfo" key="transposeTextField:">
+							<string key="name">transposeTextField:</string>
+							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBActionInfo" key="velocityGrooveCheckbox:">
+							<string key="name">velocityGrooveCheckbox:</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="clockLateIndicator">NSImageView</string>
 						<string key="currentPageSegmentedControl">NSSegmentedControl</string>

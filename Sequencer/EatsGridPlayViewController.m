@@ -787,14 +787,13 @@
                     NSLog(@"Save error: %@", saveError);
             }];
             
-            [self.delegate updateUI];
+            [self.delegate updateUI]; // WARNING: This one will be a problem
         });
         
     } else {
         _patternView.wipe = _patternView.wipe + 10;
+        [self updateView];
     }
-    
-    [self updateView];
 }
 
 - (void) stopClear
@@ -819,7 +818,7 @@
     
     // If pattern quantization is disabled
     if( patternQuantization == 0 ) {
-        [self.delegate updateUI];
+        [self.delegate updateUI]; // WARNING: This one will be a problem
     }
 }
 
@@ -848,7 +847,40 @@
 - (void) copyPattern:(uint)fromPatternId fromPage:(uint)fromPageId toPattern:(uint)toPatternId toPage:(uint)toPageId
 {
     // Copy pattern
-    NSLog(@"TODO: Copy from page %u, pattern %u --> to --> page %u, pattern %u", fromPageId, fromPatternId, toPageId, toPatternId);
+    [self.managedObjectContext performBlockAndWait:^(void) {
+        
+        // Get the notes we want to copy
+        SequencerPage *fromPage = [_sequencer.pages objectAtIndex:fromPageId];
+        NSSet *fromNotes = [[[fromPage.patterns objectAtIndex:fromPatternId] notes] copy];
+        
+        // Get the pattern we want to copy into
+        SequencerPage *toPage = [_sequencer.pages objectAtIndex:toPageId];
+        SequencerPattern *toPattern = [toPage.patterns objectAtIndex:toPatternId];
+        
+        // Clear it in preparation
+        [Sequencer clearPattern:toPattern];
+        
+        NSMutableSet *newNotesSet = [NSMutableSet setWithCapacity:fromNotes.count];
+        
+        for( SequencerNote *note in fromNotes ) {
+            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+            newNote.length = note.length;
+            newNote.row = note.row;
+            newNote.step = note.step;
+            newNote.velocity = note.velocity;
+            [newNotesSet addObject:newNote];
+        }
+        
+        // Set the notes of the target pattern
+        toPattern.notes = newNotesSet;
+        
+        NSError *saveError = nil;
+        [self.managedObjectContext save:&saveError];
+        if( saveError )
+            NSLog(@"Save error: %@", saveError);
+    }];
+    
+    [self.delegate updateUI];
 }
 
 
@@ -1173,7 +1205,7 @@
         }];
     });
     
-    [self updateView];
+    [self updateView]; // WARNING: This one will be a problem
 }
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender

@@ -817,7 +817,6 @@
     }
     
     [self updateUI];
-    [self.gridNavigationController updateGridView];
 }
 
 - (void) checkForThingsOutsideGrid
@@ -879,9 +878,9 @@
                 });
             }
         }];
-        
-        [self.gridNavigationController updateGridView];
     });
+    
+    [self updateUI]; // WARNING: This one will be a problem
     
     [self.managedObjectContextForMainThread processPendingChanges];
     [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
@@ -953,7 +952,7 @@
                     NSLog(@"Save error: %@", saveError);
             }];
             
-            [self updateUI];
+            [self updateUI]; // WARNING: This one will be a problem
         });
     }
     
@@ -1103,7 +1102,6 @@
     // If pattern quantization is disabled
     if( !patternQuantizationOn ) {
         [self updateUI];
-        [self.gridNavigationController updateGridView];
         
     } else {
         self.currentPatternSegmentedControl.selectedSegment = self.currentSequencerPageState.currentPatternId.integerValue;
@@ -1124,7 +1122,6 @@
     // If pattern quantization is disabled
     if( !patternQuantizationOn ) {
         [self updateUI];
-        [self.gridNavigationController updateGridView];
         
     } else {
         self.currentPatternSegmentedControl.selectedSegment = self.currentSequencerPageState.currentPatternId.integerValue;
@@ -1140,7 +1137,6 @@
     
     self.currentSequencerPageState.nextStep = nil;
     
-    [self.gridNavigationController updateGridView];
     [self updateUI];
 }
 
@@ -1167,7 +1163,7 @@
         
     });
     
-    [self.gridNavigationController updateGridView];
+    [self.gridNavigationController updateGridView]; // WARNING: Problem
 }
 
 - (void) incrementCurrentPageTranspose
@@ -1193,7 +1189,7 @@
         
     });
     
-    [self.gridNavigationController updateGridView];
+    [self.gridNavigationController updateGridView]; // WARNING: Problem
 }
 
 - (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
@@ -1210,7 +1206,7 @@
         }];
     });
     
-    [self updateUI];
+    [self updateUI]; // WARNING: This one will be a problem
 }
 
 - (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
@@ -1276,7 +1272,7 @@
         pattern.notes = newNotesSet;
 
         [self childMOCChanged];
-        [self updateUI];
+        [self updateUI]; // WARNING: This one will be a problem
     }
 }
 
@@ -1347,7 +1343,7 @@
                 NSLog(@"Save error: %@", saveError);
         }];
     });
-    [self updateUI];
+    [self updateUI]; // WARNING: This one will be a problem
 }
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
@@ -1448,7 +1444,7 @@
                         if( saveError )
                             NSLog(@"Save error: %@", saveError);
                     }];
-                    [self updatePitches];
+                    [self updatePitches]; // WARNING: Problem
                 });
                 
             // Cancel
