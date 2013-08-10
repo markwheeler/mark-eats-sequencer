@@ -787,7 +787,6 @@
                     NSLog(@"Save error: %@", saveError);
             }];
             
-            [self.delegate updateUI]; // WARNING: This one will be a problem
         });
         
     } else {
@@ -818,7 +817,7 @@
     
     // If pattern quantization is disabled
     if( patternQuantization == 0 ) {
-        [self.delegate updateUI]; // WARNING: This one will be a problem
+        [self.delegate updateUI];
     }
 }
 
@@ -1205,7 +1204,7 @@
         }];
     });
     
-    [self updateView]; // WARNING: This one will be a problem
+    [self updateView]; // WARNING: Transpose will be a problem
 }
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender

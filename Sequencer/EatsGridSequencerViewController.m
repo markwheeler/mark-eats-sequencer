@@ -403,31 +403,52 @@
 {
     dispatch_async(self.bigSerialQueue, ^(void) {
     
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            // Velocity
-            if(sender == _velocityView) {
-                
-                float oneStepOf127 = 127.0 / sender.width;
-                float range = 127.0 - oneStepOf127;
-                
-                float newVelocity = range * (sender.percentage / 100.0);
-                newVelocity += oneStepOf127;
-                
-                _activeEditNote.velocity = [NSNumber numberWithInt:roundf( newVelocity ) ];
-                //NSLog(@"Velocity %@ / Percentage %f", _activeEditNote.velocity, sender.percentage);
+        [self.managedObjectContext performBlock:^(void) {
             
-            // Length
-            } else if(sender == _lengthView) {
-                _activeEditNote.length = [NSNumber numberWithInt:roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1 ];
-                //NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
+            // Re-build the notes set but with the adjusted note
+            NSMutableSet *newNotes = [NSMutableSet setWithCapacity:_pattern.notes.count];
+            
+            for( SequencerNote *note in _pattern.notes ) {
+                
+                SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                
+                newNote.row = note.row;
+                newNote.step = note.step;
+                newNote.length = note.length;
+                newNote.velocity = note.velocity;
+                
+                if( note == _activeEditNote ) {
+                    
+                    // Velocity
+                    if(sender == _velocityView) {
+                        
+                        float oneStepOf127 = 127.0 / sender.width;
+                        float range = 127.0 - oneStepOf127;
+                        
+                        float newVelocity = range * (sender.percentage / 100.0);
+                        newVelocity += oneStepOf127;
+                        
+                        newNote.velocity = [NSNumber numberWithInt:roundf( newVelocity ) ];
+                        //NSLog(@"Velocity %@ / Percentage %f", _activeEditNote.velocity, sender.percentage);
+                        
+                    // Length
+                    } else if(sender == _lengthView) {
+                        newNote.length = [NSNumber numberWithInt:roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1 ];
+                        //NSLog(@"Percentage %f Length %@", sender.percentage, _activeEditNote.length);
+                    }
+                    
+                    _patternView.activeEditNote = newNote;
+                    _activeEditNote = newNote;
+                }
+                
+                [newNotes addObject:newNote];
             }
+            _pattern.notes = newNotes;
             
             NSError *saveError = nil;
             [self.managedObjectContext save:&saveError];
             if( saveError )
                 NSLog(@"Save error: %@", saveError);
-            
-            [self.delegate updateUI]; // WARNING: This one will be a problem
         }];
         
     });
@@ -466,32 +487,61 @@
         // Release
         if( !down && sender.mode == EatsPatternViewMode_Edit && _lastDownWasInEditMode ) {
                 
-                [self.managedObjectContext performBlockAndWait:^(void) {
+                [self.managedObjectContext performBlock:^(void) {
                     
                     // See if we have a note there
                     SequencerNote *foundNote = [self checkForNoteAtX:x y:self.height - 1 - y];
                     
                     // Remove
                     if( foundNote ) {
-                        [self.managedObjectContext deleteObject:foundNote];
+                        
+                        // Re-build the notes set but without the deleted note so that KVO gets updated
+                        NSMutableSet *newNotes = [NSMutableSet setWithCapacity:_pattern.notes.count];
+                        
+                        for( SequencerNote *note in _pattern.notes ) {
+                            if( note != foundNote ) {
+                                SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                                newNote.row = note.row;
+                                newNote.step = note.step;
+                                newNote.length = note.length;
+                                newNote.velocity = note.velocity;
+                                [newNotes addObject:newNote];
+                            } else {
+                                [self.managedObjectContext deleteObject:foundNote];
+                            }
+                        }
+                        _pattern.notes = newNotes;
+
                         
                     // Add
                     } else {
-                        NSMutableSet *newNotesSet = [_pattern.notes mutableCopy];
+                        
+                        // Re-build the set
+                        NSMutableSet *newNotes = [NSMutableSet setWithCapacity:_pattern.notes.count + 1];
+                        
+                        for( SequencerNote *note in _pattern.notes ) {
+                            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
+                            newNote.row = note.row;
+                            newNote.step = note.step;
+                            newNote.length = note.length;
+                            newNote.velocity = note.velocity;
+                            [newNotes addObject:newNote];
+                        }
+                        
+                        // Add the extra note
                         SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
                         newNote.step = [NSNumber numberWithUnsignedInt:x];
                         newNote.row = [NSNumber numberWithUnsignedInt:self.height - 1 - y];
                         newNote.velocity = [_sharedPreferences.defaultMIDINoteVelocity copy];
-                        [newNotesSet addObject:newNote];
-                        _pattern.notes = newNotesSet;
+                        [newNotes addObject:newNote];
+                        
+                        _pattern.notes = newNotes;
                     }
                     
                     NSError *saveError = nil;
                     [self.managedObjectContext save:&saveError];
                     if( saveError )
                         NSLog(@"Save error: %@", saveError);
-                    
-                    [self.delegate updateUI]; // WARNING: This one will be a problem
                 }];
         }
         
