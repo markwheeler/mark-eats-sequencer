@@ -728,13 +728,15 @@
         [self updatePitches];
     else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transpose"] )
         [self updatePitches];
+    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transposeZeroStep"] )
+        [self.gridNavigationController updateGridView];
     else if ( [keyPath isEqual:@"notes"] ) {
         if( object == self.debugGridView.currentPattern ) {
-            NSLog(@"The current pattern's notes changed");
+            //NSLog(@"The current pattern's notes changed");
             _debugGridView.needsDisplay = YES;
             [self.gridNavigationController updateGridView];
         } else {
-            NSLog(@"Notes inPattern %@ inPage %@ changed", [object valueForKey:@"id"], [[object valueForKey:@"inPage"] valueForKey:@"id"]);
+            //NSLog(@"Notes inPattern %@ inPage %@ changed", [object valueForKey:@"id"], [[object valueForKey:@"inPage"] valueForKey:@"id"]);
             [self.gridNavigationController updateGridView];
         }
     }
@@ -1226,8 +1228,6 @@
         }];
         
     });
-    
-    [self.gridNavigationController updateGridView]; // WARNING: Transpose
 }
 
 - (void) incrementCurrentPageTranspose
@@ -1252,8 +1252,6 @@
         }];
         
     });
-    
-    [self.gridNavigationController updateGridView]; // WARNING: Transpose
 }
 
 - (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId

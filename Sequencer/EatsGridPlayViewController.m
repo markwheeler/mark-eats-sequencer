@@ -73,6 +73,10 @@
     // Get prefs
     _sharedPreferences = [Preferences sharedPreferences];
     
+    // KVO
+    [_currentPattern.inPage addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
+    [_currentPattern.inPage addObserver:self forKeyPath:@"transposeZeroStep" options:NSKeyValueObservingOptionNew context:NULL];
+    
     // Create the sub views
     
     // Page buttons
@@ -270,8 +274,13 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
         
         [self.managedObjectContext performBlockAndWait:^(void) {
-            if( _currentPattern != [self.delegate valueForKey:@"currentPattern"] )
+            if( _currentPattern != [self.delegate valueForKey:@"currentPattern"] ) { // TODO: This line has crashed once, couldn't reproduce. Seemed like pattern was somehow null
+                [_currentPattern.inPage removeObserver:self forKeyPath:@"transpose"];
+                [_currentPattern.inPage removeObserver:self forKeyPath:@"transposeZeroStep"];
                 _currentPattern = [self.delegate valueForKey:@"currentPattern"];
+                [_currentPattern.inPage addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
+                [_currentPattern.inPage addObserver:self forKeyPath:@"transposeZeroStep" options:NSKeyValueObservingOptionNew context:NULL];
+            }
             
             // Update PatternView sub view
             NSError *requestError = nil;
@@ -307,6 +316,17 @@
         [super updateView];
                 
     });
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    
+    if ( object == _currentPattern.inPage && [keyPath isEqual:@"transpose"] )
+        [self updateView];
+    else if ( object == _currentPattern.inPage && [keyPath isEqual:@"transposeZeroStep"] )
+        [self updateView];
 }
 
 // Activates the playMode button
@@ -1195,16 +1215,16 @@
 {
     dispatch_sync(self.bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void){
-            _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
-            _currentPattern.inPage.transposeZeroStep = [NSNumber numberWithUnsignedInt:sender.zeroStep];
+            if( _currentPattern.inPage.transpose.intValue != sender.shift )
+                _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
+            if( _currentPattern.inPage.transposeZeroStep.unsignedIntValue != sender.zeroStep )
+                _currentPattern.inPage.transposeZeroStep = [NSNumber numberWithUnsignedInt:sender.zeroStep];
             NSError *saveError = nil;
             [self.managedObjectContext save:&saveError];
             if( saveError )
                 NSLog(@"Save error: %@", saveError);
         }];
     });
-    
-    [self updateView]; // WARNING: Transpose will be a problem
 }
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender
