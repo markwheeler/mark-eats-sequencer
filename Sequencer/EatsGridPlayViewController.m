@@ -74,8 +74,8 @@
     _sharedPreferences = [Preferences sharedPreferences];
     
     // KVO
-    [_currentPattern.inPage addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
-    [_currentPattern.inPage addObserver:self forKeyPath:@"transposeZeroStep" options:NSKeyValueObservingOptionNew context:NULL];
+    [_currentPattern.inPage addObserver:self forKeyPath:@"loopStart" options:NSKeyValueObservingOptionNew context:NULL];
+    [_currentPattern.inPage addObserver:self forKeyPath:@"loopEnd" options:NSKeyValueObservingOptionNew context:NULL];
     
     // Create the sub views
     
@@ -278,11 +278,11 @@
                 NSLog(@"WARNING: currentPattern is null");
             
             if( _currentPattern != [self.delegate valueForKey:@"currentPattern"] ) { // TODO: This line has crashed once, couldn't reproduce. Seemed like pattern was somehow null
-                [_currentPattern.inPage removeObserver:self forKeyPath:@"transpose"];
-                [_currentPattern.inPage removeObserver:self forKeyPath:@"transposeZeroStep"];
+                [_currentPattern.inPage removeObserver:self forKeyPath:@"loopStart"];
+                [_currentPattern.inPage removeObserver:self forKeyPath:@"loopEnd"];
                 _currentPattern = [self.delegate valueForKey:@"currentPattern"];
-                [_currentPattern.inPage addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
-                [_currentPattern.inPage addObserver:self forKeyPath:@"transposeZeroStep" options:NSKeyValueObservingOptionNew context:NULL];
+                [_currentPattern.inPage addObserver:self forKeyPath:@"loopStart" options:NSKeyValueObservingOptionNew context:NULL];
+                [_currentPattern.inPage addObserver:self forKeyPath:@"loopEnd" options:NSKeyValueObservingOptionNew context:NULL];
             }
             
             // Update PatternView sub view
@@ -326,9 +326,9 @@
                         change:(NSDictionary *)change
                        context:(void *)context {
     
-    if ( object == _currentPattern.inPage && [keyPath isEqual:@"transpose"] )
+    if ( object == _currentPattern.inPage && [keyPath isEqual:@"loopStart"] )
         [self updateView];
-    else if ( object == _currentPattern.inPage && [keyPath isEqual:@"transposeZeroStep"] )
+    else if ( object == _currentPattern.inPage && [keyPath isEqual:@"loopEnd"] )
         [self updateView];
 }
 
@@ -1040,16 +1040,20 @@
         // Scrub buttons for other pages
         if ( [_scrubOtherPagesButtons containsObject:sender] ) {
             if ( buttonDown ) {
-                sender.buttonState = EatsButtonViewState_Down;
-                
+
                 uint pageId = 0;
+                BOOL available = NO;
                 
                 for( SequencerPageState *pageState in _sequencerState.pageStates ) {
-                    if( currentPageId != pageId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause )
+                    if( currentPageId != pageId && pageState.playMode.intValue != EatsSequencerPlayMode_Pause ) {
                         pageState.nextStep = [NSNumber numberWithUnsignedInteger:[_scrubOtherPagesButtons indexOfObject:sender]];
+                        available = YES;
+                    }
                     
                     pageId ++;
                 }
+                if( available )
+                    sender.buttonState = EatsButtonViewState_Down;
                 
                 [self.delegate updateUI];
                 
@@ -1216,8 +1220,8 @@
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
 {
-    dispatch_sync(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlockAndWait:^(void){
+    dispatch_async(self.bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void){
             if( _currentPattern.inPage.transpose.intValue != sender.shift )
                 _currentPattern.inPage.transpose = [NSNumber numberWithInt:sender.shift];
             if( _currentPattern.inPage.transposeZeroStep.unsignedIntValue != sender.zeroStep )
@@ -1235,10 +1239,8 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
     
         [self setLoopStart:[NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.startPercentage width:self.width]] andEnd:[NSNumber numberWithUnsignedInt:[EatsGridUtils percentageToSteps:sender.endPercentage width:self.width]]];
-    
+        
     });
-    
-    [self updateView];
 }
 
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender

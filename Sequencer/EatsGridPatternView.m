@@ -176,7 +176,9 @@
         
         NSNumber *pressBrightnessResult = [NSNumber numberWithInt:_pressBrightness * self.opacity];
         
+        // TODO: For some reason this line still sometimes crashes with the error 'range {0, 1} extends beyond bounds for empty array'
         NSOrderedSet *currentlyDownKeys = [_currentlyDownKeys copy]; // Copy it so it can't get mutated while we're enumerating
+        
         for( NSDictionary *key in currentlyDownKeys ) {
             [[viewArray objectAtIndex:[[key valueForKey:@"x"] intValue]] replaceObjectAtIndex:[[key valueForKey:@"y"] intValue] withObject:pressBrightnessResult];
         }

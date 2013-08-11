@@ -97,7 +97,6 @@
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"pitches"];
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
     
     __block NSNumber *pageId;
 
@@ -112,7 +111,6 @@
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
     [self.currentPageOnMainThread addObserver:self forKeyPath:@"pitches" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.currentPageOnMainThread addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
     
     [self updatePitches];
     self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self.id == %@", pageId];
@@ -186,9 +184,12 @@
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
     [self.currentPageOnMainThread removeObserver:self forKeyPath:@"pitches"];
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"transpose"];
     
     for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
+        
+        [page removeObserver:self forKeyPath:@"transpose"];
+        [page removeObserver:self forKeyPath:@"transposeZeroStep"];
+        
         for( SequencerPattern *pattern in page.patterns ) {
             [pattern removeObserver:self forKeyPath:@"notes"];
         }
@@ -342,6 +343,10 @@
     
     // KVO observes the notes of every single pattern
     for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
+        
+        [page addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
+        [page addObserver:self forKeyPath:@"transposeZeroStep" options:NSKeyValueObservingOptionNew context:NULL];
+        
         for( SequencerPattern *pattern in page.patterns ) {
             [pattern addObserver:self forKeyPath:@"notes" options:NSKeyValueObservingOptionNew context:NULL];
         }
@@ -726,11 +731,18 @@
         [self updateSwingPopup];
     else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"pitches"] )
         [self updatePitches];
-    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transpose"] )
-        [self updatePitches];
-    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"transposeZeroStep"] )
-        [self.gridNavigationController updateGridView];
-    else if ( [keyPath isEqual:@"notes"] ) {
+    
+    else if ( [keyPath isEqual:@"transpose"] ) {
+        if( [[object valueForKey:@"id"] intValue] == self.debugGridView.currentPattern.inPage.id.intValue )
+            [self updatePitches];
+        if( [[object valueForKey:@"id"] intValue] == self.gridNavigationController.currentPattern.inPage.id.intValue )
+            [self.gridNavigationController updateGridView];
+        
+    } else if ( [keyPath isEqual:@"transposeZeroStep"] ) {
+        if( [[object valueForKey:@"id"] intValue] == self.gridNavigationController.currentPattern.inPage.id.intValue )
+            [self.gridNavigationController updateGridView];
+    
+    } else if ( [keyPath isEqual:@"notes"] ) {
         if( object == self.debugGridView.currentPattern ) {
             //NSLog(@"The current pattern's notes changed");
             _debugGridView.needsDisplay = YES;
@@ -748,13 +760,19 @@
 
 - (void) parentMOCSaved:(NSNotification *)notification
 {
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+    
+        // Put this in to hopefully aovid so often causing bad stuff. It's probably a bad solution.
+        dispatch_suspend( _bigSerialQueue );
+    
         [self.managedObjectContextForMainThread mergeChangesFromContextDidSaveNotification:notification];
         
-        [self.managedObjectContextForTickQueue performBlockAndWait:^(void){
+        [self.managedObjectContextForTickQueue performBlockAndWait:^(void){ // If uncommenting the other lines in this method, this should become 'andWait'
             [self.managedObjectContextForTickQueue mergeChangesFromContextDidSaveNotification:notification];
         }];
         
+        dispatch_resume( _bigSerialQueue );
+    
         // This snippet is from http://cutecoder.org/featured/asynchronous-core-data-document/
         // It nudges the file modified date to prevent 'file has been changed by another application' errors
         NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -775,12 +793,14 @@
     if( saveMainError )
         NSLog(@"Save error: %@", saveMainError);
     
-    [self.managedObjectContext performBlock:^(void) {
-        NSError *saveError = nil;
-        [self.managedObjectContext save:&saveError];
-        if( saveError )
-            NSLog(@"Save error: %@", saveError);
-    }];
+    dispatch_async( _bigSerialQueue, ^(void) {
+        [self.managedObjectContext performBlock:^(void) {
+            NSError *saveError = nil;
+            [self.managedObjectContext save:&saveError];
+            if( saveError )
+                NSLog(@"Save error: %@", saveError);
+        }];
+    });
 }
 
 - (void) undoManagerDidUndoChange:(NSNotification *)notification
@@ -821,8 +841,9 @@
 - (void) externalClockBPM:(NSNotification *)notification
 {
     // We don't want this showing up in undo history
-    [self.managedObjectContextForMainThread processPendingChanges];
-    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
+    // Commented out fow now because of concerns about performance when processPendingChanges is called
+//    [self.managedObjectContextForMainThread processPendingChanges];
+//    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
     
     dispatch_sync(_bigSerialQueue, ^(void) {
         [self.managedObjectContext performBlockAndWait:^(void) {
@@ -835,8 +856,8 @@
         }];
     });
     
-    [self.managedObjectContextForMainThread processPendingChanges];
-    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
+//    [self.managedObjectContextForMainThread processPendingChanges];
+//    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
 }
 
 - (void) gridControllerConnected:(NSNotification *)notification
@@ -1210,9 +1231,9 @@
 {
     int pageId = _currentPageOnMainThread.id.intValue;
     
-    dispatch_sync(self.bigSerialQueue, ^(void) {
+    dispatch_async(self.bigSerialQueue, ^(void) {
         
-        [self.managedObjectContext performBlockAndWait:^(void) {
+        [self.managedObjectContext performBlock:^(void) {
             
             SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
             
@@ -1234,9 +1255,9 @@
 {
     int pageId = _currentPageOnMainThread.id.intValue;
     
-    dispatch_sync(self.bigSerialQueue, ^(void) {
+    dispatch_async(self.bigSerialQueue, ^(void) {
         
-        [self.managedObjectContext performBlockAndWait:^(void) {
+        [self.managedObjectContext performBlock:^(void) {
             
             SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
             
@@ -1256,9 +1277,9 @@
 
 - (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
 {
-    dispatch_sync(self.bigSerialQueue, ^(void) {
+    dispatch_async(self.bigSerialQueue, ^(void) {
         
-        [self.managedObjectContext performBlockAndWait:^(void) {
+        [self.managedObjectContext performBlock:^(void) {
             SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId.intValue];
             [Sequencer clearPattern:[page.patterns objectAtIndex:patternId.intValue]];
             NSError *saveError = nil;
@@ -1380,28 +1401,14 @@
 
 - (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
 {
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
-            self.sequencer.stepQuantization = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
+    self.sequencerOnMainThread.stepQuantization = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+    [self childMOCChanged];
 }
 
 - (IBAction) patternQuantizationPopup:(NSPopUpButton *)sender
 {
-    dispatch_sync(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            self.sequencer.patternQuantization = [[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
+    self.sequencerOnMainThread.patternQuantization = [[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+    [self childMOCChanged];
 }
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
@@ -1445,7 +1452,7 @@
     NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:_currentPageOnMainThread.pitches.count];
     
     for( SequencerRowPitch *rowPitch in _currentPageOnMainThread.pitches ) {
-        SequencerRowPitch *newRowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContext];
+        SequencerRowPitch *newRowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContextForMainThread];
         newRowPitch.row = rowPitch.row;
         newRowPitch.pitch = rowPitch.pitch;
         [newPitches addObject:rowPitch];
@@ -1541,16 +1548,10 @@
 {
     int pageId = self.currentPageOnMainThread.id.intValue;
     
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
-            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
-            page.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
+    SequencerPage *page = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
+    page.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+    
+    [self childMOCChanged];
 }
 
 - (IBAction)swingPopup:(NSPopUpButton *)sender
@@ -1558,17 +1559,11 @@
     int pageId = self.currentPageOnMainThread.id.intValue;
     NSUInteger index = [sender indexOfSelectedItem];
     
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
-            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
-            page.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
-            page.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
+    SequencerPage *page = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
+    page.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
+    page.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
+    
+    [self childMOCChanged];
 }
 
 - (IBAction)velocityGrooveCheckbox:(NSButton *)sender

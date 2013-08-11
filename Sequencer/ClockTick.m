@@ -296,21 +296,24 @@ typedef enum EatsStepAdvance {
                     }
 
 
-                    // Send notes that need to be sent
+                    // Copy this so it can't get mutated (doesn't seem to work?!)
+                    // TODO This line crashes sometimes
+                    NSSet *notesCopy = [[[page.patterns objectAtIndex:pageState.currentPatternId.intValue] notes] copy];
                     
-                    for( SequencerNote *note in [[page.patterns objectAtIndex:pageState.currentPatternId.intValue] notes] ) {
-                        
-                        int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
-                        
-                        // Transpose
-                        pitch += page.transpose.intValue;
-                        if( pitch < 0 )
-                           pitch = 0;
-                        if( pitch > 127 )
-                           pitch = 127;
+                    // Send notes that need to be sent
+                    for( SequencerNote *note in notesCopy ) {
                         
                         // Play it!
                         if( note.step.intValue == pageState.currentStep.intValue ) {
+                            
+                            int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
+                            
+                            // Transpose
+                            pitch += page.transpose.intValue;
+                            if( pitch < 0 )
+                                pitch = 0;
+                            if( pitch > 127 )
+                                pitch = 127;
                             
                             //Set the basic note properties
                             int channel = page.channel.intValue;
