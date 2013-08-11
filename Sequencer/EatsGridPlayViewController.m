@@ -274,6 +274,9 @@
     dispatch_async(self.bigSerialQueue, ^(void) {
         
         [self.managedObjectContext performBlockAndWait:^(void) {
+            if( !_currentPattern )
+                NSLog(@"WARNING: currentPattern is null");
+            
             if( _currentPattern != [self.delegate valueForKey:@"currentPattern"] ) { // TODO: This line has crashed once, couldn't reproduce. Seemed like pattern was somehow null
                 [_currentPattern.inPage removeObserver:self forKeyPath:@"transpose"];
                 [_currentPattern.inPage removeObserver:self forKeyPath:@"transposeZeroStep"];

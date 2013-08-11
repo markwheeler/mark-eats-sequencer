@@ -330,7 +330,7 @@
     
         NSError *requestError;
         NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u)", _pattern, y];
+        noteRequest.predicate = [NSPredicate predicateWithFormat:@"(inPattern == %@) AND (row == %u) AND (step < %u)", _pattern, y, self.width];
         
         SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_pattern.inPage.id.unsignedIntegerValue];
         

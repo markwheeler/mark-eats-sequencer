@@ -85,6 +85,7 @@
 #pragma mark - Public methods
 
 // TODO – Detect monome disconnects. MLRV seems able to do this!
+// Implement this once we've switched over to pure OSC connecting (ie, no Bonjour)
 
 - (void) updateOSC
 {
