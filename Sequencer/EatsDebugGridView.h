@@ -5,15 +5,15 @@
 //  Created by Mark Wheeler on 07/04/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
+//
+//  Takes a set of SequencerNotes and draws them.
 
 #import <Cocoa/Cocoa.h>
-#import "SequencerState.h"
-#import "SequencerPattern.h"
 
 @protocol EatsDebugGridViewDelegateProtocol
-- (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
-- (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
-- (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
+- (void) cutCurrentPattern;
+- (void) copyCurrentPattern;
+- (void) pasteToCurrentPattern;
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 @end
 
@@ -26,13 +26,11 @@
 @property uint gridWidth;
 @property uint gridHeight;
 
-@property SequencerState         *sequencerState;
-@property SequencerPattern       *currentPattern;
+@property NSSet                 *notes; // Notes to draw
+@property BOOL                  drawNotesForReverse; // Should be set if playback is running backwards and note trails should extend the other way
+@property int                   currentStep;
+@property NSNumber              *nextStep;
 
-@property NSString               *pasteboardType;
-
-@property BOOL                   patternQuantizationOn;
-
-@property (weak) id              delegate;
+@property (weak) id             delegate;
 
 @end

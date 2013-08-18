@@ -7,15 +7,9 @@
 //
 
 #import "EatsDebugGridView.h"
-#import "SequencerState.h"
-#import "SequencerPage.h"
-#import "SequencerPageState.h"
 #import "SequencerNote.h"
-#import "Sequencer+Utils.h"
 
 @interface EatsDebugGridView ()
-
-@property SequencerState        *sharedSequencerState;
 
 @property NSNumber              *noteBrightness;
 @property NSNumber              *lengthBrightness;
@@ -85,18 +79,18 @@
 }
 
 - (void)cut:(id)sender {
-    if( [self.delegate respondsToSelector:@selector(cutPattern:inPage:)] )
-       [self.delegate performSelector:@selector(cutPattern:inPage:) withObject:_currentPattern.id withObject:_currentPattern.inPage.id];
+    if( [self.delegate respondsToSelector:@selector(cutCurrentPattern)] )
+       [self.delegate performSelector:@selector(cutCurrentPattern)];
 }
 
 - (void)copy:(id)sender {
-    if( [self.delegate respondsToSelector:@selector(copyPattern:inPage:)] )
-        [self.delegate performSelector:@selector(copyPattern:inPage:) withObject:_currentPattern.id withObject:_currentPattern.inPage.id];
+    if( [self.delegate respondsToSelector:@selector(copyCurrentPattern)] )
+        [self.delegate performSelector:@selector(copyCurrentPattern)];
 }
 
 - (void)paste:(id)sender {
-    if( [self.delegate respondsToSelector:@selector(pastePattern:inPage:)] )
-        [self.delegate performSelector:@selector(pastePattern:inPage:) withObject:_currentPattern.id withObject:_currentPattern.inPage.id];
+    if( [self.delegate respondsToSelector:@selector(pasteToCurrentPattern)] )
+        [self.delegate performSelector:@selector(pasteToCurrentPattern)];
 }
 
 - (BOOL) validateMenuItem:(id <NSValidatedUserInterfaceItem>)menuItem
@@ -105,7 +99,7 @@
     
     if ( menuAction == @selector(cut:) || menuAction == @selector(copy:) )
     {
-        if ( _currentPattern.notes.count ) {
+        if ( self.notes.count ) {
             return YES;
         } else {
             return NO;
@@ -114,7 +108,7 @@
     } else if ( menuAction == @selector(paste:) ) {
         
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-        if( [[pasteboard.types lastObject] isEqual: self.pasteboardType] )
+        if( [[pasteboard.types lastObject] isEqual: kSequencerNotesDataPasteboardType] )
             return YES;
         else
             return NO;
@@ -139,11 +133,9 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    if( !self.currentPattern )
+    // TODO rework
+    if( !self.notes )
         return;
-    
-    // Get the page state
-    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:_currentPattern.inPage.id.unsignedIntegerValue];
     
     // Generate the columns with playhead and nextStep
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
@@ -161,13 +153,13 @@
             else
                 active = NO;
             
-            if( x == pageState.currentStep.intValue ) {
+            if( x == self.currentStep ) {
                 if( active )
                     [[viewArray objectAtIndex:x] insertObject:_playheadBrightness atIndex:y];
                 else
                     [[viewArray objectAtIndex:x] insertObject:_playheadBrightnessInactive atIndex:y];
                 
-            } else if( pageState.nextStep && x == pageState.nextStep.intValue ) {
+            } else if( self.nextStep && x == self.nextStep.intValue ) {
                 if( active )
                     [[viewArray objectAtIndex:x] insertObject:_nextStepBrightness atIndex:y];
                 else
@@ -185,16 +177,16 @@
 
     // Put all the notes in the viewArray    
     
-    for(SequencerNote *note in _currentPattern.notes) {
+    for(SequencerNote *note in self.notes) {
         
         // Put the length tails in
-        int tailDraw = note.step.intValue;
-        int length =  note.length.intValue - 1;
+        int tailDraw = note.step;
+        int length =  note.length - 1;
         if( length > _columns - 1)
             length = _columns - 1;
         
         for( int i = 0; i < length; i++ ) {
-            if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
+            if( self.drawNotesForReverse )
                 tailDraw --;
             else
                 tailDraw ++;
@@ -205,24 +197,24 @@
                 tailDraw -= _columns;
             
             // Active / inactive
-            if( tailDraw < _gridWidth && note.row.intValue < _gridHeight ) {
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightness.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightness];
+            if( tailDraw < _gridWidth && note.row < _gridHeight ) {
+                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > _lengthBrightness.floatValue )
+                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightness];
             } else {
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row.intValue] floatValue] > _lengthBrightnessInactive.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row.intValue withObject:_lengthBrightnessInactive];
+                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > _lengthBrightnessInactive.floatValue )
+                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightnessInactive];
             }
             
             
         }
         
         // Active / inactive
-        if( note.step.intValue < _gridWidth && note.row.intValue < _gridHeight )
+        if( note.step < _gridWidth && note.row < _gridHeight )
             // Put the notes in
-            [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightness];
+            [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:_noteBrightness];
         else
             // Put the notes in
-            [[viewArray objectAtIndex:note.step.intValue] replaceObjectAtIndex:note.row.intValue withObject:_noteBrightnessInactive];
+            [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:_noteBrightnessInactive];
         
     }
     

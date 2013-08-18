@@ -10,7 +10,6 @@
 #import <Foundation/Foundation.h>
 #import "EatsClock.h"
 #import "Sequencer.h"
-#import "SequencerState.h"
 
 @protocol ClockTickDelegateProtocol
 @property BOOL isActive;
@@ -29,7 +28,7 @@
 @property int           minQuantization;
 @property uint          qnPerMeasure;
 
-@property NSManagedObjectContext *managedObjectContext;
+@property Sequencer     *sequencer;
 
 - (void) clockSongStart:(uint64_t)ns;
 - (void) clockSongStop:(uint64_t)ns;
@@ -37,6 +36,6 @@
 - (void) clockTick:(uint64_t)ns;
 - (void) clockLateBy:(uint64_t)ns;
 
-- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencerState:(SequencerState *)sequencerState;
+- (id)initWithSequencer:(Sequencer *)sequencer;
 
 @end

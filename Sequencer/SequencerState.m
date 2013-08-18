@@ -11,17 +11,22 @@
 
 @implementation SequencerState
 
-- (void) createPageStates:(uint)numberOfPages
+- (id) init
 {
-    NSMutableArray *pages = [NSMutableArray arrayWithCapacity:numberOfPages];
-    for( int i = 0; i < numberOfPages; i++ ) {
+    self = [super init];
+    if( !self )
+        return nil;
+
+    NSMutableArray *pages = [NSMutableArray arrayWithCapacity:kSequencerNumberOfPages];
+    for( int i = 0; i < kSequencerNumberOfPages; i++ ) {
         SequencerPageState *pageState = [[SequencerPageState alloc] init];
-        pageState.playMode = [NSNumber numberWithInt:EatsSequencerPlayMode_Pause];
-        pageState.currentPatternId = [NSNumber numberWithInt:0];
+        pageState.playMode = EatsSequencerPlayMode_Forward;//EatsSequencerPlayMode_Pause;
         pageState.inLoop = YES;
         [pages addObject:pageState];
     }
     self.pageStates = [NSArray arrayWithArray:pages];
+    
+    return self;
 }
 
 @end

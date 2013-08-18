@@ -7,7 +7,6 @@
 //
 
 #import "ScaleGeneratorSheetController.h"
-#import "SequencerRowPitch.h"
 #import "WMPool+Utils.h"
 
 #define DRUM_MAP @"Drum map"

@@ -7,47 +7,31 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "Sequencer+Utils.h"
-#import "SequencerPage.h"
-#import "SequencerRowPitch.h"
-#import "SequencerPattern.h"
-#import "SequencerNote.h"
-#import "SequencerPatternIdInPlaylist.h"
+#import "Sequencer.h"
 #import "EatsClock.h"
 #import "ClockTick.h"
 #import "Preferences.h"
-#import "SequencerState.h"
-#import "SequencerPageState.h"
 #import "EatsDebugGridView.h"
 #import "KeyboardInputView.h"
 
-@interface Document : NSPersistentDocument <ClockTickDelegateProtocol, NSTableViewDelegate, KeyboardInputViewDelegateProtocol, EatsDebugGridViewDelegateProtocol>
+@interface Document : NSDocument <ClockTickDelegateProtocol, NSTableViewDelegate, KeyboardInputViewDelegateProtocol, EatsDebugGridViewDelegateProtocol>
 
-@property Sequencer                 *sequencerOnMainThread;
-@property SequencerPage             *currentPageOnMainThread;
 @property Sequencer                 *sequencer;
-@property SequencerState            *sequencerState;
-@property SequencerPageState        *currentSequencerPageState;
 @property NSArray                   *currentPagePitches;
 
 @property BOOL                      isActive;
 
-@property NSManagedObjectContext    *managedObjectContextForMainThread;
-@property NSManagedObjectContext    *managedObjectContextForTickQueue;
 @property Preferences               *sharedPreferences;
-
-@property dispatch_queue_t          bigSerialQueue;
 
 - (void) updateUI;
 - (void) clearPatternStartAlert;
 - (void) showClockLateIndicator;
 
-- (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
-- (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
-- (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
-- (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId;
-
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+- (void) cutCurrentPattern;
+- (void) copyCurrentPattern;
+- (void) pasteToCurrentPattern;
+
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 - (void) swipeForward;
 - (void) swipeBack;

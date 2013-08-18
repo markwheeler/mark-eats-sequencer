@@ -11,13 +11,7 @@
 #import "EatsSwingUtils.h"
 #import "EatsVelocityUtils.h"
 #import "Preferences.h"
-#import "Sequencer+Utils.h"
-#import "SequencerPage.h"
-#import "SequencerRowPitch.h"
-#import "SequencerPattern.h"
-#import "SequencerNote.h"
-#import "SequencerState.h"
-#import "SequencerPageState.h"
+#import "Sequencer.h"
 
 typedef enum EatsStepAdvance {
     EatsStepAdvance_None,
@@ -29,8 +23,6 @@ typedef enum EatsStepAdvance {
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
-@property SequencerState                *sequencerState;
-@property Sequencer                     *sequencer;
 
 @property double        machTimeToNsFactor;
 @property double        nsToMachTimeFactor;
@@ -45,14 +37,13 @@ typedef enum EatsStepAdvance {
 
 #pragma mark - Public methods
 
-- (id)initWithManagedObjectContext:(NSManagedObjectContext *)context andSequencerState:(SequencerState *)sequencerState
+- (id)initWithSequencer:(Sequencer *)sequencer
 {
     self = [super init];
     if (self) {
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         _sharedPreferences = [Preferences sharedPreferences];
-        _sequencerState = sequencerState;
-        _managedObjectContext = context;
+        self.sequencer = sequencer;
         
         kern_return_t kernError;
         mach_timebase_info_data_t timebaseInfo;
@@ -65,18 +56,6 @@ typedef enum EatsStepAdvance {
             _machTimeToNsFactor = (double)timebaseInfo.numer / timebaseInfo.denom;
             _nsToMachTimeFactor = 1.0 / _machTimeToNsFactor;
         }
-        
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            NSError *requestError = nil;
-            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-            
-            NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-            
-            if( requestError )
-                NSLog(@"Request error: %@", requestError);
-            
-            _sequencer = [matches lastObject];
-        }];
     }
     return self;
 }
@@ -187,199 +166,206 @@ typedef enum EatsStepAdvance {
         [_activeNotes removeObjectsInArray:toRemove];
         
         
-        [self.managedObjectContext performBlock:^(void) {
+        // TODO can probably get rid of this method of updating?
+        BOOL aPageNeedsToAdvance = NO;
+        
+        // Update the current step for each page and send new notes
+        
+        for(uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
             
-            BOOL aPageNeedsToAdvance = NO;
+            // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
+            EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
             
-            // Update the current step for each page and send new notes
-            
-            for(SequencerPage *page in _sequencer.pages) {
+            // If we need to advance and it's not paused
+            if( needsToAdvance != EatsStepAdvance_None && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Pause ) {
                 
-                SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
+                aPageNeedsToAdvance = YES;
                 
-                // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
-                EatsStepAdvance needsToAdvance = [self needToAdvanceStep:page];
+                int playMode = [self.sequencer playModeForPage:pageId];
+                int playNow = [self.sequencer currentStepForPage:pageId];
+                int loopStart = [self.sequencer loopStartForPage:pageId];
+                int loopEnd = [self.sequencer loopEndForPage:pageId];
+                BOOL inLoop = [self.sequencer inLoopForPage:pageId];
                 
-                // If we need to advance and it's not paused
-                if( needsToAdvance != EatsStepAdvance_None && pageState.playMode.intValue != EatsSequencerPlayMode_Pause ) {
+                // If the page has been scrubbed
+                if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
+                    [self.sequencer setCurrentStep:[[self.sequencer nextStepForPage:pageId] intValue] forPage:pageId];
+                    [self.sequencer setNextStep:nil forPage:pageId];
                     
-                    aPageNeedsToAdvance = YES;
+                // Otherwise we need to calculate the next step
+                } else {
                     
-                    // If the page has been scrubbed
-                    if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
-                        pageState.currentStep = [pageState.nextStep copy];
-                        pageState.nextStep = nil;
-                        
-                    // Otherwise we need to calculate the next step
-                    } else {
-                        
-                        int playNow = pageState.currentStep.intValue;
-                        
-                        // Forward
-                        if( pageState.playMode.intValue == EatsSequencerPlayMode_Forward ) {
-                            playNow ++;
-                            if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                                if( ( pageState.inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue )
-                                    playNow = page.loopStart.intValue;
-                                else if( pageState.inLoop && playNow < page.loopStart.intValue )
-                                    playNow = page.loopEnd.intValue;
-                            } else {
-                                if( ( pageState.inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
-                                    playNow = page.loopStart.intValue;
-                            }
-                            
-                            if( playNow >= _sharedPreferences.gridWidth )
-                                playNow = 0;
-                            
-                        // Reverse
-                        } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-                            playNow --;
-                            if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                                if( ( pageState.inLoop || _sharedPreferences.loopFromScrubArea ) && playNow < page.loopStart.intValue )
-                                    playNow = page.loopEnd.intValue;
-                                else if( pageState.inLoop && playNow > page.loopEnd.intValue )
-                                    playNow = page.loopStart.intValue;
-                            } else {
-                                if( ( pageState.inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > page.loopEnd.intValue && playNow < page.loopStart.intValue )
-                                    playNow = page.loopEnd.intValue;
-                            }
-                            
-                            if( playNow < 0 )
-                                playNow = _sharedPreferences.gridWidth - 1;
-                            
-                        // Random
-                        } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Random ) {
-                            playNow = [Sequencer randomStepForPage:page ofWidth:_sharedPreferences.gridWidth];
+                    // Forward
+                    if( playMode == EatsSequencerPlayMode_Forward ) {
+                        playNow ++;
+                        if( loopStart <= loopEnd ) {
+                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > loopEnd )
+                                playNow = loopStart;
+                            else if( inLoop && playNow < loopStart )
+                                playNow = loopEnd;
+                        } else {
+                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > loopEnd && playNow < loopStart )
+                                playNow = loopStart;
                         }
                         
-                        pageState.currentStep = [NSNumber numberWithInt: playNow];
+                        if( playNow >= _sharedPreferences.gridWidth )
+                            playNow = 0;
+                        
+                    // Reverse
+                    } else if( playMode == EatsSequencerPlayMode_Reverse ) {
+                        playNow --;
+                        if( loopStart <= loopEnd ) {
+                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow < loopStart )
+                                playNow = loopEnd;
+                            else if( inLoop && playNow > loopEnd )
+                                playNow = loopStart;
+                        } else {
+                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > loopEnd && playNow < loopStart )
+                                playNow = loopEnd;
+                        }
+                        
+                        if( playNow < 0 )
+                            playNow = _sharedPreferences.gridWidth - 1;
+                        
+                    // Random
+                    } else if( playMode == EatsSequencerPlayMode_Random ) {
+                        
+                        int loopEndForRandom;
+                        if( loopEnd >= loopStart )
+                            loopEndForRandom = loopEnd;
+                        else
+                            loopEndForRandom = loopEnd + _sharedPreferences.gridWidth;
+                        
+                        int range = loopEndForRandom + 1 - loopStart;
+                        
+                        int randomStep = floor(arc4random_uniform(range) + loopStart);
+                        if( randomStep >= _sharedPreferences.gridWidth )
+                            randomStep -= _sharedPreferences.gridWidth;
+                        
+                        playNow = randomStep;
                     }
                     
-                    
-                    // Are we in a loop
-                    if( page.loopStart.intValue <= page.loopEnd.intValue ) {
-                        if( pageState.currentStep.intValue >= page.loopStart.intValue && pageState.currentStep.intValue <= page.loopEnd.intValue
-                           && page.loopEnd.intValue - page.loopStart.intValue != _sharedPreferences.gridWidth - 1 )
-                            pageState.inLoop = YES;
-                        else
-                            pageState.inLoop = NO;
-                    } else {
-                        if( pageState.currentStep.intValue >= page.loopStart.intValue || pageState.currentStep.intValue <= page.loopEnd.intValue )
-                            pageState.inLoop = YES;
-                        else
-                            pageState.inLoop = NO;
-                    }
-                    
-                    
-                    // OK now we know what the step is we can get on with acting upon it!
-                    
-                    
-                    // Position of step in the loop 0 - minQuantization (unless loop is shorter)
-                    uint position = ( pageState.currentStep.intValue * ( _minQuantization / page.stepLength.intValue ) );
-                    
-                    // Use the appropriate value if pattern quantization is set to none
-                    int patternQuantization = _sequencer.patternQuantization.intValue;
-                    if( patternQuantization == 0 )
-                        patternQuantization = _sharedPreferences.gridWidth;
-                    
-                    // Position of step within loop 0 – minQuantization
-                    int positionWithinLoop;
-                    if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                        positionWithinLoop = ( ((_sharedPreferences.gridWidth - 1 - pageState.currentStep.floatValue) / _sharedPreferences.gridWidth) * _minQuantization );
+                    [self.sequencer setCurrentStep:playNow forPage:pageId];
+                }
+                
+                
+                // Are we in a loop
+                if( loopStart <= loopEnd ) {
+                    if( playNow >= loopStart && playNow <= loopEnd && loopEnd - loopStart != _sharedPreferences.gridWidth - 1 )
+                        [self.sequencer setInLoop:YES forPage:pageId];
                     else
-                        positionWithinLoop = ( (pageState.currentStep.floatValue / _sharedPreferences.gridWidth) * _minQuantization );
-                    
-                    // Check if we need to advance the pattern (depending on where we are within it)
-                    if( pageState.nextPatternId && positionWithinLoop % (_minQuantization / patternQuantization ) == 0 ) {
-                        pageState.currentPatternId = [pageState.nextPatternId copy];
-                        pageState.nextPatternId = nil;
-                    }
+                        [self.sequencer setInLoop:NO forPage:pageId];
+                } else {
+                    if( playNow >= loopStart || playNow <= loopEnd )
+                        [self.sequencer setInLoop:YES forPage:pageId];
+                    else
+                        [self.sequencer setInLoop:NO forPage:pageId];
+                }
+                
+                
+                // OK now we know what the step is we can get on with acting upon it!
+                
+                
+                // Position of step in the loop 0 - minQuantization (unless loop is shorter)
+                uint position = ( playNow * ( _minQuantization / [self.sequencer stepLengthForPage:pageId] ) );
+                
+                // Use the appropriate value if pattern quantization is set to none
+                int patternQuantization = [self.sequencer patternQuantization];
+                if( patternQuantization == 0 )
+                    patternQuantization = _sharedPreferences.gridWidth;
+                
+                // Position of step within loop 0 – minQuantization
+                int positionWithinLoop;
+                if( playMode == EatsSequencerPlayMode_Reverse )
+                    positionWithinLoop = ( ( (_sharedPreferences.gridWidth - 1 - (float)playNow ) / _sharedPreferences.gridWidth) * _minQuantization );
+                else
+                    positionWithinLoop = ( ( (float)playNow / _sharedPreferences.gridWidth ) * _minQuantization );
+                
+                // Check if we need to advance the pattern (depending on where we are within it)
+                if( [self.sequencer nextPatternIdForPage:pageId] && positionWithinLoop % (_minQuantization / patternQuantization ) == 0 ) {
+                    [self.sequencer setCurrentPatternId:[[self.sequencer nextPatternIdForPage:pageId] intValue] forPage:pageId];
+                    [self.sequencer setNextPatternId:nil forPage:pageId];
+                }
 
 
-                    // Copy this so it can't get mutated (doesn't seem to work?!)
-                    // TODO This line crashes sometimes
-                    NSSet *notesCopy = [[[page.patterns objectAtIndex:pageState.currentPatternId.intValue] notes] copy];
+                // Get the notes
+                
+                NSSet *notes = [self.sequencer notesAtStep:playNow inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+                
+                // Send notes that need to be sent
+                for( SequencerNote *note in notes ) {
                     
-                    // Send notes that need to be sent
-                    for( SequencerNote *note in notesCopy ) {
+                    int pitch = [self.sequencer pitchAtRow:note.row forPage:pageId];
+                    
+                    // Transpose
+                    pitch += [self.sequencer transposeForPage:pageId];
+                    if( pitch < SEQUENCER_MIDI_MIN )
+                        pitch = SEQUENCER_MIDI_MIN;
+                    if( pitch > SEQUENCER_MIDI_MAX )
+                        pitch = SEQUENCER_MIDI_MAX;
+                    
+                    //Set the basic note properties
+                    int channel = [self.sequencer channelForPage:pageId];
+                    int velocity = note.velocity;
+                    
+                    // Calculate swing and velocity
+                    
+                    uint64_t nsSwing = 0;
+                    
+                    // We only add swing and velocity groove when playing forward or reverse
+                    if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
                         
-                        // Play it!
-                        if( note.step.intValue == pageState.currentStep.intValue ) {
-                            
-                            int pitch = [[[page.pitches objectAtIndex:note.row.intValue] pitch] intValue];
-                            
-                            // Transpose
-                            pitch += page.transpose.intValue;
-                            if( pitch < 0 )
-                                pitch = 0;
-                            if( pitch > 127 )
-                                pitch = 127;
-                            
-                            //Set the basic note properties
-                            int channel = page.channel.intValue;
-                            int velocity = note.velocity.intValue;
-                            
-                            // Calculate swing and velocity
-                            
-                            uint64_t nsSwing = 0;
-                            
-                            // We only add swing and velocity groove when playing forward or reverse
-                            if( pageState.playMode.intValue== EatsSequencerPlayMode_Forward || pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-                                
-                                // Reverse position if we're playing in reverse
-                                if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
-                                    position = _minQuantization - 1 - position;
-                                
-                                //NSLog(@"Note position: %u", position);
-                                
-                                // Calculate the swing based on note position etc
-                                nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                                 type:page.swingType.intValue
-                                                                               amount:page.swingAmount.intValue
-                                                                                  bpm:_bpm
-                                                                         qnPerMeasure:_qnPerMeasure
-                                                                      minQuantization:_minQuantization];
-                                // Velocity groove if enabled
-                                if( page.velocityGroove.boolValue ) {
-                                    velocity = [EatsVelocityUtils calculateVelocityForPosition:position
-                                                                                  baseVelocity:velocity
-                                                                                          type:page.swingType.intValue
-                                                                               minQuantization:_minQuantization];
-                                }
-                            }
-                            
-                            
-                            // Send MIDI note
-                            [self startMIDINote:pitch
-                                      onChannel:channel
-                                   withVelocity:velocity
-                                         atTime:ns + nsSwing];
-                            
-                            // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
-                            int length = roundf( note.length.floatValue * ( _minQuantization / page.stepLength.floatValue ) );
-                            if( length < 1 )
-                                NSLog(@"Note added to active notes was too short: %i", length);
-                            // Add to activeNotes so we know when to stop it
-                            [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                                                                                      [NSNumber numberWithInt:channel], @"channel",
-                                                                                                      [NSNumber numberWithInt:velocity], @"velocity",
-                                                                                                      [NSNumber numberWithInt:length], @"lengthRemaining",
-                                                                                                      page, @"fromPage",
-                                                                                                      nil]];
+                        // Reverse position if we're playing in reverse
+                        if( playMode == EatsSequencerPlayMode_Reverse )
+                            position = _minQuantization - 1 - position;
+                        
+                        //NSLog(@"Note position: %u", position);
+                        
+                        // Calculate the swing based on note position etc
+                        nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                         type:[self.sequencer swingTypeForPage:pageId]
+                                                                       amount:[self.sequencer swingAmountForPage:pageId]
+                                                                          bpm:_bpm
+                                                                 qnPerMeasure:_qnPerMeasure
+                                                              minQuantization:_minQuantization];
+                        // Velocity groove if enabled
+                        if( [self.sequencer velocityGrooveForPage:pageId] ) {
+                            velocity = [EatsVelocityUtils calculateVelocityForPosition:position
+                                                                          baseVelocity:velocity
+                                                                                  type:[self.sequencer swingTypeForPage:pageId]
+                                                                       minQuantization:_minQuantization];
                         }
-                        
                     }
                     
+                    
+                    // Send MIDI note
+                    [self startMIDINote:pitch
+                              onChannel:channel
+                           withVelocity:velocity
+                                 atTime:ns + nsSwing];
+                    
+                    // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
+                    int length = roundf( (float)note.length * ( _minQuantization / (float)[self.sequencer stepLengthForPage:pageId] ) );
+                    if( length < 1 )
+                        NSLog(@"Note added to active notes was too short: %i", length);
+                    // Add to activeNotes so we know when to stop it
+                    [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                                                                                              [NSNumber numberWithInt:channel], @"channel",
+                                                                                              [NSNumber numberWithInt:velocity], @"velocity",
+                                                                                              [NSNumber numberWithInt:length], @"lengthRemaining",
+                                                                                              [NSNumber numberWithInt:pageId], @"fromPageId",
+                                                                                              nil]];
                 }
                 
             }
             
-            // Tell the delegate to update the interface
-            if( aPageNeedsToAdvance && [_delegate respondsToSelector:@selector(updateUI)] )
-                [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
-            
-            [self incrementTick];
-        }];
+        }
+        
+        // Tell the delegate to update the interface
+        if( aPageNeedsToAdvance && [_delegate respondsToSelector:@selector(updateUI)] )
+            [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+        
+        [self incrementTick];
 
         
     } else {
@@ -400,16 +386,16 @@ typedef enum EatsStepAdvance {
 
 #pragma mark - Private methods
 
-- (EatsStepAdvance) needToAdvanceStep:(SequencerPage *)page
+- (EatsStepAdvance) needToAdvanceStep:(uint)pageId
 {
-    SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue];
     
     // If the page has been scrubbed
-    if( pageState.nextStep && _currentTick % (_ticksPerMeasure / page.inSequencer.stepQuantization.intValue) == 0 ) {
+    if( [self.sequencer nextStepForPage:pageId] && _currentTick % ( _ticksPerMeasure / [self.sequencer stepQuantization] ) == 0 ) {
         return EatsStepAdvance_Scrubbed;
         
     // If the sequence needs to advance
-    } else if( _currentTick % (_ticksPerMeasure / page.stepLength.intValue) == 0 ) {
+    } else if( _currentTick % (_ticksPerMeasure / [self.sequencer stepLengthForPage:pageId] ) == 0 ) {
+        
         return EatsStepAdvance_Normal;
         
     } else {
@@ -471,23 +457,23 @@ typedef enum EatsStepAdvance {
     for( NSMutableDictionary *note in notes ) {
         
         // Calculate swing
-        SequencerPage *pageForNote = [note objectForKey:@"fromPage"];
-        SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:pageForNote.id.unsignedIntegerValue];
+        int pageIdForNote = [[note objectForKey:@"fromPageId"] intValue];
+        int playMode = [self.sequencer playModeForPage:pageIdForNote];
         uint64_t nsSwing = 0;
         
         // We only add swing when playing forward or reverse
-        if( pageState.playMode.intValue == EatsSequencerPlayMode_Forward || pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
+        if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
             
             // Position of note in the loop 0 - minQuantization
-            uint position = ( pageState.currentStep.intValue * ( _minQuantization / pageForNote.stepLength.intValue ) );
+            uint position = ( [self.sequencer currentStepForPage:pageIdForNote] * ( _minQuantization / [self.sequencer stepLengthForPage:pageIdForNote] ) );
             
             // Reverse position if we're playing in reverse
-            if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse )
+            if( playMode == EatsSequencerPlayMode_Reverse )
                 position = _minQuantization - 1 - position;
             
             nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
-                                                             type:pageForNote.swingType.intValue
-                                                           amount:pageForNote.swingAmount.intValue
+                                                             type:[self.sequencer swingTypeForPage:pageIdForNote]
+                                                           amount:[self.sequencer swingAmountForPage:pageIdForNote]
                                                               bpm:_bpm
                                                      qnPerMeasure:_qnPerMeasure
                                                   minQuantization:_minQuantization];

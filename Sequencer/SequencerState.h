@@ -10,8 +10,7 @@
 
 @interface SequencerState : NSObject
 
-@property NSArray   *pageStates;
-
-- (void) createPageStates:(uint)numberOfPages;
+@property int                   currentPageId;
+@property NSArray               *pageStates;
 
 @end

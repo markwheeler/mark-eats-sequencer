@@ -8,22 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum EatsSequencerPlayMode {
-    EatsSequencerPlayMode_Pause,
-    EatsSequencerPlayMode_Forward,
-    EatsSequencerPlayMode_Reverse,
-    EatsSequencerPlayMode_Random
-} EatsSequencerPlayMode;
-
 @interface SequencerPageState : NSObject
 
-@property NSNumber              *currentPatternId;
-@property NSNumber              *nextPatternId;
+@property int                   currentPatternId;
+@property NSNumber              *nextPatternId; // This is an NSNumber so we can set it to nil
 
-@property NSNumber              *currentStep;
-@property NSNumber              *nextStep;
+@property int                   currentStep;
+@property NSNumber              *nextStep; // This is an NSNumber so we can set it to nil
 @property BOOL                  inLoop;
 
-@property NSNumber              *playMode;
+@property int                   playMode;
 
 @end

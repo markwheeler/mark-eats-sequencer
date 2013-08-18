@@ -6,8 +6,6 @@
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
-// TEST
-
 #import "Document.h"
 #import <VVMIDI/VVMIDI.h>
 #import "EatsDocumentController.h"
@@ -15,7 +13,7 @@
 #import "EatsSwingUtils.h"
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
-#import "EatsGridNavigationController.h"
+//#import "EatsGridNavigationController.h" TODO
 #import "EatsWMNoteValueTransformer.h"
 
 @interface Document ()
@@ -27,15 +25,9 @@
 #define MIN_QUANTIZATION 64
 #define MAX_QUANTIZATION 1
 
-#define SEQUENCER_PAGES 8
-
-#define SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE @"com.MarkEats.Sequencer.SequencerNotesData";
-
-@property BOOL                          setupComplete;
-
 @property EatsClock                     *clock;
 @property ClockTick                     *clockTick;
-@property EatsGridNavigationController  *gridNavigationController;
+//@property EatsGridNavigationController  *gridNavigationController; TODO
 @property ScaleGeneratorSheetController *scaleGeneratorSheetController;
 
 @property NSMutableArray                *stepQuantizationArray;
@@ -50,9 +42,8 @@
 @property NSPoint                       pageViewFrameOrigin;
 
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
-@property (weak) IBOutlet NSObjectController    *pageObjectController;
 
-@property (weak) IBOutlet KeyboardInputView *pageView;
+@property (weak) IBOutlet KeyboardInputView     *pageView;
 
 @property (weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
 @property (weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
@@ -77,55 +68,17 @@
 #pragma mark - Setters and getters
 
 @synthesize isActive = _isActive;
-@synthesize currentPageOnMainThread = _currentPageOnMainThread;
 
 - (void)setIsActive:(BOOL)isActive
 {
     _isActive = isActive;
-    if(self.gridNavigationController) self.gridNavigationController.isActive = isActive;
+//    if(self.gridNavigationController) self.gridNavigationController.isActive = isActive; TODO
 }
 
 - (BOOL)isActive
 {
     return _isActive;
 }
-
-- (void) setCurrentPageOnMainThread:(SequencerPage *)currentPageOnMainThread
-{
-    
-    [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
-    [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
-    
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"pitches"];
-    
-    __block NSNumber *pageId;
-
-    pageId = currentPageOnMainThread.id;
-    
-    _currentPageOnMainThread = currentPageOnMainThread;
-    _currentSequencerPageState = [_sequencerState.pageStates objectAtIndex:pageId.unsignedIntegerValue];
-    
-    [self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
-    
-    [self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.currentPageOnMainThread addObserver:self forKeyPath:@"swing" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.currentPageOnMainThread addObserver:self forKeyPath:@"pitches" options:NSKeyValueObservingOptionNew context:NULL];
-    
-    [self updatePitches];
-    self.pageObjectController.fetchPredicate = [NSPredicate predicateWithFormat:@"self.id == %@", pageId];
-    
-    [self updateSequencerPageUI];
-    
-}
-
-- (SequencerPage *) currentPageOnMainThread
-{
-    return _currentPageOnMainThread;
-}
-
 
 
 #pragma mark - Public methods
@@ -138,19 +91,19 @@
         
         //NSLog(@"---- Init Document ----");
         
-        // Create the serial queue
-        _bigSerialQueue = dispatch_queue_create("com.MarkEatsSequencer.BigQueue", NULL);
-        
         self.isActive = NO;
         
         // Get the prefs singleton
         self.sharedPreferences = [Preferences sharedPreferences];
         
-        // Create the SequencerState
-        _sequencerState = [[SequencerState alloc] init];
-        [_sequencerState createPageStates:SEQUENCER_PAGES];
+        // Create the Sequencer
+        self.sequencer = [[Sequencer alloc] init];
+        self.sequencer.undoManager = self.undoManager;
         
-        // Create the step quantization settings
+        // Add dummy data for testing
+        [self.sequencer addDummyData];
+        
+        // Create the step quantization settings TODO move this into a utils class?
         self.stepQuantizationArray = [NSMutableArray array];
         int quantizationSetting = MIN_QUANTIZATION;
         while( quantizationSetting >= MAX_QUANTIZATION ) {
@@ -174,28 +127,7 @@
 
 - (void) dealloc
 {
-    [self.currentSequencerPageState removeObserver:self forKeyPath:@"currentPatternId"];
-    [self.currentSequencerPageState removeObserver:self forKeyPath:@"playMode"];
-    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    [self.sequencerOnMainThread removeObserver:self forKeyPath:@"bpm"];
-    [self.sequencerOnMainThread removeObserver:self forKeyPath:@"stepQuantization"];
-    [self.sequencerOnMainThread removeObserver:self forKeyPath:@"patternQuantization"];
-    
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"stepLength"];
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"swing"];
-    [self.currentPageOnMainThread removeObserver:self forKeyPath:@"pitches"];
-    
-    for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
-        
-        [page removeObserver:self forKeyPath:@"transpose"];
-        [page removeObserver:self forKeyPath:@"transposeZeroStep"];
-        
-        for( SequencerPattern *pattern in page.patterns ) {
-            [pattern removeObserver:self forKeyPath:@"notes"];
-        }
-    }
     
     NSLog(@"Document deallocated OK"); // TODO: Remove this for final release
 }
@@ -215,150 +147,16 @@
     self.pageViewFrameOrigin = self.pageView.frame.origin;
     self.pageView.delegate = self;
     
-    self.managedObjectContextForMainThread = self.managedObjectContext;
-    
-    // Hacky way to get an autosave to generate an NSPersistentStore.
-    // Code snippet from http://stackoverflow.com/questions/14257287/how-to-force-creation-of-default-persistentstore-autosave-in-nspersistentdocumen
-    [self updateChangeCount:NSChangeDone];
-    [self autosaveDocumentWithDelegate:self didAutosaveSelector:@selector(document:didAutosave:contextInfo:) contextInfo:nil];
-    
-    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(windowDidBecomeMain:)
                                                  name:NSWindowDidBecomeMainNotification
                                                object:[aController window]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(windowDidBecomeKey:)
-                                                 name:NSWindowDidBecomeKeyNotification
-                                               object:[aController window]];
-}
-
-// Called by the autosave operation started in awakeFromNib.
-// Code snippet from http://stackoverflow.com/questions/14257287/how-to-force-creation-of-default-persistentstore-autosave-in-nspersistentdocumen
-- (void)document:(NSDocument *)document didAutosave:(BOOL)didAutosaveSuccessfully contextInfo:(void *)contextInfo
-{
-    [self updateChangeCount:NSChangeUndone];
-    
-    if( !self.setupComplete )
-        [self completeSetupOncePersistentStoreIsReady];
-}
-
--(BOOL) configurePersistentStoreCoordinatorForURL:(NSURL *)url ofType:(NSString *)fileType modelConfiguration:(NSString *)configuration storeOptions:(NSDictionary *)storeOptions error:(NSError **)error
-{
-    NSMutableDictionary *newOptions = [NSMutableDictionary dictionaryWithDictionary:storeOptions];
-    [newOptions setValue:@"YES" forKey:NSMigratePersistentStoresAutomaticallyOption];
-    [newOptions setValue:@"YES" forKey:NSInferMappingModelAutomaticallyOption]; // Set this to NO if we want to use a mapping model
-    
-    return [super configurePersistentStoreCoordinatorForURL:url ofType:fileType modelConfiguration:configuration storeOptions:newOptions error:error];
-}
-
-- (void) completeSetupOncePersistentStoreIsReady
-{
-    self.setupComplete = YES;
-    
-    // How this works:
-    // This document's MOC is the parent and has a private queue. It's used across the app
-    // There is a child MOC with a main queue type that is used with bindings etc.
-    // There is another child MOC which is reserved only for use on the tickQueue and is only used for reading data – just for when we need to know what to play
-    // Method below are used for keeping the MOCs in sync (parentMOCSaved: and childMOCChanged)
-    
-    NSUndoManager *undoManager = self.managedObjectContext.undoManager;
-    
-    // Replace the NSPersistentDocument's MOC with a new one that has a PrivateQueue and can be used as a parent
-    NSManagedObjectContext *parentMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    [parentMOC performBlockAndWait:^(void) {
-        parentMOC.persistentStoreCoordinator = self.managedObjectContext.persistentStoreCoordinator;
-    }];
-    self.managedObjectContext = parentMOC;
-    
-    // Create a child MOC for use on the main thead in bindings etc
-    self.managedObjectContextForMainThread = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-    self.managedObjectContextForMainThread.parentContext = self.managedObjectContext;
-    self.managedObjectContextForMainThread.undoManager = undoManager;
-    
-    // Create a child MOC for use on the tickQueue
-    self.managedObjectContextForTickQueue = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    self.managedObjectContextForTickQueue.parentContext = self.managedObjectContext;
-    
-    // Register for MOC notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(parentMOCSaved:)
-                                                 name:NSManagedObjectContextDidSaveNotification
-                                               object:self.managedObjectContext];
-    
-    
-    
-    // Setup the Core Data object
-    [self.managedObjectContextForMainThread processPendingChanges];
-    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
-    
-    [self.managedObjectContext performBlockAndWait:^(void) {
-        NSError *requestError = nil;
-        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-        NSArray *matches = [self.managedObjectContext executeFetchRequest:request error:&requestError];
-        
-        if( requestError )
-            NSLog(@"Request error: %@", requestError);
-        
-        if( [matches count] ) {
-            // Get an existing Sequencer
-            self.sequencer = [matches lastObject];
-            
-        } else {
-            // Create initial structure
-            self.sequencer = [Sequencer sequencerWithPages:SEQUENCER_PAGES inManagedObjectContext:self.managedObjectContext];
-            
-            // Add dummy data (can be useful for testing, just adds 16 random notes)
-            //[Sequencer addDummyDataToSequencer:self.sequencer inManagedObjectContext:self.managedObjectContext];
-            
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }
-    }];
-    
-    // Get the sequencer for main thread stuff
-    NSError *requestError = nil;
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Sequencer"];
-    NSArray *matches = [self.managedObjectContextForMainThread executeFetchRequest:request error:&requestError];
-    
-    if( requestError )
-        NSLog(@"Request error: %@", requestError);
-    
-    self.sequencerOnMainThread = [matches lastObject];
-    
-    [self.managedObjectContextForMainThread processPendingChanges];
-    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
-    
-    // TODO Remove this once confident that creation bugs are all fixed
-    if( [[[self.sequencerOnMainThread.pages objectAtIndex:0] pitches] count] == 0 || [[[self.sequencerOnMainThread.pages objectAtIndex:0] patterns] count] == 0 )
-        NSLog(@"WARNING: Page 0 has no pitches or patterns");
-    
-    // Setup the SequencerState
-    for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
-        [[_sequencerState.pageStates objectAtIndex:page.id.unsignedIntegerValue] setCurrentStep:[page.loopEnd copy]];
-    }
     
     // Setup UI
     [self setupUI];
     
-    // KVO observes the notes of every single pattern
-    for( SequencerPage *page in self.sequencerOnMainThread.pages ) {
-        
-        [page addObserver:self forKeyPath:@"transpose" options:NSKeyValueObservingOptionNew context:NULL];
-        [page addObserver:self forKeyPath:@"transposeZeroStep" options:NSKeyValueObservingOptionNew context:NULL];
-        
-        for( SequencerPattern *pattern in page.patterns ) {
-            [pattern addObserver:self forKeyPath:@"notes" options:NSKeyValueObservingOptionNew context:NULL];
-        }
-    }
-    
-    // Set the current page to the first one
-    self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:0];
-    
     // Create a Clock and set it up
-    self.clockTick = [[ClockTick alloc] initWithManagedObjectContext:self.managedObjectContextForTickQueue andSequencerState:self.sequencerState];
+    self.clockTick = [[ClockTick alloc] initWithSequencer:self.sequencer];
     self.clockTick.delegate = self;
     self.clockTick.ppqn = PPQN;
     self.clockTick.ticksPerMeasure = TICKS_PER_MEASURE;
@@ -377,29 +175,10 @@
     // Set everything to match the model
     [self updateSequencerPageUI];
     
-    // KVO
-    [self.sequencerOnMainThread addObserver:self forKeyPath:@"bpm" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.sequencerOnMainThread addObserver:self forKeyPath:@"stepQuantization" options:NSKeyValueObservingOptionNew context:NULL];
-    [self.sequencerOnMainThread addObserver:self forKeyPath:@"patternQuantization" options:NSKeyValueObservingOptionNew context:NULL];
-    // Seems odd to comment these out as you would think that would throw an error when setCurrentPage is called... but it works?!
-    //[self.currentSequencerPageState addObserver:self forKeyPath:@"currentPatternId" options:NSKeyValueObservingOptionNew context:NULL];
-    //[self.currentSequencerPageState addObserver:self forKeyPath:@"playMode" options:NSKeyValueObservingOptionNew context:NULL];
-    //[self.currentPageOnMainThread addObserver:self forKeyPath:@"stepLength" options:NSKeyValueObservingOptionNew context:NULL];
-    // ...etc...
-    
-    // Create the gridNavigationController
-    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
-    self.gridNavigationController.delegate = self;
-    self.gridNavigationController.isActive = self.isActive;
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(undoManagerDidUndoChange:)
-                                                 name:NSUndoManagerDidUndoChangeNotification
-                                               object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(undoManagerDidRedoChange:)
-                                                 name:NSUndoManagerDidRedoChangeNotification
-                                               object:nil];
+    // Create the gridNavigationController TODO: Bring this back
+    //    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
+    //    self.gridNavigationController.delegate = self;
+    //    self.gridNavigationController.isActive = self.isActive;
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
@@ -455,25 +234,45 @@
     return YES;
 }
 
+- (NSData *) dataOfType:(NSString *)typeName error:(NSError **)outError
+{
+    // Insert code here to write your document to data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning nil.
+    // You can also choose to override -fileWrapperOfType:error:, -writeToURL:ofType:error:, or -writeToURL:ofType:forSaveOperation:originalContentsURL:error: instead.
+    //    NSException *exception = [NSException exceptionWithName:@"UnimplementedMethod" reason:[NSString stringWithFormat:@"%@ is unimplemented", NSStringFromSelector(_cmd)] userInfo:nil];
+    //    @throw exception;
+    //    return nil;
+    
+    return [self.sequencer songKeyedArchiveData];
+}
+
+- (BOOL) readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
+{
+    // Insert code here to read your document from the given data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning NO.
+    // You can also choose to override -readFromFileWrapper:ofType:error: or -readFromURL:ofType:error: instead.
+    // If you override either of these, you should also override -isEntireFileLoaded to return NO if the contents are lazily loaded.
+    //    NSException *exception = [NSException exceptionWithName:@"UnimplementedMethod" reason:[NSString stringWithFormat:@"%@ is unimplemented", NSStringFromSelector(_cmd)] userInfo:nil];
+    //    @throw exception;
+    //    return YES;
+    
+    NSError *error = [self.sequencer setSongFromKeyedArchiveData:data];
+    if( error ) {
+        *outError = error;
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
 - (void) windowDidBecomeMain:(NSNotification *)notification
 {
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     if( documentController.lastActiveDocument != self ) {
         [documentController setActiveDocument:self];
         
-        // Added this check as in theory we might not be ready
-        if( _currentPageOnMainThread )
-            [self updateUI];
+        // Added this check as in theory we might not be ready TODO do we need this?
+//        if( _currentPageOnMainThread )
+//            [self updateUI];
     }
-}
-
-- (void) windowDidBecomeKey:(NSNotification *)aNotification
-{
-    // Commented this out as it seems that just checking when a grid controller is connected should be enough?
-//    if( !self.checkedForThingsOutsideGrid ) {
-//        self.checkedForThingsOutsideGrid = YES;
-//        [self checkForThingsOutsideGrid];
-//    }
 }
 
 - (void) updateUI
@@ -482,7 +281,7 @@
     
     _debugGridView.needsDisplay = YES;
     
-    [self.gridNavigationController updateGridView];
+//    [self.gridNavigationController updateGridView]; TODO
 }
 
 - (void) clearPatternStartAlert
@@ -499,16 +298,17 @@
 - (void) clearPatternAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if( returnCode == NSOKButton ) {
-                uint patternId;
-        
+//                uint patternId;
+//        
+        // TODO re-work this!
         // If pattern quantization is disabled
-        if( _sequencerOnMainThread.patternQuantization.intValue == 0 && _currentSequencerPageState.nextPatternId )
-            patternId = _currentSequencerPageState.nextPatternId.unsignedIntValue;
-        
-        else
-            patternId = _currentSequencerPageState.currentPatternId.unsignedIntValue;
-        
-        [self clearPattern:[NSNumber numberWithInt:patternId] inPage:_currentPageOnMainThread.id];
+//        if( _sequencerOnMainThread.patternQuantization.intValue == 0 && _currentSequencerPageState.nextPatternId )
+//            patternId = _currentSequencerPageState.nextPatternId.unsignedIntValue;
+//        
+//        else
+//            patternId = _currentSequencerPageState.currentPatternId.unsignedIntValue;
+//        
+//        [Sequencer clearPattern:....];
     }
     self.clearPatternAlert = nil;
 }
@@ -521,8 +321,6 @@
     self.clockLateIndicator.alphaValue = 0.0;
     
     self.debugGridView.delegate = self;
-    self.debugGridView.sequencerState = self.sequencerState;
-    self.debugGridView.pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
     self.debugGridView.needsDisplay = YES;
     
     [self.stepQuantizationPopup removeAllItems];
@@ -547,9 +345,9 @@
             [self.swingPopup addItemWithTitle:[swing valueForKey:@"label"]];
     }
     
-    for(SequencerPage *page in self.sequencerOnMainThread.pages) {
-        [self.currentPageSegmentedControl setLabel:page.name forSegment:[page.id intValue]];
-    }
+//    for(SequencerPage *page in self.sequencerOnMainThread.pages) { //TODO
+//        [self.currentPageSegmentedControl setLabel:page.name forSegment:[page.id intValue]];
+//    }
     
     // Table view default sort
     NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey: @"row" ascending: NO];
@@ -598,70 +396,56 @@
 
 - (void) updateClockBPM
 {
-    self.clock.bpm = self.sequencerOnMainThread.bpm.floatValue;
-    self.clockTick.bpm = self.sequencerOnMainThread.bpm.floatValue;
+    self.clock.bpm = self.sequencer.bpm;
+    self.clockTick.bpm = self.sequencer.bpm;
 }
 
 - (void) updateStepQuantizationPopup
 {
-    [self.stepQuantizationPopup selectItemAtIndex:[self.stepQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencerOnMainThread.stepQuantization];
-    }]];
+    // TODO
+//    [self.stepQuantizationPopup selectItemAtIndex:[self.stepQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+//        return [[obj valueForKey:@"quantization"] intValue] == self.sequencerOnMainThread.stepQuantization;
+//    }]];
 }
 
 - (void) updatePatternQuantizationPopup
 {
-    NSUInteger index = [self.patternQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"quantization"] isEqualTo:self.sequencerOnMainThread.patternQuantization];
-    }];
-    
-    if( index == NSNotFound )
-        index = self.patternQuantizationPopup.itemArray.count - 1;
-    
-    [self.patternQuantizationPopup selectItemAtIndex:index];
-    
-    if( [[[self.patternQuantizationArray objectAtIndex:index] valueForKey:@"quantization"] intValue] == 0 )
-        self.debugGridView.patternQuantizationOn = NO;
-    else
-        self.debugGridView.patternQuantizationOn = YES;
-    
-    [self updateUI];
+        // TODO
+//    NSUInteger index = [self.patternQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+//        return [[obj valueForKey:@"quantization"] intValue] == self.sequencerOnMainThread.patternQuantization;
+//    }];
+//    
+//    if( index == NSNotFound )
+//        index = self.patternQuantizationPopup.itemArray.count - 1;
+//    
+//    [self.patternQuantizationPopup selectItemAtIndex:index];
+//    
+//    [self updateUI];
 }
 
 - (void) updateCurrentPattern
 {
-    BOOL patternQuantizationOn = NO;
-    
-    if( self.sequencerOnMainThread.patternQuantization.unsignedIntValue > 0 )
-        patternQuantizationOn = YES;
-    
-    // If pattern quantization is disabled
-    if( !patternQuantizationOn && _currentSequencerPageState.nextPatternId ) {
-        self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.nextPatternId.intValue;
-        self.debugGridView.currentPattern = [_currentPageOnMainThread.patterns objectAtIndex:_currentSequencerPageState.nextPatternId.intValue];
-        
-    } else {
-        self.currentPatternSegmentedControl.selectedSegment = _currentSequencerPageState.currentPatternId.intValue;
-        self.debugGridView.currentPattern = [_currentPageOnMainThread.patterns objectAtIndex:_currentSequencerPageState.currentPatternId.intValue];
-    }
+    self.currentPatternSegmentedControl.selectedSegment = [self.sequencer currentlyDisplayingPatternIdForPage:[self.sequencer currentPageId]];
+    self.debugGridView.notes = [self.sequencer notesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:[self.sequencer currentPageId]] inPage:[self.sequencer currentPageId]];
 }
 
 - (void) updatePlayMode
 {
-    self.pagePlaybackControls.selectedSegment = _currentSequencerPageState.playMode.integerValue;
+    self.pagePlaybackControls.selectedSegment = [self.sequencer playModeForPage:[self.sequencer currentPageId]];
 }
 
 - (void) updateStepLengthPopup
 {
-    [self.stepLengthPopup selectItemAtIndex:[self.stepQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        return [[obj valueForKey:@"quantization"] isEqualTo:self.currentPageOnMainThread.stepLength];
-    }]];
+        // TODO
+//    [self.stepLengthPopup selectItemAtIndex:[self.stepQuantizationArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+//        return [[[obj valueForKey:@"quantization"] intValue] == [self.sequencer stepLengthForPage:[self.sequencer currentPageId]]];
+//    }]];
 }
 
 - (void) updateSwingPopup
 {
     NSUInteger index = [self.swingArray indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-        if( [[obj valueForKey:@"type"] isEqualTo:self.currentPageOnMainThread.swingType] && [[obj valueForKey:@"amount"] isEqualTo:self.currentPageOnMainThread.swingAmount] )
+        if( [[obj valueForKey:@"type"] intValue] == [self.sequencer swingTypeForPage:self.sequencer.currentPageId] && [[obj valueForKey:@"amount"] intValue] == [self.sequencer swingAmountForPage:self.sequencer.currentPageId] )
             return YES;
         else
             return NO;
@@ -675,23 +459,23 @@
     
     for( int i = 0; i < _sharedPreferences.gridHeight; i ++ ) {
         
-        NSNumber *pitch = [[_currentPageOnMainThread.pitches objectAtIndex:i] pitch];
+        int pitch = [self.sequencer pitchAtRow:i forPage:[self.sequencer currentPageId]];
         
         NSMutableDictionary *tableRow = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:i + 1], @"row",
-                                         pitch, @"pitch",
-                                         nil];
-        if( _currentPageOnMainThread.transpose.intValue ) {
+                                        [NSNumber numberWithInt:pitch], @"pitch",
+                                        nil];
+        if( [self.sequencer transposeForPage:self.sequencer.currentPageId] ) {
             NSString *transposedNote;
             
-            int transposedPitch = pitch.intValue + _currentPageOnMainThread.transpose.intValue;
+            int transposedPitch = pitch + [self.sequencer transposeForPage:[self.sequencer currentPageId]];
             if( transposedPitch > 127 )
                 transposedPitch = 127;
             else if( transposedPitch < 0 )
                 transposedPitch = 0;
             
-            if( transposedPitch > pitch.intValue )
+            if( transposedPitch > pitch )
                 transposedNote = [NSString stringWithFormat:@"↑"];
-            else if( transposedPitch < pitch.intValue )
+            else if( transposedPitch < pitch )
                 transposedNote = [NSString stringWithFormat:@"↓"];
             else
                 transposedNote = [NSString stringWithFormat:@"  "];
@@ -708,112 +492,7 @@
 
 
 
-#pragma mark – KVO
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context {
-    
-    if ( object == self.sequencerOnMainThread && [keyPath isEqual:@"bpm"] )
-        [self updateClockBPM];
-    else if ( object == self.sequencerOnMainThread && [keyPath isEqual:@"stepQuantization"] )
-        [self updateStepQuantizationPopup];
-    else if ( object == self.sequencerOnMainThread && [keyPath isEqual:@"patternQuantization"] )
-        [self updatePatternQuantizationPopup];
-    
-    else if ( object == self.currentSequencerPageState && [keyPath isEqual:@"currentPatternId"] )
-        [self updateCurrentPattern];
-    else if ( object == self.currentSequencerPageState && [keyPath isEqual:@"playMode"] )
-        [self updatePlayMode];
-    
-    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"stepLength"] )
-        [self updateStepLengthPopup];
-    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"swing"] )
-        [self updateSwingPopup];
-    else if ( object == self.currentPageOnMainThread && [keyPath isEqual:@"pitches"] )
-        [self updatePitches];
-    
-    else if ( [keyPath isEqual:@"transpose"] ) {
-        if( [[object valueForKey:@"id"] intValue] == self.debugGridView.currentPattern.inPage.id.intValue )
-            [self updatePitches];
-        if( [[object valueForKey:@"id"] intValue] == self.gridNavigationController.currentPattern.inPage.id.intValue )
-            [self.gridNavigationController updateGridView];
-        
-    } else if ( [keyPath isEqual:@"transposeZeroStep"] ) {
-        if( [[object valueForKey:@"id"] intValue] == self.gridNavigationController.currentPattern.inPage.id.intValue )
-            [self.gridNavigationController updateGridView];
-    
-    } else if ( [keyPath isEqual:@"notes"] ) {
-        if( object == self.debugGridView.currentPattern ) {
-            //NSLog(@"The current pattern's notes changed");
-            _debugGridView.needsDisplay = YES;
-            [self.gridNavigationController updateGridView];
-        } else {
-            //NSLog(@"Notes inPattern %@ inPage %@ changed", [object valueForKey:@"id"], [[object valueForKey:@"inPage"] valueForKey:@"id"]);
-            [self.gridNavigationController updateGridView];
-        }
-    }
-}
-
-
-
-#pragma mark - Private methods
-
-- (void) parentMOCSaved:(NSNotification *)notification
-{
-    dispatch_async( dispatch_get_main_queue(), ^(void) {
-    
-        // Put this in to hopefully aovid so often causing bad stuff. It's probably a bad solution.
-        dispatch_suspend( _bigSerialQueue );
-    
-        [self.managedObjectContextForMainThread mergeChangesFromContextDidSaveNotification:notification];
-        
-        [self.managedObjectContextForTickQueue performBlockAndWait:^(void){ // If uncommenting the other lines in this method, this should become 'andWait'
-            [self.managedObjectContextForTickQueue mergeChangesFromContextDidSaveNotification:notification];
-        }];
-        
-        dispatch_resume( _bigSerialQueue );
-    
-        // This snippet is from http://cutecoder.org/featured/asynchronous-core-data-document/
-        // It nudges the file modified date to prevent 'file has been changed by another application' errors
-        NSFileManager* fileManager = [NSFileManager defaultManager];
-        NSURL* fileURL = [self fileURL];
-        NSDictionary* fileAttributes = [fileManager attributesOfItemAtPath:[fileURL path] error:nil];
-        NSDate* modificationDate = fileAttributes[NSFileModificationDate];
-        if (modificationDate) {
-            // set the modification date to prevent NSDocument's "file was saved by another application" error.
-            [self setFileModificationDate:modificationDate];
-        }
-    });
-}
-
-- (void) childMOCChanged
-{
-    NSError *saveMainError = nil;
-    [self.managedObjectContextForMainThread save:&saveMainError];
-    if( saveMainError )
-        NSLog(@"Save error: %@", saveMainError);
-    
-    dispatch_async( _bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
-}
-
-- (void) undoManagerDidUndoChange:(NSNotification *)notification
-{
-    [self childMOCChanged];
-}
-
-- (void) undoManagerDidRedoChange:(NSNotification *)notification
-{
-    [self childMOCChanged];
-}
+#pragma mark – Notifications
 
 - (void) externalClockStart:(NSNotification *)notification
 {
@@ -842,24 +521,7 @@
 
 - (void) externalClockBPM:(NSNotification *)notification
 {
-    // We don't want this showing up in undo history
-    // Commented out fow now because of concerns about performance when processPendingChanges is called
-//    [self.managedObjectContextForMainThread processPendingChanges];
-//    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
-    
-    dispatch_sync(_bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            
-            _sequencer.bpm = [notification.userInfo valueForKey:@"bpm"];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
-    
-//    [self.managedObjectContextForMainThread processPendingChanges];
-//    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
+    [self.sequencer setBPMWithoutRegisteringUndo:[[notification.userInfo valueForKey:@"bpm"] floatValue]];
 }
 
 - (void) gridControllerConnected:(NSNotification *)notification
@@ -873,6 +535,9 @@
     [self updateInterfaceToMatchGridSize];
 }
 
+
+#pragma mark - Private methods
+
 - (void) resetPlayPositions
 {
     if( self.clock.clockStatus != EatsClockStatus_Stopped )
@@ -880,87 +545,27 @@
     [self.clockTick songPositionZero];
     
     //Reset the play positions of all the active loops
-    int i = 0;
-    for( SequencerPageState *pageState in _sequencerState.pageStates ) {
-        if( pageState.playMode.intValue == EatsSequencerPlayMode_Pause || pageState.playMode.intValue == EatsSequencerPlayMode_Forward ) {
-            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopEnd] copy];
-            pageState.inLoop = YES;
-        } else if( pageState.playMode.intValue == EatsSequencerPlayMode_Reverse ) {
-            pageState.currentStep = [[[_sequencerOnMainThread.pages objectAtIndex:i] loopStart] copy];
-            pageState.inLoop = YES;
-        }
-        i ++;
-    }
+    [self.sequencer resetPlayPositionsForAllPlayingPages];
     
     [self updateUI];
 }
 
 - (void) checkForThingsOutsideGrid
 {
-    [self.managedObjectContextForMainThread processPendingChanges];
-    [self.managedObjectContextForMainThread.undoManager disableUndoRegistration];
+    int count = [self.sequencer checkForNotesOutsideOfGrid];
+    if( count > 0 && !self.notesOutsideGridAlert ) {
+//                dispatch_async(dispatch_get_main_queue(), ^(void) { TODO check if we need this
+            self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
+                                                          defaultButton:@"Leave notes"
+                                                        alternateButton:@"Remove notes"
+                                                            otherButton:nil
+                                              informativeTextWithFormat:@"Would you like to remove these %i notes?", count];
+            
+            [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+//                });
+    }
     
-    dispatch_sync(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            
-            // Make sure all the loops etc fit within the connected grid size
-            for( SequencerPage *page in self.sequencer.pages ) {
-                if( page.loopStart.intValue >= self.sharedPreferences.gridWidth || page.loopEnd.intValue >= self.sharedPreferences.gridWidth ) {
-                    
-                    page.loopStart = [NSNumber numberWithInt:0];
-                    page.loopEnd = [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1];
-                }
-                
-                if( page.transposeZeroStep.intValue >= self.sharedPreferences.gridWidth )
-                    page.transposeZeroStep = [NSNumber numberWithUnsignedInt:(self.sharedPreferences.gridWidth) / 2 - 1];
-                
-                NSError *saveError = nil;
-                [self.managedObjectContext save:&saveError];
-                if( saveError )
-                    NSLog(@"Save error: %@", saveError);
-                
-                SequencerPageState *pageState = [_sequencerState.pageStates objectAtIndex:page.id.intValue];
-                
-                if( pageState.currentStep.intValue >= self.sharedPreferences.gridWidth )
-                    pageState.currentStep = [page.loopEnd copy];
-                if( pageState.nextStep.intValue >= self.sharedPreferences.gridWidth )
-                    pageState.nextStep = nil;
-                if( pageState.currentPatternId.intValue >= self.sharedPreferences.gridWidth )
-                    pageState.currentPatternId = [NSNumber numberWithInt:0];
-                if( pageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
-                    pageState.nextPatternId = nil;
-            }
-            
-            // Get the notes
-
-            NSError *requestError = nil;
-            NSFetchRequest *noteRequest = [NSFetchRequest fetchRequestWithEntityName:@"SequencerNote"];
-            noteRequest.predicate = [NSPredicate predicateWithFormat:@"(step >= %u) OR (row >= %u)", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight];
-            
-            NSUInteger count = [self.managedObjectContext countForFetchRequest:noteRequest error:&requestError];
-            
-            if( requestError )
-                NSLog(@"Request error: %@", requestError);
-
-            if( count > 0 && !self.notesOutsideGridAlert ) {
-                dispatch_async(dispatch_get_main_queue(), ^(void) {
-                    self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
-                                                                  defaultButton:@"Leave notes"
-                                                                alternateButton:@"Remove notes"
-                                                                    otherButton:nil
-                                                      informativeTextWithFormat:@"Would you like to remove these %lu notes?", count];
-                    
-                    [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
-                });
-            }
-        }];
-    });
-    
-    [self updateUI]; // The purpose of this is to update after adjust state
-    
-    [self.managedObjectContextForMainThread processPendingChanges];
-    [self.managedObjectContextForMainThread.undoManager enableUndoRegistration];
-
+    [self updateUI];
 }
 
 - (void) updateInterfaceToMatchGridSize
@@ -993,8 +598,8 @@
         
         if( newLabel.length > 100 ) // The property can't take a string longer than 100 chars
             newLabel = [newLabel substringToIndex:100];
-        self.currentPageOnMainThread.name = newLabel;
-        [self.currentPageSegmentedControl setLabel:self.currentPageOnMainThread.name forSegment:[self.currentPageOnMainThread.id intValue]];
+        [self.sequencer setName:newLabel forPage:self.sequencer.currentPageId];
+        [self.currentPageSegmentedControl setLabel:[self.sequencer nameForPage:[self.sequencer currentPageId]] forSegment:[self.sequencer currentPageId]];
     }
 }
 
@@ -1005,41 +610,7 @@
         
     // Remove them
     } else {
-        
-        // Remove the notes outside the grid
-        dispatch_async(self.bigSerialQueue, ^(void) {
-            [self.managedObjectContext performBlockAndWait:^(void) {
-                
-                // Go through every pattern, re-creating them if they have notes in
-                for( SequencerPage *page in _sequencer.pages ) {
-                    for( SequencerPattern *pattern in page.patterns ) {
-                        
-                        if( pattern.notes.count ) {
-                            NSMutableSet *newNotes = [NSMutableSet setWithCapacity:32];
-                            
-                            for( SequencerNote *note in pattern.notes ) {
-                                if( note.row.intValue < self.sharedPreferences.gridHeight && note.step.intValue < self.sharedPreferences.gridWidth ) {
-                                    SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContext];
-                                    newNote.row = note.row;
-                                    newNote.step = note.step;
-                                    newNote.length = note.length;
-                                    newNote.velocity = note.velocity;
-                                    [newNotes addObject:newNote];
-                                } else {
-                                    [self.managedObjectContext deleteObject:note];
-                                }
-                            }
-                            pattern.notes = newNotes;
-                        }
-                    }
-                }
-                
-                NSError *saveError = nil;
-                [self.managedObjectContext save:&saveError];
-                if( saveError )
-                    NSLog(@"Save error: %@", saveError);
-            }];
-        });
+        [self.sequencer removeNotesOutsideOfGrid];
     }
     
     self.notesOutsideGridAlert = nil;
@@ -1062,11 +633,7 @@
     NSLog(@"Grid supports variable brightness %i", _sharedPreferences.gridSupportsVariableBrightness);
     NSLog(@"Grid width %u", _sharedPreferences.gridWidth);
     NSLog(@"Grid height %u", _sharedPreferences.gridHeight);
-    NSLog(@"currentSequencerPageState.playMode %@", _currentSequencerPageState.playMode);
-    NSLog(@"currentSequencerPageState.currentPatternId %@", _currentSequencerPageState.currentPatternId);
-    NSLog(@"currentSequencerPageState.nextPatternId %@", _currentSequencerPageState.nextPatternId);
-    NSLog(@"sequencerOnMainThread %@", _sequencerOnMainThread);
-    NSLog(@"sequencerOnMainThread.pages[0] %@", [_sequencerOnMainThread.pages objectAtIndex:0]);
+    NSLog(@"sequencer %@", self.sequencer);
     NSLog(@"--------------------");
 }
 
@@ -1090,7 +657,7 @@
 {
     // Direction can be -1 (from left), 0 (calculate automatically), or 1 (from right)
     
-    if( self.currentPageOnMainThread.id.intValue == pageId )
+    if( self.sequencer.currentPageId == pageId )
         return;
     
     // Switch page with an animation
@@ -1110,15 +677,15 @@
         frame.origin.x += distanceToAnimate;
         
     } else {
-        if( pageId > _currentPageOnMainThread.id.integerValue )
+        if( pageId > [self.sequencer currentPageId] )
             frame.origin.x += distanceToAnimate;
-        else if ( pageId < _currentPageOnMainThread.id.integerValue )
+        else if ( pageId < [self.sequencer currentPageId] )
             frame.origin.x -= distanceToAnimate;
     }
     
     self.pageView.frame = frame;
     
-    self.currentPageOnMainThread = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
+    [self.sequencer setCurrentPageId:pageId];
     
     [NSAnimationContext beginGrouping];
     [[NSAnimationContext currentContext] setDuration:0.2];
@@ -1129,233 +696,18 @@
 
 - (void) showPreviousPage
 {
-    int newPageId = self.currentPageOnMainThread.id.intValue - 1;
+    int newPageId = self.sequencer.currentPageId - 1;
     if( newPageId < 0 )
-        newPageId = SEQUENCER_PAGES - 1;
+        newPageId = kSequencerNumberOfPages - 1;
     [self showPage:newPageId from:-1];
 }
 
 - (void) showNextPage
 {
-    int newPageId = self.currentPageOnMainThread.id.intValue + 1;
-    if( newPageId >= SEQUENCER_PAGES )
+    int newPageId = self.sequencer.currentPageId + 1;
+    if( newPageId >= kSequencerNumberOfPages )
         newPageId = 0;
     [self showPage:newPageId from:1];
-}
-
-- (void) decrementBPM
-{
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            float newBPM = roundf( [_sequencer.bpm floatValue] ) - 1;
-            if( newBPM < 20 )
-                newBPM = 20;
-            _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-        
-    });
-}
-
-- (void) incrementBPM
-{
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        
-        [self.managedObjectContext performBlockAndWait:^(void) {
-            float newBPM = roundf( [_sequencer.bpm floatValue] ) + 1;
-            if( newBPM > 300 )
-                newBPM = 300;
-            _sequencer.bpm = [NSNumber numberWithFloat:newBPM];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-        
-    });
-}
-
-- (void) setCurrentPagePattern:(int)patternId
-{
-    BOOL patternQuantizationOn = NO;
-    
-    if( self.sequencerOnMainThread.patternQuantization.unsignedIntValue > 0 )
-        patternQuantizationOn = YES;
-    
-    self.currentSequencerPageState.nextPatternId = [NSNumber numberWithInt:patternId];
-    
-    // If pattern quantization is disabled
-    if( !patternQuantizationOn ) {
-        [self updateUI];
-        
-    } else {
-        self.currentPatternSegmentedControl.selectedSegment = self.currentSequencerPageState.currentPatternId.integerValue;
-    }
-}
-
-- (void) setAllPagePatterns:(int)patternId
-{
-    BOOL patternQuantizationOn = NO;
-    
-    if( self.sequencerOnMainThread.patternQuantization.unsignedIntValue > 0 )
-        patternQuantizationOn = YES;
-    
-    for( SequencerPageState *pageState in self.sequencerState.pageStates ) {
-        pageState.nextPatternId = [NSNumber numberWithInt:patternId];   
-    }
-    
-    // If pattern quantization is disabled
-    if( !patternQuantizationOn ) {
-        [self updateUI];
-        
-    } else {
-        self.currentPatternSegmentedControl.selectedSegment = self.currentSequencerPageState.currentPatternId.integerValue;
-    }
-}
-
-- (void) setCurrentPagePlayMode:(EatsSequencerPlayMode)playMode
-{
-    if( self.currentSequencerPageState.playMode.intValue == playMode )
-        return;
-    
-    self.currentSequencerPageState.playMode = [NSNumber numberWithInteger:playMode];
-    
-    self.currentSequencerPageState.nextStep = nil;
-    
-    [self updateUI];
-}
-
-- (void) decrementCurrentPageTranspose
-{
-    int pageId = _currentPageOnMainThread.id.intValue;
-    
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        
-        [self.managedObjectContext performBlock:^(void) {
-            
-            SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
-            
-            int newTranspose = page.transpose.intValue - 1;
-            if( newTranspose < - 127 )
-                newTranspose = -127;
-            
-            page.transpose = [NSNumber numberWithInt:newTranspose];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-        
-    });
-}
-
-- (void) incrementCurrentPageTranspose
-{
-    int pageId = _currentPageOnMainThread.id.intValue;
-    
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        
-        [self.managedObjectContext performBlock:^(void) {
-            
-            SequencerPage *page = [_sequencer.pages objectAtIndex:pageId];
-            
-            int newTranspose = page.transpose.intValue + 1;
-            if( newTranspose > 127 )
-                newTranspose = 127;
-            
-            page.transpose = [NSNumber numberWithInt:newTranspose];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-        
-    });
-}
-
-- (void) clearPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
-{
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        
-        [self.managedObjectContext performBlock:^(void) {
-            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId.intValue];
-            [Sequencer clearPattern:[page.patterns objectAtIndex:patternId.intValue]];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
-}
-
-- (void) cutPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
-{
-    [self copyPattern:patternId inPage:pageId];
-    [self clearPattern:patternId inPage:pageId];
-}
-
-- (void) copyPattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
-{
-    // In order to avoid doing anything complicated and making the core data stuff support coding, here we just turn notes into an array of
-    // dictionary objects and then make them into NSData
-    
-    SequencerPattern *pattern = [[[_sequencerOnMainThread.pages objectAtIndex:pageId.unsignedIntValue] patterns] objectAtIndex:patternId.unsignedIntValue];
-    
-    if( pattern.notes.count ) {
-        
-        NSMutableArray *notesArray = [NSMutableArray arrayWithCapacity:pattern.notes.count];
-        
-        for( SequencerNote *note in pattern.notes) {
-            NSDictionary *noteProperties = [NSDictionary dictionaryWithObjectsAndKeys:note.length, @"length",
-                                                                                     note.row, @"row",
-                                                                                     note.step, @"step",
-                                                                                     note.velocity, @"velocity",
-                                                                                     nil];
-            [notesArray addObject:noteProperties];
-        }
-        
-        NSData *notesData = [NSKeyedArchiver archivedDataWithRootObject:notesArray];
-        
-        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-        [pasteboard clearContents];
-        
-        NSString *pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
-        NSArray *pasteboardTypes = [NSArray arrayWithObject:pasteboardType];
-        [pasteboard declareTypes:pasteboardTypes owner:nil];
-        
-        [pasteboard setData:notesData forType:pasteboardType];
-    }
-}
-
-- (void) pastePattern:(NSNumber *)patternId inPage:(NSNumber *)pageId
-{
-    NSString *pasteboardType = SEQUENCER_NOTES_DATA_PASTEBOARD_TYPE;
-    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-    
-    NSData *notesData = [pasteboard dataForType:pasteboardType];
-    if( notesData ) {
-        NSArray *newNotes = [NSKeyedUnarchiver unarchiveObjectWithData:notesData];
-        
-        NSMutableSet *newNotesSet = [NSMutableSet setWithCapacity:newNotes.count];
-            
-        for( NSDictionary *noteProperties in newNotes ) {
-            SequencerNote *newNote = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerNote" inManagedObjectContext:self.managedObjectContextForMainThread];
-            newNote.length = [noteProperties valueForKey:@"length"];
-            newNote.row = [noteProperties valueForKey:@"row"];
-            newNote.step = [noteProperties valueForKey:@"step"];
-            newNote.velocity = [noteProperties valueForKey:@"velocity"];
-            [newNotesSet addObject:newNote];
-        }
-        
-        SequencerPattern *pattern = [[[_sequencerOnMainThread.pages objectAtIndex:pageId.unsignedIntValue] patterns] objectAtIndex:patternId.unsignedIntValue];
-        pattern.notes = newNotesSet;
-
-        [self childMOCChanged];
-    }
 }
 
 
@@ -1364,25 +716,12 @@
 
 - (IBAction)bpmTextField:(NSTextField *)sender
 {
-    if( !_sequencerOnMainThread.bpm )
-        _sequencerOnMainThread.bpm = [NSNumber numberWithInt:100];
-    
-    [self childMOCChanged];
+    //TODO
 }
 
 - (IBAction)bpmStepper:(NSStepper *)sender
 {
-    [self childMOCChanged];
-    
-    dispatch_async(self.bigSerialQueue, ^(void) {
-        [self.managedObjectContext performBlock:^(void) {
-            self.sequencer.bpm = [NSNumber numberWithFloat:roundf( self.sequencer.bpm.floatValue )];
-            NSError *saveError = nil;
-            [self.managedObjectContext save:&saveError];
-            if( saveError )
-                NSLog(@"Save error: %@", saveError);
-        }];
-    });
+    //TODO
 }
 
 
@@ -1403,25 +742,23 @@
 
 - (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
 {
-    self.sequencerOnMainThread.stepQuantization = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-    [self childMOCChanged];
+    [self.sequencer setStepQuantization:[[[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"] intValue]];
 }
 
 - (IBAction) patternQuantizationPopup:(NSPopUpButton *)sender
 {
-    self.sequencerOnMainThread.patternQuantization = [[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-    [self childMOCChanged];
+    [self.sequencer setPatternQuantization:[[[self.patternQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"] intValue]];
 }
 
 - (IBAction) currentPageSegmentedControl:(NSSegmentedControl *)sender
 {
     // Edit name
-    if( sender.selectedSegment == _currentPageOnMainThread.id.integerValue ) {
+    if( sender.selectedSegment == [self.sequencer currentPageId] ) {
         // Make a text field, add it to an alert and then show it so you can edit the page name
         
         NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
         
-        accessoryTextField.stringValue = self.currentPageOnMainThread.name;
+        accessoryTextField.stringValue = [self.sequencer nameForPage:[self.sequencer currentPageId]];
         
         NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
                                                   defaultButton:@"OK"
@@ -1440,34 +777,38 @@
 
 - (IBAction)currentPatternSegmentedControl:(NSSegmentedControl *)sender
 {
-    [self setCurrentPagePattern:(int)sender.selectedSegment];
+        // TODO
+//    [self setCurrentPagePattern:(int)sender.selectedSegment];
 }
 
 - (IBAction)pagePlaybackControls:(NSSegmentedControl *)sender
 {
-    [self setCurrentPagePlayMode:(int)sender.selectedSegment];
+        // TODO
+//    [self setCurrentPagePlayMode:(int)sender.selectedSegment];
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)obj
 {
+    
+    // TODO
+    
     // We re-create the pitches so that it will trigger KVO
-    NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:_currentPageOnMainThread.pitches.count];
-    
-    for( SequencerRowPitch *rowPitch in _currentPageOnMainThread.pitches ) {
-        SequencerRowPitch *newRowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContextForMainThread];
-        newRowPitch.row = rowPitch.row;
-        newRowPitch.pitch = rowPitch.pitch;
-        [newPitches addObject:rowPitch];
-    }
-    
-    // Then modify the appropriate row
-    NSInteger rowIndex = self.rowPitchesTableView.numberOfRows - 1 - self.rowPitchesTableView.selectedRow;
-    SequencerRowPitch *rowPitch = [newPitches objectAtIndex:rowIndex];
-    rowPitch.pitch = [[_currentPagePitches objectAtIndex:rowIndex] valueForKey:@"pitch"];
-    
-    // And update the page
-    _currentPageOnMainThread.pitches = newPitches;
-    [self childMOCChanged];
+//    NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:_currentPageOnMainThread.pitches.count];
+//    
+//    for( SequencerRowPitch *rowPitch in _currentPageOnMainThread.pitches ) {
+//        SequencerRowPitch *newRowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContextForMainThread];
+//        newRowPitch.row = rowPitch.row;
+//        newRowPitch.pitch = rowPitch.pitch;
+//        [newPitches addObject:rowPitch];
+//    }
+//    
+//    // Then modify the appropriate row
+//    NSInteger rowIndex = self.rowPitchesTableView.numberOfRows - 1 - self.rowPitchesTableView.selectedRow;
+//    SequencerRowPitch *rowPitch = [newPitches objectAtIndex:rowIndex];
+//    rowPitch.pitch = [[_currentPagePitches objectAtIndex:rowIndex] valueForKey:@"pitch"];
+//    
+//    // And update the page
+//    _currentPageOnMainThread.pitches = newPitches;
 }
 
 - (IBAction) scalesOpenSheetButton:(NSButton *)sender {
@@ -1488,48 +829,33 @@
                 
                 self.indexOflastSelectedScaleMode = self.scaleGeneratorSheetController.indexOfLastSelectedScaleMode;
                 
-                int pageId = self.currentPageOnMainThread.id.intValue;
+                // TODO (move into Sequencer?)
                 
-                dispatch_async(self.bigSerialQueue, ^(void) {
-                    [self.managedObjectContext performBlock:^(void) {
-                        // Check what note the user entered
-                        WMNote *tonicNote;
-                        if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
-                            tonicNote = [[WMPool pool] noteWithMidiNoteNumber:noteName.intValue]; // Lookup by MIDI value if they enetered a number
-                        else
-                            tonicNote = [[WMPool pool] noteWithShortName:noteName]; // Otherwise use the short name
-                        
-                        // If we found a note then generate the sequence
-                        if( tonicNote ) {
-                            
-                            // Generate pitches
-                            NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:scaleMode length:16];
+                // Check what note the user entered
+                WMNote *tonicNote;
+                if ( [[NSScanner scannerWithString:noteName] scanInt:nil] )
+                    tonicNote = [[WMPool pool] noteWithMidiNoteNumber:noteName.intValue]; // Lookup by MIDI value if they enetered a number
+                else
+                    tonicNote = [[WMPool pool] noteWithShortName:noteName]; // Otherwise use the short name
+                
+                // If we found a note then generate the sequence
+                if( tonicNote ) {
+                    
+                    // Generate pitches
+                    NSArray *sequenceOfNotes = [WMPool sequenceOfNotesWithRootShortName:tonicNote.shortName scaleMode:scaleMode length:16];
 
-                            // Put them into the page
-                            SequencerPage *page = [self.sequencer.pages objectAtIndex:pageId];
-                            NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:sequenceOfNotes.count];
-                            
-                            int r = 0;
-                            for( WMNote *note in sequenceOfNotes ) {
-                                
-                                SequencerRowPitch *rowPitch = [NSEntityDescription insertNewObjectForEntityForName:@"SequencerRowPitch" inManagedObjectContext:self.managedObjectContext];
-                                rowPitch.row = [NSNumber numberWithInt:r];
-                                rowPitch.pitch = [NSNumber numberWithInt:note.midiNoteNumber];
-                                [newPitches addObject:rowPitch];
-                                r++;
-                            }
-                            
-                            page.pitches = newPitches;
-                            
-                            // Remember what scale was just generated
-                            self.lastTonicNoteName = tonicNote.shortName;
-                        }
-                        NSError *saveError = nil;
-                        [self.managedObjectContext save:&saveError];
-                        if( saveError )
-                            NSLog(@"Save error: %@", saveError);
-                    }];
-                });
+                    // Put them into the page
+                    NSMutableOrderedSet *newPitches = [NSMutableOrderedSet orderedSetWithCapacity:sequenceOfNotes.count];
+                    
+                    for( WMNote *note in sequenceOfNotes ) {
+                        [newPitches addObject:[NSNumber numberWithInt:note.midiNoteNumber]];
+                    }
+                    
+                    [self.sequencer setPitches:newPitches forPage:[self.sequencer currentPageId]];
+                    
+                    // Remember what scale was just generated
+                    self.lastTonicNoteName = tonicNote.shortName;
+                }
                 
             // Cancel
             } else if (returnCode == NSCancelButton) {
@@ -1548,49 +874,64 @@
 
 - (IBAction) stepLengthPopup:(NSPopUpButton *)sender
 {
-    int pageId = self.currentPageOnMainThread.id.intValue;
+    // TODO
     
-    SequencerPage *page = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
-    page.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
-    
-    [self childMOCChanged];
+//    int pageId = self.currentPageOnMainThread.id.intValue;
+//    
+//    SequencerPage *page = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
+//    page.stepLength = [[self.stepQuantizationArray objectAtIndex:[sender indexOfSelectedItem]] valueForKey:@"quantization"];
+//    
+//    [self childMOCChanged];
 }
 
 - (IBAction)swingPopup:(NSPopUpButton *)sender
 {
-    int pageId = self.currentPageOnMainThread.id.intValue;
-    NSUInteger index = [sender indexOfSelectedItem];
+        // TODO
     
-    SequencerPage *page = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
-    page.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
-    page.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
-    
-    [self childMOCChanged];
+//    int pageId = self.currentPageOnMainThread.id.intValue;
+//    NSUInteger index = [sender indexOfSelectedItem];
+//    
+//    SequencerPage *page = [self.sequencerOnMainThread.pages objectAtIndex:pageId];
+//    page.swingType = [[self.swingArray objectAtIndex:index] valueForKey:@"type"];
+//    page.swingAmount = [[self.swingArray objectAtIndex:index] valueForKey:@"amount"];
+//    
+//    [self childMOCChanged];
 }
 
 - (IBAction)velocityGrooveCheckbox:(NSButton *)sender
 {
-    [self childMOCChanged];
+    // TODO
 }
 
 
 - (IBAction)transposeTextField:(NSTextField *)sender
 {
-    if( !_currentPageOnMainThread.transpose )
-        _currentPageOnMainThread.transpose = [NSNumber numberWithInt:0];
-    [self childMOCChanged];
-    [self.gridNavigationController updateGridView];
+    // TODO
 }
 
 - (IBAction)transposeStepper:(NSStepper *)sender
 {
-    [self childMOCChanged];
-    [self.gridNavigationController updateGridView];
+    // TODO
 }
 
 
 
-#pragma mark - Keyboard and trackpad input
+#pragma mark - Keyboard input and cut/copy/paste delegate methods for EatsDebugGridView
+
+- (void) cutCurrentPattern
+{
+    [self.sequencer pasteboardCutNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:[self.sequencer currentPageId]] inPage:[self.sequencer currentPageId]];
+}
+
+- (void) copyCurrentPattern
+{
+    [self.sequencer pasteboardCopyNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:[self.sequencer currentPageId]] inPage:[self.sequencer currentPageId]];
+}
+
+- (void) pasteToCurrentPattern
+{
+    [self.sequencer pasteboardPasteNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:[self.sequencer currentPageId]] inPage:[self.sequencer currentPageId]];
+}
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
@@ -1604,6 +945,10 @@
         [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
 }
 
+
+
+#pragma mark - Keyboard and trackpad input from KeyboardInputView
+
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
     // Sequencer playback
@@ -1614,10 +959,10 @@
     // BPM
     // -
     else if( keyCode.intValue == 27 )
-        [self decrementBPM];
+        [self.sequencer decrementBPM];
     // +
     else if( keyCode.intValue == 24 )
-        [self incrementBPM];
+        [self.sequencer incrementBPM];
 
     // Pages
     // F1
@@ -1662,9 +1007,9 @@
             nextPatternId = 0;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
+            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self setCurrentPagePattern:nextPatternId];
+            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         
     // 2
     } else if( keyCode.intValue == 19 ) {
@@ -1675,9 +1020,9 @@
             nextPatternId = 1;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
+            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self setCurrentPagePattern:nextPatternId];
+            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         
     // 3
     } else if( keyCode.intValue == 20 ) {
@@ -1688,9 +1033,9 @@
             nextPatternId = 2;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
+            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self setCurrentPagePattern:nextPatternId];
+            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         
     // 4
     } else if( keyCode.intValue == 21 ) {
@@ -1701,9 +1046,9 @@
             nextPatternId = 3;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
+            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self setCurrentPagePattern:nextPatternId];
+            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         
     // 5
     } else if( keyCode.intValue == 23 ) {
@@ -1714,9 +1059,9 @@
             nextPatternId = 4;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
+            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self setCurrentPagePattern:nextPatternId];
+            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         
     // 6
     } else if( keyCode.intValue == 22 ) {
@@ -1727,9 +1072,9 @@
             nextPatternId = 5;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self setAllPagePatterns:nextPatternId];
+            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self setCurrentPagePattern:nextPatternId];
+            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         
     // 7
     } else if( keyCode.intValue == 26 ) {
@@ -1737,9 +1082,9 @@
             int nextPatternId = 6;
         
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self setAllPagePatterns:nextPatternId];
+                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self setCurrentPagePattern:nextPatternId];
+                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         }
         
     // 8
@@ -1748,9 +1093,9 @@
             int nextPatternId = 7;
         
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self setAllPagePatterns:nextPatternId];
+                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self setCurrentPagePattern:nextPatternId];
+                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         }
         
     // 9
@@ -1759,9 +1104,9 @@
             int nextPatternId = 8;
             
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self setAllPagePatterns:nextPatternId];
+                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self setCurrentPagePattern:nextPatternId];
+                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         }
         
     // 0
@@ -1770,32 +1115,32 @@
             int nextPatternId = 9;
             
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self setAllPagePatterns:nextPatternId];
+                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self setCurrentPagePattern:nextPatternId];
+                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:[self.sequencer currentPageId]];
         }
     
     // Play mode
     // p
     } else if( keyCode.intValue == 35 )
-        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Pause];
+        [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:[self.sequencer currentPageId]];
     // >
     else if( keyCode.intValue == 47 )
-        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Forward];
+        [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:[self.sequencer currentPageId]];
     // <
     else if( keyCode.intValue == 43 )
-        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Reverse];
+        [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:[self.sequencer currentPageId]];
     // ? (without any modifier)
     else if( keyCode.intValue == 44 && modifierFlags.intValue == 256 )
-        [self setCurrentPagePlayMode:EatsSequencerPlayMode_Random];
+        [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:[self.sequencer currentPageId]];
     
     // Transpose
     // [
     else if( keyCode.intValue == 33 )
-        [self decrementCurrentPageTranspose];
+        [self.sequencer decrementTransposeForPage:[self.sequencer currentPageId]];
     // ]
     else if( keyCode.intValue == 30 )
-        [self incrementCurrentPageTranspose];
+        [self.sequencer incrementTransposeForPage:[self.sequencer currentPageId]];
     
     // Debug info
     // d

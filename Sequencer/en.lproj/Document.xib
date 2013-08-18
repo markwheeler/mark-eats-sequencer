@@ -22,7 +22,6 @@
 			<string>NSMenu</string>
 			<string>NSMenuItem</string>
 			<string>NSNumberFormatter</string>
-			<string>NSObjectController</string>
 			<string>NSPopUpButton</string>
 			<string>NSPopUpButtonCell</string>
 			<string>NSScrollView</string>
@@ -66,22 +65,6 @@
 				<bool key="NSSelectsInsertedObjects">YES</bool>
 				<bool key="NSFilterRestrictsInsertion">YES</bool>
 				<bool key="NSClearsFilterPredicateOnInsertion">YES</bool>
-			</object>
-			<object class="NSObjectController" id="371356270">
-				<bool key="NSEditable">YES</bool>
-				<bool key="NSAutomaticallyPreparesContent">YES</bool>
-				<object class="_NSManagedProxy" key="_NSManagedProxy">
-					<string key="NSEntityName">Sequencer</string>
-				</object>
-				<bool key="_NSIsUsingManagedProxy">YES</bool>
-			</object>
-			<object class="NSObjectController" id="115531995">
-				<bool key="NSEditable">YES</bool>
-				<bool key="NSAutomaticallyPreparesContent">YES</bool>
-				<object class="_NSManagedProxy" key="_NSManagedProxy">
-					<string key="NSEntityName">SequencerPage</string>
-				</object>
-				<bool key="_NSIsUsingManagedProxy">YES</bool>
 			</object>
 			<object class="NSWindowTemplate" id="275939982">
 				<int key="NSWindowStyleMask">7</int>
@@ -435,7 +418,6 @@
 							</set>
 							<string key="NSFrame">{{0, 474}, {841, 8}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSImageCell" key="NSCell" id="501284141">
@@ -818,7 +800,7 @@
 													<int key="NSvFlags">256</int>
 													<string key="NSFrameSize">{144, 306}</string>
 													<reference key="NSSuperview" ref="484382370"/>
-													<reference key="NSNextKeyView" ref="384456630"/>
+													<reference key="NSNextKeyView" ref="457660602"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -995,7 +977,7 @@
 									</array>
 									<string key="NSFrame">{{445, 54}, {146, 308}}</string>
 									<reference key="NSSuperview" ref="463324255"/>
-									<reference key="NSNextKeyView" ref="457660602"/>
+									<reference key="NSNextKeyView" ref="484382370"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133650</int>
 									<reference key="NSVScroller" ref="384456630"/>
@@ -1403,14 +1385,6 @@
 					<int key="connectionID">100146</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">pageObjectController</string>
-						<reference key="source" ref="512844837"/>
-						<reference key="destination" ref="115531995"/>
-					</object>
-					<int key="connectionID">100962</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
 						<string key="label">stepQuantizationPopup:</string>
 						<reference key="source" ref="512844837"/>
@@ -1644,110 +1618,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">managedObjectContext: managedObjectContextForMainThread</string>
-						<reference key="source" ref="115531995"/>
-						<reference key="destination" ref="512844837"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="115531995"/>
-							<reference key="NSDestination" ref="512844837"/>
-							<string key="NSLabel">managedObjectContext: managedObjectContextForMainThread</string>
-							<string key="NSBinding">managedObjectContext</string>
-							<string key="NSKeyPath">managedObjectContextForMainThread</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">104776</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">managedObjectContext: managedObjectContextForMainThread</string>
-						<reference key="source" ref="371356270"/>
-						<reference key="destination" ref="512844837"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="371356270"/>
-							<reference key="NSDestination" ref="512844837"/>
-							<string key="NSLabel">managedObjectContext: managedObjectContextForMainThread</string>
-							<string key="NSBinding">managedObjectContext</string>
-							<string key="NSKeyPath">managedObjectContextForMainThread</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">104762</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: self.sharedPreferences.midiClockSourceName</string>
-						<reference key="source" ref="429705853"/>
-						<reference key="destination" ref="512844837"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="429705853"/>
-							<reference key="NSDestination" ref="512844837"/>
-							<string key="NSLabel">enabled: self.sharedPreferences.midiClockSourceName</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">self.sharedPreferences.midiClockSourceName</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSIsNil</string>
-							</object>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">104043</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.bpm</string>
-						<reference key="source" ref="429705853"/>
-						<reference key="destination" ref="371356270"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="429705853"/>
-							<reference key="NSDestination" ref="371356270"/>
-							<string key="NSLabel">value: selection.bpm</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.bpm</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">105565</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: self.sharedPreferences.midiClockSourceName</string>
-						<reference key="source" ref="709941088"/>
-						<reference key="destination" ref="512844837"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="709941088"/>
-							<reference key="NSDestination" ref="512844837"/>
-							<string key="NSLabel">enabled: self.sharedPreferences.midiClockSourceName</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">self.sharedPreferences.midiClockSourceName</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSIsNil</string>
-							</object>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">104048</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.bpm</string>
-						<reference key="source" ref="709941088"/>
-						<reference key="destination" ref="371356270"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="709941088"/>
-							<reference key="NSDestination" ref="371356270"/>
-							<string key="NSLabel">value: selection.bpm</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.bpm</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">105563</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">contentArray: self.currentPagePitches</string>
 						<reference key="source" ref="185968808"/>
 						<reference key="destination" ref="512844837"/>
@@ -1761,74 +1631,6 @@
 						</object>
 					</object>
 					<int key="connectionID">105552</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.velocityGroove</string>
-						<reference key="source" ref="647891315"/>
-						<reference key="destination" ref="115531995"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="647891315"/>
-							<reference key="NSDestination" ref="115531995"/>
-							<string key="NSLabel">value: selection.velocityGroove</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.velocityGroove</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">106569</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.transpose</string>
-						<reference key="source" ref="178833538"/>
-						<reference key="destination" ref="115531995"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="178833538"/>
-							<reference key="NSDestination" ref="115531995"/>
-							<string key="NSLabel">value: selection.transpose</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.transpose</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">106573</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.transpose</string>
-						<reference key="source" ref="244997050"/>
-						<reference key="destination" ref="115531995"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="244997050"/>
-							<reference key="NSDestination" ref="115531995"/>
-							<string key="NSLabel">value: selection.transpose</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">selection.transpose</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">106574</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">displayPatternValue1: selection.channel</string>
-						<reference key="source" ref="193933176"/>
-						<reference key="destination" ref="115531995"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="193933176"/>
-							<reference key="NSDestination" ref="115531995"/>
-							<string key="NSLabel">displayPatternValue1: selection.channel</string>
-							<string key="NSBinding">displayPatternValue1</string>
-							<string key="NSKeyPath">selection.channel</string>
-							<dictionary key="NSOptions">
-								<string key="NSDisplayPattern">Channel %{value1}@</string>
-								<string key="NSValueTransformerName">EatsPlusOneValueTransformer</string>
-							</dictionary>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">106575</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2393,18 +2195,6 @@
 						<reference key="object" ref="796877042"/>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Application</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">100960</int>
-						<reference key="object" ref="371356270"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">SequencerObjectController</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">100955</int>
-						<reference key="object" ref="115531995"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">PageObjectController</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">101619</int>
@@ -4320,8 +4110,6 @@
 				<string key="-1.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="-2.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="-3.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="100955.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="100960.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="101619.IBNSViewMetadataTranslatesAutoresizingMaskIntoConstraints"/>
 				<string key="101619.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<array class="NSMutableArray" key="101620.IBNSViewMetadataConstraints">
@@ -4655,116 +4443,7 @@
 			<nil key="sourceID"/>
 			<int key="maxID">107475</int>
 		</object>
-		<object class="IBClassDescriber" key="IBDocument.Classes">
-			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
-				<object class="IBPartialClassDescription">
-					<string key="className">Document</string>
-					<string key="superclassName">NSPersistentDocument</string>
-					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="clockLateIndicator">NSImageView</string>
-						<string key="currentPageSegmentedControl">NSSegmentedControl</string>
-						<string key="currentPatternSegmentedControl">NSSegmentedControl</string>
-						<string key="debugGridView">EatsDebugGridView</string>
-						<string key="documentWindow">NSWindow</string>
-						<string key="pageObjectController">NSObjectController</string>
-						<string key="pagePlaybackControls">NSSegmentedControl</string>
-						<string key="pageView">KeyboardInputView</string>
-						<string key="patternQuantizationPopup">NSPopUpButton</string>
-						<string key="rowPitchesTableView">NSTableView</string>
-						<string key="sequencerPlaybackControls">NSSegmentedControl</string>
-						<string key="stepLengthPopup">NSPopUpButton</string>
-						<string key="stepQuantizationPopup">NSPopUpButton</string>
-						<string key="swingPopup">NSPopUpButton</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="clockLateIndicator">
-							<string key="name">clockLateIndicator</string>
-							<string key="candidateClassName">NSImageView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="currentPageSegmentedControl">
-							<string key="name">currentPageSegmentedControl</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="currentPatternSegmentedControl">
-							<string key="name">currentPatternSegmentedControl</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="debugGridView">
-							<string key="name">debugGridView</string>
-							<string key="candidateClassName">EatsDebugGridView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="documentWindow">
-							<string key="name">documentWindow</string>
-							<string key="candidateClassName">NSWindow</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="pageObjectController">
-							<string key="name">pageObjectController</string>
-							<string key="candidateClassName">NSObjectController</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="pagePlaybackControls">
-							<string key="name">pagePlaybackControls</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="pageView">
-							<string key="name">pageView</string>
-							<string key="candidateClassName">KeyboardInputView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="patternQuantizationPopup">
-							<string key="name">patternQuantizationPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="rowPitchesTableView">
-							<string key="name">rowPitchesTableView</string>
-							<string key="candidateClassName">NSTableView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="sequencerPlaybackControls">
-							<string key="name">sequencerPlaybackControls</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="stepLengthPopup">
-							<string key="name">stepLengthPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="stepQuantizationPopup">
-							<string key="name">stepQuantizationPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="swingPopup">
-							<string key="name">swingPopup</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-					</dictionary>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/Document.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">EatsDebugGridView</string>
-					<string key="superclassName">NSView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/EatsDebugGridView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">KeyboardInputView</string>
-					<string key="superclassName">NSView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/KeyboardInputView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">NSLayoutConstraint</string>
-					<string key="superclassName">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/NSLayoutConstraint.h</string>
-					</object>
-				</object>
-			</array>
-		</object>
+		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>
 		<string key="IBDocument.TargetRuntimeIdentifier">IBCocoaFramework</string>
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
