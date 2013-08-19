@@ -33,6 +33,8 @@ typedef enum SequencerErrorCode {
 
 #pragma mark - Notifications
 
+extern NSString *const kPreferencesThatRequiresGridRedrawDidChangeNotification;
+
 // Song
 
 extern NSString *const kSequencerSongBPMDidChangeNotification;
@@ -45,20 +47,20 @@ extern NSString *const kSequencerPageNameDidChangeNotification;
 extern NSString *const kSequencerPageStepLengthDidChangeNotification;
 extern NSString *const kSequencerPageLoopDidChangeNotification;
 
-extern NSString *const kSequencerPageSwingTypeDidChangeNotification;
-extern NSString *const kSequencerPageSwingAmountDidChangeNotification;
+extern NSString *const kSequencerPageSwingDidChangeNotification;
 extern NSString *const kSequencerPageVelocityGrooveDidChangeNotification;
 extern NSString *const kSequencerPageTransposeDidChangeNotification;
 extern NSString *const kSequencerPageTransposeZeroStepDidChangeNotification;
 
 extern NSString *const kSequencerPagePitchesDidChangeNotification;
 
-extern NSString *const kSequencerPatternDidChangeNotification;
+extern NSString *const kSequencerPagePatternNotesDidChangeNotification;
 
 
 // State
 
-extern NSString *const kSequencerStateCurrentPageDidChangeNotification;
+extern NSString *const kSequencerStateCurrentPageDidChangeLeftNotification;
+extern NSString *const kSequencerStateCurrentPageDidChangeRightNotification;
 
 extern NSString *const kSequencerPageStateCurrentPatternIdDidChangeNotification;
 extern NSString *const kSequencerPageStateNextPatternIdDidChangeNotification;

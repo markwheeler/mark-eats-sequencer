@@ -20,10 +20,20 @@
 #define SEQUENCER_MIDI_MIN 0
 #define SEQUENCER_MIDI_MAX 127
 
+#define MIN_QUANTIZATION 64
+#define MAX_QUANTIZATION 1
+
 @interface Sequencer : NSObject
 
 @property NSUndoManager         *undoManager;
 
+@property NSArray               *stepQuantizationArray;
+@property NSArray               *patternQuantizationArray;
+@property NSArray               *swingArray;
+
+- (NSString *) debugInfo;
+
+- (void) updatePatternQuantizationSettings;
 
 // Song
 - (NSData *) songKeyedArchiveData;
@@ -31,8 +41,8 @@
 
 - (void) addDummyData;
 
-- (int) checkForNotesOutsideOfGrid;
-- (int) removeNotesOutsideOfGrid;
+- (NSUInteger) checkForNotesOutsideOfGrid;
+- (NSUInteger) removeNotesOutsideOfGrid;
 
 - (float) bpm;
 - (void) setBPM:(float)bpm;
@@ -75,12 +85,8 @@
 
 - (int) swingTypeForPage:(uint)pageId;
 - (void) setSwingType:(int)swingType forPage:(uint)pageId;
-- (void) incrementSwingTypeForPage:(uint)pageId;
-- (void) decrementSwingTypeForPage:(uint)pageId;
 - (int) swingAmountForPage:(uint)pageId;
 - (void) setSwingAmount:(int)swingAmount forPage:(uint)pageId;
-- (void) incrementSwingAmountForPage:(uint)pageId;
-- (void) decrementSwingAmountForPage:(uint)pageId;
 - (void) setSwingType:(int)swingType andSwingAmount:(int)swingAmount forPage:(uint)pageId;
 
 - (BOOL) velocityGrooveForPage:(uint)pageId;
@@ -94,8 +100,8 @@
 - (int) transposeZeroStepForPage:(uint)pageId;
 - (void) setTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId;
 
-- (NSOrderedSet *) pitchesForPage:(uint)pageId;
-- (void) setPitches:(NSMutableOrderedSet *)pitches forPage:(uint)pageId;
+- (NSArray *) pitchesForPage:(uint)pageId;
+- (void) setPitches:(NSMutableArray *)pitches forPage:(uint)pageId;
 - (int) pitchAtRow:(uint)row forPage:(uint)pageId;
 - (void) setPitch:(int)pitch atRow:(uint)row forPage:(uint)pageId;
 
@@ -114,6 +120,7 @@
 
 // Note
 - (SequencerNote *) noteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
+- (SequencerNote *) noteThatIsSelectableAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
 
 - (NSSet *) notesAtStep:(uint)step inPattern:(uint)patternId inPage:(uint)pageId;
 - (NSSet *) notesAtRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
@@ -136,6 +143,8 @@
 // State
 - (int) currentPageId;
 - (void) setCurrentPageId:(int)pageId;
+- (void) incrementCurrentPageId;
+- (void) decrementCurrentPageId;
 
 - (int) currentPatternIdForPage:(uint)pageId;
 - (void) setCurrentPatternId:(int)patternId forPage:(uint)pageId;

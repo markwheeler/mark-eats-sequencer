@@ -13,8 +13,6 @@
 
 @protocol ClockTickDelegateProtocol
 @property BOOL isActive;
-@optional
-- (void) updateUI;
 @end
 
 @interface ClockTick : NSObject <EatsClockDelegateProtocol>

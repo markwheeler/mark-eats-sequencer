@@ -23,7 +23,6 @@
 
 @property Preferences               *sharedPreferences;
 
-- (void) updateUI;
 - (void) clearPatternStartAlert;
 - (void) showClockLateIndicator;
 

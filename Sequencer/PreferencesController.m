@@ -193,7 +193,7 @@
 }
 
 - (IBAction)supportsVariableBrightnessCheckbox:(NSButton *)sender {
-    [self.delegate performSelector:@selector(updateUI)];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPreferencesThatRequiresGridRedrawDidChangeNotification object:self];
 }
 
 - (IBAction) midiOutputCheckbox:(id)sender {
@@ -237,7 +237,7 @@
 }
 - (IBAction)showNoteLengthOnGridCheckbox:(NSButton *)sender
 {
-    [self.delegate performSelector:@selector(updateUI)];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPreferencesThatRequiresGridRedrawDidChangeNotification object:self];
 }
 
 @end

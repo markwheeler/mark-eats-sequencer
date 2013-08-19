@@ -19,6 +19,6 @@
 @property int                   stepQuantization;
 @property int                   patternQuantization;
 
-@property NSOrderedSet          *pages; // Position in set denotes id
+@property NSArray               *pages; // Position in array denotes id
 
 @end

@@ -23,7 +23,7 @@
 @property int                   transpose;
 @property int                   transposeZeroStep;
 
-@property NSMutableOrderedSet   *patterns; // Each pattern is just an NSMutableSet of notes. Position in this set denotes id
-@property NSMutableOrderedSet   *pitches; // Just contains NSNumbers. Position in set denotes row
+@property NSMutableArray        *patterns; // Each pattern is just an NSMutableSet of notes. Position in this array denotes id
+@property NSMutableArray        *pitches; // Just contains NSNumbers. Position in array denotes row
 
 @end

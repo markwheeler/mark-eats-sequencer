@@ -133,7 +133,6 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    // TODO rework
     if( !self.notes )
         return;
     

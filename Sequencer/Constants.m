@@ -23,6 +23,8 @@ NSString *const kSequencerErrorDomain = @"com.MarkEats.Sequencer.ErrorDomain";
 
 #pragma mark - Notifications
 
+NSString *const kPreferencesThatRequiresGridRedrawDidChangeNotification = @"PreferencesThatRequiresGridRedrawDidChangeNotification";
+
 // Song
 
 NSString *const kSequencerSongBPMDidChangeNotification = @"SequencerSongBPMDidChangeNotification";
@@ -35,20 +37,20 @@ NSString *const kSequencerPageNameDidChangeNotification = @"SequencerPageNameDid
 NSString *const kSequencerPageStepLengthDidChangeNotification = @"SequencerPageStepLengthDidChangeNotification";
 NSString *const kSequencerPageLoopDidChangeNotification = @"SequencerPageLoopDidChangeNotification";
 
-NSString *const kSequencerPageSwingTypeDidChangeNotification = @"SequencerPageSwingTypeDidChangeNotification";
-NSString *const kSequencerPageSwingAmountDidChangeNotification = @"SequencerPageSwingAmountDidChangeNotification";
+NSString *const kSequencerPageSwingDidChangeNotification = @"SequencerPageSwingDidChangeNotification";
 NSString *const kSequencerPageVelocityGrooveDidChangeNotification = @"SequencerPageVelocityGrooveDidChangeNotification";
 NSString *const kSequencerPageTransposeDidChangeNotification = @"SequencerPageTransposeDidChangeNotification";
 NSString *const kSequencerPageTransposeZeroStepDidChangeNotification = @"SequencerPageTransposeZeroStepDidChangeNotification";
 
 NSString *const kSequencerPagePitchesDidChangeNotification = @"SequencerPagePitchesDidChangeNotification";
 
-NSString *const kSequencerPatternDidChangeNotification = @"SequencerPatternDidChangeNotification";
+NSString *const kSequencerPagePatternNotesDidChangeNotification = @"SequencerPagePatternNotesDidChangeNotification";
 
 
 // State
 
-NSString *const kSequencerStateCurrentPageDidChangeNotification = @"SequencerStateCurrentPageDidChangeNotification";
+NSString *const kSequencerStateCurrentPageDidChangeLeftNotification = @"SequencerStateCurrentPageDidChangeLeftNotification";
+NSString *const kSequencerStateCurrentPageDidChangeRightNotification = @"SequencerStateCurrentPageDidChangeRightNotification";
 
 NSString *const kSequencerPageStateCurrentPatternIdDidChangeNotification = @"SequencerPageStateCurrentPatternIdDidChangeNotification";
 NSString *const kSequencerPageStateNextPatternIdDidChangeNotification = @"SequencerPageStateNextPatternIdDidChangeNotification";

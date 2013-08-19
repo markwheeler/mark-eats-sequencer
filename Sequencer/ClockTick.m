@@ -361,10 +361,6 @@ typedef enum EatsStepAdvance {
             
         }
         
-        // Tell the delegate to update the interface
-        if( aPageNeedsToAdvance && [_delegate respondsToSelector:@selector(updateUI)] )
-            [_delegate performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
-        
         [self incrementTick];
 
         
