@@ -13,17 +13,15 @@
 
 @implementation EatsGridView
 
-- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue width:(uint)w height:(uint)h
+- (id) initWithDelegate:(id)delegate andSequencer:(Sequencer *)sequencer width:(uint)w height:(uint)h
 {
     self = [super init];
     if (self) {
         
         _delegate = delegate;
-        _managedObjectContext = context;
+        _sequencer= sequencer;
         _width = w;
         _height = h;
-        
-        _bigSerialQueue = queue;
         
         [self setupView];
         
@@ -39,7 +37,6 @@
 
 - (void) dealloc
 {
-    //[self stopAnimation];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

@@ -24,25 +24,24 @@
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:height] atIndex:x];
         // Generate the rows
         for(int y = 0; y < height; y++) {
+            [[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
+        }
+    }
+    
+    for( EatsGridSubView *view in views ) {
+        if( view.visible ) {
             
-            BOOL foundView = NO;
-            
-            NSEnumerator *enumerator = views.objectEnumerator;
-            
-            EatsGridSubView *view;
-            
-            while ( (view = enumerator.nextObject) && !foundView) {
-                
-                // TODO: Modify this so views can overlap? Brightest pixel takes priority. Or add their values?!
-                
-                if( view.visible && x >= view.x && x < view.x + view.width && y >= view.y && y < view.y + view.height ) {
-                    [[gridArray objectAtIndex:x] insertObject:[[view.viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y ] atIndex:y];
-                    foundView = YES;
+            NSArray *viewArray = [view.viewArray copy];
+            uint x = view.x;
+            uint y;
+            for( NSArray *column in viewArray ) {
+                y = view.y;
+                for( NSNumber *number in column ) {
+                    [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:[[viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y]];
+                    y ++;
                 }
+                x ++;
             }
-            
-            if(!foundView)
-                [[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
         }
     }
     

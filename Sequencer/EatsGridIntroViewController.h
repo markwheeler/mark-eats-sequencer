@@ -1,22 +1,17 @@
-////
-////  EatsGridIntroViewController.h
-////  Sequencer
-////
-////  Created by Mark Wheeler on 04/03/2013.
-////  Copyright (c) 2013 Mark Eats. All rights reserved.
-////
 //
-//#import <Foundation/Foundation.h>
+//  EatsGridIntroViewController.h
+//  Sequencer
 //
-//@interface EatsGridIntroViewController : NSObject
+//  Created by Mark Wheeler on 19/08/2013.
+//  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
-//@property (weak) id delegate;
-//
-//@property uint width;
-//@property uint height;
-//
-//- (id) initWithDelegate:(id)delegate width:(uint)w height:(uint)h;
-//- (void) updateView;
-//- (void) stopAnimation;
-//
-//@end
+
+#import "EatsGridView.h"
+#import "EatsGridOKView.h"
+
+@interface EatsGridIntroViewController : EatsGridView <EatsGridSubViewDelegateProtocol, EatsGridOKViewDelegateProtocol>
+
+- (void) eatsGridOKViewPressAt:(NSDictionary *)xyDown sender:(EatsGridOKView *)sender;
+- (void) stopAnimation;
+
+@end

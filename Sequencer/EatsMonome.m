@@ -29,7 +29,7 @@
         _oscOutPort = port;
         _oscPrefix = prefix;
         
-        _sharedPreferences = [Preferences sharedPreferences];
+        self.sharedPreferences = [Preferences sharedPreferences];
         
     }
     return self;
@@ -105,7 +105,7 @@
     NSUInteger level;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if( _sharedPreferences.gridSupportsVariableBrightness ) {
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/set", _oscPrefix];
         level = l;
     } else {
@@ -128,7 +128,7 @@
     NSUInteger level;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if( _sharedPreferences.gridSupportsVariableBrightness ) {
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/all", _oscPrefix];
         level = l;
     } else {
@@ -149,7 +149,7 @@
     NSMutableArray *levels;
     
     // Check what kind of monome we have and adjust accordingly (no code above this should need to worry about it)
-    if( _sharedPreferences.gridSupportsVariableBrightness ) {
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/level/map", _oscPrefix];
         levels = [NSMutableArray arrayWithArray:l];
         

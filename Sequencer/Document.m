@@ -13,7 +13,7 @@
 #import "EatsSwingUtils.h"
 #import "ClockTick.h"
 #import "ScaleGeneratorSheetController.h"
-//#import "EatsGridNavigationController.h" TODO
+#import "EatsGridNavigationController.h"
 #import "EatsWMNoteValueTransformer.h"
 
 @interface Document ()
@@ -30,7 +30,7 @@ typedef enum DocumentPageAnimationDirection {
 
 @property EatsClock                     *clock;
 @property ClockTick                     *clockTick;
-//@property EatsGridNavigationController  *gridNavigationController; TODO
+@property EatsGridNavigationController  *gridNavigationController;
 @property ScaleGeneratorSheetController *scaleGeneratorSheetController;
 
 @property NSAlert                       *notesOutsideGridAlert;
@@ -79,13 +79,21 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void)setIsActive:(BOOL)isActive
 {
-    _isActive = isActive;
-//    if(self.gridNavigationController) self.gridNavigationController.isActive = isActive; TODO
+    @synchronized( self ) {
+        _isActive = isActive;
+    }
+    
+    if(self.gridNavigationController)
+        self.gridNavigationController.isActive = isActive;
 }
 
 - (BOOL)isActive
 {
-    return _isActive;
+    BOOL result;
+    @synchronized( self ) {
+        result = _isActive;
+    }
+    return result;
 }
 
 
@@ -146,9 +154,9 @@ typedef enum DocumentPageAnimationDirection {
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     
     // Create the gridNavigationController TODO: Bring this back
-    //    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithManagedObjectContext:self.managedObjectContext andSequencerState:_sequencerState andQueue:_bigSerialQueue];
-    //    self.gridNavigationController.delegate = self;
-    //    self.gridNavigationController.isActive = self.isActive;
+    self.gridNavigationController = [[EatsGridNavigationController alloc] initWithSequencer:self.sequencer];
+    self.gridNavigationController.delegate = self;
+    self.gridNavigationController.isActive = self.isActive;
     
     // Setup UI
     [self setupUI];
@@ -394,10 +402,10 @@ typedef enum DocumentPageAnimationDirection {
 - (void) logDebugInfo
 {
     NSLog(@"---- Debug info ----");
-    NSLog(@"Grid type: %i", _sharedPreferences.gridType);
-    NSLog(@"Grid supports variable brightness: %i", _sharedPreferences.gridSupportsVariableBrightness);
-    NSLog(@"Grid width: %u", _sharedPreferences.gridWidth);
-    NSLog(@"Grid height: %u", _sharedPreferences.gridHeight);
+    NSLog(@"Grid type: %i", self.sharedPreferences.gridType);
+    NSLog(@"Grid supports variable brightness: %i", self.sharedPreferences.gridSupportsVariableBrightness);
+    NSLog(@"Grid width: %u", self.sharedPreferences.gridWidth);
+    NSLog(@"Grid height: %u", self.sharedPreferences.gridHeight);
     NSArray *sequencerDebugInfo = [[self.sequencer debugInfo] componentsSeparatedByString:@"\r"];
     for( NSString *line in sequencerDebugInfo )
         NSLog(@"%@", line);
@@ -723,9 +731,9 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) updatePitches
 {
-    NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:_sharedPreferences.gridHeight];
+    NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:self.sharedPreferences.gridHeight];
     
-    for( int i = 0; i < _sharedPreferences.gridHeight; i ++ ) {
+    for( int i = 0; i < self.sharedPreferences.gridHeight; i ++ ) {
         
         int pitch = [self.sequencer pitchAtRow:i forPage:self.sequencer.currentPageId];
         

@@ -71,7 +71,7 @@
 //    _currentPattern = [self.delegate valueForKey:@"currentPattern"];
 //    
 //    // Get prefs
-//    _sharedPreferences = [Preferences sharedPreferences];
+//    self.sharedPreferences = [Preferences sharedPreferences];
 //    
 //    // KVO
 //    [_currentPattern.inPage addObserver:self forKeyPath:@"loopStart" options:NSKeyValueObservingOptionNew context:NULL];
@@ -1100,7 +1100,7 @@
 //            
 //        // BPM- button
 //        } else if( sender == _bpmDecrementButton ) {
-//            if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
+//            if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
 //                
 //                if( !_bpmRepeatTimer ) {
 //                    
@@ -1135,7 +1135,7 @@
 //            
 //        // BPM+ button
 //        } else if( sender == _bpmIncrementButton ) {
-//            if ( buttonDown && _sharedPreferences.midiClockSourceName == nil ) {
+//            if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
 //                
 //                if( !_bpmRepeatTimer ) {
 //                    

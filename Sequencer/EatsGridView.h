@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Sequencer.h"
 
 
 @protocol EatsGridSubViewDelegateProtocol
 - (void) showView:(NSNumber *)gridView;
+@optional
+- (void) stopAnimation;
 @end
 
 @interface EatsGridView : NSObject <EatsGridSubViewDelegateProtocol>
@@ -20,12 +23,10 @@
 @property uint                      width;
 @property uint                      height;
 
-@property NSManagedObjectContext    *managedObjectContext;
+@property Sequencer                 *sequencer;
 @property NSMutableSet              *subViews;
 
-@property dispatch_queue_t          bigSerialQueue;
-
-- (id) initWithDelegate:(id)delegate managedObjectContext:(NSManagedObjectContext *)context andQueue:(dispatch_queue_t)queue width:(uint)w height:(uint)h;
+- (id) initWithDelegate:(id)delegate andSequencer:(Sequencer *)sequencer width:(uint)w height:(uint)h;
 - (void) showView:(NSNumber *)gridView;
 - (void) setupView;
 - (void) updateView;

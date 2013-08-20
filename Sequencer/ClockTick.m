@@ -42,7 +42,7 @@ typedef enum EatsStepAdvance {
     self = [super init];
     if (self) {
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
-        _sharedPreferences = [Preferences sharedPreferences];
+        self.sharedPreferences = [Preferences sharedPreferences];
         self.sequencer = sequencer;
         
         kern_return_t kernError;
@@ -78,8 +78,8 @@ typedef enum EatsStepAdvance {
     
     _currentTick = 0;
     
-    if( _sharedPreferences.sendMIDIClock
-       && _sharedPreferences.midiClockSourceName == nil
+    if( self.sharedPreferences.sendMIDIClock
+       && self.sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         
         if( !ns )
@@ -95,8 +95,8 @@ typedef enum EatsStepAdvance {
 
 - (void) clockSongStop:(uint64_t)ns
 {
-    if( _sharedPreferences.sendMIDIClock
-       && _sharedPreferences.midiClockSourceName == nil
+    if( self.sharedPreferences.sendMIDIClock
+       && self.sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         
         if( !ns )
@@ -116,8 +116,8 @@ typedef enum EatsStepAdvance {
 
 - (void) songPositionZero
 {
-    if( _sharedPreferences.sendMIDIClock
-       && _sharedPreferences.midiClockSourceName == nil
+    if( self.sharedPreferences.sendMIDIClock
+       && self.sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
@@ -139,8 +139,8 @@ typedef enum EatsStepAdvance {
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
     if( _currentTick % (_ppqn / _midiClockPPQN) == 0
-       && _sharedPreferences.sendMIDIClock
-       && _sharedPreferences.midiClockSourceName == nil
+       && self.sharedPreferences.sendMIDIClock
+       && self.sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         [self sendMIDIClockPulseAtTime:ns];
     }
@@ -199,33 +199,33 @@ typedef enum EatsStepAdvance {
                     if( playMode == EatsSequencerPlayMode_Forward ) {
                         playNow ++;
                         if( loopStart <= loopEnd ) {
-                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > loopEnd )
+                            if( ( inLoop || self.sharedPreferences.loopFromScrubArea ) && playNow > loopEnd )
                                 playNow = loopStart;
                             else if( inLoop && playNow < loopStart )
                                 playNow = loopEnd;
                         } else {
-                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > loopEnd && playNow < loopStart )
+                            if( ( inLoop || self.sharedPreferences.loopFromScrubArea ) && playNow > loopEnd && playNow < loopStart )
                                 playNow = loopStart;
                         }
                         
-                        if( playNow >= _sharedPreferences.gridWidth )
+                        if( playNow >= self.sharedPreferences.gridWidth )
                             playNow = 0;
                         
                     // Reverse
                     } else if( playMode == EatsSequencerPlayMode_Reverse ) {
                         playNow --;
                         if( loopStart <= loopEnd ) {
-                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow < loopStart )
+                            if( ( inLoop || self.sharedPreferences.loopFromScrubArea ) && playNow < loopStart )
                                 playNow = loopEnd;
                             else if( inLoop && playNow > loopEnd )
                                 playNow = loopStart;
                         } else {
-                            if( ( inLoop || _sharedPreferences.loopFromScrubArea ) && playNow > loopEnd && playNow < loopStart )
+                            if( ( inLoop || self.sharedPreferences.loopFromScrubArea ) && playNow > loopEnd && playNow < loopStart )
                                 playNow = loopEnd;
                         }
                         
                         if( playNow < 0 )
-                            playNow = _sharedPreferences.gridWidth - 1;
+                            playNow = self.sharedPreferences.gridWidth - 1;
                         
                     // Random
                     } else if( playMode == EatsSequencerPlayMode_Random ) {
@@ -234,13 +234,13 @@ typedef enum EatsStepAdvance {
                         if( loopEnd >= loopStart )
                             loopEndForRandom = loopEnd;
                         else
-                            loopEndForRandom = loopEnd + _sharedPreferences.gridWidth;
+                            loopEndForRandom = loopEnd + self.sharedPreferences.gridWidth;
                         
                         int range = loopEndForRandom + 1 - loopStart;
                         
                         int randomStep = floor(arc4random_uniform(range) + loopStart);
-                        if( randomStep >= _sharedPreferences.gridWidth )
-                            randomStep -= _sharedPreferences.gridWidth;
+                        if( randomStep >= self.sharedPreferences.gridWidth )
+                            randomStep -= self.sharedPreferences.gridWidth;
                         
                         playNow = randomStep;
                     }
@@ -251,7 +251,7 @@ typedef enum EatsStepAdvance {
                 
                 // Are we in a loop
                 if( loopStart <= loopEnd ) {
-                    if( playNow >= loopStart && playNow <= loopEnd && loopEnd - loopStart != _sharedPreferences.gridWidth - 1 )
+                    if( playNow >= loopStart && playNow <= loopEnd && loopEnd - loopStart != self.sharedPreferences.gridWidth - 1 )
                         [self.sequencer setInLoop:YES forPage:pageId];
                     else
                         [self.sequencer setInLoop:NO forPage:pageId];
@@ -272,14 +272,14 @@ typedef enum EatsStepAdvance {
                 // Use the appropriate value if pattern quantization is set to none
                 int patternQuantization = [self.sequencer patternQuantization];
                 if( patternQuantization == 0 )
-                    patternQuantization = _sharedPreferences.gridWidth;
+                    patternQuantization = self.sharedPreferences.gridWidth;
                 
                 // Position of step within loop 0 – minQuantization
                 int positionWithinLoop;
                 if( playMode == EatsSequencerPlayMode_Reverse )
-                    positionWithinLoop = ( ( (_sharedPreferences.gridWidth - 1 - (float)playNow ) / _sharedPreferences.gridWidth) * _minQuantization );
+                    positionWithinLoop = ( ( (self.sharedPreferences.gridWidth - 1 - (float)playNow ) / self.sharedPreferences.gridWidth) * _minQuantization );
                 else
-                    positionWithinLoop = ( ( (float)playNow / _sharedPreferences.gridWidth ) * _minQuantization );
+                    positionWithinLoop = ( ( (float)playNow / self.sharedPreferences.gridWidth ) * _minQuantization );
                 
                 // Check if we need to advance the pattern (depending on where we are within it)
                 if( [self.sequencer nextPatternIdForPage:pageId] && positionWithinLoop % (_minQuantization / patternQuantization ) == 0 ) {

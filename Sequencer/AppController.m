@@ -215,7 +215,7 @@
     //NSLog(@"%s", __func__);
     
     // If this message is from the clockSource MIDI node
-    if([node.name isEqualToString:_sharedPreferences.midiClockSourceName]) {
+    if([node.name isEqualToString:self.sharedPreferences.midiClockSourceName]) {
         for (VVMIDIMessage *m in a) {
             if([m type] == VVMIDIStartVal) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockStart" object:self];
