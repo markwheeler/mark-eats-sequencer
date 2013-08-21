@@ -115,7 +115,7 @@ typedef enum DocumentPageAnimationDirection {
         self.sequencer.undoManager = self.undoManager;
         
         // Add dummy data for testing
-        [self.sequencer addDummyData];
+        //[self.sequencer addDummyData];
         
         // Create a Clock and set it up
         self.clockTick = [[ClockTick alloc] initWithSequencer:self.sequencer];

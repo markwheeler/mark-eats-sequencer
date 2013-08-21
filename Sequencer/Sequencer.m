@@ -1157,7 +1157,7 @@
     SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
     
     // If pattern quantization is disabled
-    if( [self patternQuantization] && pageState.nextPatternId ) {
+    if( ![self patternQuantization] && pageState.nextPatternId ) {
         return pageState.nextPatternId.intValue;
         
     } else {
