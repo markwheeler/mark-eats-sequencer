@@ -46,6 +46,9 @@ NSString *const kSequencerPagePitchesDidChangeNotification = @"SequencerPagePitc
 
 NSString *const kSequencerPagePatternNotesDidChangeNotification = @"SequencerPagePatternNotesDidChangeNotification";
 
+NSString *const kSequencerNoteLengthDidChangeNotification = @"SequencerNoteLengthDidChangeNotification";
+NSString *const kSequencerNoteVelocityDidChangeNotification = @"SequencerNoteVelocityDidChangeNotification";
+
 
 // State
 

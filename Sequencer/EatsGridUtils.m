@@ -32,12 +32,14 @@
         if( view.visible ) {
             
             NSArray *viewArray = [view.viewArray copy];
-            uint x = view.x;
-            uint y;
+            int x = view.x;
+            int y;
             for( NSArray *column in viewArray ) {
                 y = view.y;
                 for( NSNumber *number in column ) {
-                    [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:[[viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y]];
+                    // Don't put in pixels outside the grid (if the view is hanging off the edge)
+                    if( x >= 0 && x < width && y >= 0 && y < height )
+                        [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:[[viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y]];
                     y ++;
                 }
                 x ++;

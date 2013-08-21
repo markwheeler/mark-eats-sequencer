@@ -63,14 +63,9 @@
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedPreferences = [Preferences sharedPreferences];
                 
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(gridControllerNone:)
-                                                     name:@"GridControllerNone"
-                                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(gridControllerConnected:)
-                                                     name:@"GridControllerConnected"
-                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:@"GridControllerNone" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:@"GridControllerConnected" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferencesThatRequiresGridRedrawDidChange:) name:kPreferencesThatRequiresGridRedrawDidChangeNotification object:nil];
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
             _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
@@ -114,7 +109,7 @@
 
 
 
-#pragma mark - notifications
+#pragma mark - Notifications
 
 - (void) gridControllerNone:(NSNotification *)notification
 {
@@ -124,6 +119,12 @@
 - (void) gridControllerConnected:(NSNotification *)notification
 {
     [self showView:[NSNumber numberWithInt:EatsGridViewType_Intro]];
+}
+
+- (void) preferencesThatRequiresGridRedrawDidChange:(NSNotification *)notification
+{
+    if(self.currentView)
+        [self.currentViewController updateView];
 }
 
 

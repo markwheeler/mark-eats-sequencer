@@ -12,7 +12,10 @@
 #import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
-#define NOTE_EDIT_FADE_AMOUNT 6
+
+#define NOTE_DEFAULT_BRIGHTNESS 15
+#define NOTE_LENGTH_DEFAULT_BRIGHTNESS 10
+#define NOTE_EDIT_FADE_AMOUNT 10
 
 @interface EatsGridSequencerViewController ()
 
@@ -71,10 +74,47 @@
                                                           nil];
     
     [self updatePatternNotes];
+    [self updateView];
     
+    // Sequencer page notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pagePatternNotesDidChange:) name:kSequencerPagePatternNotesDidChangeNotification object:self.sequencer];
     
-    // TODO add a lot of notification observers here
+    // Sequencer note notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteVelocityDidChange:) name:kSequencerNoteVelocityDidChangeNotification object:self.sequencer];
     
+    // Sequencer state notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeRight:) name:kSequencerStateCurrentPageDidChangeRightNotification object:self.sequencer];
+    
+    // Sequencer page state notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentPatternIdDidChange:) name:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextPatternIdDidChange:) name:kSequencerPageStateNextPatternIdDidChangeNotification object:self.sequencer];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentStepDidChange:) name:kSequencerPageStateCurrentStepDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
+}
+
+- (void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void) updateView
+{
+    if( _sharedPreferences.gridSupportsVariableBrightness ) {
+        if( _patternView.mode == EatsPatternViewMode_NoteEdit )
+            _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+        else if( _patternView.mode == EatsPatternViewMode_Edit )
+            _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
+        
+    } else {
+        _patternView.noteBrightness = 15;
+    }
+    
+    [super updateView];
 }
 
 
@@ -106,26 +146,13 @@
     _patternView.height = self.height - 1;
     _patternView.activeEditNote = note;
     
-    _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
-    _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
     
     _activeEditNote = note;
     
-    
-    // Set sliders
-    
-    float oneStepOf127 = 127.0  / _velocityView.width;
-    float range = 127.0 - oneStepOf127;
-    
-    float percentageForVelocitySlider = 100.0 * ( (note.velocity - oneStepOf127 ) / range );
-    if( percentageForVelocitySlider < 0 )
-        percentageForVelocitySlider = 0;
-    
-    //NSLog(@"Percentage for slider %f velocity %i", percentageForVelocitySlider, noteVelocity);
-    _velocityView.percentage = percentageForVelocitySlider;
-    
-    float stepPercentage = ( 100.0 / _velocityView.width );
-    _lengthView.percentage = ( ( ( ( (float)note.length / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    [self updateNoteVelocity];
+    [self updateNoteLength];
     
     [self updateView];
     
@@ -170,8 +197,8 @@
     
     _patternView.height = self.height - 1;
     
-    _patternView.noteBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
-    _patternView.noteLengthBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
+    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
     
     [self updateView];
     
@@ -214,8 +241,8 @@
     
     _patternView.height --;
     
-    _patternView.noteBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
-    _patternView.noteLengthBrightness -= NOTE_EDIT_FADE_AMOUNT / 2;
+    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
     
     if( _animationFrame == 1 ) { // Final frame
 
@@ -248,8 +275,8 @@
     
     _patternView.height ++;
     
-    _patternView.noteBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
-    _patternView.noteLengthBrightness += NOTE_EDIT_FADE_AMOUNT / 2;
+    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
+    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
     
     if( _animationFrame == 1 ) { // Final frame
         
@@ -279,18 +306,110 @@
         self.patternView.drawNotesForReverse = NO;
     self.patternView.currentStep = [self.sequencer currentStepForPage:self.sequencer.currentPageId];
     self.patternView.nextStep = [self.sequencer nextStepForPage:self.sequencer.currentPageId];
-    [self updateView];
 }
 
 - (void) updateNoteLength
 {
+    float stepPercentage = ( 100.0 / _velocityView.width );
     
+    _lengthView.percentage = ( ( ( ( (float)self.activeEditNote.length / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
 }
 
 - (void) updateNoteVelocity
 {
+    float oneStepOf127 = 127.0  / _velocityView.width;
+    float range = 127.0 - oneStepOf127;
     
+    float percentageForVelocitySlider = 100.0 * ( (self.activeEditNote.velocity - oneStepOf127 ) / range );
+    if( percentageForVelocitySlider < 0 )
+        percentageForVelocitySlider = 0;
+    
+    _velocityView.percentage = percentageForVelocitySlider;
 }
+
+
+#pragma mark - Notifications
+
+- (void) pagePatternNotesDidChange:(NSNotification *)notification
+{
+    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+        [self updatePatternNotes];
+        [self updateView];
+    }
+}
+
+- (void) noteLengthDidChange:(NSNotification *)notification
+{
+    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+        SequencerNote *note = [notification.userInfo valueForKey:@"note"];
+        if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
+            [self updateNoteLength];
+        }
+        [self updatePatternNotes];
+        [self updateView];
+    }
+}
+
+- (void) noteVelocityDidChange:(NSNotification *)notification
+{
+    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+        SequencerNote *note = [notification.userInfo valueForKey:@"note"];
+        if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
+            [self updatePatternNotes];
+            [self updateNoteVelocity];
+            [self updateView];
+        }
+    }
+}
+
+- (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
+{
+    // TODO animate?
+    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+    [self updatePatternNotes];
+    [self updateView];
+}
+
+- (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
+{
+    // TODO animate?
+    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+    [self updatePatternNotes];
+    [self updateView];
+}
+
+- (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
+{
+    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+    [self updatePatternNotes];
+    [self updateView];
+}
+
+- (void) pageStateNextPatternIdDidChange:(NSNotification *)notification
+{
+    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+    [self updatePatternNotes];
+    [self updateView];
+}
+
+- (void) pageStateCurrentStepDidChange:(NSNotification *)notification
+{
+    [self updatePatternNotes];
+    [self updateView];
+}
+
+- (void) pageStateNextStepDidChange:(NSNotification *)notification
+{
+    [self updatePatternNotes];
+    [self updateView];
+}
+
+- (void) pageStatePlayModeDidChange:(NSNotification *)notification
+{
+    [self updatePatternNotes];
+    [self updateView];
+}
+
 
 
 #pragma mark - Sub view delegate methods
@@ -327,7 +446,7 @@
     
     // Down
     if( down ) {
-    
+        
         // Edit mode
         if( sender.mode == EatsPatternViewMode_Edit ) {
             
@@ -357,7 +476,7 @@
     uint y = [[xy valueForKey:@"y"] unsignedIntValue];
     
     // See if we have a note there
-    SequencerNote *foundNote = [self.sequencer noteThatIsSelectableAtStep:x atRow:y inPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    SequencerNote *foundNote = [self.sequencer noteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     if( foundNote )
         [self enterNoteEditModeFor:foundNote];

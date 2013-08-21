@@ -30,4 +30,18 @@
     [encoder encodeInt32:self.velocity forKey:@"velocity"];
 }
 
+- (id) copyWithZone:(NSZone *)zone
+{
+    id copy = [[[self class] alloc] init];
+    
+    if( copy ) {
+        [copy setStep:self.step];
+        [copy setRow:self.row];
+        [(SequencerNote *)copy setLength:self.length];
+        [copy setVelocity:self.velocity];
+    }
+    
+    return copy;
+}
+
 @end

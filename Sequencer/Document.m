@@ -197,6 +197,9 @@ typedef enum DocumentPageAnimationDirection {
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pagePatternNotesDidChange:) name:kSequencerPagePatternNotesDidChangeNotification object:self.sequencer];
     
+    // Sequencer note notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
+    
     // Sequencer state notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeRight:) name:kSequencerStateCurrentPageDidChangeRightNotification object:self.sequencer];
@@ -216,6 +219,7 @@ typedef enum DocumentPageAnimationDirection {
     // Start the clock right away
     self.sequencerPlaybackControls.selectedSegment = 1;
     [self.clock startClock];
+    
 }
 
 - (void) windowWillClose:(NSNotification *)notification
@@ -484,25 +488,25 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) pageStepLengthDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] )
        [self updateStepLengthPopup];
 }
 
 - (void) pageSwingDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] )
         [self updateSwingPopup];
 }
 
 - (void) pageVelocityGrooveDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] )
         [self updateVelocityGroove];
 }
 
 - (void) pageTransposeDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] ) {
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
         [self updateTranspose];
         [self updatePitches];
     }
@@ -510,13 +514,19 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) pagePitchesDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] )
         [self updatePitches];
 }
 
 - (void) pagePatternNotesDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPattern:notification] )
+    if( [self.sequencer isNotificationFromCurrentPattern:notification] )
+        [self updatePatternNotes];
+}
+
+- (void) noteLengthDidChange:(NSNotification *)notification
+{
+    if( [self.sequencer isNotificationFromCurrentPattern:notification] )
         [self updatePatternNotes];
 }
 
@@ -534,7 +544,7 @@ typedef enum DocumentPageAnimationDirection {
 // Sequencer page state notifications
 - (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] ) {
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
         [self updatePatternNotes];
         [self updateCurrentPattern];
     }
@@ -542,7 +552,7 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) pageStateNextPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] ) {
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
         [self updatePatternNotes];
         [self updateCurrentPattern];
     }
@@ -550,31 +560,22 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) pageStateCurrentStepDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] )
         [self updatePatternNotes];
 }
 
 - (void) pageStateNextStepDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] )
         [self updatePatternNotes];
 }
 
 - (void) pageStatePlayModeDidChange:(NSNotification *)notification
 {
-    if( [self isNotificationFromCurrentPage:notification] )
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
         [self updatePlayMode];
-}
-
-// Some useful util methods for the above notifications to use
-- (BOOL) isNotificationFromCurrentPage:(NSNotification *)notification
-{
-    return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.sequencer.currentPageId );
-}
-
-- (BOOL) isNotificationFromCurrentPattern:(NSNotification *)notification
-{
-    return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.sequencer.currentPageId && [[notification.userInfo valueForKey:@"patternId"] intValue] == [self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] );
+        [self updatePatternNotes];
+    }
 }
 
 

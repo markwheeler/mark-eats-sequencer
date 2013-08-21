@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface SequencerNote : NSObject <NSCoding>
+@interface SequencerNote : NSObject <NSCoding, NSCopying>
 
 @property int                   step;
 @property int                   row;

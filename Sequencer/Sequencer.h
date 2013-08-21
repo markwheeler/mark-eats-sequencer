@@ -172,4 +172,8 @@
 - (int) playModeForPage:(uint)pageId;
 - (void) setPlayMode:(int)playMode forPage:(uint)pageId;
 
+// Utils
+- (BOOL) isNotificationFromCurrentPage:(NSNotification *)notification;
+- (BOOL) isNotificationFromCurrentPattern:(NSNotification *)notification;
+
 @end

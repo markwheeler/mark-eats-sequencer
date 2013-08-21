@@ -121,9 +121,10 @@
             }
             
             // Put in the active note while editing
-            if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && _mode == EatsPatternViewMode_NoteEdit ) {
+            NSNumber *noteLengthBrightnessTemp = noteLengthBrightnessResult;
+            if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && ( _mode == EatsPatternViewMode_NoteEdit || _mode == EatsPatternViewMode_Locked ) ) {
                 [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
-                noteLengthBrightnessResult = [NSNumber numberWithInt:12 * self.opacity];
+                noteLengthBrightnessTemp = [NSNumber numberWithInt:12 * self.opacity];
             }
             
             // Put the rest in (unless there's something brighter there)
@@ -149,8 +150,8 @@
                     else if( tailDraw >= self.width )
                         tailDraw -= self.width;
                     
-                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessResult.intValue )
-                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessResult];
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessTemp.intValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessTemp];
                     
                 }
             }
@@ -277,6 +278,12 @@
         }
     }
     
+    // Add down keys
+    if( down && ( _mode == EatsPatternViewMode_Play || _mode == EatsPatternViewMode_Edit ) ) {
+        [_currentlyDownKeys addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil]];
+        
+    }
+    
     // These two modes always receive all presses
     if( _mode == EatsPatternViewMode_Edit || _mode == EatsPatternViewMode_NoteEdit ) {
         // Send the press to delegate
@@ -286,12 +293,6 @@
                                 nil];
         if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
             [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
-    }
-    
-    // Add down keys
-    if( down && ( _mode == EatsPatternViewMode_Play || _mode == EatsPatternViewMode_Edit ) ) {
-        [_currentlyDownKeys addObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil]];
-        
     }
     
 }

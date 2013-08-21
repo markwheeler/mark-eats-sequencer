@@ -56,6 +56,9 @@ extern NSString *const kSequencerPagePitchesDidChangeNotification;
 
 extern NSString *const kSequencerPagePatternNotesDidChangeNotification;
 
+extern NSString *const kSequencerNoteLengthDidChangeNotification;
+extern NSString *const kSequencerNoteVelocityDidChangeNotification;
+
 
 // State
 

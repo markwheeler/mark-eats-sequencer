@@ -907,7 +907,7 @@
 
 - (void) setLength:(int)length forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    if( length > 0 && length < self.sharedPreferences.gridWidth ) {
+    if( length > 0 && length <= self.sharedPreferences.gridWidth ) {
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
@@ -919,12 +919,14 @@
                 [self.undoManager setActionName:@"Note Length Change"];
                 
                 note.length = length;
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerNoteLengthDidChangeNotification object:self userInfo:[self userInfoForNote:note inPattern:patternId inPage:pageId]];
+                
+                return;
             }
         }
         
     }
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
 }
 
 - (void) incrementLengthForNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
@@ -966,12 +968,14 @@
                 [self.undoManager setActionName:@"Note Velocity Change"];
                 
                 note.velocity = velocity;
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerNoteVelocityDidChangeNotification object:self userInfo:[self userInfoForNote:note inPattern:patternId inPage:pageId]];
+                
+                return;
             }
         }
         
     }
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
 }
 
 - (void) incrementVelocityForNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
@@ -986,8 +990,9 @@
 
 - (void) addOrRemoveNoteThatIsSelectableAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    if( [self noteThatIsSelectableAtStep:step atRow:row inPattern:patternId inPage:pageId] )
-        [self removeNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+    SequencerNote *note = [self noteThatIsSelectableAtStep:step atRow:row inPattern:patternId inPage:pageId];
+    if( note )
+        [self removeNoteAtStep:note.step atRow:note.row inPattern:patternId inPage:pageId];
     else
         [self addNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
 }
@@ -1259,8 +1264,28 @@
 }
 
 
+#pragma mark - Utils
+
+// Some useful util methods for notifications to use
+
+- (BOOL) isNotificationFromCurrentPage:(NSNotification *)notification
+{
+    return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.currentPageId );
+}
+
+- (BOOL) isNotificationFromCurrentPattern:(NSNotification *)notification
+{
+    return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.currentPageId && [[notification.userInfo valueForKey:@"patternId"] intValue] == [self currentlyDisplayingPatternIdForPage:self.currentPageId] );
+}
+
+
 
 #pragma mark - Private methods
+
+- (NSDictionary *) userInfoForPage:(uint)pageId
+{
+    return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pageId], @"pageId", nil];
+}
 
 - (NSDictionary *) userInfoForPattern:(uint)patternId inPage:(uint)pageId
 {
@@ -1269,10 +1294,15 @@
                                                       nil];
 }
 
-- (NSDictionary *) userInfoForPage:(uint)pageId
+- (NSDictionary *) userInfoForNote:(SequencerNote *)note inPattern:(uint)patternId inPage:(uint)pageId
 {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pageId], @"pageId", nil];
+    return [NSDictionary dictionaryWithObjectsAndKeys:[note copy], @"note",
+                                                      [NSNumber numberWithInt:patternId], @"patternId",
+                                                      [NSNumber numberWithInt:pageId], @"pageId",
+                                                      nil];
 }
+
+
 
 
 @end

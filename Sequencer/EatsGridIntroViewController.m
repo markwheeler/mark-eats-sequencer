@@ -63,14 +63,14 @@
     self.okView.currentFrame ++;
     [self updateView];
     
-//    if ( self.okView.currentFrame > self.okView.width + self.okView.height - 2 + self.okView.trailLength )
-//        [self stopAnimation];
+    // Commented this out so that OK keeps pulsing
+    //if ( self.okView.currentFrame > self.okView.width + self.okView.height - 2 + self.okView.trailLength )
+    //    [self stopAnimation];
 }
 
 
 - (void) eatsGridOKViewPressAt:(NSDictionary *)xyDown sender:(EatsGridOKView *)sender
 {
-//    [self stopAnimation];
     [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
 }
 
