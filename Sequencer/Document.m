@@ -291,7 +291,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) clearPatternAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     if( returnCode == NSOKButton ) {
-        [self.sequencer clearNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        [self.sequencer clearNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }
     self.clearPatternAlert = nil;
 }
@@ -553,7 +553,6 @@ typedef enum DocumentPageAnimationDirection {
 - (void) pageStateNextPatternIdDidChange:(NSNotification *)notification
 {
     if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
         [self updateCurrentPattern];
     }
 }
@@ -714,13 +713,13 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) updateCurrentPattern
 {
-    self.currentPatternSegmentedControl.selectedSegment = [self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId];
+    self.currentPatternSegmentedControl.selectedSegment = [self.sequencer currentPatternIdForPage:self.sequencer.currentPageId];
     [self updatePatternNotes];
 }
 
 - (void) updatePatternNotes
 {
-    self.debugGridView.notes = [self.sequencer notesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    self.debugGridView.notes = [self.sequencer notesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
         self.debugGridView.drawNotesForReverse = YES;
     else
@@ -882,7 +881,7 @@ typedef enum DocumentPageAnimationDirection {
 
 - (IBAction) currentPatternSegmentedControl:(NSSegmentedControl *)sender
 {
-    [self.sequencer setNextPatternId:[NSNumber numberWithInteger:sender.selectedSegment] forPage:self.sequencer.currentPageId];
+    [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInteger:sender.selectedSegment] forPage:self.sequencer.currentPageId];
 }
 
 - (void) controlTextDidEndEditing:(NSNotification *)obj
@@ -991,17 +990,17 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) cutCurrentPattern
 {
-    [self.sequencer pasteboardCutNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    [self.sequencer pasteboardCutNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
 }
 
 - (void) copyCurrentPattern
 {
-    [self.sequencer pasteboardCopyNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    [self.sequencer pasteboardCopyNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
 }
 
 - (void) pasteToCurrentPattern
 {
-    [self.sequencer pasteboardPasteNotesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    [self.sequencer pasteboardPasteNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
 }
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
@@ -1078,9 +1077,9 @@ typedef enum DocumentPageAnimationDirection {
             nextPatternId = 0;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+            [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+            [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 2
     } else if( keyCode.intValue == 19 ) {
@@ -1091,9 +1090,9 @@ typedef enum DocumentPageAnimationDirection {
             nextPatternId = 1;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+            [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+            [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 3
     } else if( keyCode.intValue == 20 ) {
@@ -1104,9 +1103,9 @@ typedef enum DocumentPageAnimationDirection {
             nextPatternId = 2;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+            [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+            [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 4
     } else if( keyCode.intValue == 21 ) {
@@ -1117,9 +1116,9 @@ typedef enum DocumentPageAnimationDirection {
             nextPatternId = 3;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+            [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+            [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 5
     } else if( keyCode.intValue == 23 ) {
@@ -1130,9 +1129,9 @@ typedef enum DocumentPageAnimationDirection {
             nextPatternId = 4;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+            [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+            [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 6
     } else if( keyCode.intValue == 22 ) {
@@ -1143,9 +1142,9 @@ typedef enum DocumentPageAnimationDirection {
             nextPatternId = 5;
         
         if( modifierFlags.intValue & NSAlternateKeyMask )
-            [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+            [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
-            [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+            [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 7
     } else if( keyCode.intValue == 26 ) {
@@ -1153,9 +1152,9 @@ typedef enum DocumentPageAnimationDirection {
             int nextPatternId = 6;
         
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+                [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+                [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
         
     // 8
@@ -1164,9 +1163,9 @@ typedef enum DocumentPageAnimationDirection {
             int nextPatternId = 7;
         
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+                [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+                [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
         
     // 9
@@ -1175,9 +1174,9 @@ typedef enum DocumentPageAnimationDirection {
             int nextPatternId = 8;
             
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+                [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+                [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
         
     // 0
@@ -1186,9 +1185,9 @@ typedef enum DocumentPageAnimationDirection {
             int nextPatternId = 9;
             
             if( modifierFlags.intValue & NSAlternateKeyMask )
-                [self.sequencer setNextPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
+                [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
-                [self.sequencer setNextPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
+                [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
     
     // Play mode

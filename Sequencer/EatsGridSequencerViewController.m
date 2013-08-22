@@ -89,7 +89,6 @@
     
     // Sequencer page state notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentPatternIdDidChange:) name:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextPatternIdDidChange:) name:kSequencerPageStateNextPatternIdDidChangeNotification object:self.sequencer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentStepDidChange:) name:kSequencerPageStateCurrentStepDidChangeNotification object:self.sequencer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
@@ -299,7 +298,7 @@
 
 - (void) updatePatternNotes
 {
-    self.patternView.notes = [self.sequencer notesForPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    self.patternView.notes = [self.sequencer notesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
         self.patternView.drawNotesForReverse = YES;
     else
@@ -385,13 +384,6 @@
     [self updateView];
 }
 
-- (void) pageStateNextPatternIdDidChange:(NSNotification *)notification
-{
-    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
-    [self updatePatternNotes];
-    [self updateView];
-}
-
 - (void) pageStateCurrentStepDidChange:(NSNotification *)notification
 {
     [self updatePatternNotes];
@@ -427,12 +419,12 @@
         float newVelocity = range * (sender.percentage / 100.0);
         newVelocity += oneStepOf127;
         
-        [self.sequencer setVelocity:newVelocity forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        [self.sequencer setVelocity:newVelocity forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         
     // Length
     } else if(sender == _lengthView) {
         int newLength = roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1;
-        [self.sequencer setLength:newLength forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        [self.sequencer setLength:newLength forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }
 }
 
@@ -466,7 +458,7 @@
     // Release
     if( !down && sender.mode == EatsPatternViewMode_Edit && _lastDownWasInEditMode ) {
         
-        [self.sequencer addOrRemoveNoteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        [self.sequencer addOrRemoveNoteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }
 }
 
@@ -476,7 +468,7 @@
     uint y = [[xy valueForKey:@"y"] unsignedIntValue];
     
     // See if we have a note there
-    SequencerNote *foundNote = [self.sequencer noteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentlyDisplayingPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    SequencerNote *foundNote = [self.sequencer noteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     if( foundNote )
         [self enterNoteEditModeFor:foundNote];

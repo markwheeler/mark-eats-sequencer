@@ -333,6 +333,17 @@
         [[self.undoManager prepareWithInvocationTarget:self] setPatternQuantization:self.song.patternQuantization];
         [self.undoManager setActionName:@"Pattern Quantization Change"];
         
+        // If setting to 'none' then update pattern appropriately
+        if( patternQuantization == 0 ) {
+            for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+                NSNumber *nextPatternId = [self nextPatternIdForPage:pageId];
+                if( nextPatternId ) {
+                    [self setCurrentPatternId:nextPatternId.intValue forPage:pageId];
+                    [self setNextPatternId:nil forPage:pageId];
+                }
+            }
+        }
+        
         self.song.patternQuantization = patternQuantization;
     }
     
@@ -1136,32 +1147,26 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStateNextPatternIdDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
 }
 
-- (void) setNextPatternIdForAllPages:(NSNumber *)patternId
+- (void) setNextOrCurrentPatternId:(NSNumber *)patternId forPage:(uint)pageId
+{
+    if( [self patternQuantization] )
+        [self setNextPatternId:patternId forPage:pageId];
+    else
+        [self setCurrentPatternId:patternId.intValue forPage:pageId];
+}
+
+- (void) setNextOrCurrentPatternIdForAllPages:(NSNumber *)patternId
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
-            [self setNextPatternId:patternId forPage:i];
+            [self setNextOrCurrentPatternId:patternId forPage:i];
     }
 }
 
-- (void) setNextPatternId:(NSNumber *)patternId forAllPagesExcept:(uint)pageId
+- (void) setNextOrCurrentPatternId:(NSNumber *)patternId forAllPagesExcept:(uint)pageId
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
         if( i != pageId )
-            [self setNextPatternId:patternId forPage:i];
-    }
-}
-
-
-- (int) currentlyDisplayingPatternIdForPage:(uint)pageId
-{
-    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
-    
-    // If pattern quantization is disabled
-    if( ![self patternQuantization] && pageState.nextPatternId ) {
-        return pageState.nextPatternId.intValue;
-        
-    } else {
-        return pageState.currentPatternId;
+            [self setNextOrCurrentPatternId:patternId forPage:i];
     }
 }
 
@@ -1275,7 +1280,7 @@
 
 - (BOOL) isNotificationFromCurrentPattern:(NSNotification *)notification
 {
-    return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.currentPageId && [[notification.userInfo valueForKey:@"patternId"] intValue] == [self currentlyDisplayingPatternIdForPage:self.currentPageId] );
+    return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.currentPageId && [[notification.userInfo valueForKey:@"patternId"] intValue] == [self currentPatternIdForPage:self.currentPageId] );
 }
 
 
