@@ -289,6 +289,7 @@
         }
         [self gridControllerConnected:EatsGridType_Monome width:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
         
+        
     // Other SerialOSC info (just skipping them for now)
         
     } else if([[o address] isEqualTo:@"/sys/host"]
@@ -310,9 +311,19 @@
         [self sendGridInputNotificationX:[keyValues[0] intValue]
                                        Y:[keyValues[1] intValue]
                                     down:[keyValues[2] intValue]];
+    
+    
+    // Tilt from the monome (ignored for now)
+    
+    } else if([[o address] isEqualTo:[NSString stringWithFormat:@"/%@/tilt", self.sharedCommunicationManager.oscPrefix]]) {
+        /*NSMutableArray *tiltValues = [[NSMutableArray alloc] initWithCapacity:4];
+        for (NSString *i in [o valueArray]) {
+            [tiltValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", i]]];
+        }
+        NSLog(@"OSC received %@ %@", [o address], tiltValues);*/
         
     
-    // Other OSC input addressed to us
+    // Other OSC input addressed to us is logged
         
     } else if([[o address] hasPrefix:[NSString stringWithFormat:@"/%@/", self.sharedCommunicationManager.oscPrefix]]) {
         if([o valueCount] > 1) {
@@ -328,8 +339,7 @@
         // TODO: send buttonInput and valueInput notifications using methods above.
         
         
-        
-    // Anything else just gets logged (can probably ignore it)
+    // Anything else just gets ignored
         
     } else {
         if([o valueCount] > 1) {
@@ -337,9 +347,9 @@
             for (NSString *s in [o valueArray]) {
                 [miscValues appendFormat:@"%@ ", [self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
             }
-            NSLog(@"OSC received %@ %@", [o address], miscValues);
+            //NSLog(@"OSC received %@ %@", [o address], miscValues);
         } else if([o valueCount]) {
-            NSLog(@"OSC received %@ %@", [o address], [self stripOSCValue:[NSString stringWithFormat:@"%@", [o value]]]);
+            //NSLog(@"OSC received %@ %@", [o address], [self stripOSCValue:[NSString stringWithFormat:@"%@", [o value]]]);
         }
     }
     
