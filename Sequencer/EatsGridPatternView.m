@@ -207,7 +207,7 @@
                     
                     // Reset the loop
                     NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"start",
-                                               [NSNumber numberWithUnsignedInt:self.width], @"end",
+                                               [NSNumber numberWithUnsignedInt:self.width - 1], @"end",
                                                nil];
                     if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
                         [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];

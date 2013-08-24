@@ -448,7 +448,7 @@
 
 - (void) setLoopStart:(int)loopStart forPage:(uint)pageId
 {
-    if( loopStart > 0 && loopStart < self.sharedPreferences.gridWidth ) {
+    if( loopStart >= 0 && loopStart < self.sharedPreferences.gridWidth ) {
     
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
@@ -478,7 +478,7 @@
 
 - (void) setLoopEnd:(int)loopEnd forPage:(uint)pageId
 {
-    if( loopEnd > 0 && loopEnd < self.sharedPreferences.gridWidth ) {
+    if( loopEnd >= 0 && loopEnd < self.sharedPreferences.gridWidth ) {
     
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
@@ -503,7 +503,7 @@
 
 - (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forPage:(uint)pageId
 {
-    if( loopStart > 0 && loopStart < self.sharedPreferences.gridWidth && loopEnd > 0 && loopEnd < self.sharedPreferences.gridWidth ) {
+    if( loopStart >= 0 && loopStart < self.sharedPreferences.gridWidth && loopEnd >= 0 && loopEnd < self.sharedPreferences.gridWidth ) {
     
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
@@ -705,10 +705,35 @@
 #pragma mark - Pattern
 
 
+- (void) startOrStopPattern:(uint)patternId inPage:(uint)pageId
+{
+    // Start fwd playback from loop start
+    if( [self playModeForPage:pageId] == EatsSequencerPlayMode_Pause ) {
+        
+        [self setPlayMode:EatsSequencerPlayMode_Forward forPage:pageId];
+        [self setNextStep:[NSNumber numberWithInt:[self loopStartForPage:pageId]] forPage:pageId];
+        
+        [self setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInt:patternId] forPage:pageId];
+        
+    // Pause a pattern that is playing
+    } else if( [self currentPatternIdForPage:pageId] == patternId ) {
+        [self setPlayMode:EatsSequencerPlayMode_Pause forPage:pageId];
+        
+    } else {
+        [self setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInt:patternId] forPage:pageId];
+    }
+}
+
 - (NSSet *) notesForPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     return [[page.patterns objectAtIndex:patternId] copy];
+}
+
+- (uint) numberOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    return (uint)[[page.patterns objectAtIndex:patternId] count];
 }
 
 - (void) setNotes:(NSMutableSet *)notes forPattern:(uint)patternId inPage:(uint)pageId
@@ -1263,6 +1288,7 @@
     if( playMode >= 0 && playMode <= 3 ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.playMode = playMode;
+        [self setNextStep:nil forPage:pageId];
     }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStatePlayModeDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];

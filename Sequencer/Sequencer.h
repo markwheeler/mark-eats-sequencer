@@ -107,7 +107,10 @@
 
 
 // Pattern
+- (void) startOrStopPattern:(uint)patternId inPage:(uint)pageId;
+
 - (NSSet *) notesForPattern:(uint)patternId inPage:(uint)pageId;
+- (uint) numberOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
 - (void) setNotes:(NSMutableSet *)notes forPattern:(uint)patternId inPage:(uint)pageId;
 
 - (void) clearNotesForPattern:(uint)patternId inPage:(uint)pageId;

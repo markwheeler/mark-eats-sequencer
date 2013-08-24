@@ -379,27 +379,35 @@
 
 - (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
 {
-    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
-    [self updatePatternNotes];
-    [self updateView];
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+        // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+        [self updatePatternNotes];
+        [self updateView];
+    }
 }
 
 - (void) pageStateCurrentStepDidChange:(NSNotification *)notification
 {
-    [self updatePatternNotes];
-    [self updateView];
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+        [self updatePatternNotes];
+        [self updateView];
+    }
 }
 
 - (void) pageStateNextStepDidChange:(NSNotification *)notification
 {
-    [self updatePatternNotes];
-    [self updateView];
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+        [self updatePatternNotes];
+        [self updateView];
+    }
 }
 
 - (void) pageStatePlayModeDidChange:(NSNotification *)notification
 {
-    [self updatePatternNotes];
-    [self updateView];
+    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+        [self updatePatternNotes];
+        [self updateView];
+    }
 }
 
 

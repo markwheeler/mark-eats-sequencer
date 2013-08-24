@@ -96,7 +96,7 @@
         _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else if( [gridView intValue] == EatsGridViewType_Play ) {
-// TODO        _currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self managedObjectContext:_managedObjectContext andQueue:_bigSerialQueue width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        _currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else {
         _currentViewController = nil;

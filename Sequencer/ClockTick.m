@@ -182,18 +182,21 @@ typedef enum EatsStepAdvance {
                 aPageNeedsToAdvance = YES;
                 
                 int playMode = [self.sequencer playModeForPage:pageId];
-                int playNow = [self.sequencer currentStepForPage:pageId];
+                int playNow;
                 int loopStart = [self.sequencer loopStartForPage:pageId];
                 int loopEnd = [self.sequencer loopEndForPage:pageId];
                 BOOL inLoop = [self.sequencer inLoopForPage:pageId];
                 
                 // If the page has been scrubbed
                 if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
-                    [self.sequencer setCurrentStep:[[self.sequencer nextStepForPage:pageId] intValue] forPage:pageId];
+                    
+                    playNow = [[self.sequencer nextStepForPage:pageId] intValue];
                     [self.sequencer setNextStep:nil forPage:pageId];
                     
                 // Otherwise we need to calculate the next step
                 } else {
+                    
+                    playNow = [self.sequencer currentStepForPage:pageId];
                     
                     // Forward
                     if( playMode == EatsSequencerPlayMode_Forward ) {
@@ -245,8 +248,9 @@ typedef enum EatsStepAdvance {
                         playNow = randomStep;
                     }
                     
-                    [self.sequencer setCurrentStep:playNow forPage:pageId];
                 }
+                
+                [self.sequencer setCurrentStep:playNow forPage:pageId];
                 
                 
                 // Are we in a loop
