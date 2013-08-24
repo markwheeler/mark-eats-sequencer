@@ -29,4 +29,9 @@
     return self;
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p, CurrentPageId: %i, PageStates: %@>", NSStringFromClass([self class]), self, self.currentPageId, self.pageStates];
+}
+
 @end

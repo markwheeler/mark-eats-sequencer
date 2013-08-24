@@ -106,7 +106,7 @@
 
 - (NSString *) debugInfo
 {
-    return [NSString stringWithFormat:@"Pages: %lu\rPatterns on page zero: %lu\rNotes in pattern zero on page zero: %lu", self.song.pages.count, [[[self.song.pages objectAtIndex:0] patterns] count], [[[[self.song.pages objectAtIndex:0] patterns] objectAtIndex:0] count] ];
+    return [NSString stringWithFormat:@"%@\r%@", self.song, self.state ];
 }
 
 - (void) updatePatternQuantizationSettings
@@ -846,8 +846,6 @@
 
 - (SequencerNote *) noteThatIsSelectableAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    // TODO test this
-    
     // See if there's a note there and return a copy of it if there is
     
     // If we are showing note length on the grid then then we need to look through all the notes on the row, checking their length
@@ -856,7 +854,6 @@
         int playMode = [self playModeForPage:pageId];
         BOOL sortDirection = ( playMode == EatsSequencerPlayMode_Reverse ) ? NO : YES;
         NSArray *sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"step" ascending:sortDirection]];
-        // TODO the above probably isn't going to work because step isn't an object and thus won't be KV compliant. Might need to look into alternate ways of sorting.
         
         NSSet *notesOnThisRow = [self notesAtRow:row inPattern:patternId inPage:pageId];
         

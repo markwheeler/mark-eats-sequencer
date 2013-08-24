@@ -10,6 +10,11 @@
 
 @implementation SequencerNote
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p, Step: %i, Row: %i, Length: %i, Velocity: %i,>", NSStringFromClass([self class]), self, self.step, self.row, self.length, self.velocity];
+}
+
 - (id) initWithCoder:(NSCoder *)decoder {
     self = [super init];
     if( !self )

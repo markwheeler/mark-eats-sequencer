@@ -10,6 +10,11 @@
 
 @implementation SequencerSong
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p, SongVersion: %i, BPM: %f, StepQuantization: %i, PatternQuantization: %i, Pages: %@>", NSStringFromClass([self class]), self, self.songVersion, self.bpm, self.stepQuantization, self.patternQuantization, self.pages];
+}
+
 - (id) initWithCoder:(NSCoder *)decoder {
     self = [super init];
     if( !self )

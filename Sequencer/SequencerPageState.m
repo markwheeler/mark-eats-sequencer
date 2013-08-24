@@ -10,4 +10,9 @@
 
 @implementation SequencerPageState
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p, CurrentPatternId: %i, NextPatternId: %@, CurrentStep: %i, NextStep: %@, InLoop: %i, PlayMode: %i>", NSStringFromClass([self class]), self, self.currentPatternId, self.nextPatternId, self.currentStep, self.nextStep, self.inLoop, self.playMode];
+}
+
 @end
