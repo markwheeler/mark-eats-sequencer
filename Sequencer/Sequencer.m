@@ -662,7 +662,10 @@
 
 - (NSArray *) pitchesForPage:(uint)pageId
 {
-    return [[[self.song.pages objectAtIndex:pageId] pitches] copy];
+    NSArray *pitches = [[self.song.pages objectAtIndex:pageId] pitches];
+    NSArray *pitchesToReturn = [[NSArray alloc] initWithArray:pitches copyItems:YES];
+    
+    return pitchesToReturn;
 }
 
 - (void) setPitches:(NSMutableArray *)pitches forPage:(uint)pageId
@@ -727,7 +730,9 @@
 - (NSSet *) notesForPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    return [[page.patterns objectAtIndex:patternId] copy];
+    NSSet *notes = [page.patterns objectAtIndex:patternId];
+    NSSet *notesToReturn = [[NSSet alloc] initWithSet:notes copyItems:YES];
+    return notesToReturn;
 }
 
 - (uint) numberOfNotesForPattern:(uint)patternId inPage:(uint)pageId
@@ -901,9 +906,10 @@
 - (NSSet *) notesAtStep:(uint)step inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
+    NSSet *notes = [page.patterns objectAtIndex:patternId];
+    NSSet *notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
     
-    NSSet *notesMatchingStep = [notes objectsPassingTest:^(id obj, BOOL *stop) {
+    NSSet *notesMatchingStep = [notesToCheck objectsPassingTest:^(id obj, BOOL *stop) {
         SequencerNote *note = (SequencerNote *)obj;
         BOOL testResult = ( note.step == step );
         return testResult;
@@ -915,9 +921,10 @@
 - (NSSet *) notesAtRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
+    NSSet *notes = [page.patterns objectAtIndex:patternId];
+    NSSet *notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
     
-    NSSet *notesMatchingRow = [notes objectsPassingTest:^(id obj, BOOL *stop) {
+    NSSet *notesMatchingRow = [notesToCheck objectsPassingTest:^(id obj, BOOL *stop) {
         SequencerNote *note = (SequencerNote *)obj;
         BOOL testResult = ( note.row == row );
         return testResult;
