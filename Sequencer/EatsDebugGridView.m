@@ -11,17 +11,19 @@
 
 @interface EatsDebugGridView ()
 
-@property NSNumber              *noteBrightness;
-@property NSNumber              *lengthBrightness;
-@property NSNumber              *playheadBrightness;
-@property NSNumber              *nextStepBrightness;
-@property NSNumber              *backgroundBrightness;
+@property (nonatomic) NSNumber              *noteBrightness;
+@property (nonatomic) NSNumber              *lengthBrightness;
+@property (nonatomic) NSNumber              *playheadBrightness;
+@property (nonatomic) NSNumber              *nextStepBrightness;
+@property (nonatomic) NSNumber              *backgroundBrightness;
 
-@property NSNumber              *noteBrightnessInactive;
-@property NSNumber              *lengthBrightnessInactive;
-@property NSNumber              *playheadBrightnessInactive;
-@property NSNumber              *nextStepBrightnessInactive;
-@property NSNumber              *backgroundBrightnessInactive;
+@property (nonatomic) NSNumber              *noteBrightnessInactive;
+@property (nonatomic) NSNumber              *lengthBrightnessInactive;
+@property (nonatomic) NSNumber              *playheadBrightnessInactive;
+@property (nonatomic) NSNumber              *nextStepBrightnessInactive;
+@property (nonatomic) NSNumber              *backgroundBrightnessInactive;
+
+@property (nonatomic) NSArray               *bezierPaths;
 
 @end
 
@@ -54,9 +56,18 @@
         self.playheadBrightnessInactive = [NSNumber numberWithFloat:self.playheadBrightness.floatValue + stateModifier];
         self.nextStepBrightnessInactive = [NSNumber numberWithFloat:self.nextStepBrightness.floatValue + stateModifier];
         self.backgroundBrightnessInactive = [NSNumber numberWithFloat:self.backgroundBrightness.floatValue + stateModifier];
+        
+        [self generateBezierPaths];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewDidResize:) name:NSViewFrameDidChangeNotification object:self];
     }
     
     return self;
+}
+
+- (void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (BOOL)acceptsFirstResponder
@@ -118,7 +129,7 @@
     }
 }
 
-- (void)keyDown:(NSEvent *)theEvent {
+- (void) keyDown:(NSEvent *)theEvent {
     
     if( self.window.firstResponder == self ) {
         if( [_delegate respondsToSelector:@selector(keyDownFromEatsDebugGridView:withModifierFlags:)] )
@@ -131,7 +142,55 @@
     [super keyDown:theEvent];
 }
 
-- (void)drawRect:(NSRect)dirtyRect
+- (void) viewDidResize:(NSNotification *)notification
+{
+    [self generateBezierPaths];
+}
+
+- (void) generateBezierPaths
+{
+    // Generate all the bezier paths only when needed rather than every draw cycle
+    // This will need to be called if the view resizes
+    
+    // Margin to allow focus ring to fit
+    CGFloat margin = 10;
+    
+    // Set the square size and corner radius – use floor() around these two lines to make squares sit 'on pixel'
+    CGFloat squareWidth = ((self.bounds.size.width - ( margin * 2 ) + _gutter) / _columns) - _gutter;
+    CGFloat squareHeight = ((self.bounds.size.height - ( margin * 2 )  + _gutter) / _rows) - _gutter;
+    
+    CGFloat squareSize;
+    if( squareWidth < squareHeight )
+        squareSize = squareWidth;
+    else
+        squareSize = squareHeight;
+    
+    // Don't bother if we're too small
+    //if(squareSize < 3)
+    //    return;
+    
+    CGFloat cornerRadius = squareSize * 0.1;
+    
+    NSMutableArray *paths = [NSMutableArray arrayWithCapacity:_rows];
+    
+    for( int r = 0; r < _rows; r++ ){
+        
+        NSMutableArray *row = [NSMutableArray arrayWithCapacity:_columns];
+        [paths addObject:row];
+        
+        for( int c = 0; c < _columns; c++ ) {
+            // Draw shape
+            NSRect rect = NSMakeRect(margin + ((squareSize + _gutter) * c), margin + ((squareSize + _gutter) * r), squareSize, squareSize);
+            NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect: rect xRadius:cornerRadius yRadius:cornerRadius];
+            
+            [row addObject:roundedRect];
+        }
+    }
+    
+    _bezierPaths = paths;
+}
+
+- (void) drawRect:(NSRect)dirtyRect
 {
     if( !self.notes )
         return;
@@ -219,7 +278,7 @@
     
     
     // Draw the viewArray
-
+    
     // Focus ring
     [NSGraphicsContext saveGraphicsState];
     
@@ -234,27 +293,10 @@
     
     [NSGraphicsContext restoreGraphicsState];
     
-    // Margin to allow focus ring to fit
-    CGFloat margin = 10;
-    
-    // Set the square size and corner radius – use floor() around these two lines to make squares sit 'on pixel'
-    CGFloat squareWidth = ((self.bounds.size.width - ( margin * 2 ) + _gutter) / _columns) - _gutter;
-    CGFloat squareHeight = ((self.bounds.size.height - ( margin * 2 )  + _gutter) / _rows) - _gutter;
-    
-    CGFloat squareSize;
-    if(squareWidth < squareHeight) squareSize = squareWidth;
-    else squareSize = squareHeight;
-    
-    // Don't bother if we're too small
-    if(squareSize < 3) return;
-    
-    CGFloat cornerRadius = squareSize * 0.1;
-    
     for( int r = 0; r < _rows; r++ ){
         for( int c = 0; c < _columns; c++ ) {
             // Draw shape
-            NSRect rect = NSMakeRect(margin + ((squareSize + _gutter) * c), margin + ((squareSize + _gutter) * r), squareSize, squareSize);
-            NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect: rect xRadius:cornerRadius yRadius:cornerRadius];
+            NSBezierPath *roundedRect = [[_bezierPaths objectAtIndex:r] objectAtIndex:c];
             
             // Set clip so we can do an 'inner' stroke
             [roundedRect setClip];
