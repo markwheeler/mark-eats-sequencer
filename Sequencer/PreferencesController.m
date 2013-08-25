@@ -56,22 +56,22 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerNone:)
-                                                 name:@"GridControllerNone"
+                                                 name:kGridControllerNoneNotification
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnecting:)
-                                                 name:@"GridControllerConnecting"
+                                                 name:kGridControllerConnectingNotification
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnectionError:)
-                                                 name:@"GridControllerConnectionError"
+                                                 name:kGridControllerConnectionErrorNotification
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerConnected:)
-                                                 name:@"GridControllerConnected"
+                                                 name:kGridControllerConnectedNotification
                                                object:nil];
 }
 

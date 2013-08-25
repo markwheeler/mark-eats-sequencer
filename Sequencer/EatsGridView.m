@@ -29,7 +29,7 @@
         [self updateView];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(gridInput:)
-                                                     name:@"GridInput"
+                                                     name:kInputGridNotification
                                                    object:nil];
     }
     return self;

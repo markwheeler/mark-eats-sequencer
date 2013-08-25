@@ -23,7 +23,34 @@ NSString *const kSequencerErrorDomain = @"com.MarkEats.Sequencer.ErrorDomain";
 
 #pragma mark - Notifications
 
+// Grid controller connection
+
+NSString *const kGridControllerNoneNotification = @"GridControllerNoneNotification";
+NSString *const kGridControllerConnectingNotification = @"GridControllerConnectingNotification";
+NSString *const kGridControllerConnectionErrorNotification = @"GridControllerConnectionErrorNotification";
+NSString *const kGridControllerConnectedNotification = @"GridControllerConnectedNotification";
+
+
+// Input
+
+NSString *const kInputGridNotification = @"InputGridNotification";
+NSString *const kInputButtonNotification = @"InputButtonNotification";
+NSString *const kInputValueNotification = @"InputValueNotification";
+
+
+// External clock
+
+NSString *const kExternalClockZeroNotification = @"ExternalClockZeroNotification";
+NSString *const kExternalClockStartNotification = @"ExternalClockStartNotification";
+NSString *const kExternalClockContinueNotification = @"ExternalClockContinueNotification";
+NSString *const kExternalClockStopNotification = @"ExternalClockStopNotification";
+NSString *const kExternalClockBPMNotification = @"ExternalClockBPMNotification";
+
+
+// Preferences
+
 NSString *const kPreferencesThatRequiresGridRedrawDidChangeNotification = @"PreferencesThatRequiresGridRedrawDidChangeNotification";
+
 
 // Song
 

@@ -63,7 +63,7 @@
 
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
     [self.sharedPreferences savePreferences];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -78,7 +78,7 @@
                                                                          [NSNumber numberWithUnsignedInt:y], @"y",
                                                                          [NSNumber numberWithBool:down], @"down",
                                                                          nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridInput"
+    [[NSNotificationCenter defaultCenter] postNotificationName:kInputGridNotification
                                                         object:self
                                                       userInfo:inputInfo];
 }
@@ -89,17 +89,18 @@
     NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:inputId], @"inputId",
                                                                          [NSNumber numberWithBool:down], @"down",
                                                                          nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"ButtonInput"
+    [[NSNotificationCenter defaultCenter] postNotificationName:kInputButtonNotification
                                                         object:self
                                                       userInfo:inputInfo];
 }
 
+// TODO
 - (void) sendValueInputNotificationId:(uint)inputId value:(float)value
 {
     NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:inputId], @"inputId",
                                                                          [NSNumber numberWithFloat:value], @"value",
                                                                          nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"ValueInput"
+    [[NSNotificationCenter defaultCenter] postNotificationName:kInputValueNotification
                                                         object:self
                                                       userInfo:inputInfo];
 }
@@ -116,7 +117,7 @@
     self.sharedPreferences.gridWidth = 16;
     self.sharedPreferences.gridHeight = 16;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
 }
 
 - (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode
@@ -139,7 +140,7 @@
         self.sharedPreferences.gridOSCLabel = (NSString *)labelOrNode;
         self.sharedPreferences.gridMIDINodeName = nil;
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnecting" object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectingNotification object:self];
         self.gridControllerConnectionTimer = [NSTimer scheduledTimerWithTimeInterval:3
                                                            target:self
                                                          selector:@selector(gridControllerConnectionTimeout:)
@@ -162,10 +163,10 @@
 - (void) gridControllerConnectionTimeout:(NSTimer *)timer
 {
     [self.gridControllerConnectionTimer invalidate];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerNone" object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
     self.sharedPreferences.gridOSCLabel = nil;
     self.sharedPreferences.gridMIDINodeName = nil;
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnectionError" object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectionErrorNotification object:self];
 }
 
 - (void) gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
@@ -182,7 +183,7 @@
 //    self.sharedPreferences.gridHeight = 8;
     
     // Let everyone know
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GridControllerConnected" object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
 }
 
 
@@ -218,29 +219,27 @@
     if([node.name isEqualToString:self.sharedPreferences.midiClockSourceName]) {
         for (VVMIDIMessage *m in a) {
             if([m type] == VVMIDIStartVal) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockStart" object:self];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockStartNotification object:self];
                 
             } else if([m type] == VVMIDIContinueVal) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockContinue" object:self];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockContinueNotification object:self];
                 
             } else if([m type] == VVMIDISongPosPointerVal) {
                 if([m data1] == 0 && [m data2] == 0)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockZero" object:self];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockZeroNotification object:self];
             }
             
             else if([m type] == VVMIDIStopVal) {
                 [_externalClockCalculator resetExternalClock];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockStop" object:self];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockStopNotification object:self];
                 
             } else if([m type] == VVMIDIClockVal) {
                 
                 NSNumber *externalBPM = [_externalClockCalculator externalClockTick:m.timestamp];
-                if( externalBPM.intValue >= 20 && externalBPM.intValue <= 300 ) {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"ExternalClockBPM"
-                                                                        object:self
-                                                                      userInfo:[NSDictionary dictionaryWithObject:externalBPM forKey:@"bpm"]];
+                if( externalBPM ) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockBPMNotification object:self userInfo:[NSDictionary dictionaryWithObject:externalBPM forKey:@"bpm"]];
                 }
-                    
+                
             }
         }
     }

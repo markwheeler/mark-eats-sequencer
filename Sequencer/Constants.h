@@ -33,6 +33,32 @@ typedef enum SequencerErrorCode {
 
 #pragma mark - Notifications
 
+// Grid controller connection
+
+extern NSString *const kGridControllerNoneNotification;
+extern NSString *const kGridControllerConnectingNotification;
+extern NSString *const kGridControllerConnectionErrorNotification;
+extern NSString *const kGridControllerConnectedNotification;
+
+
+// Input
+
+extern NSString *const kInputGridNotification;
+extern NSString *const kInputButtonNotification;
+extern NSString *const kInputValueNotification;
+
+
+// External clock
+
+extern NSString *const kExternalClockZeroNotification;
+extern NSString *const kExternalClockStartNotification;
+extern NSString *const kExternalClockContinueNotification;
+extern NSString *const kExternalClockStopNotification;
+extern NSString *const kExternalClockBPMNotification;
+
+
+// Preferences
+
 extern NSString *const kPreferencesThatRequiresGridRedrawDidChangeNotification;
 
 // Song

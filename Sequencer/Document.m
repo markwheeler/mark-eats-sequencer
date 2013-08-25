@@ -169,15 +169,15 @@ typedef enum DocumentPageAnimationDirection {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeMain:) name:NSWindowDidBecomeMainNotification object:[aController window]];
     
     // Grid controller notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:@"GridControllerConnected" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:@"GridControllerNone" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:kGridControllerConnectedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:kGridControllerNoneNotification object:nil];
     
     // External clock notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockStart:) name:@"ExternalClockStart" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockContinue:) name:@"ExternalClockContinue" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockZero:) name:@"ExternalClockZero" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockStop:) name:@"ExternalClockStop" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockBPM:) name:@"ExternalClockBPM" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockStart:) name:kExternalClockStartNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockContinue:) name:kExternalClockContinueNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockZero:) name:kExternalClockZeroNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockStop:) name:kExternalClockStopNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(externalClockBPM:) name:kExternalClockBPMNotification object:nil];
     
     // Sequencer song notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(songBPMDidChange:) name:kSequencerSongBPMDidChangeNotification object:self.sequencer];
@@ -406,6 +406,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) logDebugInfo
 {
     NSLog(@"---- Debug info ----");
+    NSLog(@"Source: %@", self.sharedPreferences.midiClockSourceName);
     NSLog(@"Grid type: %i", self.sharedPreferences.gridType);
     NSLog(@"Grid supports variable brightness: %i", self.sharedPreferences.gridSupportsVariableBrightness);
     NSLog(@"Grid width: %u", self.sharedPreferences.gridWidth);
@@ -460,7 +461,14 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) externalClockBPM:(NSNotification *)notification
 {
-    [self.sequencer setBPMWithoutRegisteringUndo:[[notification.userInfo valueForKey:@"bpm"] floatValue]];
+    float newBPM = [[notification.userInfo valueForKey:@"bpm"] floatValue];
+    
+    if( newBPM > SEQUENCER_SONG_BPM_MAX )
+        newBPM = SEQUENCER_SONG_BPM_MAX;
+    else if( newBPM < SEQUENCER_SONG_BPM_MIN )
+        newBPM = SEQUENCER_SONG_BPM_MIN;
+    
+    [self.sequencer setBPMWithoutRegisteringUndo:newBPM];
 }
 
 

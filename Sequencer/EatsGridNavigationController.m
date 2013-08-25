@@ -63,8 +63,8 @@
         _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedPreferences = [Preferences sharedPreferences];
                 
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:@"GridControllerNone" object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:@"GridControllerConnected" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:kGridControllerNoneNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:kGridControllerConnectedNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferencesThatRequiresGridRedrawDidChange:) name:kPreferencesThatRequiresGridRedrawDidChangeNotification object:nil];
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
