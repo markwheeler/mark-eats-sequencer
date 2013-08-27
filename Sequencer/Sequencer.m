@@ -861,32 +861,34 @@
         
         for( SequencerNote *note in sortedNotesOnThisRow ) {
             
-            int endPoint;
-            
-            // When in reverse
-            if( playMode == EatsSequencerPlayMode_Reverse ) {
-                endPoint = note.step - note.length + 1;
+            if( note.step < self.sharedPreferences.gridWidth ) {
+                int endPoint;
                 
-                // If it's wrapping
-                if( endPoint < 0 && ( step <= note.step || step >= endPoint + self.sharedPreferences.gridWidth ) ) {
-                    return note;
+                // When in reverse
+                if( playMode == EatsSequencerPlayMode_Reverse ) {
+                    endPoint = note.step - note.length + 1;
                     
+                    // If it's wrapping
+                    if( endPoint < 0 && ( step <= note.step || step >= endPoint + self.sharedPreferences.gridWidth ) ) {
+                        return note;
+                        
                     // If it's not wrapping
-                } else if( step <= note.step && step >= endPoint ) {
-                    return note;
-                }
-                
-            // When playing forwards
-            } else {
-                endPoint = note.step + note.length - 1;
-                
-                // If it's wrapping and we're going forwards
-                if( endPoint >= self.sharedPreferences.gridWidth && ( step >= note.step || step <= endPoint - self.sharedPreferences.gridWidth ) ) {
-                    return note;
+                    } else if( step <= note.step && step >= endPoint ) {
+                        return note;
+                    }
                     
-                // If it's not wrapping
-                } else if( step >= note.step && step <= endPoint ) {
-                    return note;
+                // When playing forwards
+                } else {
+                    endPoint = note.step + note.length - 1;
+                    
+                    // If it's wrapping and we're going forwards
+                    if( endPoint >= self.sharedPreferences.gridWidth && ( step >= note.step || step <= endPoint - self.sharedPreferences.gridWidth ) ) {
+                        return note;
+                        
+                    // If it's not wrapping
+                    } else if( step >= note.step && step <= endPoint ) {
+                        return note;
+                    }
                 }
             }
         }
