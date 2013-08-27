@@ -179,8 +179,8 @@
     self.sharedPreferences.gridHeight = h - (h % 8);
     
     // Fixed grid size for testing
-    self.sharedPreferences.gridWidth = 8;
-    self.sharedPreferences.gridHeight = 8;
+//    self.sharedPreferences.gridWidth = 8;
+//    self.sharedPreferences.gridHeight = 8;
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];

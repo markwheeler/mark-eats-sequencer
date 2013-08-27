@@ -217,6 +217,22 @@
     });
 }
 
+- (void) exitNoteEditModeInstantly
+{
+    if( _activeEditNote )
+        _activeEditNote = nil;
+    _velocityView.visible = NO;
+    _lengthView.visible = NO;
+    _patternView.y = 0;
+    _patternView.height = self.height;
+    _patternView.mode = EatsPatternViewMode_Edit;
+    
+    if( _animationTimer ) {
+        [_animationTimer invalidate];
+        _animationTimer = nil;
+    }
+}
+
 - (void) animateInNoteEditMode:(NSTimer *)timer
 {
     _animationFrame ++;
@@ -310,6 +326,7 @@
 - (void) updateNoteLength
 {
     float stepPercentage = ( 100.0 / _velocityView.width );
+    _activeEditNote = [self.sequencer noteAtStep:_activeEditNote.step atRow:_activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     _lengthView.percentage = ( ( ( ( (float)self.activeEditNote.length / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
 }
@@ -318,6 +335,7 @@
 {
     float oneStepOf127 = 127.0  / _velocityView.width;
     float range = 127.0 - oneStepOf127;
+    _activeEditNote = [self.sequencer noteAtStep:_activeEditNote.step atRow:_activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     float percentageForVelocitySlider = 100.0 * ( (self.activeEditNote.velocity - oneStepOf127 ) / range );
     if( percentageForVelocitySlider < 0 )
@@ -363,16 +381,18 @@
 
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
-    // TODO animate?
-    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+    // TODO animate
+    if( _patternView.mode != EatsPatternViewMode_Edit )
+        [self exitNoteEditModeInstantly];
     [self updatePatternNotes];
     [self updateView];
 }
 
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
-    // TODO animate?
-    // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+    // TODO animate
+    if( _patternView.mode != EatsPatternViewMode_Edit )
+        [self exitNoteEditModeInstantly];
     [self updatePatternNotes];
     [self updateView];
 }
@@ -380,7 +400,8 @@
 - (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
 {
     if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        // TODO immediately exit note edit mode (need to make a new method that works even during transition)
+        if( _patternView.mode != EatsPatternViewMode_Edit )
+            [self exitNoteEditModeInstantly];
         [self updatePatternNotes];
         [self updateView];
     }
