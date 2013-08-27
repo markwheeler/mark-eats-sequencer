@@ -13,7 +13,8 @@
 #import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
-#define ANIMATION_EASE 0.4
+#define IN_OUT_ANIMATION_EASE 0.12
+#define PAGE_ANIMATION_EASE 0.04
 
 @interface EatsGridPlayViewController ()
 
@@ -44,9 +45,13 @@
 @property NSTimer                           *bpmRepeatTimer;
 @property NSTimer                           *clearTimer;
 
-@property NSTimer                           *animationTimer;
-@property uint                              animationFrame;
-@property int                               animationSpeedMultiplier;
+@property NSTimer                           *inOutAnimationTimer;
+@property uint                              inOutAnimationFrame;
+
+@property NSTimer                           *pageAnimationTimer;
+@property uint                              pageAnimationFrame;
+
+@property float                             animationSpeedMultiplier;
 
 @property NSDictionary                      *lastDownPatternKey;
 @property BOOL                              copiedPattern;
@@ -57,6 +62,8 @@
 
 - (void) setupView
 {
+    _animationSpeedMultiplier = 8.0 / self.height;
+    
     // Get prefs
     self.sharedPreferences = [Preferences sharedPreferences];
     
@@ -261,9 +268,8 @@
     
     
     // Start animateIn
-    _animationFrame = 0;
-    _animationSpeedMultiplier = 8 / self.height;
-    [self animateIncrement:-1];
+    self.inOutAnimationFrame = 0;
+    [self animateInOutIncrement:-1];
     [self scheduleAnimateInTimer];
     
     [self updateView];
@@ -271,11 +277,14 @@
 
 - (void) dealloc
 {
-    if( _animationTimer )
-        [_animationTimer invalidate];
+    if( self.inOutAnimationTimer )
+        [self.inOutAnimationTimer invalidate];
     
-    if( _bpmRepeatTimer )
-        [_bpmRepeatTimer invalidate];
+    if( self.pageAnimationTimer )
+        [self.pageAnimationTimer invalidate];
+    
+    if( self.bpmRepeatTimer )
+        [self.bpmRepeatTimer invalidate];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -286,17 +295,17 @@
 
 - (void) animateIn:(NSTimer *)timer
 {
-    _animationFrame ++;
+    self.inOutAnimationFrame ++;
     
     [timer invalidate];
     
-    [self animateIncrement:1];
+    [self animateInOutIncrement:1];
     
     [self updateView];
     
     // Final frame
-    if( _animationFrame == self.height - 4 ) {
-        _animationTimer = nil;
+    if( self.inOutAnimationFrame == self.height - 4 ) {
+        self.inOutAnimationTimer = nil;
     } else {
         [self scheduleAnimateInTimer];
     }
@@ -305,20 +314,20 @@
 
 - (void) animateOut:(NSTimer *)timer
 {
-    _animationFrame ++;
+    self.inOutAnimationFrame ++;
     
     [timer invalidate];
     
     // Final frame
     if( _patternView.height == self.height - 1 ) {
-        _animationTimer = nil;
+        self.inOutAnimationTimer = nil;
         
         [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
     } else {
         [self scheduleAnimateOutTimer];
     }
     
-    [self animateIncrement:-1];
+    [self animateInOutIncrement:-1];
         
     [self updateView];
 }
@@ -326,7 +335,7 @@
 - (void) scheduleAnimateInTimer
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 1 + ANIMATION_EASE * _animationFrame ) ) / ANIMATION_FRAMERATE
+        self.inOutAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 0.1 + IN_OUT_ANIMATION_EASE * self.inOutAnimationFrame ) ) / ANIMATION_FRAMERATE
                                                            target:self
                                                          selector:@selector(animateIn:)
                                                          userInfo:nil
@@ -334,8 +343,8 @@
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
+        [runloop addTimer:self.inOutAnimationTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.inOutAnimationTimer forMode: NSEventTrackingRunLoopMode];
         
     });
 }
@@ -343,7 +352,8 @@
 - (void) scheduleAnimateOutTimer
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 1 + ANIMATION_EASE * ( (self.height / 2) - 1 - _animationFrame) ) ) / ANIMATION_FRAMERATE
+        int frameCountdown = ( (self.height / 2) - 1 - self.inOutAnimationFrame);
+        self.inOutAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 0.1 + IN_OUT_ANIMATION_EASE * frameCountdown ) ) / ANIMATION_FRAMERATE
                                                            target:self
                                                          selector:@selector(animateOut:)
                                                          userInfo:nil
@@ -351,12 +361,12 @@
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
+        [runloop addTimer:self.inOutAnimationTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.inOutAnimationTimer forMode: NSEventTrackingRunLoopMode];
     });
 }
 
-- (void) animateIncrement:(int)amount
+- (void) animateInOutIncrement:(int)amount
 {
     if( _transposeView ) {
         _transposeView.y += amount;
@@ -419,11 +429,90 @@
     }
 }
 
+- (void) pageLeft:(NSTimer *)timer
+{
+    self.pageAnimationFrame ++;
+    
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    [self animatePageIncrement:1];
+    
+    [self updateView];
+    
+    // Final frame
+    if( self.pageAnimationFrame == self.width - 5 ) {
+        self.pageAnimationTimer = nil;
+    } else {
+        [self scheduleAnimatePageLeftTimer];
+    }
+}
+
+- (void) pageRight:(NSTimer *)timer
+{
+    self.pageAnimationFrame ++;
+    
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    [self animatePageIncrement:-1];
+    
+    [self updateView];
+    
+    // Final frame
+    if( self.pageAnimationFrame == self.width - 5 ) {
+        self.pageAnimationTimer = nil;
+    } else {
+        [self scheduleAnimatePageRightTimer];
+    }
+}
+
+- (void) scheduleAnimatePageLeftTimer
+{
+    // Haven't attached this to the run loop because the async seemed to mean timers could overlap
+    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
+                                                               target:self
+                                                             selector:@selector(pageLeft:)
+                                                             userInfo:nil
+                                                              repeats:NO];
+}
+
+- (void) scheduleAnimatePageRightTimer
+{
+    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _animationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
+                                                              target:self
+                                                            selector:@selector(pageRight:)
+                                                            userInfo:nil
+                                                             repeats:NO];
+}
+
+- (void) animatePageIncrement:(int)amount
+{
+//    NSLog(@"Page ani %i", amount);
+    
+    _loopBraceView.x += amount;
+    _patternView.x += amount;
+
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+        
+        float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 1 );
+        float opacity = ( 0.7 * percentageOfAnimationComplete ) + 0.3;
+        
+        _loopBraceView.opacity = opacity;
+        _patternView.opacity = opacity;
+        
+    } else if( _loopBraceView.opacity != 1 || _patternView.opacity != 1 ) {
+        _loopBraceView.opacity = 1;
+        _patternView.opacity = 1;
+    }
+}
+
+
 - (void) decrementBPMRepeat:(NSTimer *)timer
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         [timer invalidate];
-        _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+        self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                            target:self
                                                          selector:@selector(decrementBPMRepeat:)
                                                          userInfo:nil
@@ -431,8 +520,8 @@
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+        [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
         
         [self.sequencer decrementBPM];
     });
@@ -442,7 +531,7 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         [timer invalidate];
-        _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+        self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                            target:self
                                                          selector:@selector(incrementBPMRepeat:)
                                                          userInfo:nil
@@ -450,8 +539,8 @@
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+        [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
         
         [self.sequencer incrementBPM];
     });
@@ -480,6 +569,48 @@
 
 
 #pragma mark - Sub view updates
+
+- (void) updatePageLeft
+{
+    // Start animate left
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    _loopBraceView.x = - self.width + 4;
+    _patternView.x = - self.width + 4;
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+        _loopBraceView.opacity = 0;
+        _patternView.opacity = 0;
+    }
+    self.pageAnimationFrame = 0;
+    [self animatePageIncrement:1];
+    [self scheduleAnimatePageLeftTimer];
+    
+    [self updatePage];
+    
+    [self updateView];
+}
+
+- (void) updatePageRight
+{
+    // Start animate right
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    _loopBraceView.x = self.width - 4;
+    _patternView.x = self.width - 4;
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+        _loopBraceView.opacity = 0;
+        _patternView.opacity = 0;
+    }
+    self.pageAnimationFrame = 0;
+    [self animatePageIncrement:-1];
+    [self scheduleAnimatePageRightTimer];
+    
+    [self updatePage];
+    
+    [self updateView];
+}
 
 - (void) updatePage
 {
@@ -562,7 +693,7 @@
                 patternButtonId ++;
             }
             
-            // For smaller grids
+        // For smaller grids
         } else {
             // For this page
             if( pageId == self.sequencer.currentPageId ) {
@@ -699,7 +830,7 @@
 // Sequencer state notifications
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
-    [self updatePage];
+    [self updatePageLeft];
     [self updatePlayMode];
     [self updatePattern];
     if( self.height > 8 ) {
@@ -713,7 +844,7 @@
 
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
-    [self updatePage];
+    [self updatePageRight];
     [self updatePlayMode];
     [self updatePattern];
     if( self.height > 8 ) {
@@ -803,6 +934,10 @@
             sender.buttonState = EatsButtonViewState_Down;
             
             [self.sequencer setCurrentPageId:(int)[_pageButtons indexOfObject:sender]];
+            
+        } else {
+            sender.buttonState = EatsButtonViewState_Inactive;
+            [self updatePage];
         }
     }
     
@@ -952,14 +1087,14 @@
     } else if( sender == _bpmDecrementButton ) {
         if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
             
-            if( !_bpmRepeatTimer ) {
+            if( !self.bpmRepeatTimer ) {
                 
                 sender.buttonState = EatsButtonViewState_Down;
                 [self.sequencer decrementBPM];
                 
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
                 
-                    _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                    self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                                        target:self
                                                                      selector:@selector(decrementBPMRepeat:)
                                                                      userInfo:nil
@@ -967,17 +1102,17 @@
                     NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                     
                     // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+                    [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
                     
                 });
             }
             
         } else {
             
-            if( _bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
-                [_bpmRepeatTimer invalidate];
-                _bpmRepeatTimer = nil;
+            if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                [self.bpmRepeatTimer invalidate];
+                self.bpmRepeatTimer = nil;
             }
             
             sender.buttonState = EatsButtonViewState_Inactive;
@@ -987,14 +1122,14 @@
     } else if( sender == _bpmIncrementButton ) {
         if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
             
-            if( !_bpmRepeatTimer ) {
+            if( !self.bpmRepeatTimer ) {
                 
                 sender.buttonState = EatsButtonViewState_Down;
                 [self.sequencer incrementBPM];
                 
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
                 
-                    _bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                    self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                                        target:self
                                                                      selector:@selector(incrementBPMRepeat:)
                                                                      userInfo:nil
@@ -1002,17 +1137,17 @@
                     NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                     
                     // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:_bpmRepeatTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:_bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+                    [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
                     
                 });
             }
             
         } else {
             
-            if( _bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
-                [_bpmRepeatTimer invalidate];
-                _bpmRepeatTimer = nil;
+            if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                [self.bpmRepeatTimer invalidate];
+                self.bpmRepeatTimer = nil;
             }
             
             sender.buttonState = EatsButtonViewState_Inactive;
@@ -1056,9 +1191,9 @@
                 [self stopClear];
             
             // Start animateOut
-            [self animateIncrement:-1];
+            [self animateInOutIncrement:-1];
             
-            _animationFrame = 0;
+            self.inOutAnimationFrame = 0;
             [self scheduleAnimateOutTimer];
         }
     }
