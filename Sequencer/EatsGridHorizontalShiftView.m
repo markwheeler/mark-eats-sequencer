@@ -8,8 +8,6 @@
 
 #import "EatsGridHorizontalShiftView.h"
 
-#define TAIL_LENGTH 3
-
 @interface EatsGridHorizontalShiftView ()
 
 @property NSDictionary          *lastDownKey;
@@ -22,6 +20,18 @@
 - (NSArray *) viewArray
 {
     if( !self.visible ) return nil;
+    
+    uint tailLength;
+    uint tailBaseBrightness;
+    
+    if( self.useWideBrightnessRange ) {
+        tailLength = 7;
+        tailBaseBrightness = 4;
+        
+    } else {
+        tailLength = 3;
+        tailBaseBrightness = 8;
+    }
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -36,13 +46,13 @@
             if( x == _zeroStep ) {
                 brightness = 15;
             } else if ( _shift > 0 && x > _zeroStep && x <= _zeroStep + _shift ) {
-                brightness = 8;
-                if( (int)x >= (int)_zeroStep + _shift - TAIL_LENGTH )
-                    brightness += ( x - ( (int)_zeroStep + _shift - TAIL_LENGTH ) + 1 );
+                brightness = tailBaseBrightness;
+                if( (int)x >= (int)_zeroStep + _shift - tailLength )
+                    brightness += ( x - ( (int)_zeroStep + _shift - tailLength ) + 1 );
             } else if ( _shift < 0 && x < _zeroStep && (int)x >= (int)_zeroStep + _shift ) {
-                brightness = 8;
-                if( (int)x <= (int)_zeroStep + _shift + TAIL_LENGTH )
-                    brightness += ( ( (int)_zeroStep + _shift + TAIL_LENGTH + 1 ) - x );
+                brightness = tailBaseBrightness;
+                if( (int)x <= (int)_zeroStep + _shift + tailLength )
+                    brightness += ( ( (int)_zeroStep + _shift + tailLength + 1 ) - x );
             } else {
                 brightness = 0;
             }

@@ -298,6 +298,17 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (void) updateView
+{
+    if( _sharedPreferences.gridSupportsVariableBrightness )
+        _transposeView.useWideBrightnessRange = YES;
+        
+    else
+        _transposeView.useWideBrightnessRange = NO;
+    
+    [super updateView];
+}
+
 
 
 #pragma mark - Private methods

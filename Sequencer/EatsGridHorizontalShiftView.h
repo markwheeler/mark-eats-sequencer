@@ -18,5 +18,6 @@
 
 @property uint      zeroStep;
 @property int       shift;
+@property BOOL      useWideBrightnessRange;
 
 @end
