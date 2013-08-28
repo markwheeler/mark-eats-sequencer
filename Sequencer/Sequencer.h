@@ -41,6 +41,8 @@
 
 - (void) addDummyData;
 
+- (void) adjustToGridSize;
+
 - (NSUInteger) checkForNotesOutsideOfGrid;
 - (NSUInteger) removeNotesOutsideOfGrid;
 

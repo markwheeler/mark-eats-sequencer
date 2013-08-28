@@ -194,7 +194,7 @@
     
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         
-        float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 1 );
+        float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 5 );
         float opacity = ( 0.7 * percentageOfAnimationComplete ) + 0.3;
         
         _patternView.opacity = opacity;

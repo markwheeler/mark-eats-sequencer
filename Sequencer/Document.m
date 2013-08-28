@@ -374,6 +374,8 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) checkForThingsOutsideGrid
 {
+    [self.sequencer adjustToGridSize];
+    
     if( ![NSThread isMainThread] )
         NSLog(@"WARNING: Should be on main thread"); // TODO
     NSUInteger count = [self.sequencer checkForNotesOutsideOfGrid];
@@ -388,6 +390,8 @@ typedef enum DocumentPageAnimationDirection {
         [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
         //                });
     }
+    
+    [self updatePatternNotes];
 }
 
 - (void) notesOutsideGridAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo

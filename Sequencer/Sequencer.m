@@ -97,6 +97,9 @@
         
         // Add
         [pages addObject:page];
+        
+        SequencerPageState *pageState = [self.state.pageStates objectAtIndex:i];
+        pageState.currentStep = page.loopEnd;
     }
     
     self.song.pages = pages;
@@ -126,8 +129,16 @@
 
 - (NSError *) setSongFromKeyedArchiveData:(NSData *)data
 {
+    SequencerSong *newSong;
+    
     NSError *outError;
-    SequencerSong *newSong = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    @try {
+        newSong = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    }
+    @catch (NSException* exception) {
+        outError = [NSError errorWithDomain:kSequencerErrorDomain code:SequencerErrorCode_UnarchiveFailed userInfo:nil];
+        return outError;
+    }
     
     if( !newSong ) {
         outError = [NSError errorWithDomain:kSequencerErrorDomain code:SequencerErrorCode_UnarchiveFailed userInfo:nil];
@@ -152,6 +163,35 @@
         [self addNoteAtStep:i atRow:(int)arc4random_uniform(8) inPattern:0 inPage:0];
     }
 }
+
+
+
+- (void) adjustToGridSize
+{
+    // Make sure all the loops etc fit within the connected grid size
+    for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+        
+        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+        SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+        
+        if( page.loopStart >= self.sharedPreferences.gridWidth || page.loopEnd >= self.sharedPreferences.gridWidth ) {
+            page.loopStart = 0;
+            page.loopEnd = self.sharedPreferences.gridWidth - 1;
+        }
+        if( page.transposeZeroStep >= self.sharedPreferences.gridWidth )
+            page.transposeZeroStep = (self.sharedPreferences.gridWidth) / 2 - 1;
+        
+        if( pageState.currentStep >= self.sharedPreferences.gridWidth )
+            pageState.currentStep = page.loopEnd;
+        if( pageState.nextStep.intValue >= self.sharedPreferences.gridWidth )
+            pageState.nextStep = nil;
+        if( pageState.currentPatternId >= self.sharedPreferences.gridWidth )
+            pageState.currentPatternId = 0;
+        if( pageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
+            pageState.nextPatternId = nil;
+    }
+}
+
 
 
 - (NSUInteger) checkForNotesOutsideOfGrid

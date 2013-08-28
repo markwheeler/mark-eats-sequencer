@@ -514,7 +514,7 @@
 
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         
-        float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 1 );
+        float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 5 );
         float opacity = ( 0.7 * percentageOfAnimationComplete ) + 0.3;
         
         _loopBraceView.opacity = opacity;
@@ -693,7 +693,7 @@
                     button.inactiveBrightness = 8;
                 // Not playing but current pattern
                 else if( patternButtonId == currentPatternId )
-                    button.inactiveBrightness = 4;
+                    button.inactiveBrightness = 5;
                 // Has some notes
                 else if( [self.sequencer numberOfNotesForPattern:patternButtonId inPage:pageId] )
                     button.inactiveBrightness = 3;
@@ -982,7 +982,7 @@
                 
                 if( !_copiedPattern ) {
                     // Change pattern
-                    [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInt:pressedPattern] forPage:self.sequencer.currentPageId];
+                    [self.sequencer startOrStopPattern:pressedPattern inPage:self.sequencer.currentPageId];
                 }
             
                 _lastDownPatternKey = nil;
@@ -1037,6 +1037,8 @@
 
                 }
                 
+                [self updatePattern];
+                
             }
         
         // Smaller grids (change all patterns at once)
@@ -1045,10 +1047,12 @@
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
-                [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]]];
+                [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
                 
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
+                
+                [self updatePattern];
             }
 
         }
