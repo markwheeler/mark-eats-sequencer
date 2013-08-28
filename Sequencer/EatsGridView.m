@@ -57,6 +57,7 @@
     // Over-ride this
     
     // Generate and combine all the sub views
+    // TODO should this be going out on a background queue?
 
     NSArray *gridArray = [EatsGridUtils combineSubViews:_subViews gridWidth:_width gridHeight:_height];
     

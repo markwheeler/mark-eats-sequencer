@@ -63,14 +63,14 @@
 - (void) setupView
 {
     if( self.height > 8 )
-        _inOutAnimationSpeedMultiplier = 0.5;
+        self.inOutAnimationSpeedMultiplier = 0.5;
     else
-        _inOutAnimationSpeedMultiplier = 2.5;
+        self.inOutAnimationSpeedMultiplier = 2.5;
     
     if( self.width > 8 )
-        _pageAnimationSpeedMultiplier = 0.5;
+        self.pageAnimationSpeedMultiplier = 0.5;
     else
-        _pageAnimationSpeedMultiplier = 8.0;
+        self.pageAnimationSpeedMultiplier = 8.0;
     
     
     // Get prefs
@@ -344,7 +344,7 @@
 - (void) scheduleAnimateInTimer
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        self.inOutAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _inOutAnimationSpeedMultiplier ) * ( 0.1 + IN_OUT_ANIMATION_EASE * self.inOutAnimationFrame ) ) / ANIMATION_FRAMERATE
+        self.inOutAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.inOutAnimationSpeedMultiplier ) * ( 0.1 + IN_OUT_ANIMATION_EASE * self.inOutAnimationFrame ) ) / ANIMATION_FRAMERATE
                                                            target:self
                                                          selector:@selector(animateIn:)
                                                          userInfo:nil
@@ -362,7 +362,7 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         int frameCountdown = ( (self.height / 2) - 1 - self.inOutAnimationFrame);
-        self.inOutAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _inOutAnimationSpeedMultiplier ) * ( 0.1 + IN_OUT_ANIMATION_EASE * frameCountdown ) ) / ANIMATION_FRAMERATE
+        self.inOutAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.inOutAnimationSpeedMultiplier ) * ( 0.1 + IN_OUT_ANIMATION_EASE * frameCountdown ) ) / ANIMATION_FRAMERATE
                                                            target:self
                                                          selector:@selector(animateOut:)
                                                          userInfo:nil
@@ -479,7 +479,7 @@
 - (void) scheduleAnimatePageLeftTimer
 {
     // Haven't attached this to the run loop because the async seemed to mean timers could overlap
-    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
+    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
                                                                target:self
                                                              selector:@selector(pageLeft:)
                                                              userInfo:nil
@@ -488,7 +488,7 @@
 
 - (void) scheduleAnimatePageRightTimer
 {
-    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * _pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
+    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
                                                               target:self
                                                             selector:@selector(pageRight:)
                                                             userInfo:nil
@@ -497,7 +497,6 @@
 
 - (void) animatePageIncrement:(int)amount
 {
-//    NSLog(@"Page ani %i", amount);
     
     _loopBraceView.x += amount;
     _patternView.x += amount;
@@ -596,8 +595,6 @@
     [self scheduleAnimatePageLeftTimer];
     
     [self updatePage];
-    
-    [self updateView];
 }
 
 - (void) updatePageRight
@@ -617,8 +614,6 @@
     [self scheduleAnimatePageRightTimer];
     
     [self updatePage];
-    
-    [self updateView];
 }
 
 - (void) updatePage

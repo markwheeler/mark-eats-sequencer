@@ -13,24 +13,30 @@
 
 #define ANIMATION_FRAMERATE 15
 
+#define PAGE_ANIMATION_EASE 0.04
+
 #define NOTE_DEFAULT_BRIGHTNESS 15
 #define NOTE_LENGTH_DEFAULT_BRIGHTNESS 10
 #define NOTE_EDIT_FADE_AMOUNT 10
 
 @interface EatsGridSequencerViewController ()
 
-@property Preferences                   *sharedPreferences;
+@property Preferences                       *sharedPreferences;
 
-@property Sequencer                     *sequencer;
-@property SequencerNote                 *activeEditNote;
-@property BOOL                          lastDownWasInEditMode;
+@property Sequencer                         *sequencer;
+@property SequencerNote                     *activeEditNote;
+@property BOOL                              lastDownWasInEditMode;
 
-@property EatsGridPatternView           *patternView;
-@property EatsGridHorizontalSliderView  *velocityView;
-@property EatsGridHorizontalSliderView  *lengthView;
+@property EatsGridPatternView               *patternView;
+@property EatsGridHorizontalSliderView      *velocityView;
+@property EatsGridHorizontalSliderView      *lengthView;
 
-@property NSTimer                       *animationTimer;
-@property uint                          animationFrame;
+@property NSTimer                           *editNoteAnimationTimer;
+@property uint                              editNoteAnimationFrame;
+
+@property NSTimer                           *pageAnimationTimer;
+@property uint                              pageAnimationFrame;
+@property float                             pageAnimationSpeedMultiplier;
 
 @end
 
@@ -38,6 +44,11 @@
 
 - (void) setupView
 {
+    if( self.width > 8 )
+        self.pageAnimationSpeedMultiplier = 0.5;
+    else
+        self.pageAnimationSpeedMultiplier = 8.0;
+    
     self.sharedPreferences = [Preferences sharedPreferences];
     
     // Create the sub views
@@ -120,13 +131,86 @@
 
 #pragma mark - Private methods
 
+- (void) pageLeft:(NSTimer *)timer
+{
+    self.pageAnimationFrame ++;
+    
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    [self animatePageIncrement:1];
+    
+    [self updateView];
+    
+    // Final frame
+    if( self.pageAnimationFrame == self.width - 5 ) {
+        self.pageAnimationTimer = nil;
+    } else {
+        [self scheduleAnimatePageLeftTimer];
+    }
+}
+
+- (void) pageRight:(NSTimer *)timer
+{
+    self.pageAnimationFrame ++;
+    
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    [self animatePageIncrement:-1];
+    
+    [self updateView];
+    
+    // Final frame
+    if( self.pageAnimationFrame == self.width - 5 ) {
+        self.pageAnimationTimer = nil;
+    } else {
+        [self scheduleAnimatePageRightTimer];
+    }
+}
+
+- (void) scheduleAnimatePageLeftTimer
+{
+    // Haven't attached this to the run loop because the async seemed to mean timers could overlap
+    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
+                                                               target:self
+                                                             selector:@selector(pageLeft:)
+                                                             userInfo:nil
+                                                              repeats:NO];
+}
+
+- (void) scheduleAnimatePageRightTimer
+{
+    self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
+                                                               target:self
+                                                             selector:@selector(pageRight:)
+                                                             userInfo:nil
+                                                              repeats:NO];
+}
+
+- (void) animatePageIncrement:(int)amount
+{
+    _patternView.x += amount;
+    
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+        
+        float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 1 );
+        float opacity = ( 0.7 * percentageOfAnimationComplete ) + 0.3;
+        
+        _patternView.opacity = opacity;
+        
+    } else if( _patternView.opacity != 1 ) {
+        _patternView.opacity = 1;
+    }
+}
+
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
     if( _patternView.mode == EatsPatternViewMode_Locked ) return;
     
     _patternView.mode = EatsPatternViewMode_Locked;
     
-    _animationFrame = 0;
+    self.editNoteAnimationFrame = 0;
     
     // Display sliders at bottom
     if( note.row > ( self.height / 2 ) - 1 ) {
@@ -157,7 +241,7 @@
     
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+        self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
                                                            target:self
                                                          selector:@selector(animateInNoteEditMode:)
                                                          userInfo:nil
@@ -165,8 +249,8 @@
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
+        [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
         
     });
 }
@@ -177,7 +261,7 @@
     
     _patternView.mode = EatsPatternViewMode_Locked;
     
-    _animationFrame = 0;
+    self.editNoteAnimationFrame = 0;
     
     // To bottom
     if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
@@ -203,7 +287,7 @@
     
     dispatch_async(dispatch_get_main_queue(), ^(void) {
     
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+        self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
                                                                target:self
                                                              selector:@selector(animateOutNoteEditMode:)
                                                              userInfo:nil
@@ -211,31 +295,32 @@
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
+        [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
         
     });
 }
 
 - (void) exitNoteEditModeInstantly
 {
-    if( _activeEditNote )
-        _activeEditNote = nil;
+    _activeEditNote = nil;
     _velocityView.visible = NO;
     _lengthView.visible = NO;
     _patternView.y = 0;
     _patternView.height = self.height;
+    _patternView.activeEditNote = nil;
     _patternView.mode = EatsPatternViewMode_Edit;
+    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
     
-    if( _animationTimer ) {
-        [_animationTimer invalidate];
-        _animationTimer = nil;
+    if( self.editNoteAnimationTimer ) {
+        [self.editNoteAnimationTimer invalidate];
+        self.editNoteAnimationTimer = nil;
     }
 }
 
 - (void) animateInNoteEditMode:(NSTimer *)timer
 {
-    _animationFrame ++;
+    self.editNoteAnimationFrame ++;
     
     // From bottom
     if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
@@ -259,12 +344,12 @@
     _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
     _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
     
-    if( _animationFrame == 1 ) { // Final frame
+    if( self.editNoteAnimationFrame == 1 ) { // Final frame
 
         _patternView.mode = EatsPatternViewMode_NoteEdit;
         
         [timer invalidate];
-        _animationTimer = nil;
+        self.editNoteAnimationTimer = nil;
     }
     
     [self updateView];
@@ -273,7 +358,7 @@
 
 - (void) animateOutNoteEditMode:(NSTimer *)timer
 {
-    _animationFrame ++;
+    self.editNoteAnimationFrame ++;
     
     // To bottom
     if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
@@ -293,7 +378,7 @@
     _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
     _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
     
-    if( _animationFrame == 1 ) { // Final frame
+    if( self.editNoteAnimationFrame == 1 ) { // Final frame
         
         _patternView.activeEditNote = nil;
         _patternView.mode = EatsPatternViewMode_Edit;
@@ -302,7 +387,7 @@
 
         
         [timer invalidate];
-        _animationTimer = nil;
+        self.editNoteAnimationTimer = nil;
     }
     
     [self updateView];
@@ -327,6 +412,7 @@
 {
     float stepPercentage = ( 100.0 / _velocityView.width );
     _activeEditNote = [self.sequencer noteAtStep:_activeEditNote.step atRow:_activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    _patternView.activeEditNote = _activeEditNote;
     
     _lengthView.percentage = ( ( ( ( (float)self.activeEditNote.length / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
 }
@@ -336,12 +422,43 @@
     float oneStepOf127 = 127.0  / _velocityView.width;
     float range = 127.0 - oneStepOf127;
     _activeEditNote = [self.sequencer noteAtStep:_activeEditNote.step atRow:_activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    _patternView.activeEditNote = _activeEditNote;
     
     float percentageForVelocitySlider = 100.0 * ( (self.activeEditNote.velocity - oneStepOf127 ) / range );
     if( percentageForVelocitySlider < 0 )
         percentageForVelocitySlider = 0;
     
     _velocityView.percentage = percentageForVelocitySlider;
+}
+
+- (void) updatePageLeft
+{
+    // Start animate left
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    _patternView.x = - self.width + 4;
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+        _patternView.opacity = 0;
+    }
+    self.pageAnimationFrame = 0;
+    [self animatePageIncrement:1];
+    [self scheduleAnimatePageLeftTimer];
+}
+
+- (void) updatePageRight
+{
+    // Start animate right
+    [self.pageAnimationTimer invalidate];
+    self.pageAnimationTimer = nil;
+    
+    _patternView.x = self.width - 4;
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+        _patternView.opacity = 0;
+    }
+    self.pageAnimationFrame = 0;
+    [self animatePageIncrement:-1];
+    [self scheduleAnimatePageRightTimer];
 }
 
 
@@ -381,19 +498,19 @@
 
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
-    // TODO animate
     if( _patternView.mode != EatsPatternViewMode_Edit )
         [self exitNoteEditModeInstantly];
     [self updatePatternNotes];
+    [self updatePageLeft];
     [self updateView];
 }
 
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
-    // TODO animate
     if( _patternView.mode != EatsPatternViewMode_Edit )
         [self exitNoteEditModeInstantly];
     [self updatePatternNotes];
+    [self updatePageRight];
     [self updateView];
 }
 
