@@ -21,8 +21,8 @@
 {
     if( !self.visible ) return nil;
     
-    uint tailLength;
-    uint tailBaseBrightness;
+    int tailLength;
+    int tailBaseBrightness;
     
     if( self.useWideBrightnessRange ) {
         tailLength = 7;
@@ -35,7 +35,7 @@
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns with playhead
+    // Generate the columns
     for(uint x = 0; x < self.width; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
