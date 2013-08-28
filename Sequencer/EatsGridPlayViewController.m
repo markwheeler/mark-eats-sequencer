@@ -1207,8 +1207,7 @@
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
 {
-    [self.sequencer setTranspose:sender.shift forPage:self.sequencer.currentPageId];
-    [self.sequencer setTransposeZeroStep:sender.zeroStep forPage:self.sequencer.currentPageId];
+    [self.sequencer setTranspose:sender.shift andTransposeZeroStep:sender.zeroStep forPage:self.sequencer.currentPageId];
 }
 
 - (void) eatsGridLoopBraceViewUpdated:(EatsGridLoopBraceView *)sender

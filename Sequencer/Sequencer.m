@@ -659,6 +659,23 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeZeroStepDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
 }
 
+- (void) setTranspose:(int)transpose andTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId
+{
+    if( transpose >= SEQUENCER_MIDI_MAX * -1 && transpose <= SEQUENCER_MIDI_MAX && transposeZeroStep >= 0 && transposeZeroStep < self.sharedPreferences.gridWidth ) {
+        
+        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+        
+        [[self.undoManager prepareWithInvocationTarget:self] setTranspose:page.transpose forPage:pageId];
+        [self.undoManager setActionName:@"Transpose Change"];
+        
+        page.transpose = transpose;
+        page.transposeZeroStep = transposeZeroStep;
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeZeroStepDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+}
+
 
 - (NSArray *) pitchesForPage:(uint)pageId
 {

@@ -100,6 +100,8 @@
 - (int) transposeZeroStepForPage:(uint)pageId;
 - (void) setTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId;
 
+- (void) setTranspose:(int)transpose andTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId;
+
 - (NSArray *) pitchesForPage:(uint)pageId;
 - (void) setPitches:(NSMutableArray *)pitches forPage:(uint)pageId;
 - (int) pitchAtRow:(uint)row forPage:(uint)pageId;
