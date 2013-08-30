@@ -168,14 +168,10 @@
 
 - (void) addDummyData
 {
-    dispatch_sync(self.sequencerQueue, ^(void) {
-        
-        // Adds 16 randomly positioned notes to pattern 0, page 0
-        for( int i = 0; i < SEQUENCER_SIZE; i ++ ) {
-            [self noDispatchAddNoteAtStep:i atRow:(int)arc4random_uniform(8) inPattern:0 inPage:0];
-        }
-        
-    });
+    // Adds 16 randomly positioned notes to pattern 0, page 0
+    for( int i = 0; i < SEQUENCER_SIZE; i ++ ) {
+        [self addNoteAtStep:i atRow:(int)arc4random_uniform(8) inPattern:0 inPage:0];
+    }
 }
 
 
@@ -1186,30 +1182,15 @@
 
 - (void) addNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    dispatch_sync(self.sequencerQueue, ^(void) {
-        [self noDispatchAddNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
-    });
-}
-
-- (void) noDispatchAddNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
-{
-    [self noDispatchAddNoteAtStep:step atRow:row withLength:1 withVelocity:self.sharedPreferences.defaultMIDINoteVelocity.intValue inPattern:patternId inPage:pageId];
+    [self addNoteAtStep:step atRow:row withLength:1 withVelocity:self.sharedPreferences.defaultMIDINoteVelocity.intValue inPattern:patternId inPage:pageId];
 }
 
 - (void) addNoteAtStep:(uint)step atRow:(uint)row withLength:(uint)length withVelocity:(uint)velocity inPattern:(uint)patternId inPage:(uint)pageId
-{
-    dispatch_sync(self.sequencerQueue, ^(void) {
-        [self noDispatchAddNoteAtStep:step atRow:row withLength:length withVelocity:velocity inPattern:patternId inPage:pageId];
-    });
-}
-
-- (void) noDispatchAddNoteAtStep:(uint)step atRow:(uint)row withLength:(uint)length withVelocity:(uint)velocity inPattern:(uint)patternId inPage:(uint)pageId
 {
     [[self.undoManager prepareWithInvocationTarget:self] removeNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
     [self.undoManager setActionName:@"Pattern Change"];
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
     
     SequencerNote *note = [[SequencerNote alloc] init];
     note.step = step;
@@ -1217,7 +1198,12 @@
     note.length = length;
     note.velocity = velocity;
     
-    [pattern addObject:note];
+    dispatch_sync(self.sequencerQueue, ^(void) {
+    
+        NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
+        [pattern addObject:note];
+        
+    });
     
     [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
