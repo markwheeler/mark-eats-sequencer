@@ -20,6 +20,8 @@
 @property SequencerState        *state;
 @property Preferences           *sharedPreferences;
 
+@property dispatch_queue_t      sequencerQueue;
+
 @end
 
 @implementation Sequencer
@@ -33,6 +35,10 @@
     self = [super init];
     if( !self )
         return nil;
+    
+    // Create the queue and make it high priority
+    self.sequencerQueue = dispatch_queue_create("com.MarkEatsSequencer.SequencerQueue", NULL);
+    dispatch_set_target_queue(self.sequencerQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
     
     self.sharedPreferences = [Preferences sharedPreferences];
     
@@ -114,7 +120,11 @@
 
 - (void) updatePatternQuantizationSettings
 {
-    self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayWithMinimum:MIN_QUANTIZATION andMaximum:MAX_QUANTIZATION forGridWidth:self.sharedPreferences.gridWidth];
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayWithMinimum:MIN_QUANTIZATION andMaximum:MAX_QUANTIZATION forGridWidth:self.sharedPreferences.gridWidth];
+        
+    });
 }
 
 
@@ -158,10 +168,14 @@
 
 - (void) addDummyData
 {
-    // Adds 16 randomly positioned notes to pattern 0, page 0
-    for( int i = 0; i < SEQUENCER_SIZE; i ++ ) {
-        [self addNoteAtStep:i atRow:(int)arc4random_uniform(8) inPattern:0 inPage:0];
-    }
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        // Adds 16 randomly positioned notes to pattern 0, page 0
+        for( int i = 0; i < SEQUENCER_SIZE; i ++ ) {
+            [self noDispatchAddNoteAtStep:i atRow:(int)arc4random_uniform(8) inPattern:0 inPage:0];
+        }
+        
+    });
 }
 
 
@@ -196,61 +210,69 @@
 
 - (NSUInteger) checkForNotesOutsideOfGrid
 {
-    NSMutableSet *notesOutsideOfGrid = [NSMutableSet set];
+    __block NSMutableSet *notesOutsideOfGrid = [NSMutableSet set];
     
-    for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
-        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        
-        for( NSSet *pattern in page.patterns ) {
+    dispatch_sync(self.sequencerQueue, ^(void) {
+    
+        for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+            SequencerPage *page = [self.song.pages objectAtIndex:pageId];
             
-            NSArray *matches = [[pattern objectsPassingTest:^BOOL(id obj, BOOL *stop) {
-                SequencerNote *note = obj;
-                BOOL result = ( note.row >= self.sharedPreferences.gridHeight || note.step >= self.sharedPreferences.gridWidth );
-                return result;
-            }] allObjects];
-            
-            [notesOutsideOfGrid addObjectsFromArray:matches];
+            for( NSSet *pattern in page.patterns ) {
+                
+                NSArray *matches = [[pattern objectsPassingTest:^BOOL(id obj, BOOL *stop) {
+                    SequencerNote *note = obj;
+                    BOOL result = ( note.row >= self.sharedPreferences.gridHeight || note.step >= self.sharedPreferences.gridWidth );
+                    return result;
+                }] allObjects];
+                
+                [notesOutsideOfGrid addObjectsFromArray:matches];
+            }
         }
-    }
+        
+    });
     
     return notesOutsideOfGrid.count;
 }
 
 - (NSUInteger) removeNotesOutsideOfGrid
 {
-    NSMutableSet *removedNoteDictionaries = [NSMutableSet set];
+    __block NSMutableSet *removedNoteDictionaries = [NSMutableSet set];
     
-    for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
-        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        
-        int patternId = 0;
-        for( NSMutableSet *pattern in page.patterns ) {
+    dispatch_sync(self.sequencerQueue, ^(void) {
+    
+        for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+            SequencerPage *page = [self.song.pages objectAtIndex:pageId];
             
-            NSArray *matches = [[pattern objectsPassingTest:^BOOL(id obj, BOOL *stop) {
-                SequencerNote *note = obj;
-                BOOL result = ( note.row >= self.sharedPreferences.gridHeight || note.step >= self.sharedPreferences.gridWidth );
-                return result;
-            }] allObjects];
-            
-            for( SequencerNote *noteToRemove in matches ) {
-                // Keep track of it so undo can be used
-                NSDictionary *noteDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:noteToRemove.step], @"step",
-                                                                                          [NSNumber numberWithInt:noteToRemove.row], @"row",
-                                                                                          [NSNumber numberWithInt:noteToRemove.length], @"length",
-                                                                                          [NSNumber numberWithInt:noteToRemove.velocity], @"velocity",
-                                                                                          [NSNumber numberWithInt:patternId], @"patternId",
-                                                                                          [NSNumber numberWithInt:pageId], @"pageId",
-                                                                                          nil];
-                [removedNoteDictionaries addObject:noteDictionary];
-                [pattern removeObject:noteToRemove];
+            int patternId = 0;
+            for( NSMutableSet *pattern in page.patterns ) {
+                
+                NSArray *matches = [[pattern objectsPassingTest:^BOOL(id obj, BOOL *stop) {
+                    SequencerNote *note = obj;
+                    BOOL result = ( note.row >= self.sharedPreferences.gridHeight || note.step >= self.sharedPreferences.gridWidth );
+                    return result;
+                }] allObjects];
+                
+                for( SequencerNote *noteToRemove in matches ) {
+                    // Keep track of it so undo can be used
+                    NSDictionary *noteDictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:noteToRemove.step], @"step",
+                                                                                              [NSNumber numberWithInt:noteToRemove.row], @"row",
+                                                                                              [NSNumber numberWithInt:noteToRemove.length], @"length",
+                                                                                              [NSNumber numberWithInt:noteToRemove.velocity], @"velocity",
+                                                                                              [NSNumber numberWithInt:patternId], @"patternId",
+                                                                                              [NSNumber numberWithInt:pageId], @"pageId",
+                                                                                              nil];
+                    [removedNoteDictionaries addObject:noteDictionary];
+                    [pattern removeObject:noteToRemove];
+                }
+                
+                if( matches.count ) {
+                    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
+                }
+                patternId ++;
             }
-            
-            if( matches.count ) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
-            }
-            patternId ++;
         }
-    }
+        
+    });
     
     [[self.undoManager prepareWithInvocationTarget:self] addBackNotesPreviouslyRemoved:removedNoteDictionaries];
     [self.undoManager setActionName:@"Remove Notes"];
@@ -260,23 +282,27 @@
 
 - (void) addBackNotesPreviouslyRemoved:(NSSet *)noteDictionaries
 {
-    for( NSDictionary *noteDictionary in noteDictionaries ) {
+    dispatch_sync(self.sequencerQueue, ^(void) {
+    
+        for( NSDictionary *noteDictionary in noteDictionaries ) {
+            
+            int pageId = [[noteDictionary valueForKey:@"pageId"] intValue];
+            int patternId = [[noteDictionary valueForKey:@"patternId"] intValue];
+            SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+            NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
+            
+            SequencerNote *note = [[SequencerNote alloc] init];
+            note.step = [[noteDictionary valueForKey:@"step"] intValue];
+            note.row = [[noteDictionary valueForKey:@"row"] intValue];
+            note.length = [[noteDictionary valueForKey:@"length"] intValue];
+            note.velocity = [[noteDictionary valueForKey:@"velocity"] intValue];
+            
+            [pattern addObject:note];
+            
+            [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
+        }
         
-        int pageId = [[noteDictionary valueForKey:@"pageId"] intValue];
-        int patternId = [[noteDictionary valueForKey:@"patternId"] intValue];
-        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
-        
-        SequencerNote *note = [[SequencerNote alloc] init];
-        note.step = [[noteDictionary valueForKey:@"step"] intValue];
-        note.row = [[noteDictionary valueForKey:@"row"] intValue];
-        note.length = [[noteDictionary valueForKey:@"length"] intValue];
-        note.velocity = [[noteDictionary valueForKey:@"velocity"] intValue];
-        
-        [pattern addObject:note];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
-    }
+    });
     
     [[self.undoManager prepareWithInvocationTarget:self] removeNotesOutsideOfGrid];
 }
@@ -304,7 +330,7 @@
         self.song.bpm = bpm;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerSongBPMDidChangeNotification object:self];
+    [self postNotification:kSequencerSongBPMDidChangeNotification];
 }
 
 - (void) incrementBPM
@@ -343,7 +369,7 @@
         self.song.stepQuantization = stepQuantization;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerSongStepQuantizationDidChangeNotification object:self];
+    [self postNotification:kSequencerSongStepQuantizationDidChangeNotification];
 }
 
 - (void) incrementStepQuantization
@@ -387,7 +413,7 @@
         self.song.patternQuantization = patternQuantization;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerSongPatternQuantizationDidChangeNotification object:self];
+    [self postNotification:kSequencerSongPatternQuantizationDidChangeNotification];
 }
 
 - (void) incrementPatternQuantization
@@ -423,7 +449,7 @@
         page.channel = channel;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageChannelDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageChannelDidChangeNotification forPage:pageId];
 }
 
 
@@ -442,7 +468,7 @@
     
     page.name = name;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageNameDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageNameDidChangeNotification forPage:pageId];
 }
 
 
@@ -467,7 +493,7 @@
         page.stepLength = stepLength;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStepLengthDidChangeNotification object:self];
+    [self postNotification:kSequencerPageStepLengthDidChangeNotification forPage:pageId];
 }
 
 - (void) incrementStepLengthForPage:(uint)pageId
@@ -498,7 +524,7 @@
         page.loopStart = loopStart;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageLoopDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
 }
 
 - (void) incrementLoopStartForPage:(uint)pageId
@@ -528,7 +554,7 @@
         page.loopEnd = loopEnd;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageLoopDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
 }
 
 - (void) incrementLoopEndForPage:(uint)pageId
@@ -554,7 +580,7 @@
         page.loopEnd = loopEnd;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageLoopDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
 }
 
 
@@ -582,7 +608,7 @@
         page.swingType = swingType;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageSwingDidChangeNotification object:self];
+    [self postNotification:kSequencerPageSwingDidChangeNotification forPage:pageId];
 }
 
 - (int) swingAmountForPage:(uint)pageId
@@ -609,7 +635,7 @@
         page.swingAmount = swingAmount;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageSwingDidChangeNotification object:self];
+    [self postNotification:kSequencerPageSwingDidChangeNotification forPage:pageId];
 }
 
 - (void) setSwingType:(int)swingType andSwingAmount:(int)swingAmount forPage:(uint)pageId
@@ -629,7 +655,7 @@
         page.swingAmount = swingAmount;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageSwingDidChangeNotification object:self];
+    [self postNotification:kSequencerPageSwingDidChangeNotification forPage:pageId];
 }
 
 
@@ -647,7 +673,7 @@
     
     page.velocityGroove = velocityGroove;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageVelocityGrooveDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageVelocityGrooveDidChangeNotification forPage:pageId];
 }
 
 
@@ -668,7 +694,7 @@
         page.transpose = transpose;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageTransposeDidChangeNotification forPage:pageId];
 }
 
 - (void) incrementTransposeForPage:(uint)pageId
@@ -696,7 +722,7 @@
         page.transposeZeroStep = transposeZeroStep;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeZeroStepDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageTransposeZeroStepDidChangeNotification forPage:pageId];
 }
 
 - (void) setTranspose:(int)transpose andTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId
@@ -712,8 +738,8 @@
         page.transposeZeroStep = transposeZeroStep;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageTransposeZeroStepDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageTransposeDidChangeNotification forPage:pageId];
+    [self postNotification:kSequencerPageTransposeZeroStepDidChangeNotification forPage:pageId];
 }
 
 
@@ -737,7 +763,7 @@
         page.pitches = pitches;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePitchesDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPagePitchesDidChangeNotification forPage:pageId];
 }
 
 - (int) pitchAtRow:(uint)row forPage:(uint)pageId
@@ -757,7 +783,7 @@
         [page.pitches replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:pitch]];
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePitchesDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPagePitchesDidChangeNotification forPage:pageId];
 }
 
 
@@ -786,28 +812,49 @@
 
 - (NSSet *) notesForPattern:(uint)patternId inPage:(uint)pageId
 {
+    __block NSSet *notesToReturn;
+    
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [page.patterns objectAtIndex:patternId];
-    NSSet *notesToReturn = [[NSSet alloc] initWithSet:notes copyItems:YES];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *notes = [page.patterns objectAtIndex:patternId];
+        notesToReturn = [[NSSet alloc] initWithSet:notes copyItems:YES];
+        
+    });
+    
     return notesToReturn;
 }
 
 - (uint) numberOfNotesForPattern:(uint)patternId inPage:(uint)pageId
 {
+    __block uint notesCount;
+    
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    return (uint)[[page.patterns objectAtIndex:patternId] count];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        notesCount = (uint)[[page.patterns objectAtIndex:patternId] count];
+        
+    });
+    
+    return notesCount;
 }
 
 - (void) setNotes:(NSMutableSet *)notes forPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
-    [self.undoManager setActionName:@"Pattern Change"];
+    dispatch_sync(self.sequencerQueue, ^(void) {
     
-    [page.patterns replaceObjectAtIndex:patternId withObject:notes];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
+        
+        [page.patterns replaceObjectAtIndex:patternId withObject:notes];
+        
+    });
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
 
 
@@ -815,12 +862,16 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
-    [self.undoManager setActionName:@"Pattern Change"];
+    dispatch_sync(self.sequencerQueue, ^(void) {
     
-    [[page.patterns objectAtIndex:patternId] removeAllObjects];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
+        [[page.patterns objectAtIndex:patternId] removeAllObjects];
+        
+    });
+    
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
 
 - (void) copyNotesFromPattern:(uint)fromPatternId fromPage:(uint)fromPageId toPattern:(uint)toPatternId toPage:(uint)toPageId
@@ -828,12 +879,17 @@
     SequencerPage *fromPage = [self.song.pages objectAtIndex:fromPageId];
     SequencerPage *toPage = [self.song.pages objectAtIndex:toPageId];
     
-    [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[toPage.patterns objectAtIndex:toPatternId] mutableCopy] forPattern:toPatternId inPage:toPageId];
-    [self.undoManager setActionName:@"Pattern Copy"];
+    dispatch_sync(self.sequencerQueue, ^(void) {
     
-    [self setNotes:[[fromPage.patterns objectAtIndex:fromPatternId] copy] forPattern:toPatternId inPage:toPageId];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[toPage.patterns objectAtIndex:toPatternId] mutableCopy] forPattern:toPatternId inPage:toPageId];
+        [self.undoManager setActionName:@"Pattern Copy"];
+
+        NSMutableSet *fromNotes = [[fromPage.patterns objectAtIndex:fromPatternId] mutableCopy];
+        [toPage.patterns replaceObjectAtIndex:toPatternId withObject:fromNotes];
+        
+    });
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:toPatternId inPage:toPageId]];
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:toPatternId inPage:toPageId];
 }
 
 
@@ -841,17 +897,25 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
+    [self pasteboardCopyNotesForPattern:patternId inPage:pageId];
+    
+    __block NSMutableSet *currentNotes;
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        currentNotes = [[page.patterns objectAtIndex:patternId] mutableCopy];
+        [[page.patterns objectAtIndex:patternId] removeAllObjects];
+        
+    });
+    
+    [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
     [self.undoManager setActionName:@"Pattern Change"];
     
-    [self pasteboardCopyNotesForPattern:patternId inPage:pageId];
-    [[page.patterns objectAtIndex:patternId] removeAllObjects];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
 
 - (void) pasteboardCopyNotesForPattern:(uint)patternId inPage:(uint)pageId
-{
+{    
     NSSet *notes = [self notesForPattern:patternId inPage:pageId];
         
     if( notes.count ) {
@@ -888,16 +952,24 @@
 - (SequencerNote *) noteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
     
-    for( SequencerNote *note in notes ) {
-        if( note.row == row && note.step == step ) {
-            // Return a copy so no-one can change what's stored in the model
-            return [note copy];
+    __block SequencerNote *noteToReturn = nil;
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *notes = [page.patterns objectAtIndex:patternId];
+    
+        for( SequencerNote *note in notes ) {
+            if( note.row == row && note.step == step ) {
+                // Return a copy so no-one can change what's stored in the model
+                noteToReturn = [note copy];
+                break;
+            }
         }
-    }
+        
+    });
     
-    return nil;
+    return noteToReturn;
 }
 
 
@@ -962,8 +1034,15 @@
 - (NSSet *) notesAtStep:(uint)step inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [page.patterns objectAtIndex:patternId];
-    NSSet *notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
+    
+    __block NSSet *notesToCheck;
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+    
+        NSSet *notes = [page.patterns objectAtIndex:patternId];
+        notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
+        
+    });
     
     NSSet *notesMatchingStep = [notesToCheck objectsPassingTest:^(id obj, BOOL *stop) {
         SequencerNote *note = (SequencerNote *)obj;
@@ -977,8 +1056,15 @@
 - (NSSet *) notesAtRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [page.patterns objectAtIndex:patternId];
-    NSSet *notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
+    
+    __block NSSet *notesToCheck;
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *notes = [page.patterns objectAtIndex:patternId];
+        notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
+        
+    });
     
     NSSet *notesMatchingRow = [notesToCheck objectsPassingTest:^(id obj, BOOL *stop) {
         SequencerNote *note = (SequencerNote *)obj;
@@ -992,14 +1078,10 @@
 
 - (int) lengthForNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
+    SequencerNote *note = [self noteAtStep:step atRow:row inPattern:patternId inPage:pageId];
     
-    for( SequencerNote *note in notes ) {
-        if( note.row == row && note.step == step ) {
-            return note.length;
-        }
-    }
+    if( note )
+        return note.length;
     
     return 0;
 }
@@ -1009,21 +1091,26 @@
     if( length > 0 && length <= self.sharedPreferences.gridWidth ) {
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
         
-        for( SequencerNote *note in notes ) {
-            if( note.row == row && note.step == step ) {
-                
-                [[self.undoManager prepareWithInvocationTarget:self] setLength:note.length forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
-                [self.undoManager setActionName:@"Note Length Change"];
-                
-                note.length = length;
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerNoteLengthDidChangeNotification object:self userInfo:[self userInfoForNote:note inPattern:patternId inPage:pageId]];
-                
-                return;
+        dispatch_sync(self.sequencerQueue, ^(void) {
+        
+            NSSet *notes = [page.patterns objectAtIndex:patternId];
+            
+            for( SequencerNote *note in notes ) {
+                if( note.row == row && note.step == step ) {
+                    
+                    [[self.undoManager prepareWithInvocationTarget:self] setLength:note.length forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+                    [self.undoManager setActionName:@"Note Length Change"];
+                    
+                    note.length = length;
+                    
+                    [self postNotification:kSequencerNoteLengthDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+                    
+                    return;
+                }
             }
-        }
+            
+        });
         
     }
 }
@@ -1041,14 +1128,10 @@
 
 - (int) velocityForNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
+    SequencerNote *note = [self noteAtStep:step atRow:row inPattern:patternId inPage:pageId];
     
-    for( SequencerNote *note in notes ) {
-        if( note.row == row && note.step == step ) {
-            return note.velocity;
-        }
-    }
+    if( note )
+        return note.velocity;
     
     return 0;
 }
@@ -1058,21 +1141,26 @@
     if( velocity >= SEQUENCER_MIDI_MIN && velocity <= SEQUENCER_MIDI_MAX ) {
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
         
-        for( SequencerNote *note in notes ) {
-            if( note.row == row && note.step == step ) {
-                
-                [[self.undoManager prepareWithInvocationTarget:self] setVelocity:note.velocity forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
-                [self.undoManager setActionName:@"Note Velocity Change"];
-                
-                note.velocity = velocity;
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerNoteVelocityDidChangeNotification object:self userInfo:[self userInfoForNote:note inPattern:patternId inPage:pageId]];
-                
-                return;
+        dispatch_sync(self.sequencerQueue, ^(void) {
+        
+            NSSet *notes = [page.patterns objectAtIndex:patternId];
+            
+            for( SequencerNote *note in notes ) {
+                if( note.row == row && note.step == step ) {
+                    
+                    [[self.undoManager prepareWithInvocationTarget:self] setVelocity:note.velocity forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+                    [self.undoManager setActionName:@"Note Velocity Change"];
+                    
+                    note.velocity = velocity;
+                    
+                    [self postNotification:kSequencerNoteVelocityDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+                    
+                    return;
+                }
             }
-        }
+            
+        });
         
     }
 }
@@ -1098,13 +1186,27 @@
 
 - (void) addNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    [self addNoteAtStep:step atRow:row withLength:1 withVelocity:self.sharedPreferences.defaultMIDINoteVelocity.intValue inPattern:patternId inPage:pageId];
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        [self noDispatchAddNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+    });
+}
+
+- (void) noDispatchAddNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self noDispatchAddNoteAtStep:step atRow:row withLength:1 withVelocity:self.sharedPreferences.defaultMIDINoteVelocity.intValue inPattern:patternId inPage:pageId];
 }
 
 - (void) addNoteAtStep:(uint)step atRow:(uint)row withLength:(uint)length withVelocity:(uint)velocity inPattern:(uint)patternId inPage:(uint)pageId
 {
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        [self noDispatchAddNoteAtStep:step atRow:row withLength:length withVelocity:velocity inPattern:patternId inPage:pageId];
+    });
+}
+
+- (void) noDispatchAddNoteAtStep:(uint)step atRow:(uint)row withLength:(uint)length withVelocity:(uint)velocity inPattern:(uint)patternId inPage:(uint)pageId
+{
     [[self.undoManager prepareWithInvocationTarget:self] removeNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
-    [self.undoManager setActionName:@"Add Note"];
+    [self.undoManager setActionName:@"Pattern Change"];
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
@@ -1117,36 +1219,41 @@
     
     [pattern addObject:note];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
 
 - (void) removeNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    NSSet *notes = [[page.patterns objectAtIndex:patternId] copy];
     
-    SequencerNote *noteToRemove;
+    dispatch_sync(self.sequencerQueue, ^(void) {
     
-    for( SequencerNote *note in notes ) {
-        if( note.row == row && note.step == step ) {
-            noteToRemove = note;
+        NSSet *notes = [page.patterns objectAtIndex:patternId];
+        
+        SequencerNote *noteToRemove;
+        
+        for( SequencerNote *note in notes ) {
+            if( note.row == row && note.step == step ) {
+                noteToRemove = note;
+                break;
+            }
         }
-    }
-    
-    if( noteToRemove ) {
-    
-        [[self.undoManager prepareWithInvocationTarget:self] addNoteAtStep:step atRow:row withLength:noteToRemove.length withVelocity:noteToRemove.velocity inPattern:patternId inPage:pageId];
-        [self.undoManager setActionName:@"Remove Note"];
         
-        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
+        if( noteToRemove ) {
         
-        // TODO – there's a possibility here that this note could get removed by another thread halfway through this method making the following line crash
-        [pattern removeObject:noteToRemove];
+            [[self.undoManager prepareWithInvocationTarget:self] addNoteAtStep:step atRow:row withLength:noteToRemove.length withVelocity:noteToRemove.velocity inPattern:patternId inPage:pageId];
+            [self.undoManager setActionName:@"Pattern Change"];
+            
+            SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+            NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
+            
+            [pattern removeObject:noteToRemove];
+            
+        }
         
-    }
+    });
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPagePatternNotesDidChangeNotification object:self userInfo:[self userInfoForPattern:patternId inPage:pageId]];
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
 
 
@@ -1170,9 +1277,9 @@
         self.state.currentPageId = pageId;
         
         if( directionRight )
-            [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerStateCurrentPageDidChangeRightNotification object:self userInfo:nil];
+            [self postNotification:kSequencerStateCurrentPageDidChangeRightNotification];
         else
-            [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerStateCurrentPageDidChangeLeftNotification object:self userInfo:nil];
+            [self postNotification:kSequencerStateCurrentPageDidChangeLeftNotification];
     }
 }
 
@@ -1184,7 +1291,7 @@
     
     self.state.currentPageId = newPageId;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerStateCurrentPageDidChangeRightNotification object:self userInfo:nil];
+    [self postNotification:kSequencerStateCurrentPageDidChangeRightNotification];
 }
 
 - (void) decrementCurrentPageId
@@ -1195,7 +1302,7 @@
     
     self.state.currentPageId = newPageId;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerStateCurrentPageDidChangeLeftNotification object:self userInfo:nil];
+    [self postNotification:kSequencerStateCurrentPageDidChangeLeftNotification];
 }
 
 
@@ -1213,7 +1320,7 @@
         pageState.currentPatternId = patternId;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageStateCurrentPatternIdDidChangeNotification forPage:pageId];
 }
 
 
@@ -1232,7 +1339,7 @@
         pageState.nextPatternId = patternId;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStateNextPatternIdDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageStateNextPatternIdDidChangeNotification forPage:pageId];
 }
 
 - (void) setNextOrCurrentPatternId:(NSNumber *)patternId forPage:(uint)pageId
@@ -1272,7 +1379,7 @@
         pageState.currentStep = step;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStateCurrentStepDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageStateCurrentStepDidChangeNotification forPage:pageId];
 }
 
 
@@ -1289,21 +1396,26 @@
         pageState.nextStep = step;
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStateNextStepDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageStateNextStepDidChangeNotification forPage:pageId];
 }
 
 - (void) setNextStepForAllPages:(NSNumber *)step
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
-        [self setNextStep:step forPage:i];
+        SequencerPageState *pageState = [self.state.pageStates objectAtIndex:i];
+        if( pageState.playMode != EatsSequencerPlayMode_Pause )
+            [self setNextStep:step forPage:i];
     }
 }
 
 - (void) setNextStep:(NSNumber *)step forAllPagesExcept:(uint)pageId
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
-        if( i != pageId )
-            [self setNextStep:step forPage:i];
+        if( i != pageId ) {
+            SequencerPageState *pageState = [self.state.pageStates objectAtIndex:i];
+            if( pageState.playMode != EatsSequencerPlayMode_Pause )
+                [self setNextStep:step forPage:i];
+        }
     }
 }
 
@@ -1336,7 +1448,7 @@
     SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
     pageState.inLoop = inLoop;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStateInLoopDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageStateInLoopDidChangeNotification forPage:pageId];
 }
 
 
@@ -1354,13 +1466,13 @@
         [self setNextStep:nil forPage:pageId];
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSequencerPageStatePlayModeDidChangeNotification object:self userInfo:[self userInfoForPage:pageId]];
+    [self postNotification:kSequencerPageStatePlayModeDidChangeNotification forPage:pageId];
 }
 
 
-#pragma mark - Utils
+#pragma mark - Private methods
 
-// Some useful util methods for notifications to use
+// Some useful methods for notifications to use
 
 - (BOOL) isNotificationFromCurrentPage:(NSNotification *)notification
 {
@@ -1372,31 +1484,41 @@
     return ( [[notification.userInfo valueForKey:@"pageId"] intValue] == self.currentPageId && [[notification.userInfo valueForKey:@"patternId"] intValue] == [self currentPatternIdForPage:self.currentPageId] );
 }
 
-
-
-#pragma mark - Private methods
-
-- (NSDictionary *) userInfoForPage:(uint)pageId
+- (void) postNotification:(NSString *)notificationName
 {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pageId], @"pageId", nil];
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
+    });
 }
 
-- (NSDictionary *) userInfoForPattern:(uint)patternId inPage:(uint)pageId
+- (void) postNotification:(NSString *)notificationName forPage:(uint)pageId
 {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:patternId], @"patternId",
-                                                      [NSNumber numberWithInt:pageId], @"pageId",
-                                                      nil];
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pageId], @"pageId", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:self userInfo:userInfo];
+    });
 }
 
-- (NSDictionary *) userInfoForNote:(SequencerNote *)note inPattern:(uint)patternId inPage:(uint)pageId
+- (void) postNotification:(NSString *)notificationName forPattern:(int)patternId inPage:(uint)pageId
 {
-    return [NSDictionary dictionaryWithObjectsAndKeys:[note copy], @"note",
-                                                      [NSNumber numberWithInt:patternId], @"patternId",
-                                                      [NSNumber numberWithInt:pageId], @"pageId",
-                                                      nil];
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:patternId], @"patternId",
+                                                                            [NSNumber numberWithInt:pageId], @"pageId",
+                                                                            nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:self userInfo:userInfo];
+    });
 }
 
-
+- (void) postNotification:(NSString *)notificationName forNote:(SequencerNote *)note inPattern:(int)patternId inPage:(uint)pageId
+{
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[note copy], @"note",
+                                                                            [NSNumber numberWithInt:patternId], @"patternId",
+                                                                            [NSNumber numberWithInt:pageId], @"pageId",
+                                                                            nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:self userInfo:userInfo];
+    });
+}
 
 
 @end

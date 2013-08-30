@@ -720,7 +720,7 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) updateChannel
 {
-    self.channelStaticTextField.stringValue = [NSString stringWithFormat:@"Channel %i", [self.sequencer channelForPage:self.sequencer.currentPageId]];
+    self.channelStaticTextField.stringValue = [NSString stringWithFormat:@"Channel %i", [self.sequencer channelForPage:self.sequencer.currentPageId] + 1];
 }
 
 - (void) updateCurrentPattern

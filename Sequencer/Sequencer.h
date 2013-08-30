@@ -7,6 +7,7 @@
 //
 //  This is the brain – everything that edits anything in the model should pass through this
 //  It lets us get and set things, as well as registering undos
+//  Sequencer is thread safe. Notifications it sends are always on the main thread
 
 
 #import <Foundation/Foundation.h>
