@@ -166,9 +166,6 @@ typedef enum EatsStepAdvance {
         [_activeNotes removeObjectsInArray:toRemove];
         
         
-        // TODO can probably get rid of this method of updating?
-        BOOL aPageNeedsToAdvance = NO;
-        
         // Update the current step for each page and send new notes
         
         for(uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
@@ -178,8 +175,6 @@ typedef enum EatsStepAdvance {
             
             // If we need to advance and it's not paused
             if( needsToAdvance != EatsStepAdvance_None && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Pause ) {
-                
-                aPageNeedsToAdvance = YES;
                 
                 int playMode = [self.sequencer playModeForPage:pageId];
                 int playNow;

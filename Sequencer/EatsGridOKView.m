@@ -52,7 +52,7 @@
     if( !self.ready )
        [self prepareProperties];
     
-    // Move the particles TODO this movement needs to be based on an absolute position generated from currentFrame and NOT have any decrement/increment in it
+    // Move the particles
     if (_currentFrame < self.height / 2 ) {
         [_particleA setObject:[NSNumber numberWithUnsignedInt:self.height / 2 - 1 - _currentFrame]  forKey:@"y"];
         [_particleB setObject:[NSNumber numberWithUnsignedInt:self.height / 2 + _currentFrame]  forKey:@"y"];

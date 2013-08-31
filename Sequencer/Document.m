@@ -138,7 +138,7 @@ typedef enum DocumentPageAnimationDirection {
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    NSLog(@"Document deallocated OK"); // TODO: Remove this for final release
+    //NSLog(@"Document deallocated OK");
 }
 
 - (NSString *) windowNibName
@@ -153,7 +153,7 @@ typedef enum DocumentPageAnimationDirection {
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     
-    // Create the gridNavigationController TODO: Bring this back
+    // Create the gridNavigationController
     self.gridNavigationController = [[EatsGridNavigationController alloc] initWithSequencer:self.sequencer];
     self.gridNavigationController.delegate = self;
     self.gridNavigationController.isActive = self.isActive;
@@ -266,8 +266,6 @@ typedef enum DocumentPageAnimationDirection {
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
     if( documentController.lastActiveDocument != self ) {
         [documentController setActiveDocument:self];
-        
-//        [self.gridNavigationController updateGridView]; TODO
     }
     
     // Doing this here rather than in didLoad because it can cause the alert to detach from the window if we create it too early
@@ -919,8 +917,6 @@ typedef enum DocumentPageAnimationDirection {
             if (returnCode == NSOKButton) {
                 
                 self.indexOflastSelectedScaleMode = self.scaleGeneratorSheetController.indexOfLastSelectedScaleMode;
-                
-                // TODO (move into Sequencer?)
                 
                 // Check what note the user entered
                 WMNote *tonicNote;

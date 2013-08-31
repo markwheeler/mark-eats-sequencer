@@ -370,12 +370,12 @@
 
 - (void) incrementStepQuantization
 {
-    [self setStepQuantization:[self stepQuantization] * 2]; //TODO check this works
+    [self setStepQuantization:[self stepQuantization] * 2];
 }
 
 - (void) decrementStepQuantization
 {
-    [self setStepQuantization:[self stepQuantization] / 2]; //TODO check this works
+    [self setStepQuantization:[self stepQuantization] / 2];
 }
 
 
@@ -414,12 +414,24 @@
 
 - (void) incrementPatternQuantization
 {
-    [self setPatternQuantization:[self patternQuantization] * 2]; //TODO check this works
+    int newPatternQuantization = [self patternQuantization];
+    if( newPatternQuantization == 0 )
+        newPatternQuantization = 1;
+    else
+        newPatternQuantization *= 2;
+        
+    [self setPatternQuantization:newPatternQuantization];
 }
 
 - (void) decrementPatternQuantization
 {
-    [self setPatternQuantization:[self patternQuantization] / 2]; //TODO check this works
+    int newPatternQuantization = [self patternQuantization];
+    if( newPatternQuantization == 1 )
+        newPatternQuantization = 0;
+    else
+        newPatternQuantization /= 2;
+    
+    [self setPatternQuantization:newPatternQuantization];
 }
 
 
@@ -494,12 +506,12 @@
 
 - (void) incrementStepLengthForPage:(uint)pageId
 {
-    [self setStepLength:[self stepLengthForPage:pageId] * 2 forPage:pageId]; //TODO check this works
+    [self setStepLength:[self stepLengthForPage:pageId] * 2 forPage:pageId];
 }
 
 - (void) decrementStepLengthForPage:(uint)pageId
 {
-    [self setStepLength:[self stepLengthForPage:pageId] / 2 forPage:pageId]; //TODO check this works
+    [self setStepLength:[self stepLengthForPage:pageId] / 2 forPage:pageId];
 }
 
 
