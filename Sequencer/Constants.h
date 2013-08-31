@@ -17,7 +17,8 @@ typedef enum EatsSequencerPlayMode {
     EatsSequencerPlayMode_Pause,
     EatsSequencerPlayMode_Forward,
     EatsSequencerPlayMode_Reverse,
-    EatsSequencerPlayMode_Random
+    EatsSequencerPlayMode_Random,
+    EatsSequencerPlayMode_Step
 } EatsSequencerPlayMode;
 
 

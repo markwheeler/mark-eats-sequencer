@@ -12,6 +12,7 @@
 		4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */; };
 		4D1B31A416EBDB9E00140B51 /* EatsDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */; };
 		4D2772461709C8EA00A8069B /* EatsVelocityUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */; };
+		4D2B42D117D29FE5009B2286 /* PlaybackStepIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D2B42D017D29FE5009B2286 /* PlaybackStepIconTemplate.pdf */; };
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */; };
 		4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */; };
@@ -121,6 +122,7 @@
 		4D1B31A316EBDB9E00140B51 /* EatsDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsDocumentController.m; sourceTree = "<group>"; };
 		4D2772441709C8EA00A8069B /* EatsVelocityUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsVelocityUtils.h; sourceTree = "<group>"; };
 		4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsVelocityUtils.m; sourceTree = "<group>"; };
+		4D2B42D017D29FE5009B2286 /* PlaybackStepIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackStepIconTemplate.pdf; sourceTree = "<group>"; };
 		4D36B25416FBB32C008057FC /* ClockTick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClockTick.h; sourceTree = "<group>"; };
 		4D36B25516FBB32C008057FC /* ClockTick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ClockTick.m; sourceTree = "<group>"; };
 		4D3ED27617C30E2A00D7D0DD /* EatsGridIntroViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridIntroViewController.h; sourceTree = "<group>"; };
@@ -268,6 +270,7 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				4D2B42D017D29FE5009B2286 /* PlaybackStepIconTemplate.pdf */,
 				4D54CAC617B612D500139D6D /* PlaybackRandomIconTemplate.pdf */,
 				4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */,
 				4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */,
@@ -617,6 +620,7 @@
 				4D54CAC417B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf in Resources */,
 				4D54CAC517B60E3B00139D6D /* PlaybackStopIconTemplate.pdf in Resources */,
 				4D54CAC717B612D500139D6D /* PlaybackRandomIconTemplate.pdf in Resources */,
+				4D2B42D117D29FE5009B2286 /* PlaybackStepIconTemplate.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

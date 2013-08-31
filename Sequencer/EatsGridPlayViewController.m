@@ -33,10 +33,10 @@
 @property NSArray                           *playModeButtons;
 @property NSArray                           *controlButtons;
 
-@property EatsGridButtonView                *pauseButton;
 @property EatsGridButtonView                *forwardButton;
 @property EatsGridButtonView                *reverseButton;
 @property EatsGridButtonView                *randomButton;
+@property EatsGridButtonView                *stepButton;
 @property EatsGridButtonView                *bpmDecrementButton;
 @property EatsGridButtonView                *bpmIncrementButton;
 @property EatsGridButtonView                *clearButton;
@@ -162,19 +162,19 @@
     }
     
     // Play mode buttons
-    _pauseButton = [[EatsGridButtonView alloc] init];
-    _pauseButton.x = self.width - 8;
-    
     _forwardButton = [[EatsGridButtonView alloc] init];
-    _forwardButton.x = self.width - 7;
+    _forwardButton.x = self.width - 8;
     
     _reverseButton = [[EatsGridButtonView alloc] init];
-    _reverseButton.x = self.width - 6;
+    _reverseButton.x = self.width - 7;
     
     _randomButton = [[EatsGridButtonView alloc] init];
-    _randomButton.x = self.width - 5;
+    _randomButton.x = self.width - 6;
     
-    _playModeButtons = [NSArray arrayWithObjects:_pauseButton, _forwardButton, _reverseButton, _randomButton, nil];
+    _stepButton = [[EatsGridButtonView alloc] init];
+    _stepButton.x = self.width - 5;
+    
+    _playModeButtons = [NSArray arrayWithObjects:_forwardButton, _reverseButton, _randomButton, _stepButton, nil];
     
     for( EatsGridButtonView *button in _playModeButtons ) {
         button.delegate = self;
@@ -668,7 +668,7 @@
 {
     uint i = 0;
     for ( EatsGridButtonView *button in _playModeButtons ) {
-        if( i == [self.sequencer playModeForPage:self.sequencer.currentPageId] )
+        if( i == [self.sequencer playModeForPage:self.sequencer.currentPageId] - 1 )
             button.buttonState = EatsButtonViewState_Active;
         else if( button.buttonState != EatsButtonViewState_Down )
             button.buttonState = EatsButtonViewState_Inactive;
@@ -1101,30 +1101,40 @@
         }
     }
     
-    // Play mode pause button
-    if( sender == _pauseButton ) {
-        if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-        }
-        
     // Play mode forward button
-    } else if( sender == _forwardButton ) {
+    if( sender == _forwardButton ) {
         if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
+            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Forward )
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+            else
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
         }
         
     // Play mode reverse button
     } else if( sender == _reverseButton ) {
         if ( buttonDown ) {
-            [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
+            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+            else
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
         }
         
     // Play mode random button
     } else if( sender == _randomButton ) {
         if ( buttonDown ) {
-            [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
+            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Random )
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+            else
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
+        }
+        
+    // Play mode step button
+    } else if( sender == _stepButton ) {
+        if ( buttonDown ) {
+            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Step )
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+            else
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Step forPage:self.sequencer.currentPageId];
         }
         
     // BPM- button

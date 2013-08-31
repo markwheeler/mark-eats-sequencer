@@ -1457,7 +1457,7 @@
 
 - (void) setPlayMode:(int)playMode forPage:(uint)pageId
 {
-    if( playMode >= 0 && playMode <= 3 ) {
+    if( playMode >= 0 && playMode <= 4 ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.playMode = playMode;
         [self setNextStep:nil forPage:pageId];
