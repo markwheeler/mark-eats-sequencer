@@ -463,6 +463,9 @@
     // Final frame
     if( self.pageAnimationFrame == self.width - 5 ) {
         self.pageAnimationTimer = nil;
+        _loopBraceView.enabled = YES;
+        _patternView.enabled = YES;
+        
     } else {
         [self scheduleAnimatePageLeftTimer];
     }
@@ -482,6 +485,9 @@
     // Final frame
     if( self.pageAnimationFrame == self.width - 5 ) {
         self.pageAnimationTimer = nil;
+        _loopBraceView.enabled = YES;
+        _patternView.enabled = YES;
+        
     } else {
         [self scheduleAnimatePageRightTimer];
     }
@@ -597,6 +603,8 @@
     
     _loopBraceView.x = - self.width + 4;
     _patternView.x = - self.width + 4;
+    _loopBraceView.enabled = NO;
+    _patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         _loopBraceView.opacity = 0;
         _patternView.opacity = 0;
@@ -616,6 +624,8 @@
     
     _loopBraceView.x = self.width - 4;
     _patternView.x = self.width - 4;
+    _loopBraceView.enabled = NO;
+    _patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         _loopBraceView.opacity = 0;
         _patternView.opacity = 0;

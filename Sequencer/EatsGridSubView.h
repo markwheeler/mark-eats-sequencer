@@ -19,6 +19,7 @@
 @property uint                      height;
 @property float                     opacity; // 0 - 1
 @property BOOL                      visible;
+@property BOOL                      enabled;
 
 - (NSArray *) viewArray;
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down;

@@ -32,7 +32,7 @@
 
 #pragma mark - Setters and getters
 
-- (void)setIsActive:(BOOL)isActive
+- (void) setIsActive:(BOOL)isActive
 {
     @synchronized( self ) {
         _isActive = isActive;
@@ -42,7 +42,7 @@
        [self.currentViewController updateView];
 }
 
-- (BOOL)isActive
+- (BOOL) isActive
 {
     BOOL result;
     @synchronized( self ) {

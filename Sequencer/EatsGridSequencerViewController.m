@@ -145,6 +145,8 @@
     // Final frame
     if( self.pageAnimationFrame == self.width - 5 ) {
         self.pageAnimationTimer = nil;
+        _patternView.enabled = YES;
+        
     } else {
         [self scheduleAnimatePageLeftTimer];
     }
@@ -164,6 +166,8 @@
     // Final frame
     if( self.pageAnimationFrame == self.width - 5 ) {
         self.pageAnimationTimer = nil;
+        _patternView.enabled = YES;
+        
     } else {
         [self scheduleAnimatePageRightTimer];
     }
@@ -206,9 +210,7 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
-    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
-    
-    _patternView.mode = EatsPatternViewMode_Locked;
+    _patternView.enabled = NO;
     
     self.editNoteAnimationFrame = 0;
     
@@ -257,9 +259,7 @@
 
 - (void) exitNoteEditMode
 {
-    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
-    
-    _patternView.mode = EatsPatternViewMode_Locked;
+    _patternView.enabled = NO;
     
     self.editNoteAnimationFrame = 0;
     
@@ -308,6 +308,7 @@
     _lengthView.visible = NO;
     _patternView.y = 0;
     _patternView.height = self.height;
+    _patternView.enabled = YES;
     _patternView.activeEditNote = nil;
     _patternView.mode = EatsPatternViewMode_Edit;
     _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
@@ -347,6 +348,7 @@
     if( self.editNoteAnimationFrame == 1 ) { // Final frame
 
         _patternView.mode = EatsPatternViewMode_NoteEdit;
+        _patternView.enabled = YES;
         
         [timer invalidate];
         self.editNoteAnimationTimer = nil;
@@ -382,6 +384,7 @@
         
         _patternView.activeEditNote = nil;
         _patternView.mode = EatsPatternViewMode_Edit;
+        _patternView.enabled = YES;
         
         _activeEditNote = nil;
 
@@ -438,6 +441,7 @@
     self.pageAnimationTimer = nil;
     
     _patternView.x = - self.width + 4;
+    _patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         _patternView.opacity = 0;
     }
@@ -453,6 +457,7 @@
     self.pageAnimationTimer = nil;
     
     _patternView.x = self.width - 4;
+    _patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         _patternView.opacity = 0;
     }
@@ -576,8 +581,6 @@
 
 - (void) eatsGridPatternViewPressAt:(NSDictionary *)xyDown sender:(EatsGridPatternView *)sender
 {
-    if( _patternView.mode == EatsPatternViewMode_Locked ) return;
-    
     uint x = [[xyDown valueForKey:@"x"] unsignedIntValue];
     uint y = [[xyDown valueForKey:@"y"] unsignedIntValue];
     BOOL down = [[xyDown valueForKey:@"down"] boolValue];

@@ -18,6 +18,17 @@
 
 @implementation EatsGridLoopBraceView
 
+
+// Put in this setter-alike so we can reset any down/selection stuff and not get into weird states
+
+- (void) setEnabled:(BOOL)enabled
+{
+    super.enabled = enabled;
+    
+    self.lastDownKey = nil;
+    self.setSelection = NO;
+}
+
 - (NSArray *) viewArray
 {
     if( !self.visible ) return nil;

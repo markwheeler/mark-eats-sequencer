@@ -83,7 +83,7 @@
     EatsGridSubView *subView;
     
     while ( (subView = [enumerator nextObject]) && !foundSubView) {
-        if(x >= subView.x && x < subView.x + subView.width && y >= subView.y && y < subView.y + subView.height && subView.visible) {
+        if(x >= subView.x && x < subView.x + subView.width && y >= subView.y && y < subView.y + subView.height && subView.visible && subView.enabled ) {
             [subView inputX:x - subView.x y:y - subView.y down:down];
             foundSubView = YES;
         }

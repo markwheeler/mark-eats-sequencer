@@ -18,6 +18,7 @@
         _height = 1;
         _opacity = 1;
         _visible = YES;
+        _enabled = YES;
     }
     return self;
 }

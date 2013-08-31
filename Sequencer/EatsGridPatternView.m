@@ -31,6 +31,18 @@
 
 @implementation EatsGridPatternView
 
+// Put in this setter-alike so we can reset any down/selection stuff and not get into weird states
+
+- (void) setEnabled:(BOOL)enabled
+{
+    super.enabled = enabled;
+    
+    self.lastLongPressKey = nil;
+    [self.currentlyDownKeys removeAllObjects];
+    [self.longPressTimer invalidate];
+    self.longPressTimer = nil;
+}
+
 - (id) init
 {
     self = [super init];
@@ -122,7 +134,7 @@
             
             // Put in the active note while editing
             NSNumber *noteLengthBrightnessTemp = noteLengthBrightnessResult;
-            if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && ( _mode == EatsPatternViewMode_NoteEdit || _mode == EatsPatternViewMode_Locked ) ) {
+            if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && _mode == EatsPatternViewMode_NoteEdit ) {
                 [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
                 noteLengthBrightnessTemp = [NSNumber numberWithInt:12 * self.opacity];
             }
