@@ -49,11 +49,11 @@
     if (self) {
         self.sharedPreferences = [Preferences sharedPreferences];
         
-        _playheadBrightness = PLAYHEAD_BRIGHTNESS;
-        _nextStepBrightness = NEXT_STEP_BRIGHTNESS;
-        _noteBrightness = NOTE_BRIGHTNESS;
-        _noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
-        _pressBrightness = PRESS_BRIGHTNESS;
+        self.playheadBrightness = PLAYHEAD_BRIGHTNESS;
+        self.nextStepBrightness = NEXT_STEP_BRIGHTNESS;
+        self.noteBrightness = NOTE_BRIGHTNESS;
+        self.noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
+        self.pressBrightness = PRESS_BRIGHTNESS;
         
         _currentlyDownKeys = [[NSMutableOrderedSet alloc] initWithCapacity:4];
     }
@@ -68,10 +68,10 @@
     
     // Get the NSNumber objects ready so we don't have to create loads of them in the for loops
     NSNumber *wipeBrighnessResult = [NSNumber numberWithInt:15 * self.opacity];
-    NSNumber *playheadBrighnessResult = [NSNumber numberWithInt:_playheadBrightness * self.opacity];
-    NSNumber *nextStepBrighnessResult = [NSNumber numberWithInt:_nextStepBrightness * self.opacity];
-    NSNumber *noteBrightnessResult = [NSNumber numberWithInt:_noteBrightness * self.opacity];
-    NSNumber *noteLengthBrightnessResult = [NSNumber numberWithInt:_noteLengthBrightness * self.opacity];
+    NSNumber *playheadBrighnessResult = [NSNumber numberWithInt:self.playheadBrightness * self.opacity];
+    NSNumber *nextStepBrighnessResult = [NSNumber numberWithInt:self.nextStepBrightness * self.opacity];
+    NSNumber *noteBrightnessResult = [NSNumber numberWithInt:self.noteBrightness * self.opacity];
+    NSNumber *noteLengthBrightnessResult = [NSNumber numberWithInt:self.noteLengthBrightness * self.opacity];
     NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
     
     // Generate the columns with playhead and nextStep
@@ -140,7 +140,7 @@
             }
             
             // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < _noteBrightness * self.opacity )
+            else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < self.noteBrightness * self.opacity )
                 [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:noteBrightnessResult];
             
             // Put the length tails in when appropriate

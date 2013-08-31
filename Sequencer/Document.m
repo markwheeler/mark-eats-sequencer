@@ -374,11 +374,9 @@ typedef enum DocumentPageAnimationDirection {
 {
     [self.sequencer adjustToGridSize];
     
-    if( ![NSThread isMainThread] )
-        NSLog(@"WARNING: Should be on main thread"); // TODO
     NSUInteger count = [self.sequencer checkForNotesOutsideOfGrid];
     if( count > 0 && !self.notesOutsideGridAlert ) {
-        //                dispatch_async(dispatch_get_main_queue(), ^(void) { TODO check if we need this
+        
         self.notesOutsideGridAlert = [NSAlert alertWithMessageText:@"This song contains notes outside of the grid controller's area."
                                                      defaultButton:@"Leave notes"
                                                    alternateButton:@"Remove notes"
@@ -386,7 +384,6 @@ typedef enum DocumentPageAnimationDirection {
                                          informativeTextWithFormat:@"Would you like to remove these %li notes?", (unsigned long)count];
         
         [self.notesOutsideGridAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(notesOutsideGridAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
-        //                });
     }
     
     [self updatePatternNotes];
@@ -477,114 +474,150 @@ typedef enum DocumentPageAnimationDirection {
 // Sequencer song notifications
 - (void) songBPMDidChange:(NSNotification *)notification
 {
-    [self updateBPM];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updateBPM];
+    });
 }
 
 - (void) songStepQuantizationDidChange:(NSNotification *)notification
 {
-    [self updateStepQuantizationPopup];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updateStepQuantizationPopup];
+    });
 }
 
 - (void) songPatternQuantizationDidChange:(NSNotification *)notification
 {
-    [self updatePatternQuantizationPopup];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updatePatternQuantizationPopup];
+    });
 }
 
 // Sequencer page notifications
 - (void) pageNameDidChange:(NSNotification *)notification
 {
-    [self updateNameForPage:[[notification.userInfo valueForKey:@"pageId"] unsignedIntValue]];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updateNameForPage:[[notification.userInfo valueForKey:@"pageId"] unsignedIntValue]];
+    });
 }
 
 - (void) pageStepLengthDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-       [self updateStepLengthPopup];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+           [self updateStepLengthPopup];
+    });
 }
 
 - (void) pageSwingDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updateSwingPopup];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updateSwingPopup];
+    });
 }
 
 - (void) pageVelocityGrooveDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updateVelocityGroove];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updateVelocityGroove];
+    });
 }
 
 - (void) pageTransposeDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updateTranspose];
-        [self updatePitches];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateTranspose];
+            [self updatePitches];
+        }
+    });
 }
 
 - (void) pagePitchesDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updatePitches];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updatePitches];
+    });
 }
 
 - (void) pagePatternNotesDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] )
-        [self updatePatternNotes];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] )
+            [self updatePatternNotes];
+    });
 }
 
 - (void) noteLengthDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] )
-        [self updatePatternNotes];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] )
+            [self updatePatternNotes];
+    });
 }
 
 // Sequencer state notifications
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
-    [self updatePageFromDirection:DocumentPageAnimationDirection_Left];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updatePageFromDirection:DocumentPageAnimationDirection_Left];
+    });
 }
 
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
-    [self updatePageFromDirection:DocumentPageAnimationDirection_Right];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updatePageFromDirection:DocumentPageAnimationDirection_Right];
+    });
 }
 
 // Sequencer page state notifications
 - (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
-        [self updateCurrentPattern];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePatternNotes];
+            [self updateCurrentPattern];
+        }
+    });
 }
 
 - (void) pageStateNextPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updateCurrentPattern];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateCurrentPattern];
+        }
+    });
 }
 
 - (void) pageStateCurrentStepDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updatePatternNotes];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updatePatternNotes];
+    });
 }
 
 - (void) pageStateNextStepDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updatePatternNotes];
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updatePatternNotes];
+    });
 }
 
 - (void) pageStatePlayModeDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePlayMode];
-        [self updatePatternNotes];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePlayMode];
+            [self updatePatternNotes];
+        }
+    });
 }
 
 

@@ -115,9 +115,10 @@
 - (void) updateView
 {
     if( _sharedPreferences.gridSupportsVariableBrightness ) {
-        if( _patternView.mode == EatsPatternViewMode_NoteEdit )
+        // Here we check if it's enabled so as to not mess up the animation
+        if( _patternView.mode == EatsPatternViewMode_NoteEdit && _patternView.enabled )
             _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-        else if( _patternView.mode == EatsPatternViewMode_Edit )
+        else if( _patternView.mode == EatsPatternViewMode_Edit && _patternView.enabled )
             _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
         
     } else {
@@ -148,7 +149,7 @@
         _patternView.enabled = YES;
         
     } else {
-        [self scheduleAnimatePageLeftTimer];
+        [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
     }
 }
 
@@ -169,27 +170,44 @@
         _patternView.enabled = YES;
         
     } else {
-        [self scheduleAnimatePageRightTimer];
+        [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
     }
 }
 
 - (void) scheduleAnimatePageLeftTimer
 {
-    // Haven't attached this to the run loop because the async seemed to mean timers could overlap
+    // This needs to be done on the main thread
+    
     self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
                                                                target:self
                                                              selector:@selector(pageLeft:)
                                                              userInfo:nil
                                                               repeats:NO];
+    
+    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+    
+    // Make sure we fire even when the UI is tracking mouse down stuff
+    [runloop addTimer:self.pageAnimationTimer forMode: NSRunLoopCommonModes];
+    [runloop addTimer:self.pageAnimationTimer forMode: NSEventTrackingRunLoopMode];
+    
 }
 
 - (void) scheduleAnimatePageRightTimer
 {
+    // This needs to be done on the main thread
+    
     self.pageAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:( ( 0.5 * self.pageAnimationSpeedMultiplier ) * ( 0.1 + PAGE_ANIMATION_EASE * self.pageAnimationFrame ) ) / ANIMATION_FRAMERATE
                                                                target:self
                                                              selector:@selector(pageRight:)
                                                              userInfo:nil
                                                               repeats:NO];
+    
+    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+    
+    // Make sure we fire even when the UI is tracking mouse down stuff
+    [runloop addTimer:self.pageAnimationTimer forMode: NSRunLoopCommonModes];
+    [runloop addTimer:self.pageAnimationTimer forMode: NSEventTrackingRunLoopMode];
+    
 }
 
 - (void) animatePageIncrement:(int)amount
@@ -210,6 +228,7 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
+    _patternView.mode = EatsPatternViewMode_NoteEdit;
     _patternView.enabled = NO;
     
     self.editNoteAnimationFrame = 0;
@@ -347,7 +366,6 @@
     
     if( self.editNoteAnimationFrame == 1 ) { // Final frame
 
-        _patternView.mode = EatsPatternViewMode_NoteEdit;
         _patternView.enabled = YES;
         
         [timer invalidate];
@@ -447,7 +465,9 @@
     }
     self.pageAnimationFrame = 0;
     [self animatePageIncrement:1];
-    [self scheduleAnimatePageLeftTimer];
+    
+    [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
+    
 }
 
 - (void) updatePageRight
@@ -463,7 +483,7 @@
     }
     self.pageAnimationFrame = 0;
     [self animatePageIncrement:-1];
-    [self scheduleAnimatePageRightTimer];
+    [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
 }
 
 

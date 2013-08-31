@@ -83,7 +83,7 @@
                                                       userInfo:inputInfo];
 }
 
-// TODO
+// TODO: External control mapping
 - (void) sendButtonInputNotificationId:(uint)inputId down:(BOOL)down
 {
     NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:inputId], @"inputId",
@@ -94,7 +94,7 @@
                                                       userInfo:inputInfo];
 }
 
-// TODO
+// TODO: External control mapping
 - (void) sendValueInputNotificationId:(uint)inputId value:(float)value
 {
     NSDictionary *inputInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:inputId], @"inputId",
@@ -335,7 +335,7 @@
             NSLog(@"OSC received %@ %@", [o address], [self stripOSCValue:[NSString stringWithFormat:@"%@", [o value]]]);
         }
         
-        // TODO: send buttonInput and valueInput notifications using methods above.
+        // TODO: External control mapping. Send buttonInput and valueInput notifications using methods above.
         
         
     // Anything else just gets ignored

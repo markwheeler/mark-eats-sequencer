@@ -7,7 +7,7 @@
 //
 //  This is the brain – everything that edits anything in the model should pass through this
 //  It lets us get and set things, as well as registering undos
-//  Sequencer is thread safe. Notifications it sends are always on the main thread
+//  Sequencer is thread safe. Notifications it sends are always on the default global queue
 
 
 #import <Foundation/Foundation.h>

@@ -26,6 +26,8 @@
 @property Sequencer                 *sequencer;
 @property NSMutableSet              *subViews;
 
+@property dispatch_queue_t          gridQueue;
+
 - (id) initWithDelegate:(id)delegate andSequencer:(Sequencer *)sequencer width:(uint)w height:(uint)h;
 - (void) showView:(NSNumber *)gridView;
 - (void) setupView;

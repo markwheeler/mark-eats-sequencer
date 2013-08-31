@@ -132,7 +132,7 @@ typedef enum EatsStepAdvance {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
     // Could re-work it in future to allow other time signatures
     
-    // TODO: Only fire on MIN_QUANTIZATION. Schedule more than 1 clock pulse if need be
+    // Could also potentially re-work to only fire on MIN_QUANTIZATION? Schedule more than 1 clock pulse if need be
     
     //NSLog(@"Tick: %lu Time: %@", (unsigned long)_currentTick, ns);
     //if( [NSThread isMainThread] ) NSLog(@"%s is running on main thread", __func__);

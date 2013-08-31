@@ -25,7 +25,7 @@ typedef enum EatsClockStatus{
 
 @interface EatsClock : NSObject
 
-@property (weak) id delegate;
+@property (weak) id     delegate;
 
 @property float         bpm;
 @property uint          ppqn; // MIDI clock sends 24. Setting to 48 means we can do that and also 16ppqn triggers.

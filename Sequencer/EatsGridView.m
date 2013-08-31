@@ -10,7 +10,6 @@
 #import "EatsGridSubView.h"
 #import "EatsGridUtils.h"
 
-
 @implementation EatsGridView
 
 - (id) initWithDelegate:(id)delegate andSequencer:(Sequencer *)sequencer width:(uint)w height:(uint)h
@@ -19,9 +18,12 @@
     if (self) {
         
         _delegate = delegate;
-        _sequencer= sequencer;
+        _sequencer = sequencer;
         _width = w;
         _height = h;
+        
+        // Create the serial queue
+        self.gridQueue = dispatch_queue_create("com.MarkEatsSequencer.GridQueue", NULL);
         
         [self setupView];
         
@@ -57,8 +59,6 @@
     // Over-ride this
     
     // Generate and combine all the sub views
-    // TODO should this be going out on a background queue?
-
     NSArray *gridArray = [EatsGridUtils combineSubViews:_subViews gridWidth:_width gridHeight:_height];
     
     // Send msg to delegate

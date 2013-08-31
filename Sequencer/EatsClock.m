@@ -30,34 +30,55 @@
 
 #pragma mark - Setters and getters
 
-- (void)setBpm:(float)bpm
+- (void) setBpm:(float)bpm
 {
-    _bpm = bpm;
+    @synchronized( self ) {
+        _bpm = bpm;
+    }
     [self updateInterval];
 }
 
-- (float)bpm {
-    return _bpm;
+- (float) bpm
+{    
+    float result;
+    @synchronized( self ) {
+        result = _bpm;
+    }
+    return result;
 }
 
-- (void)setPpqn:(uint)ppqn
+- (void) setPpqn:(uint)ppqn
 {
-    _ppqn = ppqn;
+    @synchronized( self ) {
+        _ppqn = ppqn;
+    }
     [self updateInterval];
 }
 
-- (uint)ppqn {
-    return _ppqn;
+- (uint) ppqn
+{
+    uint result;
+    @synchronized( self ) {
+        result = _ppqn;
+    }
+    return result;
 }
 
-- (void)setQnPerMeasure:(uint)qnPerMeasure
+- (void) setQnPerMeasure:(uint)qnPerMeasure
 {
-    _qnPerMeasure = qnPerMeasure;
+    @synchronized( self ) {
+        _qnPerMeasure = qnPerMeasure;
+    }
     [self updateInterval];
 }
 
-- (uint)qnPerMeasure {
-    return _qnPerMeasure;
+- (uint) qnPerMeasure
+{
+    uint result;
+    @synchronized( self ) {
+        result = _qnPerMeasure;
+    }
+    return result;
 }
 
 
@@ -74,7 +95,7 @@
         _bufferTimeInNs = 10000000; // 10ms
         
         // Create the serial queue and make it high priority
-        _tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTick", NULL);
+        _tickQueue = dispatch_queue_create("com.MarkEatsSequencer.ClockTickQueue", NULL);
         dispatch_queue_t globalHigh = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
         dispatch_set_target_queue(_tickQueue, globalHigh);
         

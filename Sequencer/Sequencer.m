@@ -36,9 +36,10 @@
     if( !self )
         return nil;
     
-    // Create the queue and make it high priority
+    // Create the serial queue and make it high priority
     self.sequencerQueue = dispatch_queue_create("com.MarkEatsSequencer.SequencerQueue", NULL);
-    dispatch_set_target_queue(self.sequencerQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+    dispatch_queue_t globalHigh = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+    dispatch_set_target_queue(self.sequencerQueue, globalHigh);
     
     self.sharedPreferences = [Preferences sharedPreferences];
     
@@ -1484,14 +1485,14 @@
 
 - (void) postNotification:(NSString *)notificationName
 {
-    dispatch_async( dispatch_get_main_queue(), ^(void) {
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
         [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
     });
 }
 
 - (void) postNotification:(NSString *)notificationName forPage:(uint)pageId
 {
-    dispatch_async( dispatch_get_main_queue(), ^(void) {
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pageId], @"pageId", nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:self userInfo:userInfo];
     });
@@ -1499,7 +1500,7 @@
 
 - (void) postNotification:(NSString *)notificationName forPattern:(int)patternId inPage:(uint)pageId
 {
-    dispatch_async( dispatch_get_main_queue(), ^(void) {
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:patternId], @"patternId",
                                                                             [NSNumber numberWithInt:pageId], @"pageId",
                                                                             nil];
@@ -1509,7 +1510,7 @@
 
 - (void) postNotification:(NSString *)notificationName forNote:(SequencerNote *)note inPattern:(int)patternId inPage:(uint)pageId
 {
-    dispatch_async( dispatch_get_main_queue(), ^(void) {
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[note copy], @"note",
                                                                             [NSNumber numberWithInt:patternId], @"patternId",
                                                                             [NSNumber numberWithInt:pageId], @"pageId",

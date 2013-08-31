@@ -43,7 +43,7 @@
         self.gridHeight = self.rows;
         
         // Brightness settings
-        self.noteBrightness = [NSNumber numberWithFloat:0.0];
+        self.noteBrightness = [NSNumber numberWithFloat:0.2];
         self.lengthBrightness = [NSNumber numberWithFloat:0.6];
         self.playheadBrightness = [NSNumber numberWithFloat:0.6];
         self.nextStepBrightness = [NSNumber numberWithFloat:0.7];
