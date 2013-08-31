@@ -13,9 +13,9 @@
 
 @interface ScaleGeneratorSheetController : JCSSheetController
 
-@property NSString                   *scaleMode;
-@property NSString                   *tonicNoteName;
+@property (nonatomic) NSString                   *scaleMode;
+@property (nonatomic) NSString                   *tonicNoteName;
 
-@property uint                       indexOfLastSelectedScaleMode;
+@property (nonatomic) uint                       indexOfLastSelectedScaleMode;
 
 @end

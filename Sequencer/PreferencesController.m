@@ -10,20 +10,20 @@
 
 @interface PreferencesController ()
 
-@property EatsCommunicationManager          *sharedCommunicationManager;
-@property Preferences                       *sharedPreferences;
+@property EatsCommunicationManager                     *sharedCommunicationManager;
+@property Preferences                                  *sharedPreferences;
 
-@property (weak) IBOutlet NSToolbar         *preferencesToolbar;
-@property (weak) IBOutlet NSTabView         *preferencesTabView;
+@property (nonatomic, weak) IBOutlet NSToolbar         *preferencesToolbar;
+@property (nonatomic, weak) IBOutlet NSTabView         *preferencesTabView;
 
-@property (weak) IBOutlet NSPopUpButton     *gridControllerPopup;
-@property (weak) IBOutlet NSTextField       *gridControllerStatus;
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *gridControllerPopup;
+@property (nonatomic, weak) IBOutlet NSTextField       *gridControllerStatus;
 
-@property (weak) IBOutlet NSTableColumn     *midiDestinationsEnableColumn;
-@property (weak) IBOutlet NSTableColumn     *midiDestinationsNameColumn;
-@property (weak) IBOutlet NSArrayController *midiDestinationsArrayController;
+@property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsEnableColumn;
+@property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsNameColumn;
+@property (nonatomic, weak) IBOutlet NSArrayController *midiDestinationsArrayController;
 
-@property (weak) IBOutlet NSPopUpButton     *clockSourcePopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *clockSourcePopup;
 
 @end
 

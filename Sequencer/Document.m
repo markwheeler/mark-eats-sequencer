@@ -33,38 +33,38 @@ typedef enum DocumentPageAnimationDirection {
 @property EatsGridNavigationController  *gridNavigationController;
 @property ScaleGeneratorSheetController *scaleGeneratorSheetController;
 
-@property NSAlert                       *notesOutsideGridAlert;
-@property NSAlert                       *clearPatternAlert;
-@property BOOL                          checkedForThingsOutsideGrid;
-@property uint                          indexOflastSelectedScaleMode;
-@property NSString                      *lastTonicNoteName;
-@property NSPoint                       pageViewFrameOrigin;
+@property (nonatomic) NSAlert                       *notesOutsideGridAlert;
+@property (nonatomic) NSAlert                       *clearPatternAlert;
+@property (nonatomic) BOOL                          checkedForThingsOutsideGrid;
+@property (nonatomic) uint                          indexOflastSelectedScaleMode;
+@property (nonatomic) NSString                      *lastTonicNoteName;
+@property (nonatomic) NSPoint                       pageViewFrameOrigin;
 
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
 
-@property (weak) IBOutlet KeyboardInputView     *pageView;
+@property (nonatomic, weak) IBOutlet KeyboardInputView     *pageView;
 
-@property (weak) IBOutlet NSTextField           *bpmTextField;
-@property (weak) IBOutlet NSStepper             *bpmStepper;
-@property (weak) IBOutlet NSImageView           *clockLateIndicator;
+@property (nonatomic, weak) IBOutlet NSTextField           *bpmTextField;
+@property (nonatomic, weak) IBOutlet NSStepper             *bpmStepper;
+@property (nonatomic, weak) IBOutlet NSImageView           *clockLateIndicator;
 
-@property (weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
-@property (weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
-@property (weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
-@property (weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
+@property (nonatomic, weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
+@property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
 
 
-@property (weak) IBOutlet NSTextField           *channelStaticTextField;
-@property (weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
-@property (weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
-@property (weak) IBOutlet NSTableView           *rowPitchesTableView;
-@property (weak) IBOutlet NSPopUpButton         *stepLengthPopup;
-@property (weak) IBOutlet NSPopUpButton         *swingPopup;
-@property (weak) IBOutlet NSButton              *velocityGrooveCheckbox;
-@property (weak) IBOutlet NSTextField           *transposeTextField;
-@property (weak) IBOutlet NSStepper             *transposeStepper;
+@property (nonatomic, weak) IBOutlet NSTextField           *channelStaticTextField;
+@property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
+@property (nonatomic, weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
+@property (nonatomic, weak) IBOutlet NSTableView           *rowPitchesTableView;
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *stepLengthPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *swingPopup;
+@property (nonatomic, weak) IBOutlet NSButton              *velocityGrooveCheckbox;
+@property (nonatomic, weak) IBOutlet NSTextField           *transposeTextField;
+@property (nonatomic, weak) IBOutlet NSStepper             *transposeStepper;
 
-@property (weak) IBOutlet EatsDebugGridView     *debugGridView;
+@property (nonatomic, weak) IBOutlet EatsDebugGridView     *debugGridView;
 
 
 @end

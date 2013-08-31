@@ -17,7 +17,7 @@
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
 @property EatsExternalClockCalculator   *externalClockCalculator;
-@property NSTimer                       *gridControllerConnectionTimer;
+@property (nonatomic) NSTimer           *gridControllerConnectionTimer;
 
 @end
 

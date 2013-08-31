@@ -106,7 +106,7 @@
 - (void) setTranspose:(int)transpose andTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId;
 
 - (NSArray *) pitchesForPage:(uint)pageId;
-- (void) setPitches:(NSMutableArray *)pitches forPage:(uint)pageId;
+- (void) setPitches:(NSArray *)pitches forPage:(uint)pageId;
 - (int) pitchAtRow:(uint)row forPage:(uint)pageId;
 - (void) setPitch:(int)pitch atRow:(uint)row forPage:(uint)pageId;
 
@@ -116,7 +116,7 @@
 
 - (NSSet *) notesForPattern:(uint)patternId inPage:(uint)pageId;
 - (uint) numberOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
-- (void) setNotes:(NSMutableSet *)notes forPattern:(uint)patternId inPage:(uint)pageId;
+- (void) setNotes:(NSSet *)notes forPattern:(uint)patternId inPage:(uint)pageId;
 
 - (void) clearNotesForPattern:(uint)patternId inPage:(uint)pageId;
 - (void) copyNotesFromPattern:(uint)fromPatternId fromPage:(uint)fromPageId toPattern:(uint)toPatternId toPage:(uint)toPageId;

@@ -760,7 +760,7 @@
     return pitchesToReturn;
 }
 
-- (void) setPitches:(NSMutableArray *)pitches forPage:(uint)pageId
+- (void) setPitches:(NSArray *)pitches forPage:(uint)pageId
 {
     if( pitches.count == SEQUENCER_SIZE ) {
     
@@ -769,7 +769,7 @@
         [[self.undoManager prepareWithInvocationTarget:self] setPitches:page.pitches forPage:pageId];
         [self.undoManager setActionName:@"Pitches Change"];
         
-        page.pitches = pitches;
+        page.pitches = [pitches mutableCopy];
     }
     
     [self postNotification:kSequencerPagePitchesDidChangeNotification forPage:pageId];
@@ -850,16 +850,16 @@
     return notesCount;
 }
 
-- (void) setNotes:(NSMutableSet *)notes forPattern:(uint)patternId inPage:(uint)pageId
+- (void) setNotes:(NSSet *)notes forPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     dispatch_sync(self.sequencerQueue, ^(void) {
     
-        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[page.patterns objectAtIndex:patternId] forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
         
-        [page.patterns replaceObjectAtIndex:patternId withObject:notes];
+        [page.patterns replaceObjectAtIndex:patternId withObject:[notes mutableCopy]];
         
     });
     
@@ -873,7 +873,7 @@
     
     dispatch_sync(self.sequencerQueue, ^(void) {
     
-        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] mutableCopy] forPattern:patternId inPage:pageId];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] copy] forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
     
         [[page.patterns objectAtIndex:patternId] removeAllObjects];
@@ -890,7 +890,7 @@
     
     dispatch_sync(self.sequencerQueue, ^(void) {
     
-        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[toPage.patterns objectAtIndex:toPatternId] mutableCopy] forPattern:toPatternId inPage:toPageId];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:[toPage.patterns objectAtIndex:toPatternId] forPattern:toPatternId inPage:toPageId];
         [self.undoManager setActionName:@"Pattern Copy"];
 
         NSMutableSet *fromNotes = [[fromPage.patterns objectAtIndex:fromPatternId] mutableCopy];
@@ -908,17 +908,15 @@
     
     [self pasteboardCopyNotesForPattern:patternId inPage:pageId];
     
-    __block NSMutableSet *currentNotes;
-    
     dispatch_sync(self.sequencerQueue, ^(void) {
         
-        currentNotes = [[page.patterns objectAtIndex:patternId] mutableCopy];
+        NSSet *currentNotes = [[page.patterns objectAtIndex:patternId] copy];
         [[page.patterns objectAtIndex:patternId] removeAllObjects];
         
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
+        
     });
-    
-    [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
-    [self.undoManager setActionName:@"Pattern Change"];
     
     [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
 }
@@ -948,7 +946,7 @@
     
     NSData *notesData = [pasteboard dataForType:pasteboardType];
     if( notesData ) {
-        NSMutableSet *newNotes = [[NSKeyedUnarchiver unarchiveObjectWithData:notesData] mutableCopy];
+        NSSet *newNotes = [NSKeyedUnarchiver unarchiveObjectWithData:notesData];
         [self setNotes:newNotes forPattern:patternId inPage:pageId];
     }
 }

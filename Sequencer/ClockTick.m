@@ -24,11 +24,11 @@ typedef enum EatsStepAdvance {
 @property EatsCommunicationManager      *sharedCommunicationManager;
 @property Preferences                   *sharedPreferences;
 
-@property double        machTimeToNsFactor;
-@property double        nsToMachTimeFactor;
+@property (nonatomic) double            machTimeToNsFactor;
+@property (nonatomic) double            nsToMachTimeFactor;
 
-@property uint              currentTick;
-@property NSMutableArray    *activeNotes;
+@property (nonatomic) uint              currentTick;
+@property (nonatomic) NSMutableArray    *activeNotes;
 
 @end
 

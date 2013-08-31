@@ -12,8 +12,8 @@
 
 #define MIDI_CLOCK_PPQN 24
 
-@property NSMutableSet      *externalClockIntervals;
-@property uint64_t          externalPulsePreviousTimestamp;
+@property (nonatomic) NSMutableSet      *externalClockIntervals;
+@property (nonatomic) uint64_t          externalPulsePreviousTimestamp;
 
 @end
 

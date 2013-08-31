@@ -8,10 +8,6 @@
 
 #import "EatsCommunicationManager.h"
 
-@interface EatsCommunicationManager ()
-
-@end
-
 
 @implementation EatsCommunicationManager
 

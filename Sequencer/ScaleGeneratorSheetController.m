@@ -13,10 +13,10 @@
 
 @interface ScaleGeneratorSheetController ()
 
-@property (weak) IBOutlet NSPopUpButton *scaleModePopup;
-@property (weak) IBOutlet NSTextField   *tonicNoteTextField;
+@property (nonatomic, weak) IBOutlet NSPopUpButton  *scaleModePopup;
+@property (nonatomic, weak) IBOutlet NSTextField    *tonicNoteTextField;
 
-@property NSString                      *previousTonicNoteName;
+@property (nonatomic) NSString                      *previousTonicNoteName;
 
 @end
 

@@ -20,7 +20,7 @@
 
 @interface PreferencesController : NSWindowController
 
-@property (weak) id delegate;
+@property (nonatomic, weak) id delegate;
 
 - (void) updateOSC;
 - (void) updateMIDI;
