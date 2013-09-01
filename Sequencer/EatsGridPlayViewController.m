@@ -64,226 +64,230 @@
 
 - (void) setupView
 {
-    if( self.height > 8 )
-        self.inOutAnimationSpeedMultiplier = 0.5;
-    else
-        self.inOutAnimationSpeedMultiplier = 2.5;
-    
-    if( self.width > 8 )
-        self.pageAnimationSpeedMultiplier = 0.5;
-    else
-        self.pageAnimationSpeedMultiplier = 8.0;
-    
-    
-    // Get prefs
-    self.sharedPreferences = [Preferences sharedPreferences];
-    
-    // Create the sub views
-    
-    // Page buttons
-    _pageButtons = [[NSMutableArray alloc] initWithCapacity:8];
-    for( int i = 0; i < 8; i ++ ) {
-        EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
-        button.delegate = self;
-        button.x = i;
-        button.y = - (self.height - 4) + 1;
-        if( self.width < 16 )
-            button.y ++;
-        button.visible = NO;
-        [_pageButtons addObject:button];
-    }
-    
-    // Pattern buttons
-    uint numberOfPatterns = self.width;
-    if( numberOfPatterns > 16 )
-        numberOfPatterns = 16;
-    
-    // Pattern buttons for this page on small grids
-    if( self.height < 16 || self.width < 16 ) {
-        _patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
-        for( int i = 0; i < numberOfPatterns; i ++ ) {
-            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
-            button.delegate = self;
-            button.x = i;
-            button.y = - (self.height - 4) + 3;
-            button.visible = NO;
-            [_patternButtons addObject:button];
-        }
-    }
-    
-    // Pattern buttons for other pages on small grids
-    if( self.height < 16 && self.width > 8 ) {
-        _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
-        for( int i = 0; i < numberOfPatterns; i ++ ) {
-            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
-            button.delegate = self;
-            button.x = i;
-            button.y = - (self.height - 4) + 2;
-            button.visible = NO;
-            [_patternsOnOtherPagesButtons addObject:button];
-        }
-    }
-    
-    // Pattern buttons for all pages on large grids
-    if( self.height > 8 && self.width > 8 ) {
-        _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns * 8];
-        // Rows
+    dispatch_sync(self.gridQueue, ^(void) {
+        
+        if( self.height > 8 )
+            self.inOutAnimationSpeedMultiplier = 0.5;
+        else
+            self.inOutAnimationSpeedMultiplier = 2.5;
+        
+        if( self.width > 8 )
+            self.pageAnimationSpeedMultiplier = 0.5;
+        else
+            self.pageAnimationSpeedMultiplier = 8.0;
+        
+        
+        // Get prefs
+        self.sharedPreferences = [Preferences sharedPreferences];
+        
+        // Create the sub views
+        
+        // Page buttons
+        _pageButtons = [[NSMutableArray alloc] initWithCapacity:8];
         for( int i = 0; i < 8; i ++ ) {
-            // Columns
-            for( int j = 0; j < numberOfPatterns; j ++ ) {
+            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+            button.delegate = self;
+            button.x = i;
+            button.y = - (self.height - 4) + 1;
+            if( self.width < 16 )
+                button.y ++;
+            button.visible = NO;
+            [_pageButtons addObject:button];
+        }
+        
+        // Pattern buttons
+        uint numberOfPatterns = self.width;
+        if( numberOfPatterns > 16 )
+            numberOfPatterns = 16;
+        
+        // Pattern buttons for this page on small grids
+        if( self.height < 16 || self.width < 16 ) {
+            _patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+            for( int i = 0; i < numberOfPatterns; i ++ ) {
                 EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
                 button.delegate = self;
-                button.x = j;
-                button.y = - (self.height - 4) + 2 + i;
-                button.inactiveBrightness = 4;
+                button.x = i;
+                button.y = - (self.height - 4) + 3;
+                button.visible = NO;
+                [_patternButtons addObject:button];
+            }
+        }
+        
+        // Pattern buttons for other pages on small grids
+        if( self.height < 16 && self.width > 8 ) {
+            _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+            for( int i = 0; i < numberOfPatterns; i ++ ) {
+                EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+                button.delegate = self;
+                button.x = i;
+                button.y = - (self.height - 4) + 2;
                 button.visible = NO;
                 [_patternsOnOtherPagesButtons addObject:button];
             }
         }
-    }
-    
-    // Scrub buttons for other pages and transpose slider, if there's space
-    if( self.height > 8 ) {
-        _scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
-        for( int i = 0; i < self.width; i ++ ) {
-            EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
-            button.delegate = self;
-            button.x = i;
-            button.y = - 1;
-            button.visible = NO;
-            [_scrubOtherPagesButtons addObject:button];
+        
+        // Pattern buttons for all pages on large grids
+        if( self.height > 8 && self.width > 8 ) {
+            _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns * 8];
+            // Rows
+            for( int i = 0; i < 8; i ++ ) {
+                // Columns
+                for( int j = 0; j < numberOfPatterns; j ++ ) {
+                    EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+                    button.delegate = self;
+                    button.x = j;
+                    button.y = - (self.height - 4) + 2 + i;
+                    button.inactiveBrightness = 4;
+                    button.visible = NO;
+                    [_patternsOnOtherPagesButtons addObject:button];
+                }
+            }
         }
         
-        _transposeView = [[EatsGridHorizontalShiftView alloc] init];
-        _transposeView.delegate = self;
-        _transposeView.x = 0;
-        _transposeView.y = - 2;
-        _transposeView.width = self.width;
-        _transposeView.height = 1;
-        _transposeView.visible = NO;
-    }
-    
-    // Play mode buttons
-    _forwardButton = [[EatsGridButtonView alloc] init];
-    _forwardButton.x = self.width - 8;
-    
-    _reverseButton = [[EatsGridButtonView alloc] init];
-    _reverseButton.x = self.width - 7;
-    
-    _randomButton = [[EatsGridButtonView alloc] init];
-    _randomButton.x = self.width - 6;
-    
-    _sliceButton = [[EatsGridButtonView alloc] init];
-    _sliceButton.x = self.width - 5;
-    
-    _playModeButtons = [NSArray arrayWithObjects:_forwardButton, _reverseButton, _randomButton, _sliceButton, nil];
-    
-    for( EatsGridButtonView *button in _playModeButtons ) {
-        button.delegate = self;
-        button.y = - (self.height - 4) + 1;
-        button.inactiveBrightness = 5;
-        button.visible = NO;
-    }
-    
-    // Control buttons
-    _bpmDecrementButton = [[EatsGridButtonView alloc] init];
-    _bpmDecrementButton.x = self.width - 4;
-    
-    _bpmIncrementButton = [[EatsGridButtonView alloc] init];
-    _bpmIncrementButton.x = self.width - 3;
-    
-    _clearButton = [[EatsGridButtonView alloc] init];
-    _clearButton.x = self.width - 2;
-    _clearButton.inactiveBrightness = 5;
-    
-    _exitButton = [[EatsGridButtonView alloc] init];
-    _exitButton.x = self.width - 1;
-    _exitButton.inactiveBrightness = 5;
-    
-    _controlButtons = [NSArray arrayWithObjects:_bpmDecrementButton, _bpmIncrementButton, _clearButton, _exitButton, nil];
-    
-    for( EatsGridButtonView *button in _controlButtons ) {
-        button.delegate = self;
-        button.y = - (self.height - 4) + 1;
-        button.visible = NO;
-    }
-    
-    // Loop length selection view
-    _loopBraceView = [[EatsGridLoopBraceView alloc] init];
-    _loopBraceView.delegate = self;
-    _loopBraceView.x = 0;
-    _loopBraceView.y = 0;
-    _loopBraceView.width = self.width;
-    _loopBraceView.height = 1;
-    _loopBraceView.fillBar = YES;
-    _loopBraceView.visible = NO;
-    
-    // Pattern view
-    _patternView = [[EatsGridPatternView alloc] init];
-    _patternView.delegate = self;
-    _patternView.x = 0;
-    _patternView.y = 1;
-    _patternView.width = self.width;
-    _patternView.height = self.height - 1;
-    _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-    _patternView.mode = EatsPatternViewMode_Play;
-    _patternView.patternHeight = self.height;
-    
-    // Add everything to sub views
-    self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
-    [self.subViews addObjectsFromArray:_pageButtons];
-    [self.subViews addObjectsFromArray:_patternButtons];
-    [self.subViews addObjectsFromArray:_patternsOnOtherPagesButtons];
-    if( self.height > 8 ) {
-        [self.subViews addObjectsFromArray:_scrubOtherPagesButtons];
-        [self.subViews addObject:_transposeView];
-    }
-    [self.subViews addObjectsFromArray:_playModeButtons];
-    [self.subViews addObjectsFromArray:_controlButtons];
-    
-    // Update everything
-    [self updatePage];
-    [self updatePlayMode];
-    [self updatePattern];
-    if( self.height > 8 ) {
-        [self updateTranspose];
-        [self updateScrubOtherPages];
-    }
-    [self updateLoop];
-    [self updatePatternNotes];
-    
-    
-    // Sequencer page notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageLoopDidChange:) name:kSequencerPageLoopDidChangeNotification object:self.sequencer];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageTransposeDidChange:) name:kSequencerPageTransposeDidChangeNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageTransposeZeroStepDidChange:) name:kSequencerPageTransposeZeroStepDidChangeNotification object:self.sequencer];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pagePatternNotesDidChange:) name:kSequencerPagePatternNotesDidChangeNotification object:self.sequencer];
-    
-    // Sequencer note notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
-    
-    // Sequencer state notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeRight:) name:kSequencerStateCurrentPageDidChangeRightNotification object:self.sequencer];
-    
-    // Sequencer page state notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentPatternIdDidChange:) name:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextPatternIdDidChange:) name:kSequencerPageStateNextPatternIdDidChangeNotification object:self.sequencer];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentStepDidChange:) name:kSequencerPageStateCurrentStepDidChangeNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
-    
-    
-    // Start animateIn
-    self.inOutAnimationFrame = 0;
-    [self animateInOutIncrement:-1];
-    [self scheduleAnimateInTimer];
-    
-    [self updateView];
+        // Scrub buttons for other pages and transpose slider, if there's space
+        if( self.height > 8 ) {
+            _scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
+            for( int i = 0; i < self.width; i ++ ) {
+                EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
+                button.delegate = self;
+                button.x = i;
+                button.y = - 1;
+                button.visible = NO;
+                [_scrubOtherPagesButtons addObject:button];
+            }
+            
+            _transposeView = [[EatsGridHorizontalShiftView alloc] init];
+            _transposeView.delegate = self;
+            _transposeView.x = 0;
+            _transposeView.y = - 2;
+            _transposeView.width = self.width;
+            _transposeView.height = 1;
+            _transposeView.visible = NO;
+        }
+        
+        // Play mode buttons
+        _forwardButton = [[EatsGridButtonView alloc] init];
+        _forwardButton.x = self.width - 8;
+        
+        _reverseButton = [[EatsGridButtonView alloc] init];
+        _reverseButton.x = self.width - 7;
+        
+        _randomButton = [[EatsGridButtonView alloc] init];
+        _randomButton.x = self.width - 6;
+        
+        _sliceButton = [[EatsGridButtonView alloc] init];
+        _sliceButton.x = self.width - 5;
+        
+        _playModeButtons = [NSArray arrayWithObjects:_forwardButton, _reverseButton, _randomButton, _sliceButton, nil];
+        
+        for( EatsGridButtonView *button in _playModeButtons ) {
+            button.delegate = self;
+            button.y = - (self.height - 4) + 1;
+            button.inactiveBrightness = 5;
+            button.visible = NO;
+        }
+        
+        // Control buttons
+        _bpmDecrementButton = [[EatsGridButtonView alloc] init];
+        _bpmDecrementButton.x = self.width - 4;
+        
+        _bpmIncrementButton = [[EatsGridButtonView alloc] init];
+        _bpmIncrementButton.x = self.width - 3;
+        
+        _clearButton = [[EatsGridButtonView alloc] init];
+        _clearButton.x = self.width - 2;
+        _clearButton.inactiveBrightness = 5;
+        
+        _exitButton = [[EatsGridButtonView alloc] init];
+        _exitButton.x = self.width - 1;
+        _exitButton.inactiveBrightness = 5;
+        
+        _controlButtons = [NSArray arrayWithObjects:_bpmDecrementButton, _bpmIncrementButton, _clearButton, _exitButton, nil];
+        
+        for( EatsGridButtonView *button in _controlButtons ) {
+            button.delegate = self;
+            button.y = - (self.height - 4) + 1;
+            button.visible = NO;
+        }
+        
+        // Loop length selection view
+        _loopBraceView = [[EatsGridLoopBraceView alloc] init];
+        _loopBraceView.delegate = self;
+        _loopBraceView.x = 0;
+        _loopBraceView.y = 0;
+        _loopBraceView.width = self.width;
+        _loopBraceView.height = 1;
+        _loopBraceView.fillBar = YES;
+        _loopBraceView.visible = NO;
+        
+        // Pattern view
+        _patternView = [[EatsGridPatternView alloc] init];
+        _patternView.delegate = self;
+        _patternView.x = 0;
+        _patternView.y = 1;
+        _patternView.width = self.width;
+        _patternView.height = self.height - 1;
+        _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+        _patternView.mode = EatsPatternViewMode_Play;
+        _patternView.patternHeight = self.height;
+        
+        // Add everything to sub views
+        self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
+        [self.subViews addObjectsFromArray:_pageButtons];
+        [self.subViews addObjectsFromArray:_patternButtons];
+        [self.subViews addObjectsFromArray:_patternsOnOtherPagesButtons];
+        if( self.height > 8 ) {
+            [self.subViews addObjectsFromArray:_scrubOtherPagesButtons];
+            [self.subViews addObject:_transposeView];
+        }
+        [self.subViews addObjectsFromArray:_playModeButtons];
+        [self.subViews addObjectsFromArray:_controlButtons];
+        
+        // Update everything
+        [self updatePage];
+        [self updatePlayMode];
+        [self updatePattern];
+        if( self.height > 8 ) {
+            [self updateTranspose];
+            [self updateScrubOtherPages];
+        }
+        [self updateLoop];
+        [self updatePatternNotes];
+        
+        
+        // Sequencer page notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageLoopDidChange:) name:kSequencerPageLoopDidChangeNotification object:self.sequencer];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageTransposeDidChange:) name:kSequencerPageTransposeDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageTransposeZeroStepDidChange:) name:kSequencerPageTransposeZeroStepDidChangeNotification object:self.sequencer];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pagePatternNotesDidChange:) name:kSequencerPagePatternNotesDidChangeNotification object:self.sequencer];
+        
+        // Sequencer note notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
+        
+        // Sequencer state notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeRight:) name:kSequencerStateCurrentPageDidChangeRightNotification object:self.sequencer];
+        
+        // Sequencer page state notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentPatternIdDidChange:) name:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextPatternIdDidChange:) name:kSequencerPageStateNextPatternIdDidChangeNotification object:self.sequencer];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentStepDidChange:) name:kSequencerPageStateCurrentStepDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
+        
+        
+        // Start animateIn
+        self.inOutAnimationFrame = 0;
+        [self animateInOutIncrement:-1];
+        [self scheduleAnimateInTimer];
+        
+        [self updateView];
+        
+    });
 }
 
 - (void) dealloc
@@ -317,41 +321,44 @@
 
 - (void) animateIn:(NSTimer *)timer
 {
-    self.inOutAnimationFrame ++;
-    
-    [timer invalidate];
-    
-    [self animateInOutIncrement:1];
-    
-    [self updateView];
-    
-    // Final frame
-    if( self.inOutAnimationFrame == self.height - 4 ) {
-        self.inOutAnimationTimer = nil;
-    } else {
-        [self scheduleAnimateInTimer];
-    }
-
+    dispatch_async(self.gridQueue, ^(void) {
+        self.inOutAnimationFrame ++;
+        
+        [timer invalidate];
+        
+        [self animateInOutIncrement:1];
+        
+        [self updateView];
+        
+        // Final frame
+        if( self.inOutAnimationFrame == self.height - 4 ) {
+            self.inOutAnimationTimer = nil;
+        } else {
+            [self scheduleAnimateInTimer];
+        }
+    });
 }
 
 - (void) animateOut:(NSTimer *)timer
 {
-    self.inOutAnimationFrame ++;
-    
-    [timer invalidate];
-    
-    // Final frame
-    if( _patternView.height == self.height - 1 ) {
-        self.inOutAnimationTimer = nil;
+    dispatch_async(self.gridQueue, ^(void) {
+        self.inOutAnimationFrame ++;
         
-        [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
-    } else {
-        [self scheduleAnimateOutTimer];
-    }
-    
-    [self animateInOutIncrement:-1];
+        [timer invalidate];
         
-    [self updateView];
+        // Final frame
+        if( _patternView.height == self.height - 1 ) {
+            self.inOutAnimationTimer = nil;
+            
+            [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
+        } else {
+            [self scheduleAnimateOutTimer];
+        }
+        
+        [self animateInOutIncrement:-1];
+            
+        [self updateView];
+    });
 }
 
 - (void) scheduleAnimateInTimer
@@ -453,46 +460,50 @@
 
 - (void) pageLeft:(NSTimer *)timer
 {
-    self.pageAnimationFrame ++;
-    
-    [self.pageAnimationTimer invalidate];
-    self.pageAnimationTimer = nil;
-    
-    [self animatePageIncrement:1];
-    
-    [self updateView];
-    
-    // Final frame
-    if( self.pageAnimationFrame == self.width - 5 ) {
-        self.pageAnimationTimer = nil;
-        _loopBraceView.enabled = YES;
-        _patternView.enabled = YES;
+    dispatch_async(self.gridQueue, ^(void) {
+        self.pageAnimationFrame ++;
         
-    } else {
-        [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
-    }
+        [self.pageAnimationTimer invalidate];
+        self.pageAnimationTimer = nil;
+        
+        [self animatePageIncrement:1];
+        
+        [self updateView];
+        
+        // Final frame
+        if( self.pageAnimationFrame == self.width - 5 ) {
+            self.pageAnimationTimer = nil;
+            _loopBraceView.enabled = YES;
+            _patternView.enabled = YES;
+            
+        } else {
+            [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
+        }
+    });
 }
 
 - (void) pageRight:(NSTimer *)timer
 {
-    self.pageAnimationFrame ++;
-    
-    [self.pageAnimationTimer invalidate];
-    self.pageAnimationTimer = nil;
-    
-    [self animatePageIncrement:-1];
-    
-    [self updateView];
-    
-    // Final frame
-    if( self.pageAnimationFrame == self.width - 5 ) {
-        self.pageAnimationTimer = nil;
-        _loopBraceView.enabled = YES;
-        _patternView.enabled = YES;
+    dispatch_async(self.gridQueue, ^(void) {
+        self.pageAnimationFrame ++;
         
-    } else {
-        [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
-    }
+        [self.pageAnimationTimer invalidate];
+        self.pageAnimationTimer = nil;
+        
+        [self animatePageIncrement:-1];
+        
+        [self updateView];
+        
+        // Final frame
+        if( self.pageAnimationFrame == self.width - 5 ) {
+            self.pageAnimationTimer = nil;
+            _loopBraceView.enabled = YES;
+            _patternView.enabled = YES;
+            
+        } else {
+            [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
+        }
+    });
 }
 
 - (void) scheduleAnimatePageLeftTimer
@@ -590,14 +601,16 @@
 
 - (void) clearIncrement:(NSTimer *)timer
 {
-    if( _patternView.wipe >= 100 ) {
-        [self stopClear];
-        [self.sequencer clearNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
-        
-    } else {
-        _patternView.wipe = _patternView.wipe + 10;
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( _patternView.wipe >= 100 ) {
+            [self stopClear];
+            [self.sequencer clearNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+            
+        } else {
+            _patternView.wipe = _patternView.wipe + 10;
+            [self updateView];
+        }
+    });
 }
 
 - (void) stopClear
@@ -823,136 +836,160 @@
 // Sequencer page notifications
 - (void) pageLoopDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updateLoop];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateLoop];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pageTransposeDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updateTranspose];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateTranspose];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pageTransposeZeroStepDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updateTranspose];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateTranspose];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pagePatternNotesDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 // Sequencer note notifications
 - (void) noteLengthDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 // Sequencer state notifications
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
-    [self updatePageLeft];
-    [self updatePlayMode];
-    [self updatePattern];
-    if( self.height > 8 ) {
-        [self updateTranspose];
-        [self updateScrubOtherPages];
-    }
-    [self updateLoop];
-    [self updatePatternNotes];
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        [self updatePageLeft];
+        [self updatePlayMode];
+        [self updatePattern];
+        if( self.height > 8 ) {
+            [self updateTranspose];
+            [self updateScrubOtherPages];
+        }
+        [self updateLoop];
+        [self updatePatternNotes];
+        [self updateView];
+    });
 }
 
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
-    [self updatePageRight];
-    [self updatePlayMode];
-    [self updatePattern];
-    if( self.height > 8 ) {
-        [self updateTranspose];
-        [self updateScrubOtherPages];
-    }
-    [self updateLoop];
-    [self updatePatternNotes];
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        [self updatePageRight];
+        [self updatePlayMode];
+        [self updatePattern];
+        if( self.height > 8 ) {
+            [self updateTranspose];
+            [self updateScrubOtherPages];
+        }
+        [self updateLoop];
+        [self updatePatternNotes];
+        [self updateView];
+    });
 }
 
 // Sequencer page state notifications
 - (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updatePatternNotes];
-    
-    [self updatePattern];
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updatePatternNotes];
+        
+        [self updatePattern];
+        [self updateView];
+    });
 }
 
 - (void) pageStateNextPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] )
-        [self updatePatternNotes];
-    
-    [self updatePattern];
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updatePatternNotes];
+        
+        [self updatePattern];
+        [self updateView];
+    });
 }
 
 - (void) pageStateCurrentStepDidChange:(NSNotification *)notification
 {
-    BOOL needsToUpdate = NO;
-    
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
-        needsToUpdate = YES;
-    }
-    
-    if( self.height > 8 ) {
-        [self updateScrubOtherPages];
-        needsToUpdate = YES;
-    }
-    
-    if( needsToUpdate )
-        [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        BOOL needsToUpdate = NO;
+        
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePatternNotes];
+            needsToUpdate = YES;
+        }
+        
+        if( self.height > 8 ) {
+            [self updateScrubOtherPages];
+            needsToUpdate = YES;
+        }
+        
+        if( needsToUpdate )
+            [self updateView];
+    });
 }
 
 - (void) pageStateNextStepDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pageStatePlayModeDidChange:(NSNotification *)notification
 {
-    BOOL needsToUpdate = NO;
-    
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePlayMode];
-        [self updatePattern];
-        needsToUpdate = YES;
-    }
-    
-    if( self.height > 8 ) {
-        [self updateScrubOtherPages];
-        needsToUpdate = YES;
-    }
-    
-    if( needsToUpdate )
-        [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        BOOL needsToUpdate = NO;
+        
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePlayMode];
+            [self updatePattern];
+            needsToUpdate = YES;
+        }
+        
+        if( self.height > 8 ) {
+            [self updateScrubOtherPages];
+            needsToUpdate = YES;
+        }
+        
+        if( needsToUpdate )
+            [self updateView];
+    });
 }
 
 

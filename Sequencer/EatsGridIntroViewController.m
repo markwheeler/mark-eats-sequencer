@@ -22,17 +22,20 @@
 
 - (void) setupView
 {
-    // Create the sub view
-    self.okView = [[EatsGridOKView alloc] init];
-    self.okView.delegate = self;
-    self.okView.x = 0;
-    self.okView.y = 0;
-    self.okView.width = self.width;
-    self.okView.height = self.height;
-    
-    self.subViews = [NSSet setWithObject:self.okView];
+    dispatch_sync(self.gridQueue, ^(void) {
+        // Create the sub view
+        self.okView = [[EatsGridOKView alloc] init];
+        self.okView.delegate = self;
+        self.okView.x = 0;
+        self.okView.y = 0;
+        self.okView.width = self.width;
+        self.okView.height = self.height;
+        
+        self.subViews = [NSSet setWithObject:self.okView];
+    });
     
     [self startAnimation];
+
 }
 
 - (void) stopAnimation
@@ -60,8 +63,10 @@
 
 - (void) updateAnimation:(NSTimer *)timer
 {
-    self.okView.currentFrame ++;
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        self.okView.currentFrame ++;
+        [self updateView];
+    });
     
     // Commented this out so that OK keeps pulsing
     //if ( self.okView.currentFrame > self.okView.width + self.okView.height - 2 + self.okView.trailLength )

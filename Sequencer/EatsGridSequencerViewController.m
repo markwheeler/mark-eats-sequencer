@@ -44,67 +44,69 @@
 
 - (void) setupView
 {
-    if( self.width > 8 )
-        self.pageAnimationSpeedMultiplier = 0.5;
-    else
-        self.pageAnimationSpeedMultiplier = 8.0;
-    
-    self.sharedPreferences = [Preferences sharedPreferences];
-    
-    // Create the sub views
-    _patternView = [[EatsGridPatternView alloc] init];
-    _patternView.delegate = self;
-    _patternView.x = 0;
-    _patternView.y = 0;
-    _patternView.width = self.width;
-    _patternView.height = self.height;
-    _patternView.mode = EatsPatternViewMode_Edit;
-    _patternView.patternHeight = self.height;
-    
-    _velocityView = [[EatsGridHorizontalSliderView alloc] init];
-    _velocityView.delegate = self;
-    _velocityView.x = 0;
-    _velocityView.y = 0;
-    _velocityView.width = self.width;
-    _velocityView.height = 1;
-    _velocityView.fillBar = YES;
-    _velocityView.visible = NO;
-    
-    _lengthView = [[EatsGridHorizontalSliderView alloc] init];
-    _lengthView.delegate = self;
-    _lengthView.x = 0;
-    _lengthView.y = 1;
-    _lengthView.width = self.width;
-    _lengthView.height = 1;
-    _lengthView.fillBar = YES;
-    _lengthView.visible = NO;
-    
-    self.subViews = [[NSMutableSet alloc] initWithObjects:_patternView,
-                                                          _velocityView,
-                                                          _lengthView,
-                                                          nil];
-    
-    [self updatePatternNotes];
-    [self updateView];
-    
-    // Sequencer page notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pagePatternNotesDidChange:) name:kSequencerPagePatternNotesDidChangeNotification object:self.sequencer];
-    
-    // Sequencer note notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteVelocityDidChange:) name:kSequencerNoteVelocityDidChangeNotification object:self.sequencer];
-    
-    // Sequencer state notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeRight:) name:kSequencerStateCurrentPageDidChangeRightNotification object:self.sequencer];
-    
-    // Sequencer page state notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentPatternIdDidChange:) name:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self.sequencer];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentStepDidChange:) name:kSequencerPageStateCurrentStepDidChangeNotification object:self.sequencer];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
+    dispatch_sync(self.gridQueue, ^(void) {
+        if( self.width > 8 )
+            self.pageAnimationSpeedMultiplier = 0.5;
+        else
+            self.pageAnimationSpeedMultiplier = 8.0;
+
+        self.sharedPreferences = [Preferences sharedPreferences];
+
+        // Create the sub views
+        _patternView = [[EatsGridPatternView alloc] init];
+        _patternView.delegate = self;
+        _patternView.x = 0;
+        _patternView.y = 0;
+        _patternView.width = self.width;
+        _patternView.height = self.height;
+        _patternView.mode = EatsPatternViewMode_Edit;
+        _patternView.patternHeight = self.height;
+
+        _velocityView = [[EatsGridHorizontalSliderView alloc] init];
+        _velocityView.delegate = self;
+        _velocityView.x = 0;
+        _velocityView.y = 0;
+        _velocityView.width = self.width;
+        _velocityView.height = 1;
+        _velocityView.fillBar = YES;
+        _velocityView.visible = NO;
+
+        _lengthView = [[EatsGridHorizontalSliderView alloc] init];
+        _lengthView.delegate = self;
+        _lengthView.x = 0;
+        _lengthView.y = 1;
+        _lengthView.width = self.width;
+        _lengthView.height = 1;
+        _lengthView.fillBar = YES;
+        _lengthView.visible = NO;
+
+        self.subViews = [[NSMutableSet alloc] initWithObjects:_patternView,
+                                                              _velocityView,
+                                                              _lengthView,
+                                                              nil];
+
+        [self updatePatternNotes];
+        [self updateView];
+
+        // Sequencer page notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pagePatternNotesDidChange:) name:kSequencerPagePatternNotesDidChangeNotification object:self.sequencer];
+
+        // Sequencer note notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteVelocityDidChange:) name:kSequencerNoteVelocityDidChangeNotification object:self.sequencer];
+
+        // Sequencer state notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeRight:) name:kSequencerStateCurrentPageDidChangeRightNotification object:self.sequencer];
+
+        // Sequencer page state notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentPatternIdDidChange:) name:kSequencerPageStateCurrentPatternIdDidChangeNotification object:self.sequencer];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateCurrentStepDidChange:) name:kSequencerPageStateCurrentStepDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
+    });
 }
 
 - (void) dealloc
@@ -134,44 +136,48 @@
 
 - (void) pageLeft:(NSTimer *)timer
 {
-    self.pageAnimationFrame ++;
-    
-    [self.pageAnimationTimer invalidate];
-    self.pageAnimationTimer = nil;
-    
-    [self animatePageIncrement:1];
-    
-    [self updateView];
-    
-    // Final frame
-    if( self.pageAnimationFrame == self.width - 5 ) {
-        self.pageAnimationTimer = nil;
-        _patternView.enabled = YES;
+    dispatch_async(self.gridQueue, ^(void) {
+        self.pageAnimationFrame ++;
         
-    } else {
-        [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
-    }
+        [self.pageAnimationTimer invalidate];
+        self.pageAnimationTimer = nil;
+        
+        [self animatePageIncrement:1];
+        
+        [self updateView];
+        
+        // Final frame
+        if( self.pageAnimationFrame == self.width - 5 ) {
+            self.pageAnimationTimer = nil;
+            _patternView.enabled = YES;
+            
+        } else {
+            [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
+        }
+    });
 }
 
 - (void) pageRight:(NSTimer *)timer
 {
-    self.pageAnimationFrame ++;
-    
-    [self.pageAnimationTimer invalidate];
-    self.pageAnimationTimer = nil;
-    
-    [self animatePageIncrement:-1];
-    
-    [self updateView];
-    
-    // Final frame
-    if( self.pageAnimationFrame == self.width - 5 ) {
-        self.pageAnimationTimer = nil;
-        _patternView.enabled = YES;
+    dispatch_async(self.gridQueue, ^(void) {
+        self.pageAnimationFrame ++;
         
-    } else {
-        [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
-    }
+        [self.pageAnimationTimer invalidate];
+        self.pageAnimationTimer = nil;
+        
+        [self animatePageIncrement:-1];
+        
+        [self updateView];
+        
+        // Final frame
+        if( self.pageAnimationFrame == self.width - 5 ) {
+            self.pageAnimationTimer = nil;
+            _patternView.enabled = YES;
+            
+        } else {
+            [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
+        }
+    });
 }
 
 - (void) scheduleAnimatePageLeftTimer
@@ -228,95 +234,99 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
-    _patternView.mode = EatsPatternViewMode_NoteEdit;
-    _patternView.enabled = NO;
-    
-    self.editNoteAnimationFrame = 0;
-    
-    // Display sliders at bottom
-    if( note.row > ( self.height / 2 ) - 1 ) {
-        _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
-        _velocityView.y = self.height - 1;
-        _velocityView.visible = YES;
+    dispatch_async(self.gridQueue, ^(void) {
+        _patternView.mode = EatsPatternViewMode_NoteEdit;
+        _patternView.enabled = NO;
         
-    // Display sliders at top
-    } else {
-        _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-        _patternView.y = 1;
-        _lengthView.y = 0;
-        _lengthView.visible = YES;
-    }
-    
-    _patternView.height = self.height - 1;
-    _patternView.activeEditNote = note;
-    
-    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-    
-    _activeEditNote = note;
-    
-    [self updateNoteVelocity];
-    [self updateNoteLength];
-    
-    [self updateView];
-    
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        self.editNoteAnimationFrame = 0;
         
-        self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
-                                                           target:self
-                                                         selector:@selector(animateInNoteEditMode:)
-                                                         userInfo:nil
-                                                          repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        // Display sliders at bottom
+        if( note.row > ( self.height / 2 ) - 1 ) {
+            _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
+            _velocityView.y = self.height - 1;
+            _velocityView.visible = YES;
+            
+        // Display sliders at top
+        } else {
+            _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+            _patternView.y = 1;
+            _lengthView.y = 0;
+            _lengthView.visible = YES;
+        }
         
-        // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
+        _patternView.height = self.height - 1;
+        _patternView.activeEditNote = note;
         
+        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        
+        _activeEditNote = note;
+        
+        [self updateNoteVelocity];
+        [self updateNoteLength];
+        
+        [self updateView];
+        
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            
+            self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                               target:self
+                                                             selector:@selector(animateInNoteEditMode:)
+                                                             userInfo:nil
+                                                              repeats:YES];
+            NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+            
+            // Make sure we fire even when the UI is tracking mouse down stuff
+            [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
+            [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
+            
+        });
     });
 }
 
 - (void) exitNoteEditMode
 {
-    _patternView.enabled = NO;
-    
-    self.editNoteAnimationFrame = 0;
-    
-    // To bottom
-    if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+    dispatch_async(self.gridQueue, ^(void) {
+        _patternView.enabled = NO;
         
-        _velocityView.y ++;
-        _lengthView.visible = NO;
+        self.editNoteAnimationFrame = 0;
         
-    // To top
-    } else {
+        // To bottom
+        if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+            
+            _velocityView.y ++;
+            _lengthView.visible = NO;
+            
+        // To top
+        } else {
+            
+            _patternView.y --;
+            _velocityView.visible = NO;
+            _lengthView.y --;
+            
+        }
         
-        _patternView.y --;
-        _velocityView.visible = NO;
-        _lengthView.y --;
+        _patternView.height = self.height - 1;
         
-    }
-    
-    _patternView.height = self.height - 1;
-    
-    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-    
-    [self updateView];
-    
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-    
-        self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
-                                                               target:self
-                                                             selector:@selector(animateOutNoteEditMode:)
-                                                             userInfo:nil
-                                                              repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
         
-        // Make sure we fire even when the UI is tracking mouse down stuff
-        [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
-        [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
+        [self updateView];
         
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+        
+            self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+                                                                   target:self
+                                                                 selector:@selector(animateOutNoteEditMode:)
+                                                                 userInfo:nil
+                                                                  repeats:YES];
+            NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+            
+            // Make sure we fire even when the UI is tracking mouse down stuff
+            [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
+            [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
+            
+        });
     });
 }
 
@@ -340,78 +350,82 @@
 
 - (void) animateInNoteEditMode:(NSTimer *)timer
 {
-    self.editNoteAnimationFrame ++;
-    
-    // From bottom
-    if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-
-        _velocityView.y --;
-        _lengthView.y = self.height - 1;
-        _lengthView.visible = YES;
-
-    // From top
-    } else {
+    dispatch_async(self.gridQueue, ^(void) {
+        self.editNoteAnimationFrame ++;
         
-        _patternView.y ++;
-        _velocityView.y = 0;
-        _lengthView.y ++;
-        _velocityView.visible = YES;
-        
-    }
-    
-    _patternView.height --;
-    
-    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-    
-    if( self.editNoteAnimationFrame == 1 ) { // Final frame
+        // From bottom
+        if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
 
-        _patternView.enabled = YES;
+            _velocityView.y --;
+            _lengthView.y = self.height - 1;
+            _lengthView.visible = YES;
+
+        // From top
+        } else {
+            
+            _patternView.y ++;
+            _velocityView.y = 0;
+            _lengthView.y ++;
+            _velocityView.visible = YES;
+            
+        }
         
-        [timer invalidate];
-        self.editNoteAnimationTimer = nil;
-    }
-    
-    [self updateView];
+        _patternView.height --;
+        
+        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+        
+        if( self.editNoteAnimationFrame == 1 ) { // Final frame
+
+            _patternView.enabled = YES;
+            
+            [timer invalidate];
+            self.editNoteAnimationTimer = nil;
+        }
+        
+        [self updateView];
+    });
 
 }
 
 - (void) animateOutNoteEditMode:(NSTimer *)timer
 {
-    self.editNoteAnimationFrame ++;
-    
-    // To bottom
-    if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+    dispatch_async(self.gridQueue, ^(void) {
+        self.editNoteAnimationFrame ++;
         
-        _velocityView.visible = NO;
+        // To bottom
+        if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+            
+            _velocityView.visible = NO;
+            
+        // To top
+        } else {
+            
+            _patternView.y --;
+            _lengthView.visible = NO;
+            
+        }
         
-    // To top
-    } else {
+        _patternView.height ++;
         
-        _patternView.y --;
-        _lengthView.visible = NO;
+        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
+        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
         
-    }
-    
-    _patternView.height ++;
-    
-    _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
-    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
-    
-    if( self.editNoteAnimationFrame == 1 ) { // Final frame
-        
-        _patternView.activeEditNote = nil;
-        _patternView.mode = EatsPatternViewMode_Edit;
-        _patternView.enabled = YES;
-        
-        _activeEditNote = nil;
+        if( self.editNoteAnimationFrame == 1 ) { // Final frame
+            
+            _patternView.activeEditNote = nil;
+            _patternView.mode = EatsPatternViewMode_Edit;
+            _patternView.enabled = YES;
+            
+            _activeEditNote = nil;
 
+            
+            [timer invalidate];
+            self.editNoteAnimationTimer = nil;
+        }
         
-        [timer invalidate];
-        self.editNoteAnimationTimer = nil;
-    }
-    
-    [self updateView];
+        [self updateView];
+    });
 }
 
 
@@ -467,7 +481,6 @@
     [self animatePageIncrement:1];
     
     [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
-    
 }
 
 - (void) updatePageRight
@@ -491,86 +504,104 @@
 
 - (void) pagePatternNotesDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 - (void) noteLengthDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
-        SequencerNote *note = [notification.userInfo valueForKey:@"note"];
-        if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
-            [self updateNoteLength];
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+            SequencerNote *note = [notification.userInfo valueForKey:@"note"];
+            if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
+                [self updateNoteLength];
+            }
+            [self updatePatternNotes];
+            [self updateView];
         }
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    });
 }
 
 - (void) noteVelocityDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
-        SequencerNote *note = [notification.userInfo valueForKey:@"note"];
-        if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
-            [self updatePatternNotes];
-            [self updateNoteVelocity];
-            [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+            SequencerNote *note = [notification.userInfo valueForKey:@"note"];
+            if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
+                [self updatePatternNotes];
+                [self updateNoteVelocity];
+                [self updateView];
+            }
         }
-    }
+    });
 }
 
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
-    if( _patternView.mode != EatsPatternViewMode_Edit )
-        [self exitNoteEditModeInstantly];
-    [self updatePatternNotes];
-    [self updatePageLeft];
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        if( _patternView.mode != EatsPatternViewMode_Edit )
+            [self exitNoteEditModeInstantly];
+        [self updatePatternNotes];
+        [self updatePageLeft];
+        [self updateView];
+    });
 }
 
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
-    if( _patternView.mode != EatsPatternViewMode_Edit )
-        [self exitNoteEditModeInstantly];
-    [self updatePatternNotes];
-    [self updatePageRight];
-    [self updateView];
+    dispatch_async(self.gridQueue, ^(void) {
+        if( _patternView.mode != EatsPatternViewMode_Edit )
+            [self exitNoteEditModeInstantly];
+        [self updatePatternNotes];
+        [self updatePageRight];
+        [self updateView];
+    });
 }
 
 - (void) pageStateCurrentPatternIdDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        if( _patternView.mode != EatsPatternViewMode_Edit )
-            [self exitNoteEditModeInstantly];
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            if( _patternView.mode != EatsPatternViewMode_Edit )
+                [self exitNoteEditModeInstantly];
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pageStateCurrentStepDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pageStateNextStepDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 - (void) pageStatePlayModeDidChange:(NSNotification *)notification
 {
-    if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-        [self updatePatternNotes];
-        [self updateView];
-    }
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updatePatternNotes];
+            [self updateView];
+        }
+    });
 }
 
 

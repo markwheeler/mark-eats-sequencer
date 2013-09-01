@@ -38,8 +38,11 @@
         _isActive = isActive;
     }
     
-    if(self.currentView)
-       [self.currentViewController updateView];
+    if(self.currentView) {
+        dispatch_async(self.currentViewController.gridQueue, ^(void) {
+            [self.currentViewController updateView];
+        });
+    }
 }
 
 - (BOOL) isActive
@@ -123,8 +126,11 @@
 
 - (void) preferencesThatRequiresGridRedrawDidChange:(NSNotification *)notification
 {
-    if(self.currentView)
-        [self.currentViewController updateView];
+    if(self.currentView) {
+        dispatch_async(self.currentViewController.gridQueue, ^(void) {
+            [self.currentViewController updateView];
+        });
+    }
 }
 
 
