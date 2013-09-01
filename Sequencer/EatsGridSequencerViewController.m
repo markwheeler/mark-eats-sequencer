@@ -644,7 +644,9 @@
             
             _lastDownWasInEditMode = YES;
             
-            [self updateView];
+            dispatch_sync(self.gridQueue, ^(void) {
+                [self updateView];
+            });
             
         // Note edit mode
         } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
@@ -653,10 +655,9 @@
             
             [self exitNoteEditMode];
         }
-    }
     
     // Release
-    if( !down && sender.mode == EatsPatternViewMode_Edit && _lastDownWasInEditMode ) {
+    } else if( sender.mode == EatsPatternViewMode_Edit && _lastDownWasInEditMode ) {
         
         [self.sequencer addOrRemoveNoteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }

@@ -54,6 +54,7 @@
 @property float                             pageAnimationSpeedMultiplier;
 
 @property NSDictionary                      *lastDownPatternKey;
+@property BOOL                              firstPatternKeyHasBeenPressed;
 @property BOOL                              copiedPattern;
 
 @end
@@ -691,6 +692,15 @@
 
 - (void) updatePattern
 {
+    // Set all other page pattern buttons to 0 (not required on large grids)
+    if( self.height < 16 ) {
+        for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
+            if( button.buttonState != EatsButtonViewState_Down )
+                button.buttonState = EatsButtonViewState_Inactive;
+            button.inactiveBrightness = 0;
+        }
+    }
+    
     for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
         
         int playMode = [self.sequencer playModeForPage:pageId];
@@ -867,8 +877,9 @@
     dispatch_async(self.gridQueue, ^(void) {
         if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
             [self updatePatternNotes];
-            [self updateView];
         }
+        [self updatePattern];
+        [self updateView];
     });
 }
 
@@ -996,305 +1007,315 @@
 
 - (void) eatsGridButtonViewPressed:(NSNumber *)down sender:(EatsGridButtonView *)sender
 {
-    BOOL buttonDown = [down boolValue];
+    dispatch_async(self.gridQueue, ^(void) {
         
-    // Page buttons
-    if ( [_pageButtons containsObject:sender] ) {
-        if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
+        BOOL buttonDown = [down boolValue];
             
-            [self.sequencer setCurrentPageId:(int)[_pageButtons indexOfObject:sender]];
-            
-        } else {
-            sender.buttonState = EatsButtonViewState_Inactive;
-            [self updatePage];
-        }
-    }
-    
-    // Pattern buttons
-    if ( [_patternButtons containsObject:sender] ) {
-        
-        uint pressedPattern = (uint)[_patternButtons indexOfObject:sender];
-        
-        if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            
-            if( _lastDownPatternKey ) {
-                // Copy pattern
-                [self.sequencer copyNotesFromPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:self.sequencer.currentPageId toPattern:pressedPattern toPage:self.sequencer.currentPageId];
-                _copiedPattern = YES;
-                
-            } else {
-                // Keep track of last down
-                _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPattern], @"pattern", nil];
-            }
-            
-        // Release
-        } else {
-            sender.buttonState = EatsButtonViewState_Inactive;
-            
-            if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
-                
-                if( !_copiedPattern ) {
-                    // Change pattern
-                    [self.sequencer startOrStopPattern:pressedPattern inPage:self.sequencer.currentPageId];
-                }
-            
-                _lastDownPatternKey = nil;
-                _copiedPattern = NO;
-            }
-        }
-        
-        [self updateView];
-    }
-    
-    // Pattern buttons for other pages
-    if ( [_patternsOnOtherPagesButtons containsObject:sender] ) {
-        
-        // For large grids
-        if( self.height > 8 && self.width > 8 ) {
-            
-            uint numberOfPatterns = self.width;
-            if (numberOfPatterns > 16)
-                numberOfPatterns = 16;
-            
-            uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
-            uint pressedPage = (uint)[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns;
-            
+        // Page buttons
+        if ( [_pageButtons containsObject:sender] ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
-                if( _lastDownPatternKey ) {
+                [self.sequencer setCurrentPageId:(int)[_pageButtons indexOfObject:sender]];
+                
+            } else {
+                sender.buttonState = EatsButtonViewState_Inactive;
+                [self updatePage];
+            }
+        }
+        
+        // Pattern buttons
+        if ( [_patternButtons containsObject:sender] ) {
+            
+            uint pressedPattern = (uint)[_patternButtons indexOfObject:sender];
+            
+            if ( buttonDown ) {
+                sender.buttonState = EatsButtonViewState_Down;
+                _firstPatternKeyHasBeenPressed = YES;
+                
+                // Here we check the timestamp to make it harder to accidentally copy when you really just wanted to trigger multiple patterns at once
+                if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"timestamp"] timeIntervalSinceNow] <= -0.4  ) {
                     // Copy pattern
-                    [self.sequencer copyNotesFromPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:[[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] toPattern:pressedPattern toPage:pressedPage];
+                    [self.sequencer copyNotesFromPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:self.sequencer.currentPageId toPattern:pressedPattern toPage:self.sequencer.currentPageId];
                     _copiedPattern = YES;
                     
                 } else {
                     // Keep track of last down
-                    _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPage], @"page",
-                                                                                     [NSNumber numberWithUnsignedInt:pressedPattern], @"pattern",
-                                                                                     nil];
+                    _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPattern], @"pattern", [NSDate date], @"timestamp", nil];
                 }
                 
             // Release
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
                 
-                if( _lastDownPatternKey
-                   && [[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] == pressedPage
-                   && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                if( !_copiedPattern && _firstPatternKeyHasBeenPressed ) {
+                    // Change pattern
+                    [self.sequencer startOrStopPattern:pressedPattern inPage:self.sequencer.currentPageId];
+                }
+                
+                if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                    _lastDownPatternKey = nil;
+                    _copiedPattern = NO;
+                }
+                
+                [self updatePattern];
+            }
+            
+            [self updateView];
+        }
+        
+        // Pattern buttons for other pages
+        if ( [_patternsOnOtherPagesButtons containsObject:sender] ) {
+            
+            // For large grids
+            if( self.height > 8 && self.width > 8 ) {
+                
+                uint numberOfPatterns = self.width;
+                if (numberOfPatterns > 16)
+                    numberOfPatterns = 16;
+                
+                uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
+                uint pressedPage = (uint)[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns;
+                
+                if ( buttonDown ) {
+                    sender.buttonState = EatsButtonViewState_Down;
+                    _firstPatternKeyHasBeenPressed = YES;
                     
-                    if( !_copiedPattern ) {
+                    // Here we check the timestamp to make it harder to accidentally copy when you really just wanted to trigger multiple patterns at once
+                    if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"timestamp"] timeIntervalSinceNow] <= -0.4  ) {
+                        // Copy pattern
+                        [self.sequencer copyNotesFromPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:[[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] toPattern:pressedPattern toPage:pressedPage];
+                        _copiedPattern = YES;
+                        
+                    } else {
+                        // Keep track of last down
+                        _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPage], @"page",
+                                                                                         [NSNumber numberWithUnsignedInt:pressedPattern], @"pattern",
+                                                                                         [NSDate date], @"timestamp",
+                                                                                         nil];
+                    }
+                    
+                // Release
+                } else {
+                    sender.buttonState = EatsButtonViewState_Inactive;
+                    
+                    if( !_copiedPattern && _firstPatternKeyHasBeenPressed ) {
                         // Change pattern
                         [self.sequencer startOrStopPattern:pressedPattern inPage:pressedPage];
                     }
                     
-                    _lastDownPatternKey = nil;
-                    _copiedPattern = NO;
+                    if( _lastDownPatternKey
+                       && [[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] == pressedPage
+                       && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                        
+                        _lastDownPatternKey = nil;
+                        _copiedPattern = NO;
 
+                    }
+                    
+                    [self updatePattern];
+                    
+                }
+            
+            // Smaller grids (change all patterns at once)
+            } else {
+                
+                if ( buttonDown ) {
+                    sender.buttonState = EatsButtonViewState_Down;
+                    
+                    [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
+                    
+                } else {
+                    sender.buttonState = EatsButtonViewState_Inactive;
+                    
+                    [self updatePattern];
+                }
+
+            }
+            
+            [self updateView];
+        }
+        
+        // Scrub buttons for other pages
+        if ( [_scrubOtherPagesButtons containsObject:sender] ) {
+            if ( buttonDown ) {
+                
+                [self.sequencer setNextStep:[NSNumber numberWithUnsignedInteger:[_scrubOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
+                
+                for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+                    if( pageId != self.sequencer.currentPageId && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Pause ) {
+                        sender.buttonState = EatsButtonViewState_Down;
+                        break;
+                    }
+                }
+            
+            } else {
+                sender.buttonState = EatsButtonViewState_Inactive;
+            }
+            
+            [self updateView];
+        }
+        
+        // Play mode forward button
+        if( sender == _forwardButton ) {
+            if ( buttonDown ) {
+                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Forward )
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+                else
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
+            }
+            
+        // Play mode reverse button
+        } else if( sender == _reverseButton ) {
+            if ( buttonDown ) {
+                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+                else
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
+            }
+            
+        // Play mode random button
+        } else if( sender == _randomButton ) {
+            if ( buttonDown ) {
+                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Random )
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+                else
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
+            }
+            
+        // Play mode slice button
+        } else if( sender == _sliceButton ) {
+            if ( buttonDown ) {
+                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Slice )
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+                else
+                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Slice forPage:self.sequencer.currentPageId];
+            }
+            
+        // BPM- button
+        } else if( sender == _bpmDecrementButton ) {
+            if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
+                
+                if( !self.bpmRepeatTimer ) {
+                    
+                    sender.buttonState = EatsButtonViewState_Down;
+                    [self.sequencer decrementBPM];
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    
+                        self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                                           target:self
+                                                                         selector:@selector(decrementBPMRepeat:)
+                                                                         userInfo:nil
+                                                                          repeats:YES];
+                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                        
+                        // Make sure we fire even when the UI is tracking mouse down stuff
+                        [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
+                        [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+                        
+                    });
                 }
                 
-                [self updatePattern];
+            } else {
                 
+                if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                    [self.bpmRepeatTimer invalidate];
+                    self.bpmRepeatTimer = nil;
+                }
+                
+                sender.buttonState = EatsButtonViewState_Inactive;
             }
-        
-        // Smaller grids (change all patterns at once)
-        } else {
             
+            [self updateView];
+            
+        // BPM+ button
+        } else if( sender == _bpmIncrementButton ) {
+            if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
+                
+                if( !self.bpmRepeatTimer ) {
+                    
+                    sender.buttonState = EatsButtonViewState_Down;
+                    [self.sequencer incrementBPM];
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    
+                        self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                                           target:self
+                                                                         selector:@selector(incrementBPMRepeat:)
+                                                                         userInfo:nil
+                                                                          repeats:YES];
+                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                        
+                        // Make sure we fire even when the UI is tracking mouse down stuff
+                        [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
+                        [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
+                        
+                    });
+                }
+                
+            } else {
+                
+                if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
+                    [self.bpmRepeatTimer invalidate];
+                    self.bpmRepeatTimer = nil;
+                }
+                
+                sender.buttonState = EatsButtonViewState_Inactive;
+            }
+            
+            [self updateView];
+            
+        // Clear button
+        } else if( sender == _clearButton ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
-                [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                
+                    _clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                                                   target:self
+                                                                 selector:@selector(clearIncrement:)
+                                                                 userInfo:nil
+                                                                  repeats:YES];
+                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                    
+                    // Make sure we fire even when the UI is tracking mouse down stuff
+                    [runloop addTimer:_clearTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:_clearTimer forMode: NSEventTrackingRunLoopMode];
+                    
+                });
                 
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
                 
-                [self updatePattern];
-            }
-
-        }
-        
-        [self updateView];
-    }
-    
-    // Scrub buttons for other pages
-    if ( [_scrubOtherPagesButtons containsObject:sender] ) {
-        if ( buttonDown ) {
-            
-            [self.sequencer setNextStep:[NSNumber numberWithUnsignedInteger:[_scrubOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
-            
-            for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
-                if( pageId != self.sequencer.currentPageId && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Pause ) {
-                    sender.buttonState = EatsButtonViewState_Down;
-                    break;
-                }
-            }
-        
-        } else {
-            sender.buttonState = EatsButtonViewState_Inactive;
-        }
-        
-        [self updateView];
-    }
-    
-    // Play mode forward button
-    if( sender == _forwardButton ) {
-        if ( buttonDown ) {
-            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Forward )
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-            else
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
-        }
-        
-    // Play mode reverse button
-    } else if( sender == _reverseButton ) {
-        if ( buttonDown ) {
-            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-            else
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
-        }
-        
-    // Play mode random button
-    } else if( sender == _randomButton ) {
-        if ( buttonDown ) {
-            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Random )
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-            else
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
-        }
-        
-    // Play mode slice button
-    } else if( sender == _sliceButton ) {
-        if ( buttonDown ) {
-            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Slice )
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-            else
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Slice forPage:self.sequencer.currentPageId];
-        }
-        
-    // BPM- button
-    } else if( sender == _bpmDecrementButton ) {
-        if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
-            
-            if( !self.bpmRepeatTimer ) {
-                
-                sender.buttonState = EatsButtonViewState_Down;
-                [self.sequencer decrementBPM];
-                
-                dispatch_async(dispatch_get_main_queue(), ^(void) {
-                
-                    self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
-                                                                       target:self
-                                                                     selector:@selector(decrementBPMRepeat:)
-                                                                     userInfo:nil
-                                                                      repeats:YES];
-                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                    
-                    // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
-                    
-                });
-            }
-            
-        } else {
-            
-            if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
-                [self.bpmRepeatTimer invalidate];
-                self.bpmRepeatTimer = nil;
-            }
-            
-            sender.buttonState = EatsButtonViewState_Inactive;
-        }
-        
-        [self updateView];
-        
-    // BPM+ button
-    } else if( sender == _bpmIncrementButton ) {
-        if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
-            
-            if( !self.bpmRepeatTimer ) {
-                
-                sender.buttonState = EatsButtonViewState_Down;
-                [self.sequencer incrementBPM];
-                
-                dispatch_async(dispatch_get_main_queue(), ^(void) {
-                
-                    self.bpmRepeatTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
-                                                                       target:self
-                                                                     selector:@selector(incrementBPMRepeat:)
-                                                                     userInfo:nil
-                                                                      repeats:YES];
-                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                    
-                    // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
-                    
-                });
-            }
-            
-        } else {
-            
-            if( self.bpmRepeatTimer && sender.buttonState == EatsButtonViewState_Down ) {
-                [self.bpmRepeatTimer invalidate];
-                self.bpmRepeatTimer = nil;
-            }
-            
-            sender.buttonState = EatsButtonViewState_Inactive;
-        }
-        
-        [self updateView];
-        
-    // Clear button
-    } else if( sender == _clearButton ) {
-        if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            
-            dispatch_async(dispatch_get_main_queue(), ^(void) {
-            
-                _clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
-                                                               target:self
-                                                             selector:@selector(clearIncrement:)
-                                                             userInfo:nil
-                                                              repeats:YES];
-                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-                
-                // Make sure we fire even when the UI is tracking mouse down stuff
-                [runloop addTimer:_clearTimer forMode: NSRunLoopCommonModes];
-                [runloop addTimer:_clearTimer forMode: NSEventTrackingRunLoopMode];
-                
-            });
-            
-        } else {
-            sender.buttonState = EatsButtonViewState_Inactive;
-            
-            [self stopClear];
-        }
-        
-        [self updateView];
-        
-    // Exit button
-    } else if( sender == _exitButton ) {
-        if ( buttonDown ) {
-            sender.buttonState = EatsButtonViewState_Down;
-            
-        // We check to make sure the exit button was pressed in this view (not just being released after transitioning from sequencer mode)
-        } else if( sender.buttonState == EatsButtonViewState_Down ) {
-            
-            if( _clearTimer )
                 [self stopClear];
+            }
             
-            // Start animateOut
-            [self animateInOutIncrement:-1];
+            [self updateView];
             
-            self.inOutAnimationFrame = 0;
-            [self scheduleAnimateOutTimer];
+        // Exit button
+        } else if( sender == _exitButton ) {
+            if ( buttonDown ) {
+                sender.buttonState = EatsButtonViewState_Down;
+                
+            // We check to make sure the exit button was pressed in this view (not just being released after transitioning from sequencer mode)
+            } else if( sender.buttonState == EatsButtonViewState_Down ) {
+                
+                if( _clearTimer )
+                    [self stopClear];
+                
+                // Start animateOut
+                [self animateInOutIncrement:-1];
+                
+                self.inOutAnimationFrame = 0;
+                [self scheduleAnimateOutTimer];
+            }
+            
+            [self updateView];
         }
         
-        [self updateView];
-    }
+    });
 }
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender

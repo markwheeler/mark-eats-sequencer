@@ -1342,8 +1342,11 @@
 - (void) setNextOrCurrentPatternId:(NSNumber *)patternId forAllPagesExcept:(uint)pageId
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
-        if( i != pageId )
-            [self setNextOrCurrentPatternId:patternId forPage:i];
+        if( i != pageId ) {
+            SequencerPageState *pageState = [self.state.pageStates objectAtIndex:i];
+            if( pageState.playMode != EatsSequencerPlayMode_Pause )
+                [self setNextOrCurrentPatternId:patternId forPage:i];
+        }
     }
 }
 
