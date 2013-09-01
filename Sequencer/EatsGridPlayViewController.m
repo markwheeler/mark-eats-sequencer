@@ -1016,6 +1016,8 @@
                 _copiedPattern = NO;
             }
         }
+        
+        [self updateView];
     }
     
     // Pattern buttons for other pages
@@ -1083,6 +1085,8 @@
             }
 
         }
+        
+        [self updateView];
     }
     
     // Scrub buttons for other pages
@@ -1101,6 +1105,8 @@
         } else {
             sender.buttonState = EatsButtonViewState_Inactive;
         }
+        
+        [self updateView];
     }
     
     // Play mode forward button
@@ -1174,6 +1180,8 @@
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         
+        [self updateView];
+        
     // BPM+ button
     } else if( sender == _bpmIncrementButton ) {
         if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
@@ -1209,6 +1217,8 @@
             sender.buttonState = EatsButtonViewState_Inactive;
         }
         
+        [self updateView];
+        
     // Clear button
     } else if( sender == _clearButton ) {
         if ( buttonDown ) {
@@ -1235,6 +1245,8 @@
             [self stopClear];
         }
         
+        [self updateView];
+        
     // Exit button
     } else if( sender == _exitButton ) {
         if ( buttonDown ) {
@@ -1252,9 +1264,9 @@
             self.inOutAnimationFrame = 0;
             [self scheduleAnimateOutTimer];
         }
+        
+        [self updateView];
     }
-    
-    [self updateView];
 }
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
