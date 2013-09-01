@@ -1409,13 +1409,45 @@
     for( SequencerPageState *pageState in self.state.pageStates ) {
         if( pageState.playMode == EatsSequencerPlayMode_Pause || pageState.playMode == EatsSequencerPlayMode_Forward ) {
             [self setCurrentStep:[self loopEndForPage:pageId] forPage:pageId];
+            [self setStutter:NO forPage:pageId];
             [self setInLoop:YES forPage:pageId];
         } else if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
             [self setCurrentStep:[self loopStartForPage:pageId] forPage:pageId];
+            [self setStutter:NO forPage:pageId];
             [self setInLoop:YES forPage:pageId];
         }
         pageId ++;
     }
+}
+
+
+- (BOOL) stutterForPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    return pageState.stutter;
+}
+
+- (void) setStutter:(BOOL)stutter forPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    pageState.stutter = stutter;
+    
+    [self postNotification:kSequencerPageStateStutterDidChangeNotification forPage:pageId];
+}
+
+
+- (BOOL) inStutterForPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    return pageState.inStutter;
+}
+
+- (void) setInStutter:(BOOL)inStutter forPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    pageState.inStutter = inStutter;
+    
+    [self postNotification:kSequencerPageStateInStutterDidChangeNotification forPage:pageId];
 }
 
 

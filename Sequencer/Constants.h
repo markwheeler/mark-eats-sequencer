@@ -97,6 +97,8 @@ extern NSString *const kSequencerPageStateNextPatternIdDidChangeNotification;
 
 extern NSString *const kSequencerPageStateCurrentStepDidChangeNotification;
 extern NSString *const kSequencerPageStateNextStepDidChangeNotification;
+extern NSString *const kSequencerPageStateStutterDidChangeNotification;
+extern NSString *const kSequencerPageStateInStutterDidChangeNotification;
 extern NSString *const kSequencerPageStateInLoopDidChangeNotification;
 
 extern NSString *const kSequencerPageStatePlayModeDidChangeNotification;

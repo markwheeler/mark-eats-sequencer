@@ -15,6 +15,8 @@
 
 @property int                   currentStep;
 @property NSNumber              *nextStep; // This is an NSNumber so we can set it to nil
+@property BOOL                  stutter;
+@property BOOL                  inStutter;
 @property BOOL                  inLoop;
 
 @property int                   playMode;
