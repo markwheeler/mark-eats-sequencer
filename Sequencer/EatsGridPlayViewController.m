@@ -680,13 +680,6 @@
 
 - (void) updatePattern
 {
-    // Set all other page pattern buttons to 0
-    for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
-        if( button.buttonState != EatsButtonViewState_Down )
-            button.buttonState = EatsButtonViewState_Inactive;
-        button.inactiveBrightness = 0;
-    }
-    
     for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
         
         int playMode = [self.sequencer playModeForPage:pageId];
@@ -731,7 +724,7 @@
                 // Is active page
                 if( pageId == self.sequencer.currentPageId )
                     button.inactiveBrightness += 3;
-
+                
                 patternButtonId ++;
             }
             
