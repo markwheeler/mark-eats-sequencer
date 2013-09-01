@@ -1063,8 +1063,8 @@ typedef enum DocumentPageAnimationDirection {
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
     // Sequencer playback
-    // Space
-    if( keyCode.intValue == 49 )
+    // Space (without any modifier)
+    if( keyCode.intValue == 49 && modifierFlags.intValue == 256 )
        [self toggleSequencerPlayback];
     
     // BPM
@@ -1232,8 +1232,8 @@ typedef enum DocumentPageAnimationDirection {
         }
     
     // Play mode
-    // p
-    } else if( keyCode.intValue == 35 )
+    // p (without any modifier)
+    } else if( keyCode.intValue == 35 && modifierFlags.intValue == 256 )
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
     // >
     else if( keyCode.intValue == 47 )
@@ -1244,6 +1244,9 @@ typedef enum DocumentPageAnimationDirection {
     // ? (without any modifier)
     else if( keyCode.intValue == 44 && modifierFlags.intValue == 256 )
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
+    // s (without any modifier)
+    else if( keyCode.intValue == 1 && modifierFlags.intValue == 256 )
+        [self.sequencer setPlayMode:EatsSequencerPlayMode_Slice forPage:self.sequencer.currentPageId];
     
     // Transpose
     // [
@@ -1254,8 +1257,8 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer incrementTransposeForPage:self.sequencer.currentPageId];
     
     // Debug info
-    // d
-    else if( keyCode.intValue == 2 )
+    // d (without any modifier)
+    else if( keyCode.intValue == 2 && modifierFlags.intValue == 256 )
         [self logDebugInfo];
     
     // Log the rest

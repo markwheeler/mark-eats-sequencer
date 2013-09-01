@@ -31,6 +31,6 @@
 @property (nonatomic) int                   currentStep;
 @property (nonatomic) NSNumber              *nextStep;
 
-@property (nonatomic, weak) id             delegate;
+@property (nonatomic, weak) id              delegate;
 
 @end
