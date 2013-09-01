@@ -184,22 +184,11 @@ typedef enum EatsStepAdvance {
                 int loopEnd = [self.sequencer loopEndForPage:pageId];
                 BOOL inLoop = [self.sequencer inLoopForPage:pageId];
                 
-                
-                // Stutter
-                if( ![self.sequencer stutterForPage:pageId] )
-                    [self.sequencer setInStutter:NO forPage:pageId];
-
-                
                 // If the page has been scrubbed
                 if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
                     
                     playNow = [[self.sequencer nextStepForPage:pageId] intValue];
-                    
-                    if( [self.sequencer stutterForPage:pageId] )
-                        [self.sequencer setInStutter:YES forPage:pageId];
-                    
-                    if( ![self.sequencer inStutterForPage:pageId] )
-                        [self.sequencer setNextStep:nil forPage:pageId];
+                    [self.sequencer setNextStep:nil forPage:pageId];
                     
                     
                 // Otherwise we need to calculate the next step

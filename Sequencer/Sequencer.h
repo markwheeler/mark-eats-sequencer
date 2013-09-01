@@ -174,12 +174,6 @@
 
 - (void) resetPlayPositionsForAllPlayingPages;
 
-- (BOOL) stutterForPage:(uint)pageId;
-- (void) setStutter:(BOOL)stutter forPage:(uint)pageId;
-
-- (BOOL) inStutterForPage:(uint)pageId;
-- (void) setInStutter:(BOOL)inStutter forPage:(uint)pageId;
-
 - (BOOL) inLoopForPage:(uint)pageId;
 - (void) setInLoop:(BOOL)inLoop forPage:(uint)pageId;
 

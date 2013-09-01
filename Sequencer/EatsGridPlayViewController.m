@@ -25,8 +25,6 @@
 @property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
 
-@property NSNumber                          *lastDownPatternViewStep;
-
 @property NSMutableArray                    *pageButtons;
 @property NSMutableArray                    *patternButtons;
 @property NSMutableArray                    *patternsOnOtherPagesButtons;
@@ -1323,28 +1321,7 @@
             [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
         [self.sequencer setNextStep:[NSNumber numberWithUnsignedInt:x] forPage:self.sequencer.currentPageId];
         
-        // Stutter - TODO: Removed for now. Feels a bit hard to control, will look at it more though.
-//        if( !self.sharedPreferences.loopFromScrubArea ) {
-//            self.lastDownPatternViewStep = [NSNumber numberWithUnsignedInt:x];
-//            [self.sequencer setStutter:YES forPage:self.sequencer.currentPageId];
-//        } else {
-//            self.lastDownPatternViewStep = nil;
-//        }
-        
-    }// else {
-        
-        // End stutter - Removed for now. Feels a bit hard to control, will look at it more though.
-//        if( self.lastDownPatternViewStep.intValue == x ) {
-//            self.lastDownPatternViewStep = nil;
-//            [self.sequencer setStutter:NO forPage:self.sequencer.currentPageId];
-//            
-//            if( [self.sequencer inStutterForPage:self.sequencer.currentPageId] ) {
-//                [self.sequencer setNextStep:nil forPage:self.sequencer.currentPageId];
-//            }
-//            
-//            [self.sequencer setInStutter:NO forPage:self.sequencer.currentPageId];
-//        }
-//    }
+    }
 }
 
 - (void) eatsGridPatternViewSelection:(NSDictionary *)selection sender:(EatsGridPatternView *)sender

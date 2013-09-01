@@ -87,8 +87,6 @@ NSString *const kSequencerPageStateNextPatternIdDidChangeNotification = @"Sequen
 
 NSString *const kSequencerPageStateCurrentStepDidChangeNotification = @"SequencerPageStateCurrentStepDidChangeNotification";
 NSString *const kSequencerPageStateNextStepDidChangeNotification = @"SequencerPageStateNextStepDidChangeNotification";
-NSString *const kSequencerPageStateStutterDidChangeNotification = @"SequencerPageStateStutterDidChangeNotification";
-NSString *const kSequencerPageStateInStutterDidChangeNotification = @"SequencerPageStateInStutterDidChangeNotification";
 NSString *const kSequencerPageStateInLoopDidChangeNotification = @"SequencerPageStateInLoopDidChangeNotification";
 
 NSString *const kSequencerPageStatePlayModeDidChangeNotification = @"SequencerPageStatePlayModeDidChangeNotification";
