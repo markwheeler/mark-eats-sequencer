@@ -47,9 +47,6 @@
         quantizationSetting = quantizationSetting / 2;
     }
     
-    NSDictionary *zeroQuantization = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"quantization", [NSString stringWithFormat:@"None"], @"label", nil];
-    [patternQuantizationArray insertObject:zeroQuantization atIndex:0];
-    
     return patternQuantizationArray;
 }
 

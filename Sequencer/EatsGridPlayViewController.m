@@ -36,7 +36,7 @@
 @property EatsGridButtonView                *forwardButton;
 @property EatsGridButtonView                *reverseButton;
 @property EatsGridButtonView                *randomButton;
-@property EatsGridButtonView                *stepButton;
+@property EatsGridButtonView                *sliceButton;
 @property EatsGridButtonView                *bpmDecrementButton;
 @property EatsGridButtonView                *bpmIncrementButton;
 @property EatsGridButtonView                *clearButton;
@@ -171,10 +171,10 @@
     _randomButton = [[EatsGridButtonView alloc] init];
     _randomButton.x = self.width - 6;
     
-    _stepButton = [[EatsGridButtonView alloc] init];
-    _stepButton.x = self.width - 5;
+    _sliceButton = [[EatsGridButtonView alloc] init];
+    _sliceButton.x = self.width - 5;
     
-    _playModeButtons = [NSArray arrayWithObjects:_forwardButton, _reverseButton, _randomButton, _stepButton, nil];
+    _playModeButtons = [NSArray arrayWithObjects:_forwardButton, _reverseButton, _randomButton, _sliceButton, nil];
     
     for( EatsGridButtonView *button in _playModeButtons ) {
         button.delegate = self;
@@ -1128,13 +1128,13 @@
                 [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
         }
         
-    // Play mode step button
-    } else if( sender == _stepButton ) {
+    // Play mode slice button
+    } else if( sender == _sliceButton ) {
         if ( buttonDown ) {
-            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Step )
+            if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Slice )
                 [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
             else
-                [self.sequencer setPlayMode:EatsSequencerPlayMode_Step forPage:self.sequencer.currentPageId];
+                [self.sequencer setPlayMode:EatsSequencerPlayMode_Slice forPage:self.sequencer.currentPageId];
         }
         
     // BPM- button

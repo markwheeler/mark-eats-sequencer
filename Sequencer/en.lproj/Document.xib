@@ -1355,7 +1355,7 @@
 												<double key="NSSegmentItemWidth">32</double>
 												<object class="NSCustomResource" key="NSSegmentItemImage">
 													<string key="NSClassName">NSImage</string>
-													<string key="NSResourceName">PlaybackStepIconTemplate</string>
+													<string key="NSResourceName">PlaybackSliceIconTemplate</string>
 												</object>
 												<int key="NSSegmentItemImageScaling">2</int>
 											</object>
@@ -1924,7 +1924,7 @@
 								<float key="scoringTypeFloat">9</float>
 								<int key="contentType">3</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="852531465">
+							<object class="IBNSLayoutConstraint" id="772933223">
 								<reference key="firstItem" ref="649355084"/>
 								<int key="firstAttribute">3</int>
 								<int key="relation">0</int>
@@ -2132,7 +2132,7 @@
 								<float key="scoringTypeFloat">29</float>
 								<int key="contentType">3</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="657869460">
+							<object class="IBNSLayoutConstraint" id="397782991">
 								<reference key="firstItem" ref="287790741"/>
 								<int key="firstAttribute">5</int>
 								<int key="relation">0</int>
@@ -2792,7 +2792,7 @@
 							<reference ref="244997050"/>
 							<reference ref="227894813"/>
 							<reference ref="159073702"/>
-							<object class="IBNSLayoutConstraint" id="314030607">
+							<object class="IBNSLayoutConstraint" id="856892881">
 								<reference key="firstItem" ref="463324255"/>
 								<int key="firstAttribute">6</int>
 								<int key="relation">0</int>
@@ -2824,7 +2824,7 @@
 								<float key="scoringTypeFloat">9</float>
 								<int key="contentType">3</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="105124830">
+							<object class="IBNSLayoutConstraint" id="5442930">
 								<reference key="firstItem" ref="463324255"/>
 								<int key="firstAttribute">6</int>
 								<int key="relation">0</int>
@@ -3144,7 +3144,7 @@
 								<float key="scoringTypeFloat">24</float>
 								<int key="contentType">2</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="586415655">
+							<object class="IBNSLayoutConstraint" id="83753384">
 								<reference key="firstItem" ref="463324255"/>
 								<int key="firstAttribute">6</int>
 								<int key="relation">0</int>
@@ -3288,7 +3288,7 @@
 								<float key="scoringTypeFloat">24</float>
 								<int key="contentType">2</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="1017704791">
+							<object class="IBNSLayoutConstraint" id="226655288">
 								<reference key="firstItem" ref="193933176"/>
 								<int key="firstAttribute">3</int>
 								<int key="relation">0</int>
@@ -3304,7 +3304,7 @@
 								<float key="scoringTypeFloat">9</float>
 								<int key="contentType">3</int>
 							</object>
-							<object class="IBNSLayoutConstraint" id="233907371">
+							<object class="IBNSLayoutConstraint" id="286111142">
 								<reference key="firstItem" ref="463324255"/>
 								<int key="firstAttribute">6</int>
 								<int key="relation">0</int>
@@ -3866,7 +3866,7 @@
 						<reference key="object" ref="76519312"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="777937934"/>
-							<object class="IBNSLayoutConstraint" id="867124419">
+							<object class="IBNSLayoutConstraint" id="694204299">
 								<reference key="firstItem" ref="76519312"/>
 								<int key="firstAttribute">7</int>
 								<int key="relation">0</int>
@@ -4139,12 +4139,12 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107517</int>
-						<reference key="object" ref="852531465"/>
+						<reference key="object" ref="772933223"/>
 						<reference key="parent" ref="568628114"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107518</int>
-						<reference key="object" ref="1017704791"/>
+						<reference key="object" ref="226655288"/>
 						<reference key="parent" ref="463324255"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -4164,22 +4164,22 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107535</int>
-						<reference key="object" ref="105124830"/>
+						<reference key="object" ref="5442930"/>
 						<reference key="parent" ref="463324255"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107536</int>
-						<reference key="object" ref="314030607"/>
+						<reference key="object" ref="856892881"/>
 						<reference key="parent" ref="463324255"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107537</int>
-						<reference key="object" ref="586415655"/>
+						<reference key="object" ref="83753384"/>
 						<reference key="parent" ref="463324255"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107538</int>
-						<reference key="object" ref="233907371"/>
+						<reference key="object" ref="286111142"/>
 						<reference key="parent" ref="463324255"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -4189,7 +4189,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107542</int>
-						<reference key="object" ref="657869460"/>
+						<reference key="object" ref="397782991"/>
 						<reference key="parent" ref="568628114"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -4219,7 +4219,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">107594</int>
-						<reference key="object" ref="867124419"/>
+						<reference key="object" ref="694204299"/>
 						<reference key="parent" ref="76519312"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -4379,7 +4379,7 @@
 				<boolean value="NO" key="106528.IBNSViewMetadataTranslatesAutoresizingMaskIntoConstraints"/>
 				<string key="106528.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<array class="NSMutableArray" key="106529.IBNSViewMetadataConstraints">
-					<reference ref="867124419"/>
+					<reference ref="694204299"/>
 				</array>
 				<boolean value="NO" key="106529.IBNSViewMetadataTranslatesAutoresizingMaskIntoConstraints"/>
 				<string key="106529.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -4438,8 +4438,8 @@
 					<reference ref="437637821"/>
 					<reference ref="501110269"/>
 					<reference ref="851835109"/>
-					<reference ref="233907371"/>
-					<reference ref="1017704791"/>
+					<reference ref="286111142"/>
+					<reference ref="226655288"/>
 					<reference ref="887117009"/>
 					<reference ref="898868700"/>
 					<reference ref="179095627"/>
@@ -4448,7 +4448,7 @@
 					<reference ref="771736019"/>
 					<reference ref="321669348"/>
 					<reference ref="366330300"/>
-					<reference ref="586415655"/>
+					<reference ref="83753384"/>
 					<reference ref="612125508"/>
 					<reference ref="524451534"/>
 					<reference ref="348093248"/>
@@ -4468,9 +4468,9 @@
 					<reference ref="203063075"/>
 					<reference ref="958362833"/>
 					<reference ref="860235422"/>
-					<reference ref="105124830"/>
+					<reference ref="5442930"/>
 					<reference ref="168243623"/>
-					<reference ref="314030607"/>
+					<reference ref="856892881"/>
 				</array>
 				<boolean value="NO" key="107125.IBNSViewMetadataTranslatesAutoresizingMaskIntoConstraints"/>
 				<string key="107125.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -4541,7 +4541,7 @@
 					<reference ref="167008374"/>
 					<reference ref="613338694"/>
 					<reference ref="366339239"/>
-					<reference ref="657869460"/>
+					<reference ref="397782991"/>
 					<reference ref="963031239"/>
 					<reference ref="182158554"/>
 					<reference ref="548714680"/>
@@ -4554,7 +4554,7 @@
 					<reference ref="729896426"/>
 					<reference ref="439758849"/>
 					<reference ref="208759791"/>
-					<reference ref="852531465"/>
+					<reference ref="772933223"/>
 					<reference ref="1062452232"/>
 					<reference ref="937920051"/>
 					<reference ref="644213663"/>
@@ -4716,7 +4716,7 @@
 			<string key="PlaybackPlayIconTemplate">{128, 128}</string>
 			<string key="PlaybackRandomIconTemplate">{128, 128}</string>
 			<string key="PlaybackReverseIconTemplate">{128, 128}</string>
-			<string key="PlaybackStepIconTemplate">{128, 128}</string>
+			<string key="PlaybackSliceIconTemplate">{128, 128}</string>
 			<string key="PlaybackStopIconTemplate">{128, 128}</string>
 			<string key="RedDot">{12, 12}</string>
 			<string key="ShadowRule">{10, 8}</string>

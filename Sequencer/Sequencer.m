@@ -126,6 +126,9 @@
         self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayWithMinimum:MIN_QUANTIZATION andMaximum:MAX_QUANTIZATION forGridWidth:self.sharedPreferences.gridWidth];
         
     });
+    
+    if( [self patternQuantization] > self.sharedPreferences.gridWidth )
+        [self setPatternQuantizationWithoutRegisteringUndo:self.sharedPreferences.gridWidth];
 }
 
 
@@ -396,43 +399,25 @@
         [[self.undoManager prepareWithInvocationTarget:self] setPatternQuantization:self.song.patternQuantization];
         [self.undoManager setActionName:@"Pattern Quantization Change"];
         
-        // If setting to 'none' then update pattern appropriately
-        if( patternQuantization == 0 ) {
-            for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
-                NSNumber *nextPatternId = [self nextPatternIdForPage:pageId];
-                if( nextPatternId ) {
-                    [self setCurrentPatternId:nextPatternId.intValue forPage:pageId];
-                    [self setNextPatternId:nil forPage:pageId];
-                }
-            }
-        }
-        
-        self.song.patternQuantization = patternQuantization;
+        [self setPatternQuantizationWithoutRegisteringUndo:patternQuantization];
     }
+}
+
+- (void) setPatternQuantizationWithoutRegisteringUndo:(int)patternQuantization
+{
+    self.song.patternQuantization = patternQuantization;
     
     [self postNotification:kSequencerSongPatternQuantizationDidChangeNotification];
 }
 
 - (void) incrementPatternQuantization
 {
-    int newPatternQuantization = [self patternQuantization];
-    if( newPatternQuantization == 0 )
-        newPatternQuantization = 1;
-    else
-        newPatternQuantization *= 2;
-        
-    [self setPatternQuantization:newPatternQuantization];
+    [self setPatternQuantization:[self patternQuantization] * 2];
 }
 
 - (void) decrementPatternQuantization
 {
-    int newPatternQuantization = [self patternQuantization];
-    if( newPatternQuantization == 1 )
-        newPatternQuantization = 0;
-    else
-        newPatternQuantization /= 2;
-    
-    [self setPatternQuantization:newPatternQuantization];
+    [self setPatternQuantization:[self patternQuantization] / 2];
 }
 
 
@@ -1341,7 +1326,7 @@
 
 - (void) setNextOrCurrentPatternId:(NSNumber *)patternId forPage:(uint)pageId
 {
-    if( [self patternQuantization] )
+    if( [self patternQuantization] && ( [self playModeForPage:pageId] != EatsSequencerPlayMode_Pause && [self playModeForPage:pageId] != EatsSequencerPlayMode_Slice ) )
         [self setNextPatternId:patternId forPage:pageId];
     else
         [self setCurrentPatternId:patternId.intValue forPage:pageId];
@@ -1350,7 +1335,7 @@
 - (void) setNextOrCurrentPatternIdForAllPages:(NSNumber *)patternId
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
-            [self setNextOrCurrentPatternId:patternId forPage:i];
+        [self setNextOrCurrentPatternId:patternId forPage:i];
     }
 }
 

@@ -389,7 +389,7 @@ typedef enum EatsStepAdvance {
         return EatsStepAdvance_Scrubbed;
         
     // If the sequence needs to advance
-    } else if( _currentTick % (_ticksPerMeasure / [self.sequencer stepLengthForPage:pageId] ) == 0 && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Step ) {
+    } else if( _currentTick % (_ticksPerMeasure / [self.sequencer stepLengthForPage:pageId] ) == 0 && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Slice ) {
         
         return EatsStepAdvance_Normal;
         
