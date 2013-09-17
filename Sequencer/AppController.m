@@ -281,29 +281,39 @@
     
     // Size info
     
-    if([[o address] isEqualTo:@"/sys/size"]) {
+    if( [o.address isEqualTo:@"/sys/size"] ) {
         NSMutableArray *sizeValues = [[NSMutableArray alloc] initWithCapacity:2];
-        for (NSString *s in [o valueArray]) {
+        for ( NSString *s in  o.valueArray ) {
             [sizeValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
         }
         [self gridControllerConnected:EatsGridType_Monome width:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
+    
+    
+    // Rotation
+    
+    } else if( [o.address isEqualTo:@"/sys/rotation"] ) {
+    
+        if( o.valueCount == 1 ) {
+            int rotation = [[self stripOSCValue:[NSString stringWithFormat:@"%@", o.value]] intValue];
+            if( rotation >= 0 && rotation < 360 && rotation % 90 == 0 )
+                self.sharedPreferences.gridRotation = rotation;
+        }
         
         
     // Other SerialOSC info (just skipping them for now)
         
-    } else if([[o address] isEqualTo:@"/sys/host"]
-              || [[o address] isEqualTo:@"/sys/port"]
-              || [[o address] isEqualTo:@"/sys/prefix"]
-              || [[o address] isEqualTo:@"/sys/rotation"]
-              || [[o address] isEqualTo:@"/sys/id"]) {
+    } else if( [o.address isEqualTo:@"/sys/host"]
+              || [o.address isEqualTo:@"/sys/port"]
+              || [o.address isEqualTo:@"/sys/prefix"]
+              || [o.address isEqualTo:@"/sys/id"] ) {
         return;
         
         
     // Key presses from the monome
         
-    } else if([[o address] isEqualTo:[NSString stringWithFormat:@"/%@/grid/key", self.sharedCommunicationManager.oscPrefix]]) {
+    } else if( [o.address isEqualTo:[NSString stringWithFormat:@"/%@/grid/key", self.sharedCommunicationManager.oscPrefix]] ) {
         NSMutableArray *keyValues = [[NSMutableArray alloc] initWithCapacity:3];
-        for (NSString *i in [o valueArray]) {
+        for( NSString *i in o.valueArray ) {
             [keyValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", i]]];
         }
         
@@ -314,7 +324,7 @@
     
     // Tilt from the monome (ignored for now)
     
-    } else if([[o address] isEqualTo:[NSString stringWithFormat:@"/%@/tilt", self.sharedCommunicationManager.oscPrefix]]) {
+    } else if( [o.address isEqualTo:[NSString stringWithFormat:@"/%@/tilt", self.sharedCommunicationManager.oscPrefix]] ) {
         /*NSMutableArray *tiltValues = [[NSMutableArray alloc] initWithCapacity:4];
         for (NSString *i in [o valueArray]) {
             [tiltValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", i]]];
@@ -324,15 +334,15 @@
     
     // Other OSC input addressed to us is logged
         
-    } else if([[o address] hasPrefix:[NSString stringWithFormat:@"/%@/", self.sharedCommunicationManager.oscPrefix]]) {
-        if([o valueCount] > 1) {
+    } else if([o.address hasPrefix:[NSString stringWithFormat:@"/%@/", self.sharedCommunicationManager.oscPrefix]]) {
+        if(o.valueCount > 1) {
             NSMutableString *miscValues = [[NSMutableString alloc] init];
             for (NSString *s in [o valueArray]) {
                 [miscValues appendFormat:@"%@ ", [self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
             }
-            NSLog(@"OSC received %@ %@", [o address], miscValues);
-        } else if([o valueCount]) {
-            NSLog(@"OSC received %@ %@", [o address], [self stripOSCValue:[NSString stringWithFormat:@"%@", [o value]]]);
+            NSLog(@"OSC received %@ %@", o.address, miscValues);
+        } else if(o.valueCount) {
+            NSLog(@"OSC received %@ %@", o.address, [self stripOSCValue:[NSString stringWithFormat:@"%@", o.value]]);
         }
         
         // TODO: External control mapping. Send buttonInput and valueInput notifications using methods above.
@@ -341,9 +351,9 @@
     // Anything else just gets ignored
         
     } else {
-        if([o valueCount] > 1) {
+        if(o.valueCount > 1) {
             NSMutableString *miscValues = [[NSMutableString alloc] init];
-            for (NSString *s in [o valueArray]) {
+            for (NSString *s in o.valueArray) {
                 [miscValues appendFormat:@"%@ ", [self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
             }
             //NSLog(@"OSC received %@ %@", [o address], miscValues);

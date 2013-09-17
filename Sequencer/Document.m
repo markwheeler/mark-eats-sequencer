@@ -405,11 +405,11 @@ typedef enum DocumentPageAnimationDirection {
 - (void) logDebugInfo
 {
     NSLog(@"---- Debug info ----");
-    NSLog(@"Source: %@", self.sharedPreferences.midiClockSourceName);
+    NSLog(@"Clock source: %@", self.sharedPreferences.midiClockSourceName);
     NSLog(@"Grid type: %i", self.sharedPreferences.gridType);
     NSLog(@"Grid supports variable brightness: %i", self.sharedPreferences.gridSupportsVariableBrightness);
-    NSLog(@"Grid width: %u", self.sharedPreferences.gridWidth);
-    NSLog(@"Grid height: %u", self.sharedPreferences.gridHeight);
+    NSLog(@"Grid rotation: %i", self.sharedPreferences.gridRotation);
+    NSLog(@"Grid size: %ux%u", self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight);
     NSArray *sequencerDebugInfo = [[self.sequencer debugInfo] componentsSeparatedByString:@"\r"];
     for( NSString *line in sequencerDebugInfo )
         NSLog(@"%@", line);

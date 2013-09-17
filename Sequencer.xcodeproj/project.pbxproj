@@ -51,6 +51,7 @@
 		4D9A774E1719B08200D5379F /* PreferencesSyncIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */; };
 		4D9A77521719B78900D5379F /* PreferencesOutputIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */; };
 		4D9A77541719BC4400D5379F /* PreferencesInputIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */; };
+		4DA8646217E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8646117E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m */; };
 		4DA8A91A170B8805001C26EB /* WMChord.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A90F170B8805001C26EB /* WMChord.m */; };
 		4DA8A91B170B8805001C26EB /* WMData.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A911170B8805001C26EB /* WMData.m */; };
 		4DA8A91C170B8805001C26EB /* WMNote.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8A913170B8805001C26EB /* WMNote.m */; };
@@ -178,6 +179,8 @@
 		4D9A774D1719B08200D5379F /* PreferencesSyncIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesSyncIconTemplate.pdf; sourceTree = "<group>"; };
 		4D9A77511719B78900D5379F /* PreferencesOutputIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesOutputIconTemplate.pdf; sourceTree = "<group>"; };
 		4D9A77531719BC4400D5379F /* PreferencesInputIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesInputIconTemplate.pdf; sourceTree = "<group>"; };
+		4DA8646017E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsNSTextFieldWithDisabledColor.h; sourceTree = "<group>"; };
+		4DA8646117E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsNSTextFieldWithDisabledColor.m; sourceTree = "<group>"; };
 		4DA8A90E170B8805001C26EB /* WMChord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMChord.h; sourceTree = "<group>"; };
 		4DA8A90F170B8805001C26EB /* WMChord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMChord.m; sourceTree = "<group>"; };
 		4DA8A910170B8805001C26EB /* WMData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMData.h; sourceTree = "<group>"; };
@@ -499,6 +502,8 @@
 				4D172E8716E5BD090012C019 /* Preferences.m */,
 				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
 				4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */,
+				4DA8646017E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.h */,
+				4DA8646117E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m */,
 				4DB87FB616E4435A00BA58BC /* Preferences.xib */,
 			);
 			name = Preferences;
@@ -681,6 +686,7 @@
 				4DEFF97117C15039005708EE /* EatsQuantizationUtils.m in Sources */,
 				4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */,
 				4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */,
+				4DA8646217E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -26,6 +26,7 @@ typedef enum EatsGridType{
 
 @property BOOL              gridAutoConnect;
 @property BOOL              gridSupportsVariableBrightness;
+@property uint              gridRotation;
 
 @property NSMutableArray    *enabledMIDIOutputNames;
 

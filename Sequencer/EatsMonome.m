@@ -31,8 +31,18 @@
         
         self.sharedPreferences = [Preferences sharedPreferences];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(setRotation:)
+                                                     name:kGridControllerSetRotationNotification
+                                                   object:nil];
+        
     }
     return self;
+}
+
+- (void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 + (void) connectToMonomeAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort withPrefix:(NSString *)prefix
@@ -52,11 +62,6 @@
     // Set prefix
     newMsg = [OSCMessage createWithAddress:@"/sys/prefix"];
     [newMsg addString:prefix];
-    [outPort sendThisMessage:newMsg];
-    
-    // Set rotation to zero (other rotations aren't supported for now)
-    newMsg = [OSCMessage createWithAddress:@"/sys/rotation"];
-    [newMsg addInt:0];
     [outPort sendThisMessage:newMsg];
     
     // Get info
@@ -98,6 +103,14 @@
 
 
 #pragma mark - Private methods
+
+- (void) setRotation:(NSNotification *)notification
+{
+    // Create and send the OSC message
+    OSCMessage *newMsg = [OSCMessage createWithAddress:@"/sys/rotation"];
+    [newMsg addInt:self.sharedPreferences.gridRotation];
+    [_oscOutPort sendThisMessage:newMsg];
+}
 
 - (void) monomeLEDLevelSetX:(NSUInteger)x y:(NSUInteger)y level:(NSUInteger)l
 {

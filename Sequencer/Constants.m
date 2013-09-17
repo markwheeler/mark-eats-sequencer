@@ -29,6 +29,7 @@ NSString *const kGridControllerNoneNotification = @"GridControllerNoneNotificati
 NSString *const kGridControllerConnectingNotification = @"GridControllerConnectingNotification";
 NSString *const kGridControllerConnectionErrorNotification = @"GridControllerConnectionErrorNotification";
 NSString *const kGridControllerConnectedNotification = @"GridControllerConnectedNotification";
+NSString *const kGridControllerSetRotationNotification = @"GridControllerSetRotationNotification";
 
 
 // Input

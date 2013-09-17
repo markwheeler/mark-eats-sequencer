@@ -18,6 +18,7 @@
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton     *gridControllerPopup;
 @property (nonatomic, weak) IBOutlet NSTextField       *gridControllerStatus;
+@property (nonatomic, weak) IBOutlet NSSlider          *gridControllerRotation;
 
 @property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsEnableColumn;
 @property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsNameColumn;
@@ -193,6 +194,12 @@
 }
 
 - (IBAction)supportsVariableBrightnessCheckbox:(NSButton *)sender {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPreferencesThatRequiresGridRedrawDidChangeNotification object:self];
+}
+
+- (IBAction)gridControllerRotationSlider:(NSSlider *)sender
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerSetRotationNotification object:self];
     [[NSNotificationCenter defaultCenter] postNotificationName:kPreferencesThatRequiresGridRedrawDidChangeNotification object:self];
 }
 
