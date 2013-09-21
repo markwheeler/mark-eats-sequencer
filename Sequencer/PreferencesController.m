@@ -184,8 +184,19 @@
 - (IBAction) gridControllerPopup:(NSPopUpButton *)sender {
     
     // Find the output port corresponding to the label of the selected item
-	if ([sender indexOfSelectedItem] > 0) {
-        [self.delegate performSelector:@selector(gridControllerConnectToDeviceType:withOSCLabelOrMIDINode:) withObject:[NSNumber numberWithInt:EatsGridType_Monome] withObject:[sender titleOfSelectedItem]];
+    NSInteger selectedItem = [sender indexOfSelectedItem];
+    
+	if ( selectedItem > 0 ) {
+        
+        NSString *titleOfItem = [sender titleOfSelectedItem];
+        
+        // First set to none to clear the grid
+        [self.delegate performSelector:@selector(gridControllerNone)];
+        // Then reset the menu
+        [sender selectItemAtIndex:selectedItem];
+        
+        // Then connect
+        [self.delegate performSelector:@selector(gridControllerConnectToDeviceType:withOSCLabelOrMIDINode:) withObject:[NSNumber numberWithInt:EatsGridType_Monome] withObject:titleOfItem];
     } else {
         self.sharedPreferences.gridOSCLabel = nil;
         self.sharedPreferences.gridMIDINodeName = nil;

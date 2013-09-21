@@ -169,7 +169,7 @@ typedef enum DocumentPageAnimationDirection {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeMain:) name:NSWindowDidBecomeMainNotification object:[aController window]];
     
     // Grid controller notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:kGridControllerConnectedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerSizeChanged:) name:kGridControllerSizeChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:kGridControllerNoneNotification object:nil];
     
     // External clock notifications
@@ -421,7 +421,7 @@ typedef enum DocumentPageAnimationDirection {
 #pragma mark – Notifications
 
 // Grid controller notifications
-- (void) gridControllerConnected:(NSNotification *)notification
+- (void) gridControllerSizeChanged:(NSNotification *)notification
 {
     [self checkForThingsOutsideGrid];
     [self updateInterfaceToMatchGridSize];

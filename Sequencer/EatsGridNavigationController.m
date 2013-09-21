@@ -68,6 +68,7 @@
                 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:kGridControllerNoneNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerConnected:) name:kGridControllerConnectedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerSizeChanged:) name:kGridControllerSizeChangedNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferencesThatRequiresGridRedrawDidChange:) name:kPreferencesThatRequiresGridRedrawDidChangeNotification object:nil];
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
@@ -86,11 +87,12 @@
 }
 
 - (void) showView:(NSNumber *)gridView
-{    
-    if( [gridView intValue] == _currentView ) return;
-    
+{
     if( [_currentViewController respondsToSelector:@selector(stopAnimation)] )
         [_currentViewController performSelector:@selector(stopAnimation)];
+    
+    if( [gridView intValue] == _currentView )
+        _currentViewController = nil;
     
     if( [gridView intValue] == EatsGridViewType_Intro ) {
         _currentViewController = [[EatsGridIntroViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
@@ -122,6 +124,27 @@
 - (void) gridControllerConnected:(NSNotification *)notification
 {
     [self showView:[NSNumber numberWithInt:EatsGridViewType_Intro]];
+}
+
+- (void) gridControllerSizeChanged:(NSNotification *)notification
+{
+    if(self.currentViewController) {
+    
+        // Only IntroView supports resizing
+        
+        if( self.currentView != EatsGridViewType_Intro )
+            [self showView:[NSNumber numberWithInt:EatsGridViewType_Intro]];
+        
+        else {
+            dispatch_async(self.currentViewController.gridQueue, ^(void) {
+                
+                self.currentViewController.width = self.sharedPreferences.gridWidth;
+                self.currentViewController.height = self.sharedPreferences.gridHeight;
+                
+                [self.currentViewController updateView];
+            });
+        }
+    }
 }
 
 - (void) preferencesThatRequiresGridRedrawDidChange:(NSNotification *)notification

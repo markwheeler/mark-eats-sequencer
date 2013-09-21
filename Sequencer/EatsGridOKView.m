@@ -22,8 +22,6 @@
 
 @property NSNumber              *okBrightness;
 
-@property BOOL                  ready;
-
 @property Preferences           *sharedPreferences;
 
 @end
@@ -40,6 +38,13 @@
         self.okBrightness = [NSNumber numberWithInt:15];
         
         self.sharedPreferences = [Preferences sharedPreferences];
+        
+        _particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
+        _particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
+        
+        // Set the particle start positions
+        _particleA = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2) - 1], @"y", nil];
+        _particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2)], @"y", nil];
 
     }
     return self;
@@ -49,8 +54,8 @@
 {
     if( !self.visible ) return nil;
     
-    if( !self.ready )
-       [self prepareProperties];
+    _okLeftMargin = (self.width - [self.okArray count]) / 2;
+    _okTopMargin = (self.height - [[self.okArray objectAtIndex:0] count]) / 2;
     
     // Move the particles
     if (_currentFrame < self.height / 2 ) {
@@ -147,19 +152,6 @@
     return gridArray;
 }
 
-- (void) prepareProperties
-{
-    _okLeftMargin = (self.width - [self.okArray count]) / 2;
-    _okTopMargin = (self.height - [[self.okArray objectAtIndex:0] count]) / 2;
-    
-    // Set the particle start positions
-    _particleA = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2) - 1], @"y", nil];
-    _particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2)], @"y", nil];
-    _particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
-    _particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
-    
-    self.ready = YES;
-}
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
 {

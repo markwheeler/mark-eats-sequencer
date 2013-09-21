@@ -112,6 +112,7 @@
 - (void) gridControllerNone
 {
     [self.gridControllerConnectionTimer invalidate];
+    self.gridControllerConnectionTimer = nil;
     
     self.sharedPreferences.gridType = EatsGridType_None;
     self.sharedPreferences.gridWidth = 16;
@@ -141,6 +142,8 @@
         self.sharedPreferences.gridMIDINodeName = nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectingNotification object:self];
+        NSLog(@"Connecting..."); // TODO
+        [self.gridControllerConnectionTimer invalidate];
         self.gridControllerConnectionTimer = [NSTimer scheduledTimerWithTimeInterval:3
                                                            target:self
                                                          selector:@selector(gridControllerConnectionTimeout:)
@@ -162,25 +165,32 @@
 
 - (void) gridControllerConnectionTimeout:(NSTimer *)timer
 {
+    NSLog(@"**** TIMEOUT ****"); // TODO
     [self.gridControllerConnectionTimer invalidate];
+    self.gridControllerConnectionTimer = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
     self.sharedPreferences.gridOSCLabel = nil;
     self.sharedPreferences.gridMIDINodeName = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectionErrorNotification object:self];
 }
 
-- (void) gridControllerConnected:(EatsGridType)gridType width:(uint)w height:(uint)h
+- (void) gridControllerSetWidth:(uint)w height:(uint)h
 {
-    [self.gridControllerConnectionTimer invalidate];
-    
     // Set the prefs, making sure the width is divisible by 8
-    self.sharedPreferences.gridType = EatsGridType_Monome;
     self.sharedPreferences.gridWidth = w - (w % 8);
     self.sharedPreferences.gridHeight = h - (h % 8);
     
     // Fixed grid size for testing
 //    self.sharedPreferences.gridWidth = 8;
 //    self.sharedPreferences.gridHeight = 8;
+}
+
+- (void) gridControllerConnected:(EatsGridType)gridType
+{
+    [self.gridControllerConnectionTimer invalidate];
+    self.gridControllerConnectionTimer = nil;
+    NSLog(@"Connected"); // TODO
+    self.sharedPreferences.gridType = EatsGridType_Monome;
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
@@ -286,7 +296,13 @@
         for ( NSString *s in  o.valueArray ) {
             [sizeValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
         }
-        [self gridControllerConnected:EatsGridType_Monome width:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
+        
+        [self gridControllerSetWidth:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
+        
+        if( self.gridControllerConnectionTimer )
+            [self gridControllerConnected:EatsGridType_Monome];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerSizeChangedNotification object:self];
     
     
     // Rotation

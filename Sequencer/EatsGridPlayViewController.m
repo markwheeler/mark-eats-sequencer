@@ -65,6 +65,7 @@
 {
     dispatch_sync(self.gridQueue, ^(void) {
         
+        // Update animation speed multiplier
         if( self.height > 8 )
             self.inOutAnimationSpeedMultiplier = 0.5;
         else
@@ -78,6 +79,7 @@
         
         // Get prefs
         self.sharedPreferences = [Preferences sharedPreferences];
+        
         
         // Create the sub views
         
@@ -100,7 +102,7 @@
             numberOfPatterns = 16;
         
         // Pattern buttons for this page on small grids
-        if( self.height < 16 || self.width < 16 ) {
+        if( self.height < 16 ) {
             _patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
             for( int i = 0; i < numberOfPatterns; i ++ ) {
                 EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
@@ -126,7 +128,7 @@
         }
         
         // Pattern buttons for all pages on large grids
-        if( self.height > 8 && self.width > 8 ) {
+        if( self.height > 8 ) {
             _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns * 8];
             // Rows
             for( int i = 0; i < 8; i ++ ) {
@@ -136,6 +138,8 @@
                     button.delegate = self;
                     button.x = j;
                     button.y = - (self.height - 4) + 2 + i;
+                    if( self.width < 16 )
+                        button.y ++;
                     button.inactiveBrightness = 4;
                     button.visible = NO;
                     [_patternsOnOtherPagesButtons addObject:button];
@@ -143,7 +147,7 @@
             }
         }
         
-        // Scrub buttons for other pages and transpose slider, if there's space
+        // Scrub buttons for other pages, if there's space
         if( self.height > 8 ) {
             _scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
             for( int i = 0; i < self.width; i ++ ) {
@@ -154,7 +158,10 @@
                 button.visible = NO;
                 [_scrubOtherPagesButtons addObject:button];
             }
-            
+        }
+        
+        // Transpose slider, if there's space
+        if( self.height > 8 && self.width > 8 ) {
             _transposeView = [[EatsGridHorizontalShiftView alloc] init];
             _transposeView.delegate = self;
             _transposeView.x = 0;
@@ -217,7 +224,6 @@
         _loopBraceView.width = self.width;
         _loopBraceView.height = 1;
         _loopBraceView.fillBar = YES;
-        _loopBraceView.visible = NO;
         
         // Pattern view
         _patternView = [[EatsGridPatternView alloc] init];
@@ -235,10 +241,10 @@
         [self.subViews addObjectsFromArray:_pageButtons];
         [self.subViews addObjectsFromArray:_patternButtons];
         [self.subViews addObjectsFromArray:_patternsOnOtherPagesButtons];
-        if( self.height > 8 ) {
+        if( self.height > 8 )
             [self.subViews addObjectsFromArray:_scrubOtherPagesButtons];
+        if( self.height > 8 && self.width > 8 )
             [self.subViews addObject:_transposeView];
-        }
         [self.subViews addObjectsFromArray:_playModeButtons];
         [self.subViews addObjectsFromArray:_controlButtons];
         
@@ -710,7 +716,7 @@
         uint patternButtonId;
         
         // For large grids
-        if( self.height > 8 && self.width > 8 ) {
+        if( self.height > 8 ) {
             
             NSRange range;
             range.length = self.width;
@@ -1068,7 +1074,7 @@
         if ( [_patternsOnOtherPagesButtons containsObject:sender] ) {
             
             // For large grids
-            if( self.height > 8 && self.width > 8 ) {
+            if( self.height > 8 ) {
                 
                 uint numberOfPatterns = self.width;
                 if (numberOfPatterns > 16)

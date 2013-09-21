@@ -239,9 +239,16 @@
         
         // Put the length tails in
         int tailDraw = note.step;
-        int length =  note.length - 1;
-        if( length > _columns - 1)
-            length = _columns - 1;
+        int length;
+        
+        // Don't draw trails for notes outside of grid
+        if( note.step > self.gridWidth - 1 )
+            length = 0;
+        else
+            length = note.length - 1;
+        
+        if( length > _gridWidth - 1 )
+            length = _gridWidth - 1;
         
         for( int i = 0; i < length; i++ ) {
             if( self.drawNotesForReverse )
@@ -250,9 +257,9 @@
                 tailDraw ++;
             
             if( tailDraw < 0 )
-                tailDraw += _columns;
-            else if( tailDraw >= _columns )
-                tailDraw -= _columns;
+                tailDraw += _gridWidth;
+            else if( tailDraw >= _gridWidth )
+                tailDraw -= _gridWidth;
             
             // Active / inactive
             if( tailDraw < _gridWidth && note.row < _gridHeight ) {

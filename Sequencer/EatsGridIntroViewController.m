@@ -23,19 +23,46 @@
 - (void) setupView
 {
     dispatch_sync(self.gridQueue, ^(void) {
-        // Create the sub view
-        self.okView = [[EatsGridOKView alloc] init];
-        self.okView.delegate = self;
-        self.okView.x = 0;
-        self.okView.y = 0;
-        self.okView.width = self.width;
-        self.okView.height = self.height;
-        
-        self.subViews = [NSSet setWithObject:self.okView];
+        [self createSubViews];
     });
+    
+    // Size KVO
+    [self addObserver:self forKeyPath:@"width" options:NSKeyValueObservingOptionNew context:NULL];
+    [self addObserver:self forKeyPath:@"height" options:NSKeyValueObservingOptionNew context:NULL];
     
     [self startAnimation];
 
+}
+
+- (void) dealloc
+{
+    [self removeObserver:self forKeyPath:@"width"];
+    [self removeObserver:self forKeyPath:@"height"];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    
+    [self stopAnimation];
+    dispatch_async(self.gridQueue, ^(void) {
+        [self createSubViews];
+    });
+    [self startAnimation];
+}
+
+- (void) createSubViews
+{
+    // Create the sub view
+    self.okView = [[EatsGridOKView alloc] init];
+    self.okView.delegate = self;
+    self.okView.x = 0;
+    self.okView.y = 0;
+    self.okView.width = self.width;
+    self.okView.height = self.height;
+    
+    self.subViews = [NSSet setWithObject:self.okView];
 }
 
 - (void) stopAnimation
