@@ -37,8 +37,11 @@
 {
     super.enabled = enabled;
     
-    self.lastLongPressKey = nil;
-    [self.currentlyDownKeys removeAllObjects];
+    if( self.lastLongPressKey )
+        self.lastLongPressKey = nil;
+    dispatch_sync(dispatch_get_main_queue(), ^(void) { // Added this in to try and avoid it getting mutated while removing all objects
+       [self.currentlyDownKeys removeAllObjects];
+    });
     [self.longPressTimer invalidate];
     self.longPressTimer = nil;
 }
@@ -175,7 +178,6 @@
         
         NSNumber *pressBrightnessResult = [NSNumber numberWithInt:_pressBrightness * self.opacity];
         
-        // TODO: For some reason this line still sometimes crashes with the error 'range {0, 1} extends beyond bounds for empty array'
         NSOrderedSet *currentlyDownKeys = [_currentlyDownKeys copy]; // Copy it so it can't get mutated while we're enumerating
         
         for( NSDictionary *key in currentlyDownKeys ) {
