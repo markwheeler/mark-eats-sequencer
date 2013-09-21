@@ -349,14 +349,32 @@ typedef enum EatsStepAdvance {
                     // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
                     int length = roundf( (float)note.length * ( _minQuantization / (float)[self.sequencer stepLengthForPage:pageId] ) );
                     if( length < 1 )
-                        NSLog(@"Note added to active notes was too short: %i", length);
-                    // Add to activeNotes so we know when to stop it
-                    [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                                                                              [NSNumber numberWithInt:channel], @"channel",
-                                                                                              [NSNumber numberWithInt:velocity], @"velocity",
-                                                                                              [NSNumber numberWithInt:length], @"lengthRemaining",
-                                                                                              [NSNumber numberWithInt:pageId], @"fromPageId",
-                                                                                              nil]];
+                        NSLog(@"WARNING: Note added to active notes was too short: %i", length);
+                    
+                    // Add to, or update, activeNotes so we know when to stop the note
+                    
+                    NSUInteger index = [_activeNotes indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+                        BOOL result = ( [[obj valueForKey:@"channel"] intValue] == channel && [[obj valueForKey:@"pitch"] intValue] == pitch );
+                        return result;
+                    }];
+                    
+                    // If the note isn't already playing then make an entry for it
+                    if( index == NSNotFound ) {
+                        [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                                                 [NSNumber numberWithInt:channel], @"channel",
+                                                 [NSNumber numberWithInt:velocity], @"velocity",
+                                                 [NSNumber numberWithInt:length], @"lengthRemaining",
+                                                 [NSNumber numberWithInt:pageId], @"fromPageId",
+                                                 nil]];
+                        
+                    // If the note is playing then either update it's length, or leave it, depending on if this will make it longer or not
+                    } else {
+                        
+                        NSMutableDictionary *note = [_activeNotes objectAtIndex:index];
+                        if( [[note valueForKey:@"lengthRemaining"] intValue] < length )
+                            [note setObject:[NSNumber numberWithInt:length] forKey:@"lengthRemaining"];
+                    }
+                    
                 }
                 
             }
