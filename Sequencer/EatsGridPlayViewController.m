@@ -57,6 +57,9 @@
 @property BOOL                              firstPatternKeyHasBeenPressed;
 @property BOOL                              copiedPattern;
 
+@property NSNumber                          *lastDownScrubOtherPagesKey;
+@property BOOL                              setLoopOnOtherPages;
+
 @end
 
 @implementation EatsGridPlayViewController
@@ -1144,9 +1147,34 @@
         
         // Scrub buttons for other pages
         if ( [_scrubOtherPagesButtons containsObject:sender] ) {
+            
+            int pressedStep = (int)[_scrubOtherPagesButtons indexOfObject:sender];
+            
             if ( buttonDown ) {
                 
-                [self.sequencer setNextStep:[NSNumber numberWithUnsignedInteger:[_scrubOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
+                if( self.sharedPreferences.loopFromScrubArea && _lastDownScrubOtherPagesKey  ) {
+                    // Set loop
+                    [self.sequencer setLoopStart:_lastDownScrubOtherPagesKey.intValue andLoopEnd:pressedStep - 1 forAllPagesExcept:self.sequencer.currentPageId];
+                    _setLoopOnOtherPages = YES;
+                    
+                } else {
+                    
+                    if( self.sharedPreferences.loopFromScrubArea ) {
+                        if( !_setLoopOnOtherPages ) {
+                            // Reset loop
+                            [self.sequencer setLoopStart:0 andLoopEnd:self.sharedPreferences.gridWidth - 1 forAllPagesExcept:self.sequencer.currentPageId];
+                        }
+                        
+                        // Keep track of last down
+                        _lastDownScrubOtherPagesKey = [NSNumber numberWithUnsignedInteger:pressedStep];
+                    }
+                    
+                    if( !_setLoopOnOtherPages || !self.sharedPreferences.loopFromScrubArea ) {
+                        // Scrub
+                        [self.sequencer setNextStep:[NSNumber numberWithUnsignedInteger:pressedStep] forAllPagesExcept:self.sequencer.currentPageId];
+                    }
+                    
+                }
                 
                 for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
                     if( pageId != self.sequencer.currentPageId && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Pause ) {
@@ -1154,9 +1182,17 @@
                         break;
                     }
                 }
-            
+                
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
+                
+                if( _lastDownScrubOtherPagesKey && _lastDownScrubOtherPagesKey.intValue == pressedStep ) {
+                    _lastDownScrubOtherPagesKey = nil;
+                    _setLoopOnOtherPages = NO;
+                }
+                
+                [self updateScrubOtherPages];
+
             }
             
             [self updateView];

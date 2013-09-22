@@ -578,6 +578,70 @@
 }
 
 
+- (void) setLoopStart:(int)loopStart forAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self setLoopStart:loopStart forPage:i];
+        }
+    }
+}
+
+- (void) setLoopEnd:(int)loopEnd forAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self setLoopEnd:loopEnd forPage:i];
+        }
+    }
+}
+
+- (void) incrementLoopStartForAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self incrementLoopStartForPage:i];
+        }
+    }
+}
+
+- (void) decrementLoopStartForAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self decrementLoopStartForPage:i];
+        }
+    }
+}
+
+- (void) incrementLoopEndForAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self incrementLoopEndForPage:i];
+        }
+    }
+}
+
+- (void) decrementLoopEndForAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self decrementLoopEndForPage:i];
+        }
+    }
+}
+
+- (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self setLoopStart:loopStart andLoopEnd:loopEnd forPage:i];
+        }
+    }
+}
+
+
 - (int) swingTypeForPage:(uint)pageId
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
