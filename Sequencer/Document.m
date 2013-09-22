@@ -277,8 +277,8 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) clearPatternStartAlert
 {
-    self.clearPatternAlert = [NSAlert alertWithMessageText:@"Clear current pattern?"
-                                                 defaultButton:@"Clear"
+    self.clearPatternAlert = [NSAlert alertWithMessageText:@"Delete current pattern?"
+                                                 defaultButton:@"Delete"
                                                alternateButton:@"Cancel"
                                                    otherButton:nil
                                      informativeTextWithFormat:@""];
@@ -1046,13 +1046,15 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
-    // Clear
-    // Backspace
-    if( keyCode.intValue == 51 )
-        [self clearPatternStartAlert];
-    
-    // Send the rest to the main keyboard input handling
-    else
+//    // Left TODO
+//    if( keyCode.intValue == 123 )
+//        // Shift pattern left
+//    // Right
+//    else if( keyCode.intValue == 124 )
+//        // Shift pattern right
+//    
+//    // Send the rest to the main keyboard input handling
+//    else
         [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
 }
 

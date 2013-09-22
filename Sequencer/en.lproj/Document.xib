@@ -2,7 +2,7 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12E55</string>
+		<string key="IBDocument.SystemVersion">12F37</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
 		<string key="IBDocument.AppKitVersion">1187.39</string>
 		<string key="IBDocument.HIToolboxVersion">626.00</string>
@@ -419,7 +419,6 @@
 							</set>
 							<string key="NSFrame">{{0, 474}, {841, 8}}</string>
 							<reference key="NSSuperview" ref="568628114"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSImageCell" key="NSCell" id="501284141">
@@ -802,7 +801,7 @@
 													<int key="NSvFlags">256</int>
 													<string key="NSFrameSize">{145, 306}</string>
 													<reference key="NSSuperview" ref="484382370"/>
-													<reference key="NSNextKeyView" ref="384456630"/>
+													<reference key="NSNextKeyView" ref="457660602"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -979,7 +978,7 @@
 									</array>
 									<string key="NSFrame">{{443, 54}, {147, 308}}</string>
 									<reference key="NSSuperview" ref="463324255"/>
-									<reference key="NSNextKeyView" ref="457660602"/>
+									<reference key="NSNextKeyView" ref="484382370"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133650</int>
 									<reference key="NSVScroller" ref="384456630"/>

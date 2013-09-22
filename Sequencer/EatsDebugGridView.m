@@ -89,19 +89,28 @@
     return [super becomeFirstResponder];
 }
 
-- (void)cut:(id)sender {
+- (void) cut:(id)sender
+{
     if( [self.delegate respondsToSelector:@selector(cutCurrentPattern)] )
        [self.delegate performSelector:@selector(cutCurrentPattern)];
 }
 
-- (void)copy:(id)sender {
+- (void) copy:(id)sender
+{
     if( [self.delegate respondsToSelector:@selector(copyCurrentPattern)] )
         [self.delegate performSelector:@selector(copyCurrentPattern)];
 }
 
-- (void)paste:(id)sender {
+- (void) paste:(id)sender
+{
     if( [self.delegate respondsToSelector:@selector(pasteToCurrentPattern)] )
         [self.delegate performSelector:@selector(pasteToCurrentPattern)];
+}
+
+- (void) delete:(id)sender
+{
+    if( [self.delegate respondsToSelector:@selector(clearPatternStartAlert)] )
+        [self.delegate performSelector:@selector(clearPatternStartAlert)];
 }
 
 - (BOOL) validateMenuItem:(id <NSValidatedUserInterfaceItem>)menuItem
@@ -123,6 +132,14 @@
             return YES;
         else
             return NO;
+        
+    } else if ( menuAction == @selector(delete:) )
+        {
+            if ( self.notes.count ) {
+                return YES;
+            } else {
+                return NO;
+            }
         
     } else {
         return YES;
