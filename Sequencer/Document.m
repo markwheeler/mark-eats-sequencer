@@ -1046,7 +1046,8 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
-//    // Left TODO
+    // TODO shortcuts for highlighted pattern
+//    // Left
 //    if( keyCode.intValue == 123 )
 //        // Shift pattern left
 //    // Right

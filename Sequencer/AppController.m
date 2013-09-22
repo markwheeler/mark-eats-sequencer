@@ -142,7 +142,7 @@
         self.sharedPreferences.gridMIDINodeName = nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectingNotification object:self];
-        NSLog(@"Connecting..."); // TODO
+        NSLog(@"Connecting to grid controller...");
         [self.gridControllerConnectionTimer invalidate];
         self.gridControllerConnectionTimer = [NSTimer scheduledTimerWithTimeInterval:3
                                                            target:self
@@ -165,7 +165,7 @@
 
 - (void) gridControllerConnectionTimeout:(NSTimer *)timer
 {
-    NSLog(@"**** TIMEOUT ****"); // TODO
+    NSLog(@"Connecting to grid controller timed out");
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
@@ -189,7 +189,7 @@
 {
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
-    NSLog(@"Connected"); // TODO
+    NSLog(@"Connected to grid controller");
     self.sharedPreferences.gridType = EatsGridType_Monome;
     
     // Let everyone know
