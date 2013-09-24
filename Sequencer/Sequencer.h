@@ -86,6 +86,14 @@
 - (void) decrementLoopEndForPage:(uint)pageId;
 - (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forPage:(uint)pageId;
 
+- (void) setLoopStartForAllPages:(int)loopStart;
+- (void) setLoopEndForAllPages:(int)loopEnd;
+- (void) incrementLoopStartForAllPages;
+- (void) decrementLoopStartForAllPages;
+- (void) incrementLoopEndForAllPages;
+- (void) decrementLoopEndForAllPages;
+- (void) setLoopStartForAllPages:(int)loopStart andLoopEnd:(int)loopEnd;
+
 - (void) setLoopStart:(int)loopStart forAllPagesExcept:(uint)pageId;
 - (void) setLoopEnd:(int)loopEnd forAllPagesExcept:(uint)pageId;
 - (void) incrementLoopStartForAllPagesExcept:(uint)pageId;

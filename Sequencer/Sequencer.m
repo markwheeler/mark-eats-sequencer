@@ -578,6 +578,56 @@
 }
 
 
+- (void) setLoopStartForAllPages:(int)loopStart
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self setLoopStart:loopStart forPage:i];
+    }
+}
+
+- (void) setLoopEndForAllPages:(int)loopEnd
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self setLoopEnd:loopEnd forPage:i];
+    }
+}
+
+- (void) incrementLoopStartForAllPages
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self incrementLoopStartForPage:i];
+    }
+}
+
+- (void) decrementLoopStartForAllPages
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self decrementLoopStartForPage:i];
+    }
+}
+
+- (void) incrementLoopEndForAllPages
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self incrementLoopEndForPage:i];
+    }
+}
+
+- (void) decrementLoopEndForAllPages
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self decrementLoopEndForPage:i];
+    }
+}
+
+- (void) setLoopStartForAllPages:(int)loopStart andLoopEnd:(int)loopEnd
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self setLoopStart:loopStart andLoopEnd:loopEnd forPage:i];
+    }
+}
+///////////////////////
+
 - (void) setLoopStart:(int)loopStart forAllPagesExcept:(uint)pageId
 {
     for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
