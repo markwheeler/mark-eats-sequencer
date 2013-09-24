@@ -942,7 +942,7 @@
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[toPage.patterns objectAtIndex:toPatternId] forPattern:toPatternId inPage:toPageId];
         [self.undoManager setActionName:@"Pattern Copy"];
 
-        NSMutableSet *fromNotes = [[fromPage.patterns objectAtIndex:fromPatternId] mutableCopy];
+        NSMutableSet *fromNotes = [[NSMutableSet alloc] initWithSet:[fromPage.patterns objectAtIndex:fromPatternId] copyItems:YES];
         [toPage.patterns replaceObjectAtIndex:toPatternId withObject:fromNotes];
         
     });
