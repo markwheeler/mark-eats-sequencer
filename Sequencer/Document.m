@@ -1046,16 +1046,30 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
 {
-    // TODO shortcuts for highlighted pattern
-//    // Left
-//    if( keyCode.intValue == 123 )
-//        // Shift pattern left
-//    // Right
-//    else if( keyCode.intValue == 124 )
-//        // Shift pattern right
-//    
-//    // Send the rest to the main keyboard input handling
-//    else
+    // Shortcuts for highlighted pattern
+    
+    // Left
+    if( keyCode.intValue == 123 )
+        // Shift pattern left 1
+        [self.sequencer shiftPatternLeft:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Right
+    else if( keyCode.intValue == 124 )
+        // Shift pattern right 1
+        [self.sequencer shiftPatternRight:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Up
+    else if( keyCode.intValue == 126 )
+        // Shift pattern up 1
+        [self.sequencer shiftPatternUp:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Down
+    else if( keyCode.intValue == 125 )
+        // Shift pattern down 1
+        [self.sequencer shiftPatternDown:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Send the rest to the main keyboard input handling
+    else
         [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
 }
 

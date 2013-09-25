@@ -626,7 +626,7 @@
         [self setLoopStart:loopStart andLoopEnd:loopEnd forPage:i];
     }
 }
-///////////////////////
+
 
 - (void) setLoopStart:(int)loopStart forAllPagesExcept:(uint)pageId
 {
@@ -959,6 +959,83 @@
         [self.undoManager setActionName:@"Pattern Change"];
         
         [page.patterns replaceObjectAtIndex:patternId withObject:[notes mutableCopy]];
+        
+    });
+    
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
+}
+
+
+- (void) shiftPatternLeft:(uint)patternId inPage:(uint)pageId
+{
+    [self shiftPattern:patternId inPage:pageId horizontally:-1];
+}
+
+- (void) shiftPatternRight:(uint)patternId inPage:(uint)pageId
+{
+    [self shiftPattern:patternId inPage:pageId horizontally:1];
+}
+
+- (void) shiftPatternUp:(uint)patternId inPage:(uint)pageId
+{
+    [self shiftPattern:patternId inPage:pageId vertically:1];
+}
+
+- (void) shiftPatternDown:(uint)patternId inPage:(uint)pageId
+{
+    [self shiftPattern:patternId inPage:pageId vertically:-1];
+}
+
+- (void) shiftPattern:(uint)patternId inPage:(uint)pageId horizontally:(int)amount
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
+        
+        for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
+            if( note.step < self.sharedPreferences.gridWidth ) {
+                
+                int newStep = note.step + amount;
+                if( newStep >= (int)self.sharedPreferences.gridWidth )
+                    newStep = 0;
+                else if( newStep < 0 )
+                    newStep = self.sharedPreferences.gridWidth - 1;
+                
+                note.step = newStep;
+            }
+        }
+        
+    });
+    
+    [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
+}
+
+- (void) shiftPattern:(uint)patternId inPage:(uint)pageId vertically:(int)amount
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
+        
+        for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
+            if( note.row < self.sharedPreferences.gridHeight ) {
+                
+                int newRow = note.row + amount;
+                if( newRow >= (int)self.sharedPreferences.gridHeight )
+                    newRow = 0;
+                else if( newRow < 0 )
+                    newRow = self.sharedPreferences.gridHeight - 1;
+                
+                note.row = newRow;
+            }
+        }
         
     });
     

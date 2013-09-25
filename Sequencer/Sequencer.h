@@ -134,6 +134,11 @@
 - (uint) numberOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
 - (void) setNotes:(NSSet *)notes forPattern:(uint)patternId inPage:(uint)pageId;
 
+- (void) shiftPatternLeft:(uint)patternId inPage:(uint)pageId;
+- (void) shiftPatternRight:(uint)patternId inPage:(uint)pageId;
+- (void) shiftPatternUp:(uint)patternId inPage:(uint)pageId;
+- (void) shiftPatternDown:(uint)patternId inPage:(uint)pageId;
+
 - (void) clearNotesForPattern:(uint)patternId inPage:(uint)pageId;
 - (void) copyNotesFromPattern:(uint)fromPatternId fromPage:(uint)fromPageId toPattern:(uint)toPatternId toPage:(uint)toPageId;
 
