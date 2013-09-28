@@ -146,7 +146,34 @@
     }
 }
 
-- (void) keyDown:(NSEvent *)theEvent {
+-(void) mouseEntered:(NSEvent *)theEvent
+{
+    if( [_delegate respondsToSelector:@selector(debugGridViewMouseEntered)] )
+        [_delegate performSelector:@selector(debugGridViewMouseEntered)];
+}
+
+-(void) mouseExited:(NSEvent *)theEvent
+{
+    if( [_delegate respondsToSelector:@selector(debugGridViewMouseExited)] )
+        [_delegate performSelector:@selector(debugGridViewMouseExited)];
+}
+
+-(void) updateTrackingAreas
+{
+    if( self.trackingAreas != nil ) {
+        [self removeTrackingArea:[self.trackingAreas lastObject]];
+    }
+    
+    int opts = (NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways);
+    NSTrackingArea *trackingArea = [ [NSTrackingArea alloc] initWithRect:[self bounds]
+                                                 options:opts
+                                                   owner:self
+                                                userInfo:nil];
+    [self addTrackingArea:trackingArea];
+}
+
+- (void) keyDown:(NSEvent *)theEvent
+{
     
     if( self.window.firstResponder == self ) {
         if( [_delegate respondsToSelector:@selector(keyDownFromEatsDebugGridView:withModifierFlags:)] )
@@ -319,6 +346,9 @@
     
     for( int r = 0; r < _rows; r++ ){
         for( int c = 0; c < _columns; c++ ) {
+            
+            [NSGraphicsContext saveGraphicsState];
+            
             // Draw shape
             NSBezierPath *roundedRect = [[_bezierPaths objectAtIndex:r] objectAtIndex:c];
             
@@ -334,6 +364,8 @@
             [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] - 0.1 alpha:1] set];
             [roundedRect setLineWidth:2.0];
             [roundedRect stroke];
+            
+            [NSGraphicsContext restoreGraphicsState];
             
         }
     }

@@ -65,6 +65,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSStepper             *transposeStepper;
 
 @property (nonatomic, weak) IBOutlet EatsDebugGridView     *debugGridView;
+@property (weak) IBOutlet NSView                           *debugGridViewFloatingToolbar;
 
 
 @end
@@ -305,6 +306,8 @@ typedef enum DocumentPageAnimationDirection {
     self.clockLateIndicator.alphaValue = 0.0;
     
     self.debugGridView.delegate = self;
+    
+    self.debugGridViewFloatingToolbar.alphaValue = 0.0;
     
     // Setup step quantization popup
     [self.stepQuantizationPopup removeAllItems];
@@ -1024,10 +1027,53 @@ typedef enum DocumentPageAnimationDirection {
 {
     [self.sequencer setTranspose:sender.intValue forPage:self.sequencer.currentPageId];
 }
+- (IBAction)debugGridViewFloatingToolbarShiftPattern:(NSSegmentedControl *)sender
+{
+    if( sender.selectedSegment == 0 )
+       [self.sequencer shiftPatternLeft:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    else if( sender.selectedSegment == 1 )
+        [self.sequencer shiftPatternRight:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    else if( sender.selectedSegment == 2 )
+        [self.sequencer shiftPatternUp:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    else if( sender.selectedSegment == 3 )
+        [self.sequencer shiftPatternDown:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+}
 
+- (IBAction)debugGridViewFloatingToolbarVelocity:(NSSegmentedControl *)sender
+{
+    if( sender.selectedSegment == 0 )
+        [self.sequencer decrementByLargeStepVelocityOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    else if( sender.selectedSegment == 1 )
+        [self.sequencer incrementByLargeStepVelocityOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
 
+}
 
-#pragma mark - Keyboard input and cut/copy/paste delegate methods for EatsDebugGridView
+- (IBAction)debugGridViewFloatingToolbarLength:(NSSegmentedControl *)sender
+{
+    if( sender.selectedSegment == 0 )
+        [self.sequencer decrementLengthOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    else if( sender.selectedSegment == 1 )
+        [self.sequencer incrementLengthOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+
+}
+
+#pragma mark - Keyboard input, rollover and cut/copy/paste delegate methods for EatsDebugGridView
+
+- (void) debugGridViewMouseEntered
+{
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:0.2];
+    [[self.debugGridViewFloatingToolbar animator] setAlphaValue:1.0];
+    [NSAnimationContext endGrouping];
+}
+
+- (void) debugGridViewMouseExited
+{
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:0.2];
+    [[self.debugGridViewFloatingToolbar animator] setAlphaValue:0.0];
+    [NSAnimationContext endGrouping];
+}
 
 - (void) cutCurrentPattern
 {
@@ -1048,8 +1094,28 @@ typedef enum DocumentPageAnimationDirection {
 {
     // Shortcuts for highlighted pattern
     
+    // Shift + Left
+    if( keyCode.intValue == 123 && modifierFlags.intValue & NSShiftKeyMask )
+        // Decrease length
+        [self.sequencer decrementLengthOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Shift + Right
+    else if( keyCode.intValue == 124 && modifierFlags.intValue & NSShiftKeyMask )
+        // Increase length
+        [self.sequencer incrementLengthOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Shift + Up
+    else if( keyCode.intValue == 126 && modifierFlags.intValue & NSShiftKeyMask )
+        // Increase velocity
+        [self.sequencer incrementVelocityOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Shift + Down
+    else if( keyCode.intValue == 125 && modifierFlags.intValue & NSShiftKeyMask )
+        // Decrease velocity
+        [self.sequencer decrementVelocityOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
     // Left
-    if( keyCode.intValue == 123 )
+    else if( keyCode.intValue == 123 )
         // Shift pattern left 1
         [self.sequencer shiftPatternLeft:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     

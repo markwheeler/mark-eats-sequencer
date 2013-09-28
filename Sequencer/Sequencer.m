@@ -997,7 +997,7 @@
         [self.undoManager setActionName:@"Pattern Change"];
         
         for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
-            if( note.step < self.sharedPreferences.gridWidth ) {
+            if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
                 
                 int newStep = note.step + amount;
                 if( newStep >= (int)self.sharedPreferences.gridWidth )
@@ -1025,7 +1025,7 @@
         [self.undoManager setActionName:@"Pattern Change"];
         
         for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
-            if( note.row < self.sharedPreferences.gridHeight ) {
+            if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
                 
                 int newRow = note.row + amount;
                 if( newRow >= (int)self.sharedPreferences.gridHeight )
@@ -1040,6 +1040,145 @@
     });
     
     [self postNotification:kSequencerPagePatternNotesDidChangeNotification forPattern:patternId inPage:pageId];
+}
+
+
+- (void) setVelocityOfNotes:(int)velocity forPattern:(uint)patternId inPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    if( velocity >= SEQUENCER_MIDI_MIN && velocity <= SEQUENCER_MIDI_MAX ) {
+       
+        dispatch_sync(self.sequencerQueue, ^(void) {
+            
+            NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+            [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+            [self.undoManager setActionName:@"Pattern Change"];
+            
+            for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
+                
+                if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
+                    note.velocity = velocity;
+                    [self postNotification:kSequencerNoteVelocityDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+                }
+            }
+            
+        });
+    }
+}
+
+- (void) incrementVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self adjustVelocityOfNotesByAmount:1 forPattern:patternId inPage:pageId];
+}
+
+- (void) decrementVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self adjustVelocityOfNotesByAmount:-1 forPattern:patternId inPage:pageId];
+}
+
+- (void) incrementByLargeStepVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self adjustVelocityOfNotesByAmount:( SEQUENCER_MIDI_MAX + 1 ) / self.sharedPreferences.gridWidth forPattern:patternId inPage:pageId];
+}
+
+- (void) decrementByLargeStepVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self adjustVelocityOfNotesByAmount:-( ( SEQUENCER_MIDI_MAX + 1 ) / self.sharedPreferences.gridWidth ) forPattern:patternId inPage:pageId];
+}
+
+- (void) adjustVelocityOfNotesByAmount:(int)amount forPattern:(uint)patternId inPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
+        
+        for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
+            
+            if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
+                int newVelocity = note.velocity + amount;
+                
+                if( newVelocity < SEQUENCER_MIDI_MIN )
+                    newVelocity = SEQUENCER_MIDI_MIN;
+                if( newVelocity > SEQUENCER_MIDI_MAX )
+                    newVelocity = SEQUENCER_MIDI_MAX;
+                    
+                note.velocity = newVelocity;
+                
+                [self postNotification:kSequencerNoteVelocityDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+            }
+        }
+        
+    });
+}
+
+
+- (void) setLengthOfNotes:(int)length forPattern:(uint)patternId inPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    if( length >= 1 && length <= self.sharedPreferences.gridWidth ) {
+        
+        dispatch_sync(self.sequencerQueue, ^(void) {
+            
+            NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+            [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+            [self.undoManager setActionName:@"Pattern Change"];
+            
+            for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
+                
+                if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
+                    note.length = length;
+                    [self postNotification:kSequencerNoteLengthDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+                }
+            }
+            
+        });
+    }
+}
+
+- (void) incrementLengthOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self adjustLengthOfNotesByAmount:1 forPattern:patternId inPage:pageId];
+}
+
+- (void) decrementLengthOfNotesForPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self adjustLengthOfNotesByAmount:-1 forPattern:patternId inPage:pageId];
+}
+
+- (void) adjustLengthOfNotesByAmount:(int)amount forPattern:(uint)patternId inPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
+        [self.undoManager setActionName:@"Pattern Change"];
+        
+        for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
+            
+            if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
+                int newLength = note.length + amount;
+                
+                if( newLength < 1 )
+                    newLength = 1;
+                if( newLength > self.sharedPreferences.gridWidth )
+                    newLength = self.sharedPreferences.gridWidth;
+
+                note.length = newLength;
+                    
+                [self postNotification:kSequencerNoteLengthDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+
+            }
+        }
+        
+    });
 }
 
 

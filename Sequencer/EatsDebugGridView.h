@@ -15,6 +15,9 @@
 - (void) copyCurrentPattern;
 - (void) pasteToCurrentPattern;
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+@optional
+- (void) debugGridViewMouseEntered;
+- (void) debugGridViewMouseExited;
 @end
 
 @interface EatsDebugGridView : NSView

@@ -139,6 +139,17 @@
 - (void) shiftPatternUp:(uint)patternId inPage:(uint)pageId;
 - (void) shiftPatternDown:(uint)patternId inPage:(uint)pageId;
 
+- (void) setVelocityOfNotes:(int)velocity forPattern:(uint)patternId inPage:(uint)pageId;
+- (void) incrementVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
+- (void) decrementVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
+- (void) incrementByLargeStepVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
+- (void) decrementByLargeStepVelocityOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
+
+- (void) setLengthOfNotes:(int)length forPattern:(uint)patternId inPage:(uint)pageId;
+- (void) incrementLengthOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
+- (void) decrementLengthOfNotesForPattern:(uint)patternId inPage:(uint)pageId;
+
+
 - (void) clearNotesForPattern:(uint)patternId inPage:(uint)pageId;
 - (void) copyNotesFromPattern:(uint)fromPatternId fromPage:(uint)fromPageId toPattern:(uint)toPatternId toPage:(uint)toPageId;
 

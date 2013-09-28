@@ -35,4 +35,7 @@
 - (void) swipeForward;
 - (void) swipeBack;
 
+- (void) debugGridViewMouseEntered;
+- (void) debugGridViewMouseExited;
+
 @end

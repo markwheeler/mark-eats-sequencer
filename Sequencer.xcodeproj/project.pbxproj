@@ -16,6 +16,13 @@
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */; };
 		4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */; };
+		4D4E8A5A17F757DE00764300 /* FloatingToolbarBack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */; };
+		4D4E8A5D17F76A8B00764300 /* MinusIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5B17F76A8B00764300 /* MinusIconTemplate.pdf */; };
+		4D4E8A5E17F76A8B00764300 /* PlusIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5C17F76A8B00764300 /* PlusIconTemplate.pdf */; };
+		4D4E8A6317F76CC000764300 /* ArrowDownIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5F17F76CC000764300 /* ArrowDownIconTemplate.pdf */; };
+		4D4E8A6417F76CC000764300 /* ArrowLeftIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A6017F76CC000764300 /* ArrowLeftIconTemplate.pdf */; };
+		4D4E8A6517F76CC000764300 /* ArrowRightIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A6117F76CC000764300 /* ArrowRightIconTemplate.pdf */; };
+		4D4E8A6617F76CC000764300 /* ArrowUpIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A6217F76CC000764300 /* ArrowUpIconTemplate.pdf */; };
 		4D54CAC117B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */; };
 		4D54CAC217B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */; };
 		4D54CAC417B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */; };
@@ -130,6 +137,14 @@
 		4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridIntroViewController.m; sourceTree = "<group>"; };
 		4D3ED27917C30ECE00D7D0DD /* EatsGridOKView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridOKView.h; sourceTree = "<group>"; };
 		4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridOKView.m; sourceTree = "<group>"; };
+		4D4E8A5817F757DE00764300 /* FloatingToolbarBack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FloatingToolbarBack.h; sourceTree = "<group>"; };
+		4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FloatingToolbarBack.m; sourceTree = "<group>"; };
+		4D4E8A5B17F76A8B00764300 /* MinusIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = MinusIconTemplate.pdf; sourceTree = "<group>"; };
+		4D4E8A5C17F76A8B00764300 /* PlusIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlusIconTemplate.pdf; sourceTree = "<group>"; };
+		4D4E8A5F17F76CC000764300 /* ArrowDownIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowDownIconTemplate.pdf; sourceTree = "<group>"; };
+		4D4E8A6017F76CC000764300 /* ArrowLeftIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowLeftIconTemplate.pdf; sourceTree = "<group>"; };
+		4D4E8A6117F76CC000764300 /* ArrowRightIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowRightIconTemplate.pdf; sourceTree = "<group>"; };
+		4D4E8A6217F76CC000764300 /* ArrowUpIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowUpIconTemplate.pdf; sourceTree = "<group>"; };
 		4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackPauseIconTemplate.pdf; sourceTree = "<group>"; };
 		4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackPlayIconTemplate.pdf; sourceTree = "<group>"; };
 		4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackReverseIconTemplate.pdf; sourceTree = "<group>"; };
@@ -273,6 +288,12 @@
 		4D1C403117121191000F773D /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				4D4E8A5F17F76CC000764300 /* ArrowDownIconTemplate.pdf */,
+				4D4E8A6017F76CC000764300 /* ArrowLeftIconTemplate.pdf */,
+				4D4E8A6117F76CC000764300 /* ArrowRightIconTemplate.pdf */,
+				4D4E8A6217F76CC000764300 /* ArrowUpIconTemplate.pdf */,
+				4D4E8A5B17F76A8B00764300 /* MinusIconTemplate.pdf */,
+				4D4E8A5C17F76A8B00764300 /* PlusIconTemplate.pdf */,
 				4D2B42D217D2A665009B2286 /* PlaybackSliceIconTemplate.pdf */,
 				4D54CAC617B612D500139D6D /* PlaybackRandomIconTemplate.pdf */,
 				4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */,
@@ -518,6 +539,8 @@
 				4DF7DA3317A815F400538081 /* KeyboardInputView.m */,
 				4D82B13917117AEF00AD8222 /* EatsDebugGridView.h */,
 				4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */,
+				4D4E8A5817F757DE00764300 /* FloatingToolbarBack.h */,
+				4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */,
 				4DC940A7170064B6005FD88D /* ScaleGeneratorSheetController.h */,
 				4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
@@ -626,6 +649,12 @@
 				4D54CAC517B60E3B00139D6D /* PlaybackStopIconTemplate.pdf in Resources */,
 				4D54CAC717B612D500139D6D /* PlaybackRandomIconTemplate.pdf in Resources */,
 				4D2B42D317D2A665009B2286 /* PlaybackSliceIconTemplate.pdf in Resources */,
+				4D4E8A5D17F76A8B00764300 /* MinusIconTemplate.pdf in Resources */,
+				4D4E8A5E17F76A8B00764300 /* PlusIconTemplate.pdf in Resources */,
+				4D4E8A6317F76CC000764300 /* ArrowDownIconTemplate.pdf in Resources */,
+				4D4E8A6417F76CC000764300 /* ArrowLeftIconTemplate.pdf in Resources */,
+				4D4E8A6517F76CC000764300 /* ArrowRightIconTemplate.pdf in Resources */,
+				4D4E8A6617F76CC000764300 /* ArrowUpIconTemplate.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,6 +716,7 @@
 				4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */,
 				4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */,
 				4DA8646217E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m in Sources */,
+				4D4E8A5A17F757DE00764300 /* FloatingToolbarBack.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
