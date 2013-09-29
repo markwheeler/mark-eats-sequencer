@@ -23,7 +23,8 @@
 @property (nonatomic) NSNumber              *nextStepBrightnessInactive;
 @property (nonatomic) NSNumber              *backgroundBrightnessInactive;
 
-@property (nonatomic) NSArray               *bezierPaths;
+@property (nonatomic) NSArray               *bezierPathsForFills;
+@property (nonatomic) NSArray               *bezierPathsForStrokes;
 
 @end
 
@@ -215,23 +216,31 @@
     
     CGFloat cornerRadius = squareSize * 0.1;
     
-    NSMutableArray *paths = [NSMutableArray arrayWithCapacity:_rows];
+    NSMutableArray *pathsForFills = [NSMutableArray arrayWithCapacity:_rows];
+    NSMutableArray *pathsForStrokes = [NSMutableArray arrayWithCapacity:_rows];
     
     for( int r = 0; r < _rows; r++ ){
         
-        NSMutableArray *row = [NSMutableArray arrayWithCapacity:_columns];
-        [paths addObject:row];
+        NSMutableArray *rowForFills = [NSMutableArray arrayWithCapacity:_columns];
+        [pathsForFills addObject:rowForFills];
+        NSMutableArray *rowForStrokes = [NSMutableArray arrayWithCapacity:_columns];
+        [pathsForStrokes addObject:rowForStrokes];
         
         for( int c = 0; c < _columns; c++ ) {
             // Draw shape
-            NSRect rect = NSMakeRect(margin + ((squareSize + _gutter) * c), margin + ((squareSize + _gutter) * r), squareSize, squareSize);
-            NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect: rect xRadius:cornerRadius yRadius:cornerRadius];
+            NSRect rectForFill = NSMakeRect(margin + ((squareSize + _gutter) * c), margin + ((squareSize + _gutter) * r), squareSize, squareSize);
+            NSBezierPath *roundedRectForFill = [NSBezierPath bezierPathWithRoundedRect:rectForFill xRadius:cornerRadius yRadius:cornerRadius];
+            [rowForFills addObject:roundedRectForFill];
             
-            [row addObject:roundedRect];
+            NSRect rectForStroke = NSMakeRect(rectForFill.origin.x + 0.5, rectForFill.origin.y + 0.5, rectForFill.size.width - 1, rectForFill.size.height - 1);
+            NSBezierPath *roundedRectForStroke = [NSBezierPath bezierPathWithRoundedRect:rectForStroke xRadius:cornerRadius yRadius:cornerRadius];
+            [rowForStrokes
+             addObject:roundedRectForStroke];
         }
     }
     
-    _bezierPaths = paths;
+    _bezierPathsForFills = pathsForFills;
+    _bezierPathsForStrokes = pathsForStrokes;
 }
 
 - (void) drawRect:(NSRect)dirtyRect
@@ -349,21 +358,16 @@
             
             [NSGraphicsContext saveGraphicsState];
             
-            // Draw shape
-            NSBezierPath *roundedRect = [[_bezierPaths objectAtIndex:r] objectAtIndex:c];
-            
-            // Set clip so we can do an 'inner' stroke
-            [roundedRect setClip];
-            
             // Fill
+            NSBezierPath *roundedRectForFill = [[_bezierPathsForFills objectAtIndex:r] objectAtIndex:c];
             [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] alpha:1] set];
-            [roundedRect fill];
-            
+            [roundedRectForFill fill];
             
             // Stroke
+            NSBezierPath *roundedRectForStroke = [[_bezierPathsForStrokes objectAtIndex:r] objectAtIndex:c];
             [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] - 0.1 alpha:1] set];
-            [roundedRect setLineWidth:2.0];
-            [roundedRect stroke];
+            [roundedRectForStroke setLineWidth:1.0];
+            [roundedRectForStroke stroke];
             
             [NSGraphicsContext restoreGraphicsState];
             

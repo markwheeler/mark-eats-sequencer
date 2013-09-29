@@ -22,7 +22,7 @@
     if (self) {
         // Initialization code here.
         
-        NSRect rect = NSMakeRect(0.0, 0.0, self.bounds.size.width, self.bounds.size.height);
+        NSRect rect = NSMakeRect(10.0, 10.0, self.bounds.size.width - 20.0, self.bounds.size.height - 20.0);
         self.roundedRect = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:4 yRadius:4];
     }
     
@@ -33,15 +33,16 @@
 {
     [NSGraphicsContext saveGraphicsState];
     
+    // Shadow
+    NSShadow *shadow = [[NSShadow alloc] init];
+    [shadow setShadowOffset:NSMakeSize(0.0, -1.0)];
+    [shadow setShadowBlurRadius:2.0];
+    [shadow setShadowColor:[[NSColor blackColor] colorWithAlphaComponent:0.4]];
+    [shadow set];
+    
     // Fill
-    [[NSColor windowBackgroundColor] set];
+    [[NSColor colorWithCalibratedWhite:0.94 alpha:1.0] set];
     [_roundedRect fill];
-    
-    
-    // Stroke
-    [[NSColor darkGrayColor] set];
-    [_roundedRect setLineWidth:1.0];
-    [_roundedRect stroke];
     
     [NSGraphicsContext restoreGraphicsState];
 }
