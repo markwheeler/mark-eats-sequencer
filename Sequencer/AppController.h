@@ -9,9 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "PreferencesController.h"
 #import <VVMIDI/VVMIDI.h>
+#import <Quincy/BWQuincyManager.h>
 #import "EatsCommunicationManager.h"
 
-@interface AppController : NSObject <VVMIDIDelegateProtocol, PreferencesControllerDelegateProtocol>
+@interface AppController : NSObject <VVMIDIDelegateProtocol, PreferencesControllerDelegateProtocol, BWQuincyManagerDelegate>
 
 @property PreferencesController *preferencesController;
 

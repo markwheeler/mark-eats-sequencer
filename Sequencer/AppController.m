@@ -56,6 +56,10 @@
         
         // Firing this with a delay just so all the windows have time to draw etc (might be a better approach but this works!)
         [self performSelector:@selector(checkForFirstRun) withObject:nil afterDelay:0.5];
+        
+        [[BWQuincyManager sharedQuincyManager] setSubmissionURL:@"http://www.markeats.com/quincykit/crash_v200.php"];
+        [[BWQuincyManager sharedQuincyManager] setCompanyName:@"Mark Eats"];
+        [[BWQuincyManager sharedQuincyManager] setDelegate:self];
     }
     
     return self;
@@ -66,6 +70,12 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
     [self.sharedPreferences savePreferences];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+// Delegate for QuincyKit
+- (void) showMainApplicationWindow
+{
+    // For Document based apps this should be empty
 }
 
 
