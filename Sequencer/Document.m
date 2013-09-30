@@ -39,6 +39,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic) uint                          indexOflastSelectedScaleMode;
 @property (nonatomic) NSString                      *lastTonicNoteName;
 @property (nonatomic) NSPoint                       pageViewFrameOrigin;
+@property (nonatomic) NSPoint                       debugGridViewFloatingToolbarFrameOrigin;
 
 @property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
 
@@ -65,7 +66,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSStepper             *transposeStepper;
 
 @property (nonatomic, weak) IBOutlet EatsDebugGridView     *debugGridView;
-@property (weak) IBOutlet NSView                           *debugGridViewFloatingToolbar;
+@property (nonatomic, weak) IBOutlet NSView                *debugGridViewFloatingToolbar;
 
 
 @end
@@ -301,6 +302,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) setupUI
 {
     self.pageViewFrameOrigin = self.pageView.frame.origin;
+    self.debugGridViewFloatingToolbarFrameOrigin = self.debugGridViewFloatingToolbar.frame.origin;
     self.pageView.delegate = self;
     
     self.clockLateIndicator.alphaValue = 0.0;
@@ -719,22 +721,27 @@ typedef enum DocumentPageAnimationDirection {
     
     float distanceToAnimate = 100.0;
     
-    NSRect frame = self.pageView.frame;
+    NSRect pageViewframe = self.pageView.frame;
+    NSRect toolbarFrame = self.debugGridViewFloatingToolbar.frame;
     
     if( direction == DocumentPageAnimationDirection_Left ) {
-        frame.origin.x -= distanceToAnimate;
+        pageViewframe.origin.x = self.pageViewFrameOrigin.x - distanceToAnimate;
+        toolbarFrame.origin.x = self.debugGridViewFloatingToolbarFrameOrigin.x - ( distanceToAnimate / 2 );
         
     } else if( direction == DocumentPageAnimationDirection_Right ) {
-        frame.origin.x += distanceToAnimate;
+        pageViewframe.origin.x = self.pageViewFrameOrigin.x + distanceToAnimate;
+        toolbarFrame.origin.x = self.debugGridViewFloatingToolbarFrameOrigin.x + ( distanceToAnimate / 2 );
         
     }
     
-    self.pageView.frame = frame;
+    self.pageView.frame = pageViewframe;
+    self.debugGridViewFloatingToolbar.frame = toolbarFrame;
     
     [NSAnimationContext beginGrouping];
     [[NSAnimationContext currentContext] setDuration:0.2];
     [[self.pageView animator] setAlphaValue:1.0];
     [[self.pageView animator] setFrameOrigin:self.pageViewFrameOrigin];
+    [[self.debugGridViewFloatingToolbar animator] setFrameOrigin:self.debugGridViewFloatingToolbarFrameOrigin];
     [NSAnimationContext endGrouping];
     
     [self updateAllPageSpecificInterface];
