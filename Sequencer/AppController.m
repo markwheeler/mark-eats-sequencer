@@ -456,10 +456,9 @@
     [self.preferencesController showWindow:self];
 }
 
-- (IBAction) clearMenuItem:(NSMenuItem *)sender
-{
+- (IBAction)renamePageMenuItem:(NSMenuItem *)sender {
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
-    [documentController.currentDocument clearPatternStartAlert];
+    [documentController.currentDocument renameCurrentPageStartAlert];
 }
 
 - (IBAction)helpUserGuideMenuItem:(NSMenuItem *)sender

@@ -296,6 +296,36 @@ typedef enum DocumentPageAnimationDirection {
     self.clearPatternAlert = nil;
 }
 
+- (void) renameCurrentPageStartAlert
+{
+    // Make a text field, add it to an alert and then show it so you can edit the page name
+    
+    NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
+    
+    accessoryTextField.stringValue = [self.sequencer nameForPage:self.sequencer.currentPageId];
+    
+    NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
+                                              defaultButton:@"OK"
+                                            alternateButton:@"Cancel"
+                                                otherButton:nil
+                                  informativeTextWithFormat:@""];
+    [editLabelAlert setAccessoryView:accessoryTextField];
+    
+    [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(renameCurrentPageAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+}
+
+- (void) renameCurrentPageAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    NSString *newLabel = [alert.accessoryView valueForKey:@"stringValue"];
+    
+    if( returnCode == NSOKButton && ![newLabel isEqualToString:@""] ) {
+        
+        if( newLabel.length > 100 ) // Don't allow a string longer than 100 chars
+            newLabel = [newLabel substringToIndex:100];
+        [self.sequencer setName:newLabel forPage:self.sequencer.currentPageId];
+    }
+}
+
 
 #pragma mark - Setup UI
 
@@ -898,36 +928,11 @@ typedef enum DocumentPageAnimationDirection {
 {
     // Edit name
     if( sender.selectedSegment == self.sequencer.currentPageId ) {
-        // Make a text field, add it to an alert and then show it so you can edit the page name
-        
-        NSTextField *accessoryTextField = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,200,22)];
-        
-        accessoryTextField.stringValue = [self.sequencer nameForPage:self.sequencer.currentPageId];
-        
-        NSAlert *editLabelAlert = [NSAlert alertWithMessageText:@"Edit the label for this sequencer page."
-                                                  defaultButton:@"OK"
-                                                alternateButton:@"Cancel"
-                                                    otherButton:nil
-                                      informativeTextWithFormat:@""];
-        [editLabelAlert setAccessoryView:accessoryTextField];
-        
-        [editLabelAlert beginSheetModalForWindow:self.documentWindow modalDelegate:self didEndSelector:@selector(editLabelAlertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+        [self renameCurrentPageStartAlert];
         
     // Otherwise switch page
     } else {
         [self.sequencer setCurrentPageId:(int)sender.selectedSegment];
-    }
-}
-
-- (void) editLabelAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    NSString *newLabel = [alert.accessoryView valueForKey:@"stringValue"];
-    
-    if( returnCode == NSOKButton && ![newLabel isEqualToString:@""] ) {
-        
-        if( newLabel.length > 100 ) // Don't allow a string longer than 100 chars
-            newLabel = [newLabel substringToIndex:100];
-        [self.sequencer setName:newLabel forPage:self.sequencer.currentPageId];
     }
 }
 

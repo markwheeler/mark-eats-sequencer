@@ -24,6 +24,7 @@
 @property Preferences               *sharedPreferences;
 
 - (void) clearPatternStartAlert;
+- (void) renameCurrentPageStartAlert;
 - (void) showClockLateIndicator;
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
