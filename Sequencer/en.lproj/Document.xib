@@ -2,9 +2,9 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12F37</string>
+		<string key="IBDocument.SystemVersion">12F45</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.39</string>
+		<string key="IBDocument.AppKitVersion">1187.40</string>
 		<string key="IBDocument.HIToolboxVersion">626.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1453,7 +1453,7 @@
 									<object class="NSTextFieldCell" key="NSCell" id="948604558">
 										<int key="NSCellFlags">68157504</int>
 										<int key="NSCellFlags2">138413056</int>
-										<string key="NSContents">Shift pattern</string>
+										<string key="NSContents">Shift notes</string>
 										<reference key="NSSupport" ref="26"/>
 										<string key="NSCellIdentifier">_NS:1535</string>
 										<reference key="NSControlView" ref="737035910"/>
@@ -1634,10 +1634,9 @@
 				<bool key="NSSharedInstance">YES</bool>
 			</object>
 			<object class="NSCustomView" id="817567821">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">268</int>
 				<string key="NSFrameSize">{163, 96}</string>
-				<reference key="NSSuperview"/>
 				<string key="NSReuseIdentifierKey">_NS:9</string>
 				<string key="NSClassName">NSView</string>
 			</object>
@@ -5590,95 +5589,6 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">Document</string>
 					<string key="superclassName">NSDocument</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="bpmStepper:">NSStepper</string>
-						<string key="bpmTextField:">NSTextField</string>
-						<string key="currentPageSegmentedControl:">NSSegmentedControl</string>
-						<string key="currentPatternSegmentedControl:">NSSegmentedControl</string>
-						<string key="debugGridViewFloatingToolbarLength:">NSSegmentedControl</string>
-						<string key="debugGridViewFloatingToolbarShiftPattern:">NSSegmentedControl</string>
-						<string key="debugGridViewFloatingToolbarVelocity:">NSSegmentedControl</string>
-						<string key="pagePlaybackControls:">NSSegmentedControl</string>
-						<string key="patternQuantizationPopup:">NSPopUpButton</string>
-						<string key="scalesOpenSheetButton:">NSButton</string>
-						<string key="sequencerPlaybackControls:">NSSegmentedControl</string>
-						<string key="stepLengthPopup:">NSPopUpButton</string>
-						<string key="stepQuantizationPopup:">NSPopUpButton</string>
-						<string key="swingPopup:">NSPopUpButton</string>
-						<string key="transposeStepper:">NSStepper</string>
-						<string key="transposeTextField:">NSTextField</string>
-						<string key="velocityGrooveCheckbox:">NSButton</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="bpmStepper:">
-							<string key="name">bpmStepper:</string>
-							<string key="candidateClassName">NSStepper</string>
-						</object>
-						<object class="IBActionInfo" key="bpmTextField:">
-							<string key="name">bpmTextField:</string>
-							<string key="candidateClassName">NSTextField</string>
-						</object>
-						<object class="IBActionInfo" key="currentPageSegmentedControl:">
-							<string key="name">currentPageSegmentedControl:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="currentPatternSegmentedControl:">
-							<string key="name">currentPatternSegmentedControl:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="debugGridViewFloatingToolbarLength:">
-							<string key="name">debugGridViewFloatingToolbarLength:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="debugGridViewFloatingToolbarShiftPattern:">
-							<string key="name">debugGridViewFloatingToolbarShiftPattern:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="debugGridViewFloatingToolbarVelocity:">
-							<string key="name">debugGridViewFloatingToolbarVelocity:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="pagePlaybackControls:">
-							<string key="name">pagePlaybackControls:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="patternQuantizationPopup:">
-							<string key="name">patternQuantizationPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="scalesOpenSheetButton:">
-							<string key="name">scalesOpenSheetButton:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBActionInfo" key="sequencerPlaybackControls:">
-							<string key="name">sequencerPlaybackControls:</string>
-							<string key="candidateClassName">NSSegmentedControl</string>
-						</object>
-						<object class="IBActionInfo" key="stepLengthPopup:">
-							<string key="name">stepLengthPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="stepQuantizationPopup:">
-							<string key="name">stepQuantizationPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="swingPopup:">
-							<string key="name">swingPopup:</string>
-							<string key="candidateClassName">NSPopUpButton</string>
-						</object>
-						<object class="IBActionInfo" key="transposeStepper:">
-							<string key="name">transposeStepper:</string>
-							<string key="candidateClassName">NSStepper</string>
-						</object>
-						<object class="IBActionInfo" key="transposeTextField:">
-							<string key="name">transposeTextField:</string>
-							<string key="candidateClassName">NSTextField</string>
-						</object>
-						<object class="IBActionInfo" key="velocityGrooveCheckbox:">
-							<string key="name">velocityGrooveCheckbox:</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="bpmStepper">NSStepper</string>
 						<string key="bpmTextField">NSTextField</string>
