@@ -46,8 +46,8 @@
     self.song = [[SequencerSong alloc] init];
     self.state = [[SequencerState alloc] init];
     
-    self.stepQuantizationArray = [EatsQuantizationUtils stepQuantizationArrayWithMinimum:MIN_QUANTIZATION andMaximum:MAX_QUANTIZATION];
-    self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayWithMinimum:MIN_QUANTIZATION andMaximum:MAX_QUANTIZATION forGridWidth:self.sharedPreferences.gridWidth];
+    self.stepQuantizationArray = [EatsQuantizationUtils stepQuantizationArray];
+    self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayForGridWidth:self.sharedPreferences.gridWidth];
     self.swingArray = [EatsSwingUtils swingArray];
     
     // Create the default song
@@ -123,7 +123,7 @@
 {
     dispatch_sync(self.sequencerQueue, ^(void) {
         
-        self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayWithMinimum:MIN_QUANTIZATION andMaximum:MAX_QUANTIZATION forGridWidth:self.sharedPreferences.gridWidth];
+        self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayForGridWidth:self.sharedPreferences.gridWidth];
         
     });
     

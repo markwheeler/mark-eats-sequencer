@@ -11,9 +11,9 @@
 @interface EatsQuantizationUtils : NSObject
 
 // Returns an array of dictionary objects with all the step quantization settings
-+ (NSArray *) stepQuantizationArrayWithMinimum:(uint)min andMaximum:(uint)max;
++ (NSArray *) stepQuantizationArray;
 
 // Returns an array of dictionary objects with all the pattern quantization settings
-+ (NSArray *) patternQuantizationArrayWithMinimum:(uint)min andMaximum:(uint)max forGridWidth:(uint)gridWidth;
++ (NSArray *) patternQuantizationArrayForGridWidth:(uint)gridWidth;
 
 @end

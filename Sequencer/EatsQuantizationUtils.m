@@ -10,41 +10,71 @@
 
 @implementation EatsQuantizationUtils
 
-+ (NSArray *) stepQuantizationArrayWithMinimum:(uint)min andMaximum:(uint)max
++ (NSArray *) stepQuantizationArray
 {
+    NSArray *quantizationValues = [NSArray arrayWithObjects:[NSNumber numberWithInt:64],
+                                                            [NSNumber numberWithInt:48],
+                                                            [NSNumber numberWithInt:32],
+                                                            [NSNumber numberWithInt:24],
+                                                            [NSNumber numberWithInt:16],
+                                                            [NSNumber numberWithInt:12],
+                                                            [NSNumber numberWithInt:8],
+                                                            [NSNumber numberWithInt:6],
+                                                            [NSNumber numberWithInt:4],
+                                                            [NSNumber numberWithInt:3],
+                                                            [NSNumber numberWithInt:2],
+                                                            [NSNumber numberWithInt:1],
+                                                            nil];
+    
     NSMutableArray *stepQuantizationArray = [NSMutableArray array];
-    int quantizationSetting = min;
-    while( quantizationSetting >= max ) {
+    
+    for( NSNumber *quantizationValue in quantizationValues ) {
         
-        NSMutableDictionary *quantization = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:quantizationSetting], @"quantization", nil];
+        NSMutableDictionary *quantization = [NSMutableDictionary dictionaryWithObjectsAndKeys:quantizationValue, @"quantization", nil];
         
-        if( quantizationSetting == 1)
+        if( quantizationValue.intValue == 1)
             [quantization setObject:[NSString stringWithFormat:@"1 bar"] forKey:@"label"];
         else
-            [quantization setObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] forKey:@"label"];
+            [quantization setObject:[NSString stringWithFormat:@"1/%@", quantizationValue] forKey:@"label"];
         
         [stepQuantizationArray insertObject:quantization atIndex:0];
-        quantizationSetting = quantizationSetting / 2;
     }
     
     return stepQuantizationArray;
 }
 
-+ (NSArray *) patternQuantizationArrayWithMinimum:(uint)min andMaximum:(uint)max forGridWidth:(uint)gridWidth;
++ (NSArray *) patternQuantizationArrayForGridWidth:(uint)gridWidth;
 {
+    NSArray *quantizationValues = [NSArray arrayWithObjects:[NSNumber numberWithInt:64],
+                                                            [NSNumber numberWithInt:48],
+                                                            [NSNumber numberWithInt:32],
+                                                            [NSNumber numberWithInt:24],
+                                                            [NSNumber numberWithInt:16],
+                                                            [NSNumber numberWithInt:12],
+                                                            [NSNumber numberWithInt:8],
+                                                            [NSNumber numberWithInt:6],
+                                                            [NSNumber numberWithInt:4],
+                                                            [NSNumber numberWithInt:3],
+                                                            [NSNumber numberWithInt:2],
+                                                            [NSNumber numberWithInt:1],
+                                                            nil];
+    
     NSMutableArray *patternQuantizationArray = [NSMutableArray array];
-    int quantizationSetting = gridWidth;
-    while ( quantizationSetting >= max ) {
+    
+    for( NSNumber *quantizationValue in quantizationValues ) {
         
-        NSMutableDictionary *quantization = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:quantizationSetting], @"quantization", nil];
-        
-        if( quantizationSetting == 1)
-            [quantization setObject:[NSString stringWithFormat:@"1 loop"] forKey:@"label"];
-        else
-            [quantization setObject:[NSString stringWithFormat:@"1/%i", quantizationSetting] forKey:@"label"];
-        
-        [patternQuantizationArray insertObject:quantization atIndex:0];
-        quantizationSetting = quantizationSetting / 2;
+        if( quantizationValue.intValue <= gridWidth ) {
+            
+            NSMutableDictionary *quantization = [NSMutableDictionary dictionaryWithObjectsAndKeys:quantizationValue, @"quantization", nil];
+            
+            if( quantizationValue.intValue == 1)
+                [quantization setObject:[NSString stringWithFormat:@"1 loop"] forKey:@"label"];
+            else
+                [quantization setObject:[NSString stringWithFormat:@"1/%@", quantizationValue] forKey:@"label"];
+            
+            [patternQuantizationArray insertObject:quantization atIndex:0];
+            
+        }
     }
     
     return patternQuantizationArray;
