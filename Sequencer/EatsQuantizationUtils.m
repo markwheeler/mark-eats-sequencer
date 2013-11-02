@@ -46,15 +46,10 @@
 + (NSArray *) patternQuantizationArrayForGridWidth:(uint)gridWidth;
 {
     NSArray *quantizationValues = [NSArray arrayWithObjects:[NSNumber numberWithInt:64],
-                                                            [NSNumber numberWithInt:48],
                                                             [NSNumber numberWithInt:32],
-                                                            [NSNumber numberWithInt:24],
                                                             [NSNumber numberWithInt:16],
-                                                            [NSNumber numberWithInt:12],
                                                             [NSNumber numberWithInt:8],
-                                                            [NSNumber numberWithInt:6],
                                                             [NSNumber numberWithInt:4],
-                                                            [NSNumber numberWithInt:3],
                                                             [NSNumber numberWithInt:2],
                                                             [NSNumber numberWithInt:1],
                                                             nil];
