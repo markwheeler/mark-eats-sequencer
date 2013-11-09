@@ -344,7 +344,7 @@ typedef enum EatsStepAdvance {
                        withVelocity:velocity
                              atTime:ns + nsSwing];
                 
-                // This number in the end here is the MIN_QUANTIZATION steps that the note will be in length.
+                // This number in the end here is the _ticksPerMeasure steps that the note will be in length.
                 int length = roundf( (float)note.length * ( _ticksPerMeasure / (float)[self.sequencer stepLengthForPage:pageId] ) );
                 if( length < 1 )
                     NSLog(@"WARNING: Note added to active notes was too short: %i", length);
@@ -492,7 +492,9 @@ typedef enum EatsStepAdvance {
         [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                  onChannel:[[note objectForKey:@"channel"] intValue]
               withVelocity:[[note objectForKey:@"velocity"] intValue]
-                    atTime:ns + nsSwing];
+                    atTime:ns + nsSwing - 10];
+        // Here we subtract 10ns to make sure that if a note is repeating the 'off' gets processed before the 'on'.
+        // It's a bit hacky (we're actually making all the notes too short) but it's such a tiny ammount that it works fine.
     }
 }
 
