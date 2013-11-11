@@ -860,6 +860,25 @@ typedef enum DocumentPageAnimationDirection {
         BOOL result = ( [[obj valueForKey:@"quantization"] intValue] == [self.sequencer stepLengthForPage:self.sequencer.currentPageId] );
         return result;
     }]];
+    
+    // Change swing popup if swing isn't going to be applied
+    
+    NSColor *fontColor = [NSColor blackColor];
+    
+    if( MIN_QUANTIZATION % [self.sequencer stepLengthForPage:self.sequencer.currentPageId] != 0 ) {
+        fontColor = [NSColor grayColor];
+    }
+    
+    for( NSMenuItem *menuItem in self.swingPopup.itemArray ) {
+        NSMutableAttributedString *attributedTitle = [[NSMutableAttributedString alloc] initWithString:menuItem.title];
+        if( attributedTitle.length > 5 ) {
+            NSRange colorRange = NSMakeRange(4, attributedTitle.length - 4);
+            NSRange fullRange = NSMakeRange(0, attributedTitle.length);
+            [attributedTitle addAttribute:NSForegroundColorAttributeName value:fontColor range:colorRange];
+            [attributedTitle addAttribute:NSFontAttributeName value:[NSFont systemFontOfSize: [NSFont systemFontSize]] range:fullRange];
+            [menuItem setAttributedTitle:attributedTitle];
+        }
+    }
 }
 
 - (void) updateSwingPopup

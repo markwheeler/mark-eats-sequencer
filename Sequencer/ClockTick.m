@@ -267,7 +267,7 @@ typedef enum EatsStepAdvance {
             
             
             // Position of step in the loop 0 - minQuantization (unless loop is shorter)
-            uint position = ( playNow * ( _minQuantization / [self.sequencer stepLengthForPage:pageId] ) );
+            int position = ( playNow * ( _minQuantization / [self.sequencer stepLengthForPage:pageId] ) );
             
             // Use the appropriate value if pattern quantization is set to none
             int patternQuantization = [self.sequencer patternQuantization];
@@ -316,18 +316,23 @@ typedef enum EatsStepAdvance {
                 if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
                     
                     // Reverse position if we're playing in reverse
-                    if( playMode == EatsSequencerPlayMode_Reverse )
-                        position = _minQuantization - 1 - position;
+                    if( playMode == EatsSequencerPlayMode_Reverse ) {
+                        int sixtyFourthsPerStep = _minQuantization / [self.sequencer stepLengthForPage:pageId];
+                        position = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - position;
+                    }
                     
-                    //NSLog(@"Note position: %u", position);
+                    // Don't apply swing to the time sigs that don't fit into the loop
+                    if( _minQuantization % [self.sequencer stepLengthForPage:pageId] == 0 ) {
                     
-                    // Calculate the swing based on note position etc
-                    nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                     type:[self.sequencer swingTypeForPage:pageId]
-                                                                   amount:[self.sequencer swingAmountForPage:pageId]
-                                                                      bpm:_bpm
-                                                             qnPerMeasure:_qnPerMeasure
-                                                          minQuantization:_minQuantization];
+                        // Calculate the swing based on note position etc
+                        nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                         type:[self.sequencer swingTypeForPage:pageId]
+                                                                       amount:[self.sequencer swingAmountForPage:pageId]
+                                                                          bpm:_bpm
+                                                                 qnPerMeasure:_qnPerMeasure
+                                                              minQuantization:_minQuantization];
+                    }
+                    
                     // Velocity groove if enabled
                     if( [self.sequencer velocityGrooveForPage:pageId] ) {
                         velocity = [EatsVelocityUtils calculateVelocityForPosition:position
@@ -468,17 +473,21 @@ typedef enum EatsStepAdvance {
         // Calculate swing
         int pageIdForNote = [[note objectForKey:@"fromPageId"] intValue];
         int playMode = [self.sequencer playModeForPage:pageIdForNote];
-        uint64_t nsSwing = 0;
+        int stepLength = [self.sequencer stepLengthForPage:pageIdForNote];
+        int64_t nsSwing = 0;
+        int64_t nsLengthAdjustment = 0;
         
-        // We only add swing when playing forward or reverse
-        if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
+        // We only add swing when playing forward or reverse && with time sigs that match up to the loop
+        if( ( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) && _minQuantization % stepLength == 0 ) {
             
-            // Position of note in the loop 0 - minQuantization
-            uint position = ( [self.sequencer currentStepForPage:pageIdForNote] * ( _minQuantization / [self.sequencer stepLengthForPage:pageIdForNote] ) );
+            // Position of note in the loop 0 - ticksPerMeasure
+            uint position = ( [self.sequencer currentStepForPage:pageIdForNote] * ( _minQuantization / stepLength ) );
             
             // Reverse position if we're playing in reverse
-            if( playMode == EatsSequencerPlayMode_Reverse )
-                position = _minQuantization - 1 - position;
+            if( playMode == EatsSequencerPlayMode_Reverse ) {
+                int sixtyFourthsPerStep = _minQuantization / stepLength;
+                position = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - position;
+            }
             
             nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
                                                              type:[self.sequencer swingTypeForPage:pageIdForNote]
@@ -486,14 +495,25 @@ typedef enum EatsStepAdvance {
                                                               bpm:_bpm
                                                      qnPerMeasure:_qnPerMeasure
                                                   minQuantization:_minQuantization];
+            
+            // Calculate note length adjustment depending on swing
+            nsLengthAdjustment = [EatsSwingUtils calculateNoteLengthAdjustmentNsForPosition:position
+                                                                                       type:[self.sequencer swingTypeForPage:pageIdForNote]
+                                                                                     amount:[self.sequencer swingAmountForPage:pageIdForNote]
+                                                                                        bpm:_bpm
+                                                                               qnPerMeasure:_qnPerMeasure
+                                                                            minQuantization:_minQuantization
+                                                                                 stepLength:[self.sequencer stepLengthForPage:pageIdForNote]];
+            
+            //NSLog(@"Length adjustment for position %u in ms %f", position, nsLengthAdjustment / 1000000.0);
         }
         
         // Stop it
         [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
                  onChannel:[[note objectForKey:@"channel"] intValue]
               withVelocity:[[note objectForKey:@"velocity"] intValue]
-                    atTime:ns + nsSwing - 10];
-        // Here we subtract 10ns to make sure that if a note is repeating the 'off' gets processed before the 'on'.
+                    atTime:ns + nsSwing + nsLengthAdjustment - 50];
+        // Here we subtract 50ns to make sure that if a note is repeating the 'off' gets processed before the 'on'.
         // It's a bit hacky (we're actually making all the notes too short) but it's such a tiny ammount that it works fine.
     }
 }

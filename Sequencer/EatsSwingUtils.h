@@ -14,6 +14,8 @@
 + (NSArray *) swingArray;
 
 // Returns the amount of time in nanoseconds a note should be pushed back
-+ (uint64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization;
++ (int64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization;
+
++ (int64_t) calculateNoteLengthAdjustmentNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization stepLength:(uint)stepLength;
 
 @end

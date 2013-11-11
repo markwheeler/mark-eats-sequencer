@@ -13,22 +13,22 @@
 + (NSArray *) swingArray
 {
     return [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:50], @"amount", @"8th – 50 (Straight)", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:54], @"amount", @"8th - 54", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:58], @"amount", @"8th - 58", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:63], @"amount", @"8th - 63", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:67], @"amount", @"8th - 67 (Triplets)", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:71], @"amount", @"8th - 71", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:54], @"amount", @"8th – 54", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:58], @"amount", @"8th – 58", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:63], @"amount", @"8th – 63", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:67], @"amount", @"8th – 67 (Triplets)", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:8], @"type", [NSNumber numberWithInt:71], @"amount", @"8th – 71", @"label", nil],
                                      [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"type", [NSNumber numberWithInt:0], @"amount", @"-", @"label", nil],
                                      [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:50], @"amount", @"16th – 50 (Straight)", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:54], @"amount", @"16th - 54", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:58], @"amount", @"16th - 58", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:63], @"amount", @"16th - 63", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:67], @"amount", @"16th - 67 (Triplets)", @"label", nil],
-                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:71], @"amount", @"16th - 71", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:54], @"amount", @"16th – 54", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:58], @"amount", @"16th – 58", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:63], @"amount", @"16th – 63", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:67], @"amount", @"16th – 67 (Triplets)", @"label", nil],
+                                     [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:16], @"type", [NSNumber numberWithInt:71], @"amount", @"16th – 71", @"label", nil],
                                      nil];
 }
 
-+ (uint64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization
++ (int64_t) calculateSwingNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization
 {
     // Position must be 0 - minQuantization - 1
     
@@ -41,7 +41,7 @@
     // Start working in NS
     uint64_t barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
     uint64_t swingCycleInNs = barInNs / ( minQuantization / swingCycle );
-    uint64_t swingInNs = 0;
+    int64_t swingInNs = 0;
     uint64_t positionRelativeToZero;
     uint64_t defaultPositionRelativeToZero;
     
@@ -55,8 +55,8 @@
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
         
     // Make even split shorter
+    // TODO this isn't working correctly for reverse
     } else {
-        
         positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( (swingCycleInNs * ( 1.0 - swingAmountFactor )) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
         defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
@@ -64,6 +64,41 @@
     }
     
     return swingInNs;
+}
+
++ (int64_t) calculateNoteLengthAdjustmentNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization stepLength:(uint)stepLength
+{
+    // Position must be 0 - minQuantization - 1
+    
+    // Number of 64ths in each cycle
+    uint swingCycle = minQuantization / ( swingType / 2 );
+    
+    // This gives us the positioning of the note in 64ths
+    uint positionInSwingCycle = position % swingCycle;
+    
+    // Start working in NS
+    uint64_t barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
+    uint64_t stepLengthInNs = barInNs / stepLength;
+    int64_t additionalLengthNs = 0;
+    
+    float swingAmountFactor = ( swingAmount - 50 ) / 50.0;
+    
+    // Calculate the difference
+    additionalLengthNs = ( stepLengthInNs * swingAmountFactor );
+    
+    // Make odd split longer
+    if( positionInSwingCycle < swingCycle / 2 ) {
+        
+        return additionalLengthNs;
+        
+    // Make even split shorter
+    } else {
+        
+        return additionalLengthNs * -1;
+        
+    }
+    
+    
 }
 
 @end
