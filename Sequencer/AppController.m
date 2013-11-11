@@ -199,8 +199,8 @@
 {
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
-    NSLog(@"Connected to grid controller");
     self.sharedPreferences.gridType = EatsGridType_Monome;
+    NSLog(@"Connected to grid controller: %@\nSize: %ux%u\nType: %i\nVaribright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
@@ -275,6 +275,7 @@
     BOOL stillActive = NO;
     for(NSString *s in [self.sharedCommunicationManager.oscManager outPortLabelArray] ) {
         if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
+            NSLog(@"Auto-connecting...");
             stillActive = YES;
             [self gridControllerConnectToDeviceType:[NSNumber numberWithInt:EatsGridType_Monome ] withOSCLabelOrMIDINode:s];
         }
