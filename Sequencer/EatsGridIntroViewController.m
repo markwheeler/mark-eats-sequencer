@@ -22,6 +22,8 @@
 
 - (void) setupView
 {
+    NSLog(@"Start setting up GridIntroView");
+    
     dispatch_sync(self.gridQueue, ^(void) {
         [self createSubViews];
     });
@@ -31,6 +33,8 @@
     [self addObserver:self forKeyPath:@"height" options:NSKeyValueObservingOptionNew context:NULL];
     
     [self startAnimation];
+    
+    NSLog(@"Done setting up GridIntroView");
 
 }
 
