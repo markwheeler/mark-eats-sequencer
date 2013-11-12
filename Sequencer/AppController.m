@@ -200,7 +200,7 @@
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
     self.sharedPreferences.gridType = EatsGridType_Monome;
-    NSLog(@"Connected to grid controller: %@\nSize: %ux%u\nType: %i\nVaribright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
+    NSLog(@"Connected to grid controller: %@ / Size: %ux%u / Type: %i / Varibright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
