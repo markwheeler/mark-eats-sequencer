@@ -110,7 +110,24 @@ typedef enum EatsStepAdvance {
         }
     }
     
-    [self stopNotes:_activeNotes atTime:ns];
+    // Stop all notes as soon as possible
+    for( NSMutableDictionary *note in _activeNotes ) {
+        
+        uint64_t startedAtNs = [[note objectForKey:@"startedAtNs"] unsignedLongLongValue];
+        uint64_t stopAtNs;
+        
+        if( startedAtNs < ns )
+            stopAtNs = ns;
+        else
+            stopAtNs = startedAtNs + 50; // Adding 50 just to make sure it definitely goes out after the note on
+        
+        // Stop it
+        [self stopMIDINote:[[note objectForKey:@"pitch"] intValue]
+                 onChannel:[[note objectForKey:@"channel"] intValue]
+              withVelocity:[[note objectForKey:@"velocity"] intValue]
+                    atTime:stopAtNs];
+    }
+    
     [_activeNotes removeAllObjects];
 }
 
@@ -368,6 +385,7 @@ typedef enum EatsStepAdvance {
                                              [NSNumber numberWithInt:velocity], @"velocity",
                                              [NSNumber numberWithInt:length], @"lengthRemaining",
                                              [NSNumber numberWithInt:pageId], @"fromPageId",
+                                             [NSNumber numberWithUnsignedLongLong:ns +nsSwing], @"startedAtNs",
                                              nil]];
                     
                 // If the note is playing then either update it's length, or leave it, depending on if this will make it longer or not
