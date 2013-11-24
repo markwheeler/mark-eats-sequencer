@@ -68,7 +68,7 @@
     self.okView.width = self.width;
     self.okView.height = self.height;
     
-    self.subViews = [NSSet setWithObject:self.okView];
+    self.subViews = [NSMutableSet setWithObject:self.okView];
 }
 
 - (void) stopAnimation
