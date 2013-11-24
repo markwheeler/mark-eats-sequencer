@@ -39,7 +39,7 @@
     [self.scaleModePopup addItemsWithTitles:[[[[WMPool pool] scaleDefinitions] allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]];
     [self.scaleModePopup addItemWithTitle:DRUM_MAP];
     if( self.indexOfLastSelectedScaleMode )
-        self.scaleMode = [self.scaleModePopup.itemTitles objectAtIndex:self.indexOfLastSelectedScaleMode];
+        self.scaleMode = [self.scaleModePopup.itemTitles objectAtIndex:self.indexOfLastSelectedScaleMode.intValue];
     else
         self.scaleMode = WMScaleModeIonianMajor;
     if( !self.tonicNoteName )
@@ -68,7 +68,7 @@
 
 - (IBAction)generateButton:(NSButton *)sender {
     
-    self.indexOfLastSelectedScaleMode = self.scaleModePopup.indexOfSelectedItem;
+    self.indexOfLastSelectedScaleMode = [NSNumber numberWithInteger:self.scaleModePopup.indexOfSelectedItem ];
     
     // Check for drum map
     if( [self.scaleMode isEqualToString:DRUM_MAP] )

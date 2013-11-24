@@ -36,7 +36,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic) NSAlert                       *notesOutsideGridAlert;
 @property (nonatomic) NSAlert                       *clearPatternAlert;
 @property (nonatomic) BOOL                          checkedForThingsOutsideGrid;
-@property (nonatomic) uint                          indexOflastSelectedScaleMode;
+@property (nonatomic) NSNumber                      *indexOflastSelectedScaleMode;
 @property (nonatomic) NSString                      *lastTonicNoteName;
 @property (nonatomic) NSPoint                       pageViewFrameOrigin;
 @property (nonatomic) NSPoint                       debugGridViewFloatingToolbarFrameOrigin;
