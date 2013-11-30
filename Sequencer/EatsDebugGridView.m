@@ -7,12 +7,13 @@
 //
 
 #import "EatsDebugGridView.h"
+#import "Sequencer.h"
 #import "SequencerNote.h"
 
 @interface EatsDebugGridView ()
 
-@property (nonatomic) NSNumber              *noteBrightness;
-@property (nonatomic) NSNumber              *lengthBrightness;
+@property (nonatomic) float                 noteBrightness;
+@property (nonatomic) float                 lengthBrightness;
 @property (nonatomic) NSNumber              *playheadBrightness;
 @property (nonatomic) NSNumber              *nextStepBrightness;
 @property (nonatomic) NSNumber              *backgroundBrightness;
@@ -44,16 +45,16 @@
         self.gridHeight = self.rows;
         
         // Brightness settings
-        self.noteBrightness = [NSNumber numberWithFloat:0.2];
-        self.lengthBrightness = [NSNumber numberWithFloat:0.6];
+        self.noteBrightness = 0.0;
+        self.lengthBrightness = 0.55;
         self.playheadBrightness = [NSNumber numberWithFloat:0.6];
         self.nextStepBrightness = [NSNumber numberWithFloat:0.7];
         self.backgroundBrightness = [NSNumber numberWithFloat:0.8];
         
         float stateModifier = 0.1;
         
-        self.noteBrightnessInactive = [NSNumber numberWithFloat:self.noteBrightness.floatValue + 0.5];
-        self.lengthBrightnessInactive = [NSNumber numberWithFloat:self.lengthBrightness.floatValue + stateModifier];
+        self.noteBrightnessInactive = [NSNumber numberWithFloat:self.noteBrightness + 0.5];
+        self.lengthBrightnessInactive = [NSNumber numberWithFloat:self.lengthBrightness + stateModifier];
         self.playheadBrightnessInactive = [NSNumber numberWithFloat:self.playheadBrightness.floatValue + stateModifier];
         self.nextStepBrightnessInactive = [NSNumber numberWithFloat:self.nextStepBrightness.floatValue + stateModifier];
         self.backgroundBrightnessInactive = [NSNumber numberWithFloat:self.backgroundBrightness.floatValue + stateModifier];
@@ -290,6 +291,9 @@
     
     for(SequencerNote *note in self.notes) {
         
+        // Used for calculating brightness based on note velocity
+        float velocityPercentage = (float)note.velocity / SEQUENCER_MIDI_MAX;
+        
         // Put the length tails in
         int tailDraw = note.step;
         int length;
@@ -316,8 +320,10 @@
             
             // Active / inactive
             if( tailDraw < _gridWidth && note.row < _gridHeight ) {
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > _lengthBrightness.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightness];
+                float velocityTailBrightness = 0.1 * ( 1.0 - velocityPercentage );
+                NSNumber *lengthBrightnessWithVelocity = [NSNumber numberWithFloat:_lengthBrightness + velocityTailBrightness];
+                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > lengthBrightnessWithVelocity.floatValue )
+                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:lengthBrightnessWithVelocity];
             } else {
                 if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > _lengthBrightnessInactive.floatValue )
                     [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightnessInactive];
@@ -327,10 +333,12 @@
         }
         
         // Active / inactive
-        if( note.step < _gridWidth && note.row < _gridHeight )
+        if( note.step < _gridWidth && note.row < _gridHeight ) {
             // Put the notes in
-            [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:_noteBrightness];
-        else
+            float velocityNoteBrightness = 0.4 * ( 1.0 - velocityPercentage );
+            NSNumber *noteBrightnessWithVelocity = [NSNumber numberWithFloat:_noteBrightness + velocityNoteBrightness];
+            [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:noteBrightnessWithVelocity];
+        } else
             // Put the notes in
             [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:_noteBrightnessInactive];
         
