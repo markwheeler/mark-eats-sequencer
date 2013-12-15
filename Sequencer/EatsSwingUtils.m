@@ -55,7 +55,6 @@
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
         
     // Make even split shorter
-    // TODO this isn't working correctly for reverse
     } else {
         positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( (swingCycleInNs * ( 1.0 - swingAmountFactor )) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
         defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
@@ -68,6 +67,9 @@
 
 + (int64_t) calculateNoteLengthAdjustmentNsForPosition:(uint)position type:(int)swingType amount:(int)swingAmount bpm:(float)bpm qnPerMeasure:(uint)qnPerMeasure minQuantization:(uint)minQuantization stepLength:(uint)stepLength
 {
+    
+    if( stepLength < swingType ) return 0;
+    
     // Position must be 0 - minQuantization - 1
     
     // Number of 64ths in each cycle
