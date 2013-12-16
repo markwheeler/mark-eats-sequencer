@@ -41,7 +41,7 @@ typedef enum EatsStepAdvance {
 {
     self = [super init];
     if (self) {
-        _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
+        self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedPreferences = [Preferences sharedPreferences];
         self.sequencer = sequencer;
         
@@ -53,8 +53,8 @@ typedef enum EatsStepAdvance {
             NSLog(@"Error getting mach_timebase");
         } else {
             // Set the time factors so we can work in ns
-            _machTimeToNsFactor = (double)timebaseInfo.numer / timebaseInfo.denom;
-            _nsToMachTimeFactor = 1.0 / _machTimeToNsFactor;
+            self.machTimeToNsFactor = (double)timebaseInfo.numer / timebaseInfo.denom;
+            self.nsToMachTimeFactor = 1.0 / self.machTimeToNsFactor;
         }
     }
     return self;

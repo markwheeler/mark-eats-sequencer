@@ -250,12 +250,12 @@
             }
             
             else if([m type] == VVMIDIStopVal) {
-                [_externalClockCalculator resetExternalClock];
+                [self.externalClockCalculator resetExternalClock];
                 [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockStopNotification object:self];
                 
             } else if([m type] == VVMIDIClockVal) {
                 
-                NSNumber *externalBPM = [_externalClockCalculator externalClockTick:m.timestamp];
+                NSNumber *externalBPM = [self.externalClockCalculator externalClockTick:m.timestamp];
                 if( externalBPM ) {
                     [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockBPMNotification object:self userInfo:[NSDictionary dictionaryWithObject:externalBPM forKey:@"bpm"]];
                 }
