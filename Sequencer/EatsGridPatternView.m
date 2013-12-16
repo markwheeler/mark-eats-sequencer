@@ -73,8 +73,6 @@
     NSNumber *wipeBrighnessResult = [NSNumber numberWithInt:15 * self.opacity];
     NSNumber *playheadBrighnessResult = [NSNumber numberWithInt:self.playheadBrightness * self.opacity];
     NSNumber *nextStepBrighnessResult = [NSNumber numberWithInt:self.nextStepBrightness * self.opacity];
-    NSNumber *noteBrightnessResult = [NSNumber numberWithInt:self.noteBrightness * self.opacity];
-    NSNumber *noteLengthBrightnessResult = [NSNumber numberWithInt:self.noteLengthBrightness * self.opacity];
     NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
     
     // Generate the columns with playhead and nextStep
@@ -135,16 +133,35 @@
                 
             }
             
+            // Calculate brightness based on note velocity if supported
+            NSNumber *noteBrightnessWithVelocity;
+            NSNumber *noteLengthBrightnessWithVelocity;
+            
+            if( self.sharedPreferences.gridSupportsVariableBrightness ) {
+                
+                float velocityPercentage = (float)note.velocity / SEQUENCER_MIDI_MAX;
+                
+                float noteBrightness = ( self.noteBrightness / 2.0 ) + ( ( self.noteBrightness / 2.0 ) * velocityPercentage );
+                float lengthBrightness = ( self.noteLengthBrightness / 2.0 ) + ( ( self.noteLengthBrightness / 2.0 ) * velocityPercentage );
+                
+                noteBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:roundf( noteBrightness * self.opacity )];
+                noteLengthBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:roundf( lengthBrightness * self.opacity )];
+                
+            } else {
+                
+                noteBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:self.noteBrightness * self.opacity];
+                noteLengthBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:self.noteLengthBrightness * self.opacity];
+            }
+            
             // Put in the active note while editing
-            NSNumber *noteLengthBrightnessTemp = noteLengthBrightnessResult;
             if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && _mode == EatsPatternViewMode_NoteEdit ) {
                 [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
-                noteLengthBrightnessTemp = [NSNumber numberWithInt:12 * self.opacity];
+                noteLengthBrightnessWithVelocity = [NSNumber numberWithInt:12 * self.opacity];
             }
             
             // Put the rest in (unless there's something brighter there)
             else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < self.noteBrightness * self.opacity )
-                [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:noteBrightnessResult];
+                [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:noteBrightnessWithVelocity];
             
             // Put the length tails in when appropriate
             if( self.sharedPreferences.showNoteLengthOnGrid || ( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row ) ) {
@@ -165,8 +182,8 @@
                     else if( tailDraw >= self.width )
                         tailDraw -= self.width;
                     
-                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessTemp.intValue )
-                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessTemp];
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteBrightnessWithVelocity.intValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessWithVelocity];
                     
                 }
             }

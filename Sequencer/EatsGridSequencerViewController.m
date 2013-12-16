@@ -532,10 +532,10 @@
         if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
             SequencerNote *note = [notification.userInfo valueForKey:@"note"];
             if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
-                [self updatePatternNotes];
                 [self updateNoteVelocity];
-                [self updateView];
             }
+            [self updatePatternNotes];
+            [self updateView];
         }
     });
 }
