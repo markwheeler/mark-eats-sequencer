@@ -234,6 +234,9 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
+    // TODO temp logging to track down bug x6
+    NSLog(@"1 entering note edit mode for: %@", note);
+    
     dispatch_async(self.gridQueue, ^(void) {
         self.patternView.mode = EatsPatternViewMode_NoteEdit;
         self.patternView.enabled = NO;
@@ -267,6 +270,8 @@
         
         [self updateView];
         
+        NSLog(@"2 entering note edit mode for: %@", note);
+        
         dispatch_async(dispatch_get_main_queue(), ^(void) {
             
             self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
@@ -279,6 +284,8 @@
             // Make sure we fire even when the UI is tracking mouse down stuff
             [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
             [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
+            
+            NSLog(@"3 entering note edit mode for: %@", note);
             
         });
     });
@@ -351,6 +358,9 @@
 - (void) animateInNoteEditMode:(NSTimer *)timer
 {
     dispatch_async(self.gridQueue, ^(void) {
+        
+        NSLog(@"4 entering note edit mode");
+        
         self.editNoteAnimationFrame ++;
         
         // From bottom
@@ -383,7 +393,11 @@
             self.editNoteAnimationTimer = nil;
         }
         
+        NSLog(@"5 entering note edit mode");
+        
         [self updateView];
+        
+        NSLog(@"6 entering note edit mode");
     });
 
 }

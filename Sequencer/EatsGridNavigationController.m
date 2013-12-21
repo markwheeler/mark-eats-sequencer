@@ -161,7 +161,7 @@
 #pragma mark - GridView delegate methods
 
 - (void) updateGridWithArray:(NSArray *)gridArray
-{        
+{
     // Only send msgs to the grid controller if we're the active document
     if( !self.isActive ) return;
     

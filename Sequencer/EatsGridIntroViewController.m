@@ -24,8 +24,6 @@
 
 - (void) setupView
 {
-    NSLog(@"Start setting up GridIntroView");
-    
     dispatch_sync(self.gridQueue, ^(void) {
         [self createSubViews];
     });
@@ -51,6 +49,7 @@
                         change:(NSDictionary *)change
                        context:(void *)context {
     
+    NSLog(@"Grid %@ changed", keyPath);
     [self stopAnimation];
     dispatch_async(self.gridQueue, ^(void) {
         [self createSubViews];

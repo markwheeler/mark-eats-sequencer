@@ -14,6 +14,10 @@
 // Takes an NSSet of Dictionary objects, each containing x, y, width, height and a viewArray
 + (NSArray *) combineSubViews:(NSSet *)views gridWidth:(uint)width gridHeight:(uint)height
 {
+    // TODO This is only here to help track down crash on connect bug
+    if( !views.count )
+        NSLog(@"WARNING: No subviews in current view");
+    
     // Combine sub views to create the complete view
     NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:width];
     
@@ -37,6 +41,13 @@
             for( NSArray *column in viewArray ) {
                 y = view.y;
                 for( NSNumber *number in column ) {
+                    
+                    // TODO This is only here to help track down crash on connect bug
+                    if( x >= gridArray.count )
+                        NSLog(@"WARNING: Trying to add pixel beyond gridArray width %@", gridArray);
+                    else if( y >= [[gridArray objectAtIndex:x] count] )
+                        NSLog(@"WARNING: Trying to add pixel beyond gridArray height %@", gridArray);
+                    
                     // Don't put in pixels outside the grid (if the view is hanging off the edge)
                     if( x >= 0 && x < width && y >= 0 && y < height )
                         [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:[[viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y]];
@@ -47,7 +58,7 @@
         }
     }
     
-    return gridArray;
+    return [gridArray copy];
 }
 
 + (float) stepsToPercentage:(int)steps width:(uint)width

@@ -72,6 +72,9 @@
 
 - (void) redrawGridController:(NSArray *)gridArray
 {
+    // TODO just for testing connect bug
+    if( !gridArray.count )
+        NSLog(@"WARNING: redrawGridController: gridArray arrived empty");
     
     // Cut up the complete 2D array into 8x8 1D arrays ready for sending to the monome
     
@@ -79,13 +82,13 @@
     for(int i = 0; i < [gridArray count] / 8; i++) {
         
         // ...and for each 8-high block within those
-        for(int j = 0; j < [[gridArray objectAtIndex:0] count] / 8; j++) {
+        for( int j = 0; j < [[gridArray objectAtIndex:0] count] / 8; j++ ) {
             
             // Create a 1D array that's going to get sent as a map
             NSMutableArray *levelsArray = [NSMutableArray arrayWithCapacity:64];
             
-            for(int y = 0 + 8 * j; y < 8 * (j + 1); y++) {
-                for(NSUInteger x = 0 + 8 * i; x < 8 * (i + 1); x++) {
+            for( int y = 0 + 8 * j; y < 8 * (j + 1); y++ ) {
+                for( NSUInteger x = 0 + 8 * i; x < 8 * (i + 1); x++ ) {
                     [levelsArray addObject:[[gridArray objectAtIndex:x] objectAtIndex:y]];
                 }
             }
@@ -158,6 +161,10 @@
 
 - (void) monomeLEDLevelMapXOffset:(NSUInteger)x yOffset:(NSUInteger)y levels:(NSArray *)l;
 {
+    // TODO just for testing connect bug
+    if( !l.count )
+        NSLog(@"WARNING: monomeLEDLevelMapXOffset: levels arrived empty");
+    
     NSString *oscAddress;
     NSMutableArray *levels;
     
@@ -171,8 +178,8 @@
         
         // Go through and make everything binary in a new array 'levels'
         levels = [NSMutableArray arrayWithCapacity:64];
-        for(NSNumber *level in l) {
-            if(level.intValue > BRIGHTNESS_CUTOFF)
+        for( NSNumber *level in l ) {
+            if( level.intValue > BRIGHTNESS_CUTOFF )
                 [levels addObject:[NSNumber numberWithUnsignedInt:1]];
             else
                 [levels addObject:[NSNumber numberWithUnsignedInt:0]];
@@ -210,7 +217,7 @@
         }
         
         // When we have a row we bitmask it and push it into that array
-        [bitMaskedLevels addObject:[NSNumber numberWithLong:strtol([binaryRow UTF8String], NULL, 2)]];
+        [bitMaskedLevels addObject:[NSNumber numberWithLong:strtol( [binaryRow UTF8String], NULL, 2 )]];
         binaryRow = [NSMutableString string];
     }
     
