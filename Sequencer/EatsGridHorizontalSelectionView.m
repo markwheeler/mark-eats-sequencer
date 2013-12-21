@@ -22,8 +22,8 @@
 {
     if( !self.visible ) return nil;
     
-    uint startPercentageAsStep = [EatsGridUtils percentageToSteps:_startPercentage width:self.width];
-    uint endPercentageAsStep = [EatsGridUtils percentageToSteps:_endPercentage width:self.width];
+    uint startPercentageAsStep = [EatsGridUtils percentageToSteps:self.startPercentage width:self.width];
+    uint endPercentageAsStep = [EatsGridUtils percentageToSteps:self.endPercentage width:self.width];
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -35,7 +35,7 @@
             
             if( x == startPercentageAsStep || x == endPercentageAsStep)
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( x > startPercentageAsStep && x < endPercentageAsStep && _fillBar )
+            else if ( x > startPercentageAsStep && x < endPercentageAsStep && self.fillBar )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -50,22 +50,22 @@
     // Down
     if( down ) {
         
-        if( _lastDownKey ) {
+        if( self.lastDownKey ) {
             
-            _startPercentage = [EatsGridUtils stepsToPercentage:[[_lastDownKey valueForKey:@"x"] intValue] width:self.width];
-            _endPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
+            self.startPercentage = [EatsGridUtils stepsToPercentage:[[self.lastDownKey valueForKey:@"x"] intValue] width:self.width];
+            self.endPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
             
             // Maintain order
-            if ( _startPercentage > _endPercentage ) {
-                _endPercentage = _startPercentage;
-                _startPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
+            if ( self.startPercentage > self.endPercentage ) {
+                self.endPercentage = self.startPercentage;
+                self.startPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
             }
             
-            _setSelection = YES;
+            self.setSelection = YES;
             
         } else {
             // Log the last press
-            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSelectionViewUpdated:)])
@@ -75,13 +75,13 @@
     } else {
         
         // Remove lastDownKey if it's this one and put a 1 step selection haven't already drawn a selection
-        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
-            if (!_setSelection ) {    
-                _startPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
-                _endPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
+        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if (!self.setSelection ) {
+                self.startPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
+                self.endPercentage = [EatsGridUtils stepsToPercentage:x width:self.width];
             }
-            _lastDownKey = nil;
-            _setSelection = NO;
+            self.lastDownKey = nil;
+            self.setSelection = NO;
         }
 
     }

@@ -87,7 +87,7 @@
         // Create the sub views
         
         // Page buttons
-        _pageButtons = [[NSMutableArray alloc] initWithCapacity:8];
+        self.pageButtons = [[NSMutableArray alloc] initWithCapacity:8];
         for( int i = 0; i < 8; i ++ ) {
             EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
             button.delegate = self;
@@ -96,7 +96,7 @@
             if( self.width < 16 )
                 button.y ++;
             button.visible = NO;
-            [_pageButtons addObject:button];
+            [self.pageButtons addObject:button];
         }
         
         // Pattern buttons
@@ -106,33 +106,33 @@
         
         // Pattern buttons for this page on small grids
         if( self.height < 16 ) {
-            _patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+            self.patternButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
             for( int i = 0; i < numberOfPatterns; i ++ ) {
                 EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
                 button.delegate = self;
                 button.x = i;
                 button.y = - (self.height - 4) + 3;
                 button.visible = NO;
-                [_patternButtons addObject:button];
+                [self.patternButtons addObject:button];
             }
         }
         
         // Pattern buttons for other pages on small grids
         if( self.height < 16 && self.width > 8 ) {
-            _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
+            self.patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns];
             for( int i = 0; i < numberOfPatterns; i ++ ) {
                 EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
                 button.delegate = self;
                 button.x = i;
                 button.y = - (self.height - 4) + 2;
                 button.visible = NO;
-                [_patternsOnOtherPagesButtons addObject:button];
+                [self.patternsOnOtherPagesButtons addObject:button];
             }
         }
         
         // Pattern buttons for all pages on large grids
         if( self.height > 8 ) {
-            _patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns * 8];
+            self.patternsOnOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:numberOfPatterns * 8];
             // Rows
             for( int i = 0; i < 8; i ++ ) {
                 // Columns
@@ -145,51 +145,51 @@
                         button.y ++;
                     button.inactiveBrightness = 4;
                     button.visible = NO;
-                    [_patternsOnOtherPagesButtons addObject:button];
+                    [self.patternsOnOtherPagesButtons addObject:button];
                 }
             }
         }
         
         // Scrub buttons for other pages, if there's space
         if( self.height > 8 ) {
-            _scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
+            self.scrubOtherPagesButtons = [[NSMutableArray alloc] initWithCapacity:self.width];
             for( int i = 0; i < self.width; i ++ ) {
                 EatsGridButtonView *button = [[EatsGridButtonView alloc] init];
                 button.delegate = self;
                 button.x = i;
                 button.y = - 1;
                 button.visible = NO;
-                [_scrubOtherPagesButtons addObject:button];
+                [self.scrubOtherPagesButtons addObject:button];
             }
         }
         
         // Transpose slider, if there's space
         if( self.height > 8 && self.width > 8 ) {
-            _transposeView = [[EatsGridHorizontalShiftView alloc] init];
-            _transposeView.delegate = self;
-            _transposeView.x = 0;
-            _transposeView.y = - 2;
-            _transposeView.width = self.width;
-            _transposeView.height = 1;
-            _transposeView.visible = NO;
+            self.transposeView = [[EatsGridHorizontalShiftView alloc] init];
+            self.transposeView.delegate = self;
+            self.transposeView.x = 0;
+            self.transposeView.y = - 2;
+            self.transposeView.width = self.width;
+            self.transposeView.height = 1;
+            self.transposeView.visible = NO;
         }
         
         // Play mode buttons
-        _forwardButton = [[EatsGridButtonView alloc] init];
-        _forwardButton.x = self.width - 8;
+        self.forwardButton = [[EatsGridButtonView alloc] init];
+        self.forwardButton.x = self.width - 8;
         
-        _reverseButton = [[EatsGridButtonView alloc] init];
-        _reverseButton.x = self.width - 7;
+        self.reverseButton = [[EatsGridButtonView alloc] init];
+        self.reverseButton.x = self.width - 7;
         
-        _randomButton = [[EatsGridButtonView alloc] init];
-        _randomButton.x = self.width - 6;
+        self.randomButton = [[EatsGridButtonView alloc] init];
+        self.randomButton.x = self.width - 6;
         
-        _sliceButton = [[EatsGridButtonView alloc] init];
-        _sliceButton.x = self.width - 5;
+        self.sliceButton = [[EatsGridButtonView alloc] init];
+        self.sliceButton.x = self.width - 5;
         
-        _playModeButtons = [NSArray arrayWithObjects:_forwardButton, _reverseButton, _randomButton, _sliceButton, nil];
+        self.playModeButtons = [NSArray arrayWithObjects:self.forwardButton, self.reverseButton, self.randomButton, self.sliceButton, nil];
         
-        for( EatsGridButtonView *button in _playModeButtons ) {
+        for( EatsGridButtonView *button in self.playModeButtons ) {
             button.delegate = self;
             button.y = - (self.height - 4) + 1;
             button.inactiveBrightness = 5;
@@ -197,59 +197,59 @@
         }
         
         // Control buttons
-        _bpmDecrementButton = [[EatsGridButtonView alloc] init];
-        _bpmDecrementButton.x = self.width - 4;
+        self.bpmDecrementButton = [[EatsGridButtonView alloc] init];
+        self.bpmDecrementButton.x = self.width - 4;
         
-        _bpmIncrementButton = [[EatsGridButtonView alloc] init];
-        _bpmIncrementButton.x = self.width - 3;
+        self.bpmIncrementButton = [[EatsGridButtonView alloc] init];
+        self.bpmIncrementButton.x = self.width - 3;
         
-        _clearButton = [[EatsGridButtonView alloc] init];
-        _clearButton.x = self.width - 2;
-        _clearButton.inactiveBrightness = 5;
+        self.clearButton = [[EatsGridButtonView alloc] init];
+        self.clearButton.x = self.width - 2;
+        self.clearButton.inactiveBrightness = 5;
         
-        _exitButton = [[EatsGridButtonView alloc] init];
-        _exitButton.x = self.width - 1;
-        _exitButton.inactiveBrightness = 5;
+        self.exitButton = [[EatsGridButtonView alloc] init];
+        self.exitButton.x = self.width - 1;
+        self.exitButton.inactiveBrightness = 5;
         
-        _controlButtons = [NSArray arrayWithObjects:_bpmDecrementButton, _bpmIncrementButton, _clearButton, _exitButton, nil];
+        self.controlButtons = [NSArray arrayWithObjects:self.bpmDecrementButton, self.bpmIncrementButton, self.clearButton, self.exitButton, nil];
         
-        for( EatsGridButtonView *button in _controlButtons ) {
+        for( EatsGridButtonView *button in self.controlButtons ) {
             button.delegate = self;
             button.y = - (self.height - 4) + 1;
             button.visible = NO;
         }
         
         // Loop length selection view
-        _loopBraceView = [[EatsGridLoopBraceView alloc] init];
-        _loopBraceView.delegate = self;
-        _loopBraceView.x = 0;
-        _loopBraceView.y = 0;
-        _loopBraceView.width = self.width;
-        _loopBraceView.height = 1;
-        _loopBraceView.fillBar = YES;
+        self.loopBraceView = [[EatsGridLoopBraceView alloc] init];
+        self.loopBraceView.delegate = self;
+        self.loopBraceView.x = 0;
+        self.loopBraceView.y = 0;
+        self.loopBraceView.width = self.width;
+        self.loopBraceView.height = 1;
+        self.loopBraceView.fillBar = YES;
         
         // Pattern view
-        _patternView = [[EatsGridPatternView alloc] init];
-        _patternView.delegate = self;
-        _patternView.x = 0;
-        _patternView.y = 1;
-        _patternView.width = self.width;
-        _patternView.height = self.height - 1;
-        _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-        _patternView.mode = EatsPatternViewMode_Play;
-        _patternView.patternHeight = self.height;
+        self.patternView = [[EatsGridPatternView alloc] init];
+        self.patternView.delegate = self;
+        self.patternView.x = 0;
+        self.patternView.y = 1;
+        self.patternView.width = self.width;
+        self.patternView.height = self.height - 1;
+        self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+        self.patternView.mode = EatsPatternViewMode_Play;
+        self.patternView.patternHeight = self.height;
         
         // Add everything to sub views
-        self.subViews = [[NSMutableSet alloc] initWithObjects:_loopBraceView, _patternView, nil];
-        [self.subViews addObjectsFromArray:_pageButtons];
-        [self.subViews addObjectsFromArray:_patternButtons];
-        [self.subViews addObjectsFromArray:_patternsOnOtherPagesButtons];
+        self.subViews = [[NSMutableSet alloc] initWithObjects:self.loopBraceView, self.patternView, nil];
+        [self.subViews addObjectsFromArray:self.pageButtons];
+        [self.subViews addObjectsFromArray:self.patternButtons];
+        [self.subViews addObjectsFromArray:self.patternsOnOtherPagesButtons];
         if( self.height > 8 )
-            [self.subViews addObjectsFromArray:_scrubOtherPagesButtons];
+            [self.subViews addObjectsFromArray:self.scrubOtherPagesButtons];
         if( self.height > 8 && self.width > 8 )
-            [self.subViews addObject:_transposeView];
-        [self.subViews addObjectsFromArray:_playModeButtons];
-        [self.subViews addObjectsFromArray:_controlButtons];
+            [self.subViews addObject:self.transposeView];
+        [self.subViews addObjectsFromArray:self.playModeButtons];
+        [self.subViews addObjectsFromArray:self.controlButtons];
         
         // Update everything
         [self updatePage];
@@ -314,11 +314,11 @@
 
 - (void) updateView
 {
-    if( _sharedPreferences.gridSupportsVariableBrightness )
-        _transposeView.useWideBrightnessRange = YES;
+    if( self.sharedPreferences.gridSupportsVariableBrightness )
+        self.transposeView.useWideBrightnessRange = YES;
         
     else
-        _transposeView.useWideBrightnessRange = NO;
+        self.transposeView.useWideBrightnessRange = NO;
     
     [super updateView];
 }
@@ -355,7 +355,7 @@
         [timer invalidate];
         
         // Final frame
-        if( _patternView.height == self.height - 1 ) {
+        if( self.patternView.height == self.height - 1 ) {
             self.inOutAnimationTimer = nil;
             
             [self showView:[NSNumber numberWithInt:EatsGridViewType_Sequencer]];
@@ -405,59 +405,59 @@
 
 - (void) animateInOutIncrement:(int)amount
 {
-    if( _transposeView ) {
-        _transposeView.y += amount;
-        if( _transposeView.y < 0 )
-            _transposeView.visible = NO;
+    if( self.transposeView ) {
+        self.transposeView.y += amount;
+        if( self.transposeView.y < 0 )
+            self.transposeView.visible = NO;
         else
-            _transposeView.visible = YES;
+            self.transposeView.visible = YES;
     }
     
-    _loopBraceView.y += amount;
-    if( _loopBraceView.y < 0 )
-        _loopBraceView.visible = NO;
+    self.loopBraceView.y += amount;
+    if( self.loopBraceView.y < 0 )
+        self.loopBraceView.visible = NO;
     else
-        _loopBraceView.visible = YES;
+        self.loopBraceView.visible = YES;
     
-    _patternView.y += amount;
-    _patternView.height += amount * -1;
+    self.patternView.y += amount;
+    self.patternView.height += amount * -1;
     
-    for (EatsGridButtonView *button in _pageButtons) {
+    for (EatsGridButtonView *button in self.pageButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
         else
             button.visible = YES;
     }
-    for (EatsGridButtonView *button in _patternButtons) {
+    for (EatsGridButtonView *button in self.patternButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
         else
             button.visible = YES;
     }
-    for (EatsGridButtonView *button in _patternsOnOtherPagesButtons) {
+    for (EatsGridButtonView *button in self.patternsOnOtherPagesButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
         else
             button.visible = YES;
     }
-    for (EatsGridButtonView *button in _scrubOtherPagesButtons) {
+    for (EatsGridButtonView *button in self.scrubOtherPagesButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
         else
             button.visible = YES;
     }
-    for (EatsGridButtonView *button in _playModeButtons) {
+    for (EatsGridButtonView *button in self.playModeButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
         else
             button.visible = YES;
     }
-    for (EatsGridButtonView *button in _controlButtons) {
+    for (EatsGridButtonView *button in self.controlButtons) {
         button.y += amount;
         if( button.y < 0 )
             button.visible = NO;
@@ -481,8 +481,8 @@
         // Final frame
         if( self.pageAnimationFrame == self.width - 5 ) {
             self.pageAnimationTimer = nil;
-            _loopBraceView.enabled = YES;
-            _patternView.enabled = YES;
+            self.loopBraceView.enabled = YES;
+            self.patternView.enabled = YES;
             
         } else {
             [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
@@ -505,8 +505,8 @@
         // Final frame
         if( self.pageAnimationFrame == self.width - 5 ) {
             self.pageAnimationTimer = nil;
-            _loopBraceView.enabled = YES;
-            _patternView.enabled = YES;
+            self.loopBraceView.enabled = YES;
+            self.patternView.enabled = YES;
             
         } else {
             [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
@@ -551,20 +551,20 @@
 - (void) animatePageIncrement:(int)amount
 {
     
-    _loopBraceView.x += amount;
-    _patternView.x += amount;
+    self.loopBraceView.x += amount;
+    self.patternView.x += amount;
 
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         
         float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 5 );
         float opacity = ( 0.7 * percentageOfAnimationComplete ) + 0.3;
         
-        _loopBraceView.opacity = opacity;
-        _patternView.opacity = opacity;
+        self.loopBraceView.opacity = opacity;
+        self.patternView.opacity = opacity;
         
-    } else if( _loopBraceView.opacity != 1 || _patternView.opacity != 1 ) {
-        _loopBraceView.opacity = 1;
-        _patternView.opacity = 1;
+    } else if( self.loopBraceView.opacity != 1 || self.patternView.opacity != 1 ) {
+        self.loopBraceView.opacity = 1;
+        self.patternView.opacity = 1;
     }
 }
 
@@ -610,12 +610,12 @@
 - (void) clearIncrement:(NSTimer *)timer
 {
     dispatch_async(self.gridQueue, ^(void) {
-        if( _patternView.wipe >= 100 ) {
+        if( self.patternView.wipe >= 100 ) {
             [self stopClear];
             [self.sequencer clearNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
             
         } else {
-            _patternView.wipe = _patternView.wipe + 10;
+            self.patternView.wipe = self.patternView.wipe + 10;
             [self updateView];
         }
     });
@@ -623,10 +623,10 @@
 
 - (void) stopClear
 {
-    [_clearTimer invalidate];
-    _clearTimer = nil;
-    _patternView.wipe = 0;
-    _clearButton.buttonState = EatsButtonViewState_Inactive;
+    [self.clearTimer invalidate];
+    self.clearTimer = nil;
+    self.patternView.wipe = 0;
+    self.clearButton.buttonState = EatsButtonViewState_Inactive;
 }
 
 
@@ -639,13 +639,13 @@
     [self.pageAnimationTimer invalidate];
     self.pageAnimationTimer = nil;
     
-    _loopBraceView.x = - self.width + 4;
-    _patternView.x = - self.width + 4;
-    _loopBraceView.enabled = NO;
-    _patternView.enabled = NO;
+    self.loopBraceView.x = - self.width + 4;
+    self.patternView.x = - self.width + 4;
+    self.loopBraceView.enabled = NO;
+    self.patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
-        _loopBraceView.opacity = 0;
-        _patternView.opacity = 0;
+        self.loopBraceView.opacity = 0;
+        self.patternView.opacity = 0;
     }
     self.pageAnimationFrame = 0;
     [self animatePageIncrement:1];
@@ -660,13 +660,13 @@
     [self.pageAnimationTimer invalidate];
     self.pageAnimationTimer = nil;
     
-    _loopBraceView.x = self.width - 4;
-    _patternView.x = self.width - 4;
-    _loopBraceView.enabled = NO;
-    _patternView.enabled = NO;
+    self.loopBraceView.x = self.width - 4;
+    self.patternView.x = self.width - 4;
+    self.loopBraceView.enabled = NO;
+    self.patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
-        _loopBraceView.opacity = 0;
-        _patternView.opacity = 0;
+        self.loopBraceView.opacity = 0;
+        self.patternView.opacity = 0;
     }
     self.pageAnimationFrame = 0;
     [self animatePageIncrement:-1];
@@ -678,7 +678,7 @@
 - (void) updatePage
 {
     uint i = 0;
-    for ( EatsGridButtonView *button in _pageButtons ) {
+    for ( EatsGridButtonView *button in self.pageButtons ) {
         if( i == self.sequencer.currentPageId )
             button.buttonState = EatsButtonViewState_Active;
         else if( button.buttonState != EatsButtonViewState_Down )
@@ -690,7 +690,7 @@
 - (void) updatePlayMode
 {
     uint i = 0;
-    for ( EatsGridButtonView *button in _playModeButtons ) {
+    for ( EatsGridButtonView *button in self.playModeButtons ) {
         if( i == [self.sequencer playModeForPage:self.sequencer.currentPageId] - 1 )
             button.buttonState = EatsButtonViewState_Active;
         else if( button.buttonState != EatsButtonViewState_Down )
@@ -703,7 +703,7 @@
 {
     // Set all other page pattern buttons to 0 (not required on large grids)
     if( self.height < 16 ) {
-        for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
+        for ( EatsGridButtonView *button in self.patternsOnOtherPagesButtons ) {
             if( button.buttonState != EatsButtonViewState_Down )
                 button.buttonState = EatsButtonViewState_Inactive;
             button.inactiveBrightness = 0;
@@ -727,7 +727,7 @@
                 range.length = 16;
             range.location = pageId * range.length;
             
-            NSArray *patternsRow = [_patternsOnOtherPagesButtons subarrayWithRange:range];
+            NSArray *patternsRow = [self.patternsOnOtherPagesButtons subarrayWithRange:range];
             
             patternButtonId = 0;
             for ( EatsGridButtonView *button in patternsRow ) {
@@ -764,7 +764,7 @@
             if( pageId == self.sequencer.currentPageId ) {
                 
                 patternButtonId = 0;
-                for ( EatsGridButtonView *button in _patternButtons ) {
+                for ( EatsGridButtonView *button in self.patternButtons ) {
                     
                     // Activate playing or next if pattern quantization is off
                     if( patternButtonId == currentPatternId && playMode != EatsSequencerPlayMode_Pause )
@@ -791,7 +791,7 @@
             } else if( playMode != EatsSequencerPlayMode_Pause )  {
                 
                 patternButtonId = 0;
-                for ( EatsGridButtonView *button in _patternsOnOtherPagesButtons ) {
+                for ( EatsGridButtonView *button in self.patternsOnOtherPagesButtons ) {
                     
                     // Playing pattern
                     if( patternButtonId == currentPatternId )
@@ -809,29 +809,29 @@
 
 - (void) updateTranspose
 {
-    _transposeView.shift = [self.sequencer transposeForPage:self.sequencer.currentPageId];
-    _transposeView.zeroStep = [self.sequencer transposeZeroStepForPage:self.sequencer.currentPageId];
+    self.transposeView.shift = [self.sequencer transposeForPage:self.sequencer.currentPageId];
+    self.transposeView.zeroStep = [self.sequencer transposeZeroStepForPage:self.sequencer.currentPageId];
 }
 
 - (void) updateScrubOtherPages
 {
     // Set all other page pattern buttons to 0
-    for ( EatsGridButtonView *button in _scrubOtherPagesButtons ) {
+    for ( EatsGridButtonView *button in self.scrubOtherPagesButtons ) {
         if( button.buttonState != EatsButtonViewState_Down )
             button.buttonState = EatsButtonViewState_Inactive;
     }
     
     for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
         if( pageId != self.sequencer.currentPageId && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Pause )
-            [[_scrubOtherPagesButtons objectAtIndex:[self.sequencer currentStepForPage:pageId] ] setButtonState:EatsButtonViewState_Active];
+            [[self.scrubOtherPagesButtons objectAtIndex:[self.sequencer currentStepForPage:pageId] ] setButtonState:EatsButtonViewState_Active];
     }
 }
 
 
 - (void) updateLoop
 {
-    _loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:[self.sequencer loopStartForPage:self.sequencer.currentPageId] width:self.width];
-    _loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:[self.sequencer loopEndForPage:self.sequencer.currentPageId] width:self.width];
+    self.loopBraceView.startPercentage = [EatsGridUtils stepsToPercentage:[self.sequencer loopStartForPage:self.sequencer.currentPageId] width:self.width];
+    self.loopBraceView.endPercentage = [EatsGridUtils stepsToPercentage:[self.sequencer loopEndForPage:self.sequencer.currentPageId] width:self.width];
 }
 
 - (void) updatePatternNotes
@@ -1021,11 +1021,11 @@
         BOOL buttonDown = [down boolValue];
             
         // Page buttons
-        if ( [_pageButtons containsObject:sender] ) {
+        if ( [self.pageButtons containsObject:sender] ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
-                [self.sequencer setCurrentPageId:(int)[_pageButtons indexOfObject:sender]];
+                [self.sequencer setCurrentPageId:(int)[self.pageButtons indexOfObject:sender]];
                 
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
@@ -1034,37 +1034,37 @@
         }
         
         // Pattern buttons
-        if ( [_patternButtons containsObject:sender] ) {
+        if ( [self.patternButtons containsObject:sender] ) {
             
-            uint pressedPattern = (uint)[_patternButtons indexOfObject:sender];
+            uint pressedPattern = (uint)[self.patternButtons indexOfObject:sender];
             
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
-                _firstPatternKeyHasBeenPressed = YES;
+                self.firstPatternKeyHasBeenPressed = YES;
                 
                 // Here we check the timestamp to make it harder to accidentally copy when you really just wanted to trigger multiple patterns at once
-                if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"timestamp"] timeIntervalSinceNow] <= -0.4  ) {
+                if( self.lastDownPatternKey && [[self.lastDownPatternKey valueForKey:@"timestamp"] timeIntervalSinceNow] <= -0.4  ) {
                     // Copy pattern
-                    [self.sequencer copyNotesFromPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:self.sequencer.currentPageId toPattern:pressedPattern toPage:self.sequencer.currentPageId];
-                    _copiedPattern = YES;
+                    [self.sequencer copyNotesFromPattern:[[self.lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:self.sequencer.currentPageId toPattern:pressedPattern toPage:self.sequencer.currentPageId];
+                    self.copiedPattern = YES;
                     
                 } else {
                     // Keep track of last down
-                    _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPattern], @"pattern", [NSDate date], @"timestamp", nil];
+                    self.lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPattern], @"pattern", [NSDate date], @"timestamp", nil];
                 }
                 
             // Release
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
                 
-                if( !_copiedPattern && _firstPatternKeyHasBeenPressed ) {
+                if( !self.copiedPattern && self.firstPatternKeyHasBeenPressed ) {
                     // Change pattern
                     [self.sequencer startOrStopPattern:pressedPattern inPage:self.sequencer.currentPageId];
                 }
                 
-                if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
-                    _lastDownPatternKey = nil;
-                    _copiedPattern = NO;
+                if( self.lastDownPatternKey && [[self.lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                    self.lastDownPatternKey = nil;
+                    self.copiedPattern = NO;
                 }
                 
                 [self updatePattern];
@@ -1074,7 +1074,7 @@
         }
         
         // Pattern buttons for other pages
-        if ( [_patternsOnOtherPagesButtons containsObject:sender] ) {
+        if ( [self.patternsOnOtherPagesButtons containsObject:sender] ) {
             
             // For large grids
             if( self.height > 8 ) {
@@ -1083,22 +1083,22 @@
                 if (numberOfPatterns > 16)
                     numberOfPatterns = 16;
                 
-                uint pressedPattern = [_patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
-                uint pressedPage = (uint)[_patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns;
+                uint pressedPattern = [self.patternsOnOtherPagesButtons indexOfObject:sender] % numberOfPatterns;
+                uint pressedPage = (uint)[self.patternsOnOtherPagesButtons indexOfObject:sender] / numberOfPatterns;
                 
                 if ( buttonDown ) {
                     sender.buttonState = EatsButtonViewState_Down;
-                    _firstPatternKeyHasBeenPressed = YES;
+                    self.firstPatternKeyHasBeenPressed = YES;
                     
                     // Here we check the timestamp to make it harder to accidentally copy when you really just wanted to trigger multiple patterns at once
-                    if( _lastDownPatternKey && [[_lastDownPatternKey valueForKey:@"timestamp"] timeIntervalSinceNow] <= -0.4  ) {
+                    if( self.lastDownPatternKey && [[self.lastDownPatternKey valueForKey:@"timestamp"] timeIntervalSinceNow] <= -0.4  ) {
                         // Copy pattern
-                        [self.sequencer copyNotesFromPattern:[[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:[[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] toPattern:pressedPattern toPage:pressedPage];
-                        _copiedPattern = YES;
+                        [self.sequencer copyNotesFromPattern:[[self.lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] fromPage:[[self.lastDownPatternKey valueForKey:@"page"] unsignedIntValue] toPattern:pressedPattern toPage:pressedPage];
+                        self.copiedPattern = YES;
                         
                     } else {
                         // Keep track of last down
-                        _lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPage], @"page",
+                        self.lastDownPatternKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:pressedPage], @"page",
                                                                                          [NSNumber numberWithUnsignedInt:pressedPattern], @"pattern",
                                                                                          [NSDate date], @"timestamp",
                                                                                          nil];
@@ -1108,17 +1108,17 @@
                 } else {
                     sender.buttonState = EatsButtonViewState_Inactive;
                     
-                    if( !_copiedPattern && _firstPatternKeyHasBeenPressed ) {
+                    if( !self.copiedPattern && self.firstPatternKeyHasBeenPressed ) {
                         // Change pattern
                         [self.sequencer startOrStopPattern:pressedPattern inPage:pressedPage];
                     }
                     
-                    if( _lastDownPatternKey
-                       && [[_lastDownPatternKey valueForKey:@"page"] unsignedIntValue] == pressedPage
-                       && [[_lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
+                    if( self.lastDownPatternKey
+                       && [[self.lastDownPatternKey valueForKey:@"page"] unsignedIntValue] == pressedPage
+                       && [[self.lastDownPatternKey valueForKey:@"pattern"] unsignedIntValue] == pressedPattern ) {
                         
-                        _lastDownPatternKey = nil;
-                        _copiedPattern = NO;
+                        self.lastDownPatternKey = nil;
+                        self.copiedPattern = NO;
 
                     }
                     
@@ -1132,7 +1132,7 @@
                 if ( buttonDown ) {
                     sender.buttonState = EatsButtonViewState_Down;
                     
-                    [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInteger:[_patternsOnOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
+                    [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithUnsignedInteger:[self.patternsOnOtherPagesButtons indexOfObject:sender]] forAllPagesExcept:self.sequencer.currentPageId];
                     
                 } else {
                     sender.buttonState = EatsButtonViewState_Inactive;
@@ -1146,30 +1146,30 @@
         }
         
         // Scrub buttons for other pages
-        if ( [_scrubOtherPagesButtons containsObject:sender] ) {
+        if ( [self.scrubOtherPagesButtons containsObject:sender] ) {
             
-            int pressedStep = (int)[_scrubOtherPagesButtons indexOfObject:sender];
+            int pressedStep = (int)[self.scrubOtherPagesButtons indexOfObject:sender];
             
             if ( buttonDown ) {
                 
-                if( self.sharedPreferences.loopFromScrubArea && _lastDownScrubOtherPagesKey  ) {
+                if( self.sharedPreferences.loopFromScrubArea && self.lastDownScrubOtherPagesKey  ) {
                     // Set loop
-                    [self.sequencer setLoopStart:_lastDownScrubOtherPagesKey.intValue andLoopEnd:pressedStep - 1 forAllPagesExcept:self.sequencer.currentPageId];
-                    _setLoopOnOtherPages = YES;
+                    [self.sequencer setLoopStart:self.lastDownScrubOtherPagesKey.intValue andLoopEnd:pressedStep - 1 forAllPagesExcept:self.sequencer.currentPageId];
+                    self.setLoopOnOtherPages = YES;
                     
                 } else {
                     
                     if( self.sharedPreferences.loopFromScrubArea ) {
-                        if( !_setLoopOnOtherPages ) {
+                        if( !self.setLoopOnOtherPages ) {
                             // Reset loop
                             [self.sequencer setLoopStart:0 andLoopEnd:self.sharedPreferences.gridWidth - 1 forAllPagesExcept:self.sequencer.currentPageId];
                         }
                         
                         // Keep track of last down
-                        _lastDownScrubOtherPagesKey = [NSNumber numberWithUnsignedInteger:pressedStep];
+                        self.lastDownScrubOtherPagesKey = [NSNumber numberWithUnsignedInteger:pressedStep];
                     }
                     
-                    if( !_setLoopOnOtherPages || !self.sharedPreferences.loopFromScrubArea ) {
+                    if( !self.setLoopOnOtherPages || !self.sharedPreferences.loopFromScrubArea ) {
                         // Scrub
                         [self.sequencer setNextStep:[NSNumber numberWithUnsignedInteger:pressedStep] forAllPagesExcept:self.sequencer.currentPageId];
                     }
@@ -1186,9 +1186,9 @@
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
                 
-                if( _lastDownScrubOtherPagesKey && _lastDownScrubOtherPagesKey.intValue == pressedStep ) {
-                    _lastDownScrubOtherPagesKey = nil;
-                    _setLoopOnOtherPages = NO;
+                if( self.lastDownScrubOtherPagesKey && self.lastDownScrubOtherPagesKey.intValue == pressedStep ) {
+                    self.lastDownScrubOtherPagesKey = nil;
+                    self.setLoopOnOtherPages = NO;
                 }
                 
                 [self updateScrubOtherPages];
@@ -1199,7 +1199,7 @@
         }
         
         // Play mode forward button
-        if( sender == _forwardButton ) {
+        if( sender == self.forwardButton ) {
             if ( buttonDown ) {
                 if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Forward )
                     [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
@@ -1208,7 +1208,7 @@
             }
             
         // Play mode reverse button
-        } else if( sender == _reverseButton ) {
+        } else if( sender == self.reverseButton ) {
             if ( buttonDown ) {
                 if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
                     [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
@@ -1217,7 +1217,7 @@
             }
             
         // Play mode random button
-        } else if( sender == _randomButton ) {
+        } else if( sender == self.randomButton ) {
             if ( buttonDown ) {
                 if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Random )
                     [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
@@ -1226,7 +1226,7 @@
             }
             
         // Play mode slice button
-        } else if( sender == _sliceButton ) {
+        } else if( sender == self.sliceButton ) {
             if ( buttonDown ) {
                 if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Slice )
                     [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
@@ -1235,7 +1235,7 @@
             }
             
         // BPM- button
-        } else if( sender == _bpmDecrementButton ) {
+        } else if( sender == self.bpmDecrementButton ) {
             if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
                 
                 if( !self.bpmRepeatTimer ) {
@@ -1272,7 +1272,7 @@
             [self updateView];
             
         // BPM+ button
-        } else if( sender == _bpmIncrementButton ) {
+        } else if( sender == self.bpmIncrementButton ) {
             if ( buttonDown && self.sharedPreferences.midiClockSourceName == nil ) {
                 
                 if( !self.bpmRepeatTimer ) {
@@ -1309,13 +1309,13 @@
             [self updateView];
             
         // Clear button
-        } else if( sender == _clearButton ) {
+        } else if( sender == self.clearButton ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
                 
-                    _clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                    self.clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                                    target:self
                                                                  selector:@selector(clearIncrement:)
                                                                  userInfo:nil
@@ -1323,8 +1323,8 @@
                     NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                     
                     // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:_clearTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:_clearTimer forMode: NSEventTrackingRunLoopMode];
+                    [runloop addTimer:self.clearTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:self.clearTimer forMode: NSEventTrackingRunLoopMode];
                     
                 });
                 
@@ -1337,14 +1337,14 @@
             [self updateView];
             
         // Exit button
-        } else if( sender == _exitButton ) {
+        } else if( sender == self.exitButton ) {
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
             // We check to make sure the exit button was pressed in this view (not just being released after transitioning from sequencer mode)
             } else if( sender.buttonState == EatsButtonViewState_Down ) {
                 
-                if( _clearTimer )
+                if( self.clearTimer )
                     [self stopClear];
                 
                 // Start animateOut

@@ -26,42 +26,42 @@
     if (self) {
         
         // Create MIDI manager
-        _midiManager = [[EatsMIDIManager alloc] init];
-        NSLog(@"MIDI source: %@", _midiManager.virtualSource.name);
-        NSLog(@"MIDI destination: %@", _midiManager.virtualDest.name);
+        self.midiManager = [[EatsMIDIManager alloc] init];
+        NSLog(@"MIDI source: %@", self.midiManager.virtualSource.name);
+        NSLog(@"MIDI destination: %@", self.midiManager.virtualDest.name);
         
         // Create OSC manager
-        _oscManager = [[OSCManager alloc] initWithServiceType:@"_monome-osc._udp"];
-        [_oscManager setInPortLabelBase:@"Mark Eats Seq"];
+        self.oscManager = [[OSCManager alloc] initWithServiceType:@"_monome-osc._udp"];
+        [self.oscManager setInPortLabelBase:@"Mark Eats Seq"];
         
         // Set OSC defaults
-        _oscInPort = nil;
-        _oscOutPort = nil;
-        _oscInputPortLabel = @"Mark Eats Sequencer input";
-        _oscOutputPortLabel = @"Mark Eats Sequencer output";
-        _oscPrefix = @"markeatsseq";
+        self.oscInPort = nil;
+        self.oscOutPort = nil;
+        self.oscInputPortLabel = @"Mark Eats Sequencer input";
+        self.oscOutputPortLabel = @"Mark Eats Sequencer output";
+        self.oscPrefix = @"markeatsseq";
 
         // Create the OSC ports
         uint retries = 0;
-        while (_oscInPort == nil && retries < 50) {
-            _oscInPort = [_oscManager createNewInputForPort:12234 + retries withLabel:_oscInputPortLabel];
+        while (self.oscInPort == nil && retries < 50) {
+            self.oscInPort = [self.oscManager createNewInputForPort:12234 + retries withLabel:self.oscInputPortLabel];
             retries++;
         }
-        if (_oscInPort)
-            NSLog(@"OSC in port: %hu", _oscInPort.port);
+        if (self.oscInPort)
+            NSLog(@"OSC in port: %hu", self.oscInPort.port);
         else
             NSLog(@"Error creating OSC in port");
         retries = 0;
-        while (_oscOutPort == nil && retries < 50) {
-            _oscOutPort = [_oscManager createNewOutputToAddress:@"local" atPort:12234 + retries withLabel:_oscOutputPortLabel];
+        while (self.oscOutPort == nil && retries < 50) {
+            self.oscOutPort = [self.oscManager createNewOutputToAddress:@"local" atPort:12234 + retries withLabel:self.oscOutputPortLabel];
             retries++;
         }
-        if (_oscOutPort)
-            NSLog(@"OSC out port: %hu", _oscOutPort.port);
+        if (self.oscOutPort)
+            NSLog(@"OSC out port: %hu", self.oscOutPort.port);
         else
             NSLog(@"Error creating OSC out port");
 
-        NSLog(@"OSC prefix: %@", _oscPrefix);
+        NSLog(@"OSC prefix: %@", self.oscPrefix);
     }
     
     return self;

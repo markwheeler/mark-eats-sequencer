@@ -17,10 +17,10 @@
     self = [super init];
     if (self) {
         
-        _delegate = delegate;
-        _sequencer = sequencer;
-        _width = w;
-        _height = h;
+        self.delegate = delegate;
+        self.sequencer = sequencer;
+        self.width = w;
+        self.height = h;
         
         // Create the serial queue
         self.gridQueue = dispatch_queue_create("com.MarkEatsSequencer.GridQueue", NULL);
@@ -45,8 +45,8 @@
 - (void) showView:(NSNumber *)gridView
 {
     // Pass the message up
-    if([_delegate respondsToSelector:@selector(showView:)])
-        [_delegate performSelector:@selector(showView:) withObject:gridView];
+    if([self.delegate respondsToSelector:@selector(showView:)])
+        [self.delegate performSelector:@selector(showView:) withObject:gridView];
 }
 
 - (void) setupView
@@ -59,17 +59,17 @@
     // Over-ride this
     
     // Generate and combine all the sub views
-    NSArray *gridArray = [EatsGridUtils combineSubViews:_subViews gridWidth:_width gridHeight:_height];
+    NSArray *gridArray = [EatsGridUtils combineSubViews:self.subViews gridWidth:self.width gridHeight:self.height];
     
     // Send msg to delegate
-    if([_delegate respondsToSelector:@selector(updateGridWithArray:)])
-        [_delegate performSelector:@selector(updateGridWithArray:) withObject:gridArray];
+    if([self.delegate respondsToSelector:@selector(updateGridWithArray:)])
+        [self.delegate performSelector:@selector(updateGridWithArray:) withObject:gridArray];
 }
 
 - (void) gridInput:(NSNotification *)notification
 {
     // Ignore input if we're not active
-    if( ![_delegate performSelector:@selector(isActive)] )
+    if( ![self.delegate performSelector:@selector(isActive)] )
         return;
     
     uint x = [[notification.userInfo valueForKey:@"x"] unsignedIntValue];
@@ -79,7 +79,7 @@
     // Pass the message down to the appropriate sub view
     
     BOOL foundSubView = NO;
-    NSEnumerator *enumerator = [_subViews objectEnumerator];
+    NSEnumerator *enumerator = [self.subViews objectEnumerator];
     EatsGridSubView *subView;
     
     while ( (subView = [enumerator nextObject]) && !foundSubView) {

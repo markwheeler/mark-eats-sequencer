@@ -33,17 +33,17 @@
             
             int brightness;
             
-            if( ( x == _leftValue && _rightValue == 0 ) || ( x == (int)self.width - 1 - (int)_rightValue && _leftValue == 0 ) )
+            if( ( x == self.leftValue && self.rightValue == 0 ) || ( x == (int)self.width - 1 - (int)self.rightValue && self.leftValue == 0 ) )
                 brightness = 15;
-            else if ( x < _leftValue ) {
+            else if ( x < self.leftValue ) {
                 brightness = 8;
-                if( (int)x >= (int)_leftValue - TAIL_LENGTH )
-                    brightness += ( x - ( _leftValue - TAIL_LENGTH) + 1 ) * 2;
+                if( (int)x >= (int)self.leftValue - TAIL_LENGTH )
+                    brightness += ( x - ( self.leftValue - TAIL_LENGTH) + 1 ) * 2;
                 
-            } else if( (int)x > (int)self.width - 1 - (int)_rightValue ) {
+            } else if( (int)x > (int)self.width - 1 - (int)self.rightValue ) {
                 brightness = 8;
-                if( (int)x < (int)self.width - (int)_rightValue + TAIL_LENGTH ) {
-                    brightness += ( ( (int)self.width - 1 - (int)_rightValue + TAIL_LENGTH) - x + 1 ) * 2;
+                if( (int)x < (int)self.width - (int)self.rightValue + TAIL_LENGTH ) {
+                    brightness += ( ( (int)self.width - 1 - (int)self.rightValue + TAIL_LENGTH) - x + 1 ) * 2;
                 }
             
             } else {
@@ -62,24 +62,24 @@
     // Down
     if( down ) {
         
-        if( _lastDownKey ) {
+        if( self.lastDownKey ) {
             
-            if( [[_lastDownKey valueForKey:@"x"] intValue] < x ) {
-                _leftValue = x;
-                _rightValue = 0;
+            if( [[self.lastDownKey valueForKey:@"x"] intValue] < x ) {
+                self.leftValue = x;
+                self.rightValue = 0;
             } else {
-                _leftValue = 0;
-                _rightValue = self.width - 1 - x;
+                self.leftValue = 0;
+                self.rightValue = self.width - 1 - x;
             }
             
-            _setSelection = YES;
+            self.setSelection = YES;
             
             if([self.delegate respondsToSelector:@selector(eatsGridHorizontalEndPullViewUpdated:)])
                 [self.delegate performSelector:@selector(eatsGridHorizontalEndPullViewUpdated:) withObject:self];
             
         } else {
             // Log the last press
-            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
         
@@ -87,16 +87,16 @@
     } else {
         
         // Remove lastDownKey if it's this one and put a 1 step selection haven't already drawn a selection
-        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
-            if (!_setSelection ) {
-                _leftValue = 0;
-                _rightValue = 0;
+        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if ( !self.setSelection ) {
+                self.leftValue = 0;
+                self.rightValue = 0;
                 
                 if([self.delegate respondsToSelector:@selector(eatsGridHorizontalEndPullViewUpdated:)])
                     [self.delegate performSelector:@selector(eatsGridHorizontalEndPullViewUpdated:) withObject:self];
             }
-            _lastDownKey = nil;
-            _setSelection = NO;
+            self.lastDownKey = nil;
+            self.setSelection = NO;
         }
     }
 }

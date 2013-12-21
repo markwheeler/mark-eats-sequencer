@@ -62,8 +62,8 @@
     if (self) {
         
         _isActive = NO;
-        _sequencer = sequencer;
-        _sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
+        self.sequencer = sequencer;
+        self.sharedCommunicationManager = [EatsCommunicationManager sharedCommunicationManager];
         self.sharedPreferences = [Preferences sharedPreferences];
                 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:kGridControllerNoneNotification object:nil];
@@ -72,8 +72,8 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferencesThatRequiresGridRedrawDidChange:) name:kPreferencesThatRequiresGridRedrawDidChangeNotification object:nil];
         
         if(self.sharedPreferences.gridType != EatsGridType_None) {
-            _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
-            _currentView = EatsGridViewType_Sequencer;
+            self.currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+            self.currentView = EatsGridViewType_Sequencer;
         }
 
     }
@@ -88,28 +88,28 @@
 
 - (void) showView:(NSNumber *)gridView
 {
-    if( [_currentViewController respondsToSelector:@selector(stopAnimation)] )
-        [_currentViewController performSelector:@selector(stopAnimation)];
+    if( [self.currentViewController respondsToSelector:@selector(stopAnimation)] )
+        [self.currentViewController performSelector:@selector(stopAnimation)];
     
-    if( [gridView intValue] == _currentView )
-        _currentViewController = nil;
+    if( [gridView intValue] == self.currentView )
+        self.currentViewController = nil;
     
     if( [gridView intValue] == EatsGridViewType_Intro ) {
-        _currentViewController = [[EatsGridIntroViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        self.currentViewController = [[EatsGridIntroViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else if( [gridView intValue] == EatsGridViewType_Sequencer ) {
-        _currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        self.currentViewController = [[EatsGridSequencerViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else if( [gridView intValue] == EatsGridViewType_Play ) {
-        _currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
+        self.currentViewController = [[EatsGridPlayViewController alloc] initWithDelegate:self andSequencer:self.sequencer width:self.sharedPreferences.gridWidth height:self.sharedPreferences.gridHeight];
         
     } else {
-        _currentViewController = nil;
-        if( [_deviceInterface respondsToSelector:@selector(clearGridController)] )
-            [_deviceInterface performSelector:@selector(clearGridController)];
+        self.currentViewController = nil;
+        if( [self.deviceInterface respondsToSelector:@selector(clearGridController)] )
+            [self.deviceInterface performSelector:@selector(clearGridController)];
     }
     
-    _currentView = [gridView intValue];
+    self.currentView = [gridView intValue];
 }
 
 
@@ -163,20 +163,20 @@
 - (void) updateGridWithArray:(NSArray *)gridArray
 {        
     // Only send msgs to the grid controller if we're the active document
-    if( !_isActive ) return;
+    if( !self.isActive ) return;
     
-    if(self.sharedPreferences.gridType == EatsGridType_Monome && _sharedCommunicationManager.oscOutPort) {
-        if(![_deviceInterface isKindOfClass:[EatsMonome class]])
-            _deviceInterface = [[EatsMonome alloc] initWithOSCPort:_sharedCommunicationManager.oscOutPort oscPrefix:_sharedCommunicationManager.oscPrefix];
+    if(self.sharedPreferences.gridType == EatsGridType_Monome && self.sharedCommunicationManager.oscOutPort) {
+        if(![self.deviceInterface isKindOfClass:[EatsMonome class]])
+            self.deviceInterface = [[EatsMonome alloc] initWithOSCPort:self.sharedCommunicationManager.oscOutPort oscPrefix:self.sharedCommunicationManager.oscPrefix];
         
     } else if(self.sharedPreferences.gridType == EatsGridType_Launchpad && self.sharedPreferences.gridMIDINodeName) {
-        //if(![_deviceInterface isKindOfClass:[EatsLaunchpad class])
-        //    _deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:self.sharedPreferences.gridMIDINodeName];
+        //if(![self.deviceInterface isKindOfClass:[EatsLaunchpad class])
+        //    self.deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:self.sharedPreferences.gridMIDINodeName];
         
     }
     
-    if(self.sharedPreferences.gridType != EatsGridType_None && [_deviceInterface respondsToSelector:@selector(redrawGridController:)])
-        [_deviceInterface performSelector:@selector(redrawGridController:) withObject:gridArray];
+    if(self.sharedPreferences.gridType != EatsGridType_None && [self.deviceInterface respondsToSelector:@selector(redrawGridController:)])
+        [self.deviceInterface performSelector:@selector(redrawGridController:) withObject:gridArray];
 
 }
 

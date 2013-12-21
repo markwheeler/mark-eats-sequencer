@@ -53,36 +53,36 @@
         self.sharedPreferences = [Preferences sharedPreferences];
 
         // Create the sub views
-        _patternView = [[EatsGridPatternView alloc] init];
-        _patternView.delegate = self;
-        _patternView.x = 0;
-        _patternView.y = 0;
-        _patternView.width = self.width;
-        _patternView.height = self.height;
-        _patternView.mode = EatsPatternViewMode_Edit;
-        _patternView.patternHeight = self.height;
+        self.patternView = [[EatsGridPatternView alloc] init];
+        self.patternView.delegate = self;
+        self.patternView.x = 0;
+        self.patternView.y = 0;
+        self.patternView.width = self.width;
+        self.patternView.height = self.height;
+        self.patternView.mode = EatsPatternViewMode_Edit;
+        self.patternView.patternHeight = self.height;
 
-        _velocityView = [[EatsGridHorizontalSliderView alloc] init];
-        _velocityView.delegate = self;
-        _velocityView.x = 0;
-        _velocityView.y = 0;
-        _velocityView.width = self.width;
-        _velocityView.height = 1;
-        _velocityView.fillBar = YES;
-        _velocityView.visible = NO;
+        self.velocityView = [[EatsGridHorizontalSliderView alloc] init];
+        self.velocityView.delegate = self;
+        self.velocityView.x = 0;
+        self.velocityView.y = 0;
+        self.velocityView.width = self.width;
+        self.velocityView.height = 1;
+        self.velocityView.fillBar = YES;
+        self.velocityView.visible = NO;
 
-        _lengthView = [[EatsGridHorizontalSliderView alloc] init];
-        _lengthView.delegate = self;
-        _lengthView.x = 0;
-        _lengthView.y = 1;
-        _lengthView.width = self.width;
-        _lengthView.height = 1;
-        _lengthView.fillBar = YES;
-        _lengthView.visible = NO;
+        self.lengthView = [[EatsGridHorizontalSliderView alloc] init];
+        self.lengthView.delegate = self;
+        self.lengthView.x = 0;
+        self.lengthView.y = 1;
+        self.lengthView.width = self.width;
+        self.lengthView.height = 1;
+        self.lengthView.fillBar = YES;
+        self.lengthView.visible = NO;
 
-        self.subViews = [[NSMutableSet alloc] initWithObjects:_patternView,
-                                                              _velocityView,
-                                                              _lengthView,
+        self.subViews = [[NSMutableSet alloc] initWithObjects:self.patternView,
+                                                              self.velocityView,
+                                                              self.lengthView,
                                                               nil];
 
         [self updatePatternNotes];
@@ -116,15 +116,15 @@
 
 - (void) updateView
 {
-    if( _sharedPreferences.gridSupportsVariableBrightness ) {
+    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         // Here we check if it's enabled so as to not mess up the animation
-        if( _patternView.mode == EatsPatternViewMode_NoteEdit && _patternView.enabled )
-            _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-        else if( _patternView.mode == EatsPatternViewMode_Edit && _patternView.enabled )
-            _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
+        if( self.patternView.mode == EatsPatternViewMode_NoteEdit && self.patternView.enabled )
+            self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+        else if( self.patternView.mode == EatsPatternViewMode_Edit && self.patternView.enabled )
+            self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
         
     } else {
-        _patternView.noteBrightness = 15;
+        self.patternView.noteBrightness = 15;
     }
     
     [super updateView];
@@ -149,7 +149,7 @@
         // Final frame
         if( self.pageAnimationFrame == self.width - 5 ) {
             self.pageAnimationTimer = nil;
-            _patternView.enabled = YES;
+            self.patternView.enabled = YES;
             
         } else {
             [self performSelectorOnMainThread:@selector(scheduleAnimatePageLeftTimer) withObject:nil waitUntilDone:YES];
@@ -172,7 +172,7 @@
         // Final frame
         if( self.pageAnimationFrame == self.width - 5 ) {
             self.pageAnimationTimer = nil;
-            _patternView.enabled = YES;
+            self.patternView.enabled = YES;
             
         } else {
             [self performSelectorOnMainThread:@selector(scheduleAnimatePageRightTimer) withObject:nil waitUntilDone:YES];
@@ -218,49 +218,49 @@
 
 - (void) animatePageIncrement:(int)amount
 {
-    _patternView.x += amount;
+    self.patternView.x += amount;
     
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         
         float percentageOfAnimationComplete = (float)self.pageAnimationFrame / ( self.width - 5 );
         float opacity = ( 0.7 * percentageOfAnimationComplete ) + 0.3;
         
-        _patternView.opacity = opacity;
+        self.patternView.opacity = opacity;
         
-    } else if( _patternView.opacity != 1 ) {
-        _patternView.opacity = 1;
+    } else if( self.patternView.opacity != 1 ) {
+        self.patternView.opacity = 1;
     }
 }
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
     dispatch_async(self.gridQueue, ^(void) {
-        _patternView.mode = EatsPatternViewMode_NoteEdit;
-        _patternView.enabled = NO;
+        self.patternView.mode = EatsPatternViewMode_NoteEdit;
+        self.patternView.enabled = NO;
         
         self.editNoteAnimationFrame = 0;
         
         // Display sliders at bottom
         if( note.row > ( self.height / 2 ) - 1 ) {
-            _patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
-            _velocityView.y = self.height - 1;
-            _velocityView.visible = YES;
+            self.patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
+            self.velocityView.y = self.height - 1;
+            self.velocityView.visible = YES;
             
         // Display sliders at top
         } else {
-            _patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-            _patternView.y = 1;
-            _lengthView.y = 0;
-            _lengthView.visible = YES;
+            self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
+            self.patternView.y = 1;
+            self.lengthView.y = 0;
+            self.lengthView.visible = YES;
         }
         
-        _patternView.height = self.height - 1;
-        _patternView.activeEditNote = note;
+        self.patternView.height = self.height - 1;
+        self.patternView.activeEditNote = note;
         
-        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
         
-        _activeEditNote = note;
+        self.activeEditNote = note;
         
         [self updateNoteVelocity];
         [self updateNoteLength];
@@ -287,29 +287,29 @@
 - (void) exitNoteEditMode
 {
     dispatch_async(self.gridQueue, ^(void) {
-        _patternView.enabled = NO;
+        self.patternView.enabled = NO;
         
         self.editNoteAnimationFrame = 0;
         
         // To bottom
-        if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+        if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
             
-            _velocityView.y ++;
-            _lengthView.visible = NO;
+            self.velocityView.y ++;
+            self.lengthView.visible = NO;
             
         // To top
         } else {
             
-            _patternView.y --;
-            _velocityView.visible = NO;
-            _lengthView.y --;
+            self.patternView.y --;
+            self.velocityView.visible = NO;
+            self.lengthView.y --;
             
         }
         
-        _patternView.height = self.height - 1;
+        self.patternView.height = self.height - 1;
         
-        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
         
         [self updateView];
         
@@ -332,15 +332,15 @@
 
 - (void) exitNoteEditModeInstantly
 {
-    _activeEditNote = nil;
-    _velocityView.visible = NO;
-    _lengthView.visible = NO;
-    _patternView.y = 0;
-    _patternView.height = self.height;
-    _patternView.enabled = YES;
-    _patternView.activeEditNote = nil;
-    _patternView.mode = EatsPatternViewMode_Edit;
-    _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
+    self.activeEditNote = nil;
+    self.velocityView.visible = NO;
+    self.lengthView.visible = NO;
+    self.patternView.y = 0;
+    self.patternView.height = self.height;
+    self.patternView.enabled = YES;
+    self.patternView.activeEditNote = nil;
+    self.patternView.mode = EatsPatternViewMode_Edit;
+    self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
     
     if( self.editNoteAnimationTimer ) {
         [self.editNoteAnimationTimer invalidate];
@@ -354,30 +354,30 @@
         self.editNoteAnimationFrame ++;
         
         // From bottom
-        if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+        if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
 
-            _velocityView.y --;
-            _lengthView.y = self.height - 1;
-            _lengthView.visible = YES;
+            self.velocityView.y --;
+            self.lengthView.y = self.height - 1;
+            self.lengthView.visible = YES;
 
         // From top
         } else {
             
-            _patternView.y ++;
-            _velocityView.y = 0;
-            _lengthView.y ++;
-            _velocityView.visible = YES;
+            self.patternView.y ++;
+            self.velocityView.y = 0;
+            self.lengthView.y ++;
+            self.velocityView.visible = YES;
             
         }
         
-        _patternView.height --;
+        self.patternView.height --;
         
-        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
+        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
         
         if( self.editNoteAnimationFrame == 1 ) { // Final frame
 
-            _patternView.enabled = YES;
+            self.patternView.enabled = YES;
             
             [timer invalidate];
             self.editNoteAnimationTimer = nil;
@@ -394,30 +394,30 @@
         self.editNoteAnimationFrame ++;
         
         // To bottom
-        if( _patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+        if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
             
-            _velocityView.visible = NO;
+            self.velocityView.visible = NO;
             
         // To top
         } else {
             
-            _patternView.y --;
-            _lengthView.visible = NO;
+            self.patternView.y --;
+            self.lengthView.visible = NO;
             
         }
         
-        _patternView.height ++;
+        self.patternView.height ++;
         
-        _patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
-        _patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
+        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
+        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
         
         if( self.editNoteAnimationFrame == 1 ) { // Final frame
             
-            _patternView.activeEditNote = nil;
-            _patternView.mode = EatsPatternViewMode_Edit;
-            _patternView.enabled = YES;
+            self.patternView.activeEditNote = nil;
+            self.patternView.mode = EatsPatternViewMode_Edit;
+            self.patternView.enabled = YES;
             
-            _activeEditNote = nil;
+            self.activeEditNote = nil;
 
             
             [timer invalidate];
@@ -445,25 +445,25 @@
 
 - (void) updateNoteLength
 {
-    float stepPercentage = ( 100.0 / _velocityView.width );
-    _activeEditNote = [self.sequencer noteAtStep:_activeEditNote.step atRow:_activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
-    _patternView.activeEditNote = _activeEditNote;
+    float stepPercentage = ( 100.0 / self.velocityView.width );
+    self.activeEditNote = [self.sequencer noteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    self.patternView.activeEditNote = self.activeEditNote;
     
-    _lengthView.percentage = ( ( ( ( (float)self.activeEditNote.length / _lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
+    self.lengthView.percentage = ( ( ( ( (float)self.activeEditNote.length / self.lengthView.width )  * 100.0) - stepPercentage) / (100.0 - stepPercentage) ) * 100.0;
 }
 
 - (void) updateNoteVelocity
 {
-    float oneStepOf127 = 127.0  / _velocityView.width;
+    float oneStepOf127 = 127.0  / self.velocityView.width;
     float range = 127.0 - oneStepOf127;
-    _activeEditNote = [self.sequencer noteAtStep:_activeEditNote.step atRow:_activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
-    _patternView.activeEditNote = _activeEditNote;
+    self.activeEditNote = [self.sequencer noteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    self.patternView.activeEditNote = self.activeEditNote;
     
     float percentageForVelocitySlider = 100.0 * ( (self.activeEditNote.velocity - oneStepOf127 ) / range );
     if( percentageForVelocitySlider < 0 )
         percentageForVelocitySlider = 0;
     
-    _velocityView.percentage = percentageForVelocitySlider;
+    self.velocityView.percentage = percentageForVelocitySlider;
 }
 
 - (void) updatePageLeft
@@ -472,10 +472,10 @@
     [self.pageAnimationTimer invalidate];
     self.pageAnimationTimer = nil;
     
-    _patternView.x = - self.width + 4;
-    _patternView.enabled = NO;
+    self.patternView.x = - self.width + 4;
+    self.patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
-        _patternView.opacity = 0;
+        self.patternView.opacity = 0;
     }
     self.pageAnimationFrame = 0;
     [self animatePageIncrement:1];
@@ -489,10 +489,10 @@
     [self.pageAnimationTimer invalidate];
     self.pageAnimationTimer = nil;
     
-    _patternView.x = self.width - 4;
-    _patternView.enabled = NO;
+    self.patternView.x = self.width - 4;
+    self.patternView.enabled = NO;
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
-        _patternView.opacity = 0;
+        self.patternView.opacity = 0;
     }
     self.pageAnimationFrame = 0;
     [self animatePageIncrement:-1];
@@ -543,7 +543,7 @@
 - (void) stateCurrentPageDidChangeLeft:(NSNotification *)notification
 {
     dispatch_async(self.gridQueue, ^(void) {
-        if( _patternView.mode != EatsPatternViewMode_Edit )
+        if( self.patternView.mode != EatsPatternViewMode_Edit )
             [self exitNoteEditModeInstantly];
         [self updatePatternNotes];
         [self updatePageLeft];
@@ -554,7 +554,7 @@
 - (void) stateCurrentPageDidChangeRight:(NSNotification *)notification
 {
     dispatch_async(self.gridQueue, ^(void) {
-        if( _patternView.mode != EatsPatternViewMode_Edit )
+        if( self.patternView.mode != EatsPatternViewMode_Edit )
             [self exitNoteEditModeInstantly];
         [self updatePatternNotes];
         [self updatePageRight];
@@ -566,7 +566,7 @@
 {
     dispatch_async(self.gridQueue, ^(void) {
         if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
-            if( _patternView.mode != EatsPatternViewMode_Edit )
+            if( self.patternView.mode != EatsPatternViewMode_Edit )
                 [self exitNoteEditModeInstantly];
             [self updatePatternNotes];
             [self updateView];
@@ -613,7 +613,7 @@
 {
 
     // Velocity
-    if(sender == _velocityView) {
+    if(sender == self.velocityView) {
         
         float oneStepOf127 = 127.0 / sender.width;
         float range = 127.0 - oneStepOf127;
@@ -624,7 +624,7 @@
         [self.sequencer setVelocity:newVelocity forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         
     // Length
-    } else if(sender == _lengthView) {
+    } else if(sender == self.lengthView) {
         int newLength = roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1;
         [self.sequencer setLength:newLength forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }
@@ -642,7 +642,7 @@
         // Edit mode
         if( sender.mode == EatsPatternViewMode_Edit ) {
             
-            _lastDownWasInEditMode = YES;
+            self.lastDownWasInEditMode = YES;
             
             dispatch_sync(self.gridQueue, ^(void) {
                 [self updateView];
@@ -651,13 +651,13 @@
         // Note edit mode
         } else if ( sender.mode == EatsPatternViewMode_NoteEdit ) {
             
-            _lastDownWasInEditMode = NO;
+            self.lastDownWasInEditMode = NO;
             
             [self exitNoteEditMode];
         }
     
     // Release
-    } else if( sender.mode == EatsPatternViewMode_Edit && _lastDownWasInEditMode ) {
+    } else if( sender.mode == EatsPatternViewMode_Edit && self.lastDownWasInEditMode ) {
         
         [self.sequencer addOrRemoveNoteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }

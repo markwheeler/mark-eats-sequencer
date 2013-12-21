@@ -73,15 +73,15 @@
 
 - (void) stopAnimation
 {
-    [_animationTimer invalidate];
+    [self.animationTimer invalidate];
 }
 
 - (void) startAnimation
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         NSLog(@"Start intro animation");
-        [_animationTimer invalidate];
-        _animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / FRAMERATE
+        [self.animationTimer invalidate];
+        self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / FRAMERATE
                                                            target:self
                                                          selector:@selector(updateAnimation:)
                                                          userInfo:nil

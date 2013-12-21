@@ -15,7 +15,7 @@
 {
     if( !self.visible ) return nil;
     
-    uint percentageAsStep = [EatsGridUtils percentageToSteps:_percentage width:self.width];
+    uint percentageAsStep = [EatsGridUtils percentageToSteps:self.percentage width:self.width];
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
@@ -27,7 +27,7 @@
             
             if( x == percentageAsStep )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( x < percentageAsStep && _fillBar )
+            else if ( x < percentageAsStep && self.fillBar )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -42,7 +42,7 @@
     // Down
     if( down ) {
 
-        _percentage = [EatsGridUtils stepsToPercentage:x width:self.width];
+        self.percentage = [EatsGridUtils stepsToPercentage:x width:self.width];
         
         if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
             [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];

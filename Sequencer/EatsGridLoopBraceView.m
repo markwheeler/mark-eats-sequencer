@@ -33,12 +33,12 @@
 {
     if( !self.visible ) return nil;
     
-    uint startPercentageAsStep = [EatsGridUtils percentageToSteps:_startPercentage width:self.width];
-    uint endPercentageAsStep = [EatsGridUtils percentageToSteps:_endPercentage width:self.width];
+    uint startPercentageAsStep = [EatsGridUtils percentageToSteps:self.startPercentage width:self.width];
+    uint endPercentageAsStep = [EatsGridUtils percentageToSteps:self.endPercentage width:self.width];
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns with playhead
+    // Generate the columns
     for(uint x = 0; x < self.width; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
@@ -46,9 +46,9 @@
             
             if( x == startPercentageAsStep || x == endPercentageAsStep)
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
-            else if ( ( startPercentageAsStep < endPercentageAsStep &&  x > startPercentageAsStep && x < endPercentageAsStep && _fillBar )
-                     || ( startPercentageAsStep > endPercentageAsStep &&  x > startPercentageAsStep && _fillBar )
-                     || ( startPercentageAsStep > endPercentageAsStep && x < endPercentageAsStep && _fillBar ) )
+            else if ( ( startPercentageAsStep < endPercentageAsStep &&  x > startPercentageAsStep && x < endPercentageAsStep && self.fillBar )
+                     || ( startPercentageAsStep > endPercentageAsStep &&  x > startPercentageAsStep && self.fillBar )
+                     || ( startPercentageAsStep > endPercentageAsStep && x < endPercentageAsStep && self.fillBar ) )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:10 * self.opacity] atIndex:y];
             else
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:0] atIndex:y];
@@ -63,24 +63,24 @@
     // Down
     if( down ) {
         
-        if( _lastDownKey ) {
+        if( self.lastDownKey ) {
             
             int loopEndX = x - 1;
             if( loopEndX < 0 )
                 loopEndX += self.width;
             
             // Set a selection
-            _startPercentage = [EatsGridUtils stepsToPercentage:[[_lastDownKey valueForKey:@"x"] intValue] width:self.width];
-            _endPercentage = [EatsGridUtils stepsToPercentage:loopEndX width:self.width];
+            self.startPercentage = [EatsGridUtils stepsToPercentage:[[self.lastDownKey valueForKey:@"x"] intValue] width:self.width];
+            self.endPercentage = [EatsGridUtils stepsToPercentage:loopEndX width:self.width];
             
-            _setSelection = YES;
+            self.setSelection = YES;
             
             if([self.delegate respondsToSelector:@selector(eatsGridLoopBraceViewUpdated:)])
                 [self.delegate performSelector:@selector(eatsGridLoopBraceViewUpdated:) withObject:self];
             
         } else {
             // Log the last press
-            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
         
@@ -89,17 +89,17 @@
     } else {
         
         // Remove lastDownKey if it's this one and set the selection to all
-        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
-            if (!_setSelection ) {
+        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if (!self.setSelection ) {
                 
-                _startPercentage = 0;
-                _endPercentage = 100;
+                self.startPercentage = 0;
+                self.endPercentage = 100;
                 
                 if([self.delegate respondsToSelector:@selector(eatsGridLoopBraceViewUpdated:)])
                     [self.delegate performSelector:@selector(eatsGridLoopBraceViewUpdated:) withObject:self];
             }
-            _lastDownKey = nil;
-            _setSelection = NO;
+            self.lastDownKey = nil;
+            self.setSelection = NO;
         }
         
     }

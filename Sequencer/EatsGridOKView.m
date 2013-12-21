@@ -33,18 +33,18 @@
     self = [super init];
     if (self) {
         
-        _currentFrame = 0;
+        self.currentFrame = 0;
         self.trailLength = TRAIL_LENGTH;
         self.okBrightness = [NSNumber numberWithInt:15];
         
         self.sharedPreferences = [Preferences sharedPreferences];
         
-        _particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
-        _particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
+        self.particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
+        self.particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
         
         // Set the particle start positions
-        _particleA = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2) - 1], @"y", nil];
-        _particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2)], @"y", nil];
+        self.particleA = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2) - 1], @"y", nil];
+        self.particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2)], @"y", nil];
 
     }
     return self;
@@ -54,22 +54,22 @@
 {
     if( !self.visible ) return nil;
     
-    _okLeftMargin = (self.width - [self.okArray count]) / 2;
-    _okTopMargin = (self.height - [[self.okArray objectAtIndex:0] count]) / 2;
+    self.okLeftMargin = (self.width - [self.okArray count]) / 2;
+    self.okTopMargin = (self.height - [[self.okArray objectAtIndex:0] count]) / 2;
     
     // Move the particles
-    if (_currentFrame < self.height / 2 ) {
-        [_particleA setObject:[NSNumber numberWithUnsignedInt:self.height / 2 - 1 - _currentFrame]  forKey:@"y"];
-        [_particleB setObject:[NSNumber numberWithUnsignedInt:self.height / 2 + _currentFrame]  forKey:@"y"];
-    } else if (_currentFrame <= (self.height / 2) + self.width - 2) {
-        [_particleA setObject:[NSNumber numberWithUnsignedInt:_currentFrame - self.height / 2 + 1]  forKey:@"x"];
-        [_particleB setObject:[NSNumber numberWithUnsignedInt:_currentFrame - self.height / 2 + 1]  forKey:@"x"];
-    } else if (_currentFrame <= self.width + self.height - 3) {
-        [_particleA setObject:[NSNumber numberWithUnsignedInt:_currentFrame - self.height / 2 + 2 - self.width]  forKey:@"y"];
-        [_particleB setObject:[NSNumber numberWithUnsignedInt:self.height - 1 + self.width + self.height / 2 - 2 - _currentFrame]  forKey:@"y"];
+    if (self.currentFrame < self.height / 2 ) {
+        [self.particleA setObject:[NSNumber numberWithUnsignedInt:self.height / 2 - 1 - self.currentFrame]  forKey:@"y"];
+        [self.particleB setObject:[NSNumber numberWithUnsignedInt:self.height / 2 + self.currentFrame]  forKey:@"y"];
+    } else if (self.currentFrame <= (self.height / 2) + self.width - 2) {
+        [self.particleA setObject:[NSNumber numberWithUnsignedInt:self.currentFrame - self.height / 2 + 1]  forKey:@"x"];
+        [self.particleB setObject:[NSNumber numberWithUnsignedInt:self.currentFrame - self.height / 2 + 1]  forKey:@"x"];
+    } else if (self.currentFrame <= self.width + self.height - 3) {
+        [self.particleA setObject:[NSNumber numberWithUnsignedInt:self.currentFrame - self.height / 2 + 2 - self.width]  forKey:@"y"];
+        [self.particleB setObject:[NSNumber numberWithUnsignedInt:self.height - 1 + self.width + self.height / 2 - 2 - self.currentFrame]  forKey:@"y"];
     } else {
-        _particleA = nil;
-        _particleB = nil;
+        self.particleA = nil;
+        self.particleB = nil;
     }
     
     // Pulse the OK if we support variable brightness
@@ -94,9 +94,9 @@
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         for(uint y = 0; y < self.height; y++) {
             // Put OK in
-            if(x >= _okLeftMargin && x < _okLeftMargin + [okArray count] && y >= _okTopMargin && y < _okTopMargin + [[okArray objectAtIndex:0] count]) {
-                if(!_particleA || x <= [[_particleA valueForKey:@"x"] unsignedIntValue])
-                    [[gridArray objectAtIndex:x] insertObject:[[okArray objectAtIndex:x - _okLeftMargin] objectAtIndex:y - _okTopMargin] atIndex:y];
+            if(x >= self.okLeftMargin && x < self.okLeftMargin + [okArray count] && y >= self.okTopMargin && y < self.okTopMargin + [[okArray objectAtIndex:0] count]) {
+                if(!self.particleA || x <= [[self.particleA valueForKey:@"x"] unsignedIntValue])
+                    [[gridArray objectAtIndex:x] insertObject:[[okArray objectAtIndex:x - self.okLeftMargin] objectAtIndex:y - self.okTopMargin] atIndex:y];
                 else
                     [[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
             } else {
@@ -106,34 +106,34 @@
     }
     
     // Add particle A
-    if(_particleA) {
-        [[gridArray objectAtIndex:[[_particleA valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[_particleA valueForKey:@"y"] unsignedIntValue]
+    if(self.particleA) {
+        [[gridArray objectAtIndex:[[self.particleA valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[self.particleA valueForKey:@"y"] unsignedIntValue]
                                                                                               withObject:[NSNumber numberWithUnsignedInt:15]];
     }
     // Add particle B
-    if(_particleB)
-        [[gridArray objectAtIndex:[[_particleB valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[_particleB valueForKey:@"y"] unsignedIntValue]
+    if(self.particleB)
+        [[gridArray objectAtIndex:[[self.particleB valueForKey:@"x"] unsignedIntValue]] replaceObjectAtIndex:[[self.particleB valueForKey:@"y"] unsignedIntValue]
                                                                                               withObject:[NSNumber numberWithUnsignedInt:15]];
     // Draw trails
-    for(int i = 0; i < [_particleATrail count]; i++) {
+    for(int i = 0; i < [self.particleATrail count]; i++) {
         // startFix ensure the trails are correct when they first appear (before they are full length)
         int startFix = 0;
-        if([_particleATrail count] < TRAIL_LENGTH && _particleA)
-            startFix = TRAIL_LENGTH - (int)[_particleATrail count];
+        if([self.particleATrail count] < TRAIL_LENGTH && self.particleA)
+            startFix = TRAIL_LENGTH - (int)[self.particleATrail count];
         
         // The +1s in this maths make sure we don't end up setting 0 brightness
         NSNumber *brightness = [NSNumber numberWithFloat:floor((15.0 / (TRAIL_LENGTH + 1) ) * (i + 1 + startFix))];
         
         // Draw A
-        uint x = [[[_particleATrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue];
-        uint y = [[[_particleATrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue];
+        uint x = [[[self.particleATrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue];
+        uint y = [[[self.particleATrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue];
         if([[[gridArray objectAtIndex:x] objectAtIndex:y] integerValue] < [brightness integerValue]){
             [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:brightness];
         }
         
         // Draw B
-        x = [[[_particleBTrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue];
-        y = [[[_particleBTrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue];
+        x = [[[self.particleBTrail objectAtIndex:i] valueForKey:@"x"] unsignedIntValue];
+        y = [[[self.particleBTrail objectAtIndex:i] valueForKey:@"y"] unsignedIntValue];
         if([[[gridArray objectAtIndex:x] objectAtIndex:y] integerValue] < [brightness integerValue]){
             [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:brightness];
         }
@@ -141,12 +141,12 @@
     }
     
     // Save trail info
-    if(_particleA) [_particleATrail addObject:[_particleA copy]];
-    if(_particleB) [_particleBTrail addObject:[_particleB copy]];
+    if(self.particleA) [self.particleATrail addObject:[self.particleA copy]];
+    if(self.particleB) [self.particleBTrail addObject:[self.particleB copy]];
     
-    if([_particleATrail count] > TRAIL_LENGTH || (!_particleA && [_particleATrail count] > 0) ) {
-        [_particleATrail removeObjectAtIndex:0];
-        [_particleBTrail removeObjectAtIndex:0];
+    if([self.particleATrail count] > TRAIL_LENGTH || (!self.particleA && [self.particleATrail count] > 0) ) {
+        [self.particleATrail removeObjectAtIndex:0];
+        [self.particleBTrail removeObjectAtIndex:0];
     }
     
     return gridArray;

@@ -43,16 +43,16 @@
             
             int brightness;
             
-            if( x == _zeroStep ) {
+            if( x == self.zeroStep ) {
                 brightness = 15;
-            } else if ( _shift > 0 && x > _zeroStep && x <= _zeroStep + _shift ) {
+            } else if ( self.shift > 0 && x > self.zeroStep && x <= self.zeroStep + self.shift ) {
                 brightness = tailBaseBrightness;
-                if( (int)x >= (int)_zeroStep + _shift - tailLength )
-                    brightness += ( x - ( (int)_zeroStep + _shift - tailLength ) + 1 );
-            } else if ( _shift < 0 && x < _zeroStep && (int)x >= (int)_zeroStep + _shift ) {
+                if( (int)x >= (int)self.zeroStep + self.shift - tailLength )
+                    brightness += ( x - ( (int)self.zeroStep + self.shift - tailLength ) + 1 );
+            } else if ( self.shift < 0 && x < self.zeroStep && (int)x >= (int)self.zeroStep + self.shift ) {
                 brightness = tailBaseBrightness;
-                if( (int)x <= (int)_zeroStep + _shift + tailLength )
-                    brightness += ( ( (int)_zeroStep + _shift + tailLength + 1 ) - x );
+                if( (int)x <= (int)self.zeroStep + self.shift + tailLength )
+                    brightness += ( ( (int)self.zeroStep + self.shift + tailLength + 1 ) - x );
             } else {
                 brightness = 0;
             }
@@ -69,17 +69,17 @@
     // Down
     if( down ) {
         
-        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] unsignedIntValue] == _zeroStep ) {
-            _zeroStep = x;
+        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] unsignedIntValue] == self.zeroStep ) {
+            self.zeroStep = x;
             
-            _setSelection = YES;
+            self.setSelection = YES;
             
             if([self.delegate respondsToSelector:@selector(eatsGridHorizontalShiftViewUpdated:)])
                 [self.delegate performSelector:@selector(eatsGridHorizontalShiftViewUpdated:) withObject:self];
             
         } else {
             // Log the last press
-            _lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
+            self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
         
@@ -87,15 +87,15 @@
     } else {
         
         // Remove lastDownKey if it's this one etc
-        if( _lastDownKey && [[_lastDownKey valueForKey:@"x"] intValue] == x && [[_lastDownKey valueForKey:@"y"] intValue] == y ) {
-            if (!_setSelection ) {
-                _shift = x - (int)_zeroStep;
+        if( self.lastDownKey && [[self.lastDownKey valueForKey:@"x"] intValue] == x && [[self.lastDownKey valueForKey:@"y"] intValue] == y ) {
+            if (!self.setSelection ) {
+                self.shift = x - (int)self.zeroStep;
                 
                 if([self.delegate respondsToSelector:@selector(eatsGridHorizontalShiftViewUpdated:)])
                     [self.delegate performSelector:@selector(eatsGridHorizontalShiftViewUpdated:) withObject:self];
             }
-            _lastDownKey = nil;
-            _setSelection = NO;
+            self.lastDownKey = nil;
+            self.setSelection = NO;
         }
     }
 }

@@ -973,7 +973,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) controlTextDidEndEditing:(NSNotification *)obj
 {
     NSInteger rowIndex = self.rowPitchesTableView.numberOfRows - 1 - self.rowPitchesTableView.selectedRow;
-    [self.sequencer setPitch:[[[_currentPagePitches objectAtIndex:rowIndex] valueForKey:@"pitch"] intValue] atRow:(uint)rowIndex forPage:self.sequencer.currentPageId];
+    [self.sequencer setPitch:[[[self.currentPagePitches objectAtIndex:rowIndex] valueForKey:@"pitch"] intValue] atRow:(uint)rowIndex forPage:self.sequencer.currentPageId];
 }
 
 - (IBAction) scalesOpenSheetButton:(NSButton *)sender {
