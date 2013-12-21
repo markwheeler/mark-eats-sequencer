@@ -43,10 +43,10 @@
                 for( NSNumber *number in column ) {
                     
                     // TODO This is only here to help track down crash on connect bug
-                    if( x >= gridArray.count )
-                        NSLog(@"WARNING: Trying to add pixel beyond gridArray width %@", gridArray);
-                    else if( y >= [[gridArray objectAtIndex:x] count] )
-                        NSLog(@"WARNING: Trying to add pixel beyond gridArray height %@", gridArray);
+                    if( width > gridArray.count )
+                        NSLog(@"WARNING: Width is larger than gridArray width %@", gridArray);
+                    else if( x < gridArray.count && height > [[gridArray objectAtIndex:x] count] )
+                        NSLog(@"WARNING: Height is larger than gridArray height %@", gridArray);
                     
                     // Don't put in pixels outside the grid (if the view is hanging off the edge)
                     if( x >= 0 && x < width && y >= 0 && y < height )
