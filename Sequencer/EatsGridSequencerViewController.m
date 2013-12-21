@@ -17,7 +17,7 @@
 
 #define NOTE_DEFAULT_BRIGHTNESS 15
 #define NOTE_LENGTH_DEFAULT_BRIGHTNESS 10
-#define NOTE_EDIT_FADE_AMOUNT 10
+#define NOTE_EDIT_FADE_AMOUNT 7
 
 @interface EatsGridSequencerViewController ()
 
