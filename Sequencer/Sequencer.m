@@ -1735,6 +1735,54 @@
 }
 
 
+- (void) incrementStepForPage:(uint)pageId
+{
+    int step = [self currentStepForPage:pageId] + 1;
+    
+    if ( step > [self loopEndForPage:pageId] )
+        step = [self loopStartForPage:pageId];
+    
+    [self setNextStep:[NSNumber numberWithInt:step] forPage:pageId];
+}
+
+- (void) incrementStepForAllPages
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        
+        int step = [self currentStepForPage:i] + 1;
+        
+        if ( step > [self loopEndForPage:i] )
+            step = [self loopStartForPage:i];
+        
+        [self setNextStep:[NSNumber numberWithInt:step] forPage:i];
+    }
+}
+
+
+- (void) decrementStepForPage:(uint)pageId
+{
+    int step = [self currentStepForPage:pageId] - 1;
+    
+    if ( step < [self loopStartForPage:pageId] )
+        step = [self loopEndForPage:pageId];
+    
+    [self setNextStep:[NSNumber numberWithInt:step] forPage:pageId];
+}
+
+- (void) decrementStepForAllPages
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        
+        int step = [self currentStepForPage:i] - 1;
+        
+        if ( step < [self loopStartForPage:i] )
+            step = [self loopEndForPage:i];
+        
+        [self setNextStep:[NSNumber numberWithInt:step] forPage:i];
+    }
+}
+
+
 - (void) resetPlayPositionsForAllPlayingPages
 {
     //Reset the play positions of all the active loops

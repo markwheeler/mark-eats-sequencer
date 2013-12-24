@@ -204,6 +204,12 @@
 - (void) setNextStepForAllPages:(NSNumber *)step;
 - (void) setNextStep:(NSNumber *)step forAllPagesExcept:(uint)pageId;
 
+- (void) incrementStepForPage:(uint)pageId;
+- (void) incrementStepForAllPages;
+
+- (void) decrementStepForPage:(uint)pageId;
+- (void) decrementStepForAllPages;
+
 - (void) resetPlayPositionsForAllPlayingPages;
 
 - (BOOL) inLoopForPage:(uint)pageId;
