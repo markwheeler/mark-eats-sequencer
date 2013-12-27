@@ -1930,6 +1930,12 @@
 }
 
 
+
+- (NSSet *) automationChanges
+{
+    return [self.song.automation.changes copy];
+}
+
 - (NSSet *) automationChangesForTick:(uint)tick
 {
     __block NSSet *changesToCheck;

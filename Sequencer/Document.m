@@ -51,6 +51,7 @@ typedef enum DocumentPageAnimationDirection {
 
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
 
+@property (nonatomic, weak) IBOutlet NSButton              *removeAllAutomationButton;
 @property (nonatomic, weak) IBOutlet NSTextField           *automationLoopLengthTextField;
 @property (nonatomic, weak) IBOutlet NSStepper             *automationLoopLengthStepper;
 
@@ -349,6 +350,7 @@ typedef enum DocumentPageAnimationDirection {
     self.pageView.delegate = self;
     
     self.clockLateIndicator.alphaValue = 0.0;
+    self.removeAllAutomationButton.alphaValue = 0.0;
     
     self.debugGridView.delegate = self;
     
@@ -687,9 +689,10 @@ typedef enum DocumentPageAnimationDirection {
 - (void) automationChangesDidChange:(NSNotification *)notification
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] || ![notification.userInfo valueForKey:@"pageId"] ) {
             [self updateActiveAutomation];
         }
+        [self updateAutomationStatus];
     });
 }
 
@@ -724,6 +727,7 @@ typedef enum DocumentPageAnimationDirection {
     [self updateAutomationLoopLength];
     [self updateStepQuantizationPopup];
     [self updatePatternQuantizationPopup];
+    [self updateAutomationStatus];
 }
 
 - (void) updateAllPageSpecificInterface
@@ -947,6 +951,28 @@ typedef enum DocumentPageAnimationDirection {
     self.transposeStepper.intValue = [self.sequencer transposeForPage:self.sequencer.currentPageId];
 }
 
+- (void) updateAutomationStatus
+{
+    // Show
+    if( [[self.sequencer automationChanges] count] ) {
+        
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:0.3];
+        [[self.removeAllAutomationButton animator] setAlphaValue:1.0];
+        [[self.removeAllAutomationButton animator] setEnabled:YES];
+        [NSAnimationContext endGrouping];
+        
+    // Hide
+    } else {
+
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:0.1];
+        [[self.removeAllAutomationButton animator] setAlphaValue:0.0];
+        [[self.removeAllAutomationButton animator] setEnabled:NO];
+        [NSAnimationContext endGrouping];
+    }
+}
+
 - (void) updateActiveAutomation
 {
     NSArray *typeNames = [self.sequencer automationTypeNamesActiveForPage:self.sequencer.currentPageId];
@@ -992,6 +1018,12 @@ typedef enum DocumentPageAnimationDirection {
             [self resetPlayPositions];
         [self.clock startClock];
     }
+}
+
+- (IBAction)removeAllAutomationButton:(NSButton *)sender
+{
+    NSLog(@"Remove all auto");
+    [self.sequencer removeAllAutomation];
 }
 
 - (IBAction)automationLoopLengthTextField:(NSTextField *)sender

@@ -233,10 +233,12 @@
 - (void) incrementAutomationLoopLength;
 - (void) decrementAutomationLoopLength;
 
+- (NSSet *) automationChanges;
 - (NSSet *) automationChangesForTick:(uint)tick;
 - (NSSet *) automationChangesForPage:(uint)pageId;
 - (NSArray *) automationTypeNamesActiveForPage:(uint)pageId;
 - (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId;
+- (void) removeAllAutomation;
 
 // Utils
 - (BOOL) isNotificationFromCurrentPage:(NSNotification *)notification;
