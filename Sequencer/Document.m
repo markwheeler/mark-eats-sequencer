@@ -12,6 +12,7 @@
 #import "EatsCommunicationManager.h"
 #import "EatsSwingUtils.h"
 #import "ClockTick.h"
+#import "EatsNSTableViewClickPassThrough.h"
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
 #import "EatsWMNoteValueTransformer.h"
@@ -70,6 +71,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSTextField           *transposeTextField;
 @property (nonatomic, weak) IBOutlet NSStepper             *transposeStepper;
 @property (nonatomic, weak) IBOutlet NSTextField           *activeAutomationStaticTextField;
+@property (nonatomic, weak) IBOutlet EatsNSTableViewClickPassThrough  *activeAutomationTableView;
 
 @property (nonatomic, weak) IBOutlet EatsDebugGridView     *debugGridView;
 @property (nonatomic, weak) IBOutlet NSView                *debugGridViewFloatingToolbar;
@@ -352,6 +354,7 @@ typedef enum DocumentPageAnimationDirection {
     self.clockLateIndicator.alphaValue = 0.0;
     self.removeAllAutomationButton.alphaValue = 0.0;
     
+    self.activeAutomationTableView.delegate = self;
     self.debugGridView.delegate = self;
     
     self.debugGridViewFloatingToolbar.alphaValue = 0.0;
@@ -1234,6 +1237,11 @@ typedef enum DocumentPageAnimationDirection {
 - (void) pasteToCurrentPattern
 {
     [self.sequencer pasteboardPasteNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+}
+
+- (void) keyDownFromTableView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
+{
+    [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
 }
 
 - (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags

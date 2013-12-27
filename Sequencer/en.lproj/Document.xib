@@ -8,6 +8,7 @@
         <customObject id="-2" userLabel="File's Owner" customClass="Document">
             <connections>
                 <outlet property="activeAutomationStaticTextField" destination="6Ls-Zu-0bN" id="uwe-bw-Lnw"/>
+                <outlet property="activeAutomationTableView" destination="5Ny-0K-mk6" id="y2m-j0-tEQ"/>
                 <outlet property="automationLoopLengthStepper" destination="nDw-r4-hAY" id="Huo-02-OWl"/>
                 <outlet property="automationLoopLengthTextField" destination="8g4-8e-6xf" id="vpr-Ni-wsg"/>
                 <outlet property="bpmStepper" destination="101619" id="107482"/>
@@ -607,7 +608,7 @@
                                     <rect key="frame" x="0.0" y="0.0" width="176" height="100"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="5Ny-0K-mk6">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="5Ny-0K-mk6" customClass="EatsNSTableViewClickPassThrough">
                                             <rect key="frame" x="0.0" y="0.0" width="176" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>

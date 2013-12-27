@@ -33,6 +33,7 @@
 - (void) copyCurrentPattern;
 - (void) pasteToCurrentPattern;
 
+- (void) keyDownFromTableView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 - (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
 - (void) swipeForward;
 - (void) swipeBack;
