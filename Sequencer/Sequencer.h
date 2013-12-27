@@ -14,6 +14,8 @@
 #import "SequencerSong.h"
 #import "SequencerPage.h"
 #import "SequencerNote.h"
+#import "SequencerAutomation.h"
+#import "SequencerAutomationChange.h"
 
 #define SEQUENCER_SONG_VERSION 0
 
@@ -217,6 +219,24 @@
 
 - (int) playModeForPage:(uint)pageId;
 - (void) setPlayMode:(int)playMode forPage:(uint)pageId;
+
+// Automation
+- (uint) automationCurrentTick;
+- (void) resetAutomationCurrentTick;
+- (void) incrementAutomationCurrentTick;
+
+- (int) automationMode;
+- (void) setAutomationMode:(EatsSequencerAutomationMode)mode;
+
+- (uint) automationLoopLength;
+- (void) setAutomationLoopLength:(uint)bars;
+- (void) incrementAutomationLoopLength;
+- (void) decrementAutomationLoopLength;
+
+- (NSSet *) automationChangesForTick:(uint)tick;
+- (NSSet *) automationChangesForPage:(uint)pageId;
+- (NSArray *) automationTypeNamesActiveForPage:(uint)pageId;
+- (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId;
 
 // Utils
 - (BOOL) isNotificationFromCurrentPage:(NSNotification *)notification;

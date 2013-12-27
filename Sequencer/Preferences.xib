@@ -40,7 +40,7 @@
                             <tabViewItem label="Inputs" identifier="0" id="19">
                                 <view key="view" id="22">
                                     <rect key="frame" x="0.0" y="0.0" width="480" height="220"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="261">
                                             <rect key="frame" x="121" y="144" width="239" height="26"/>
@@ -50,7 +50,7 @@
                                             </constraints>
                                             <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="271" id="268">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
+                                                <font key="font" metaFont="menu"/>
                                                 <menu key="menu" title="OtherViews" id="270">
                                                     <items>
                                                         <menuItem title="None" state="on" id="271"/>
@@ -108,8 +108,8 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="supportsVariableBrightnessCheckbox:" target="-2" id="700"/>
-                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="1292"/>
                                                 <binding destination="-2" name="value" keyPath="self.sharedPreferences.gridSupportsVariableBrightness" id="642"/>
+                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="1292"/>
                                             </connections>
                                         </button>
                                         <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1021" customClass="EatsNSTextFieldWithDisabledColor">
@@ -130,8 +130,8 @@
                                             <sliderCell key="cell" alignment="left" maxValue="360" tickMarkPosition="above" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="circular" id="1088"/>
                                             <connections>
                                                 <action selector="gridControllerRotationSlider:" target="-2" id="1176"/>
-                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="1287"/>
                                                 <binding destination="-2" name="value" keyPath="self.sharedPreferences.gridRotation" id="1284"/>
+                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="1287"/>
                                             </connections>
                                         </slider>
                                     </subviews>
@@ -274,7 +274,7 @@
                                             </constraints>
                                             <popUpButtonCell key="cell" type="push" title="Internal" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="98" id="94">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
+                                                <font key="font" metaFont="menu"/>
                                                 <menu key="menu" title="OtherViews" id="95">
                                                     <items>
                                                         <menuItem title="Internal" state="on" id="98"/>

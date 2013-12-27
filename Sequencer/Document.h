@@ -18,6 +18,7 @@
 
 @property Sequencer                 *sequencer;
 @property NSArray                   *currentPagePitches;
+@property NSArray                   *currentPageActiveAutomation;
 
 @property BOOL                      isActive;
 

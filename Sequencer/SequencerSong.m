@@ -12,7 +12,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, SongVersion: %i, BPM: %f, StepQuantization: %i, PatternQuantization: %i, Pages: %@>", NSStringFromClass([self class]), self, self.songVersion, self.bpm, self.stepQuantization, self.patternQuantization, self.pages];
+    return [NSString stringWithFormat:@"<%@: %p, SongVersion: %i, BPM: %f, StepQuantization: %i, PatternQuantization: %i, Pages: %@, Automation: %@>", NSStringFromClass([self class]), self, self.songVersion, self.bpm, self.stepQuantization, self.patternQuantization, self.pages, self.automation];
 }
 
 - (id) initWithCoder:(NSCoder *)decoder {
@@ -28,6 +28,8 @@
     
     self.pages = [decoder decodeObjectForKey:@"pages"];
     
+    self.automation = [decoder decodeObjectForKey:@"automation"];
+    
     return self;
 }
 
@@ -39,6 +41,8 @@
     [encoder encodeInt32:self.patternQuantization forKey:@"patternQuantization"];
     
     [encoder encodeObject:self.pages forKey:@"pages"];
+    
+    [encoder encodeObject:self.automation forKey:@"automation"];
 }
 
 @end

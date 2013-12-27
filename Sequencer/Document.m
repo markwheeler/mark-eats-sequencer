@@ -50,10 +50,14 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSImageView           *clockLateIndicator;
 
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *sequencerPlaybackControls;
+
+@property (nonatomic, weak) IBOutlet NSTextField           *automationLoopLengthTextField;
+@property (nonatomic, weak) IBOutlet NSStepper             *automationLoopLengthStepper;
+
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
-@property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
 
+@property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
 
 @property (nonatomic, weak) IBOutlet NSTextField           *channelStaticTextField;
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
@@ -64,6 +68,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSButton              *velocityGrooveCheckbox;
 @property (nonatomic, weak) IBOutlet NSTextField           *transposeTextField;
 @property (nonatomic, weak) IBOutlet NSStepper             *transposeStepper;
+@property (nonatomic, weak) IBOutlet NSTextField           *activeAutomationStaticTextField;
 
 @property (nonatomic, weak) IBOutlet EatsDebugGridView     *debugGridView;
 @property (nonatomic, weak) IBOutlet NSView                *debugGridViewFloatingToolbar;
@@ -170,6 +175,9 @@ typedef enum DocumentPageAnimationDirection {
     // Window notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeMain:) name:NSWindowDidBecomeMainNotification object:[aController window]];
     
+    // UI notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeAutomation:) name:@"removeAutomationButtonClickedNotification" object:nil];
+    
     // Grid controller notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerSizeChanged:) name:kGridControllerSizeChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gridControllerNone:) name:kGridControllerNoneNotification object:nil];
@@ -215,6 +223,10 @@ typedef enum DocumentPageAnimationDirection {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStateNextStepDidChange:) name:kSequencerPageStateNextStepDidChangeNotification object:self.sequencer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
+    
+    // Sequencer automation notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationLoopLengthDidChange:) name:kSequencerAutomationLoopLengthDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationChangesDidChange:) name:kSequencerAutomationChangesDidChangeNotification object:self.sequencer];
     
     // Match the grid (even if it's the default there's stuff in here that needs to get called)
     [self updateInterfaceToMatchGridSize];
@@ -342,7 +354,7 @@ typedef enum DocumentPageAnimationDirection {
     
     self.debugGridViewFloatingToolbar.alphaValue = 0.0;
     
-    // Setup step quantization popup
+    // Setup step quantization & step length popups
     [self.stepQuantizationPopup removeAllItems];
     [self.stepLengthPopup removeAllItems];
     for( NSDictionary *quantization in self.sequencer.stepQuantizationArray) {
@@ -664,6 +676,22 @@ typedef enum DocumentPageAnimationDirection {
     });
 }
 
+// Sequencer automation notifications
+- (void) automationLoopLengthDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updateAutomationLoopLength];
+    });
+}
+
+- (void) automationChangesDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateActiveAutomation];
+        }
+    });
+}
 
 #pragma mark - Interface updates
 
@@ -693,6 +721,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) updateAllNonPageSpecificInterface
 {
     [self updateBPM];
+    [self updateAutomationLoopLength];
     [self updateStepQuantizationPopup];
     [self updatePatternQuantizationPopup];
 }
@@ -708,6 +737,7 @@ typedef enum DocumentPageAnimationDirection {
     [self updateSwingPopup];
     [self updateVelocityGroove];
     [self updateTranspose];
+    [self updateActiveAutomation];
 }
 
 - (void) updateBPM
@@ -726,6 +756,12 @@ typedef enum DocumentPageAnimationDirection {
     [[NSAnimationContext currentContext] setDuration:0.3];
     [[self.clockLateIndicator animator] setAlphaValue:0.0];
     [NSAnimationContext endGrouping];
+}
+
+- (void) updateAutomationLoopLength
+{
+    self.automationLoopLengthTextField.intValue = self.sequencer.automationLoopLength;
+    self.automationLoopLengthStepper.intValue = self.sequencer.automationLoopLength;
 }
 
 - (void) updateStepQuantizationPopup
@@ -911,6 +947,22 @@ typedef enum DocumentPageAnimationDirection {
     self.transposeStepper.intValue = [self.sequencer transposeForPage:self.sequencer.currentPageId];
 }
 
+- (void) updateActiveAutomation
+{
+    NSArray *typeNames = [self.sequencer automationTypeNamesActiveForPage:self.sequencer.currentPageId];
+    
+    if( typeNames.count ) {
+        self.activeAutomationStaticTextField.textColor = [NSColor controlTextColor];
+        self.activeAutomationStaticTextField.stringValue = [NSString stringWithFormat:@"Active automation"];
+        
+    } else {
+        self.activeAutomationStaticTextField.textColor = [NSColor disabledControlTextColor];
+        self.activeAutomationStaticTextField.stringValue = [NSString stringWithFormat:@"No active automation"];
+    }
+    
+    self.currentPageActiveAutomation = typeNames;
+}
+
 
 
 #pragma mark - Interface actions
@@ -941,6 +993,20 @@ typedef enum DocumentPageAnimationDirection {
         [self.clock startClock];
     }
 }
+
+- (IBAction)automationLoopLengthTextField:(NSTextField *)sender
+{
+    [self.sequencer setAutomationLoopLength:sender.intValue];
+}
+
+- (IBAction)automationLoopLengthStepper:(NSStepper *)sender
+{
+    if( sender.intValue > self.sequencer.automationLoopLength )
+        [self.sequencer incrementAutomationLoopLength];
+    else if( sender.intValue < self.sequencer.automationLoopLength )
+        [self.sequencer decrementAutomationLoopLength];
+}
+
 
 - (IBAction) stepQuantizationPopup:(NSPopUpButton *)sender
 {
@@ -1067,6 +1133,14 @@ typedef enum DocumentPageAnimationDirection {
 {
     [self.sequencer setTranspose:sender.intValue forPage:self.sequencer.currentPageId];
 }
+
+
+- (void) removeAutomation:(NSNotification *)notification
+{
+    [self.sequencer removeAutomationChangesOfType:[[notification.object valueForKey:@"automationType"] intValue] forPage:self.sequencer.currentPageId];
+}
+
+
 - (IBAction)debugGridViewFloatingToolbarShiftPattern:(NSSegmentedControl *)sender
 {
     if( sender.selectedSegment == 0 )

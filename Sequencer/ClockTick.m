@@ -181,6 +181,40 @@ typedef enum EatsStepAdvance {
     [_activeNotes removeObjectsInArray:toRemove];
     
     
+    // Do automation stuff if this is a 64th
+    if( _currentTick % (_ticksPerMeasure / MIN_QUANTIZATION ) == 0 && ( self.sequencer.automationMode == EatsSequencerAutomationMode_Recording || self.sequencer.automationMode == EatsSequencerAutomationMode_Playing ) ) {
+        
+        [self.sequencer incrementAutomationCurrentTick];
+        
+        NSSet *changesForThisTick = [self.sequencer automationChangesForTick:self.sequencer.automationCurrentTick];
+        
+        for( SequencerAutomationChange *change in changesForThisTick ) {
+            
+            // Change pattern
+            if( change.automationType == EatsSequencerAutomationType_SetNextPatternId ) {
+                [self.sequencer setNextOrCurrentPatternId:[change.values valueForKey:@"value"] forPage:change.pageId];
+                
+            // Scrub step
+            } else if( change.automationType == EatsSequencerAutomationType_SetNextStep ) {
+                [self.sequencer setNextStep:[change.values valueForKey:@"value"] forPage:change.pageId];
+               
+            // Loop
+            } else if( change.automationType == EatsSequencerAutomationType_SetLoop ) {
+                [self.sequencer setLoopStart:[[change.values valueForKey:@"startValue"] intValue] andLoopEnd:[[change.values valueForKey:@"endValue"] intValue] forPage:change.pageId];
+                
+            // Transpose
+            } else if( change.automationType == EatsSequencerAutomationType_SetTranspose ) {
+                [self.sequencer setTranspose:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+                
+            // Play mode
+            } else if( change.automationType == EatsSequencerAutomationType_SetPlayMode ) {
+                [self.sequencer setPlayMode:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+                
+            }
+        }
+    }
+    
+    
     // Update the current step for each page and send new notes
     
     for(uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {

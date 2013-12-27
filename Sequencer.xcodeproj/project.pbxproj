@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D056CED186BA63800A99F00 /* EatsNSTableCellViewLightBackground.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D056CEC186BA63800A99F00 /* EatsNSTableCellViewLightBackground.m */; };
 		4D172E8216E5B74E0012C019 /* EatsGridNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */; };
 		4D172E8816E5BD090012C019 /* Preferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D172E8716E5BD090012C019 /* Preferences.m */; };
 		4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D1AEF09171B026600317D56 /* EatsWMNoteValueTransformer.m */; };
@@ -16,6 +17,8 @@
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */; };
 		4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */; };
+		4D41801A186A4E9300FCB58C /* SequencerAutomation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D418019186A4E9300FCB58C /* SequencerAutomation.m */; };
+		4D41801D186A56EB00FCB58C /* SequencerAutomationChange.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D41801C186A56EB00FCB58C /* SequencerAutomationChange.m */; };
 		4D4E8A5A17F757DE00764300 /* FloatingToolbarBack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */; };
 		4D4E8A5D17F76A8B00764300 /* MinusIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5B17F76A8B00764300 /* MinusIconTemplate.pdf */; };
 		4D4E8A5E17F76A8B00764300 /* PlusIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5C17F76A8B00764300 /* PlusIconTemplate.pdf */; };
@@ -122,6 +125,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D056CEB186BA63800A99F00 /* EatsNSTableCellViewLightBackground.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsNSTableCellViewLightBackground.h; sourceTree = "<group>"; };
+		4D056CEC186BA63800A99F00 /* EatsNSTableCellViewLightBackground.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsNSTableCellViewLightBackground.m; sourceTree = "<group>"; };
 		4D0687D2170CCB1900783723 /* WMNoteCollectionKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMNoteCollectionKeys.h; sourceTree = "<group>"; };
 		4D172E8016E5B74E0012C019 /* EatsGridNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridNavigationController.h; sourceTree = "<group>"; };
 		4D172E8116E5B74E0012C019 /* EatsGridNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridNavigationController.m; sourceTree = "<group>"; };
@@ -140,6 +145,10 @@
 		4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridIntroViewController.m; sourceTree = "<group>"; };
 		4D3ED27917C30ECE00D7D0DD /* EatsGridOKView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridOKView.h; sourceTree = "<group>"; };
 		4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridOKView.m; sourceTree = "<group>"; };
+		4D418018186A4E9300FCB58C /* SequencerAutomation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerAutomation.h; sourceTree = "<group>"; };
+		4D418019186A4E9300FCB58C /* SequencerAutomation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerAutomation.m; sourceTree = "<group>"; };
+		4D41801B186A56EB00FCB58C /* SequencerAutomationChange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerAutomationChange.h; sourceTree = "<group>"; };
+		4D41801C186A56EB00FCB58C /* SequencerAutomationChange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerAutomationChange.m; sourceTree = "<group>"; };
 		4D4E8A5817F757DE00764300 /* FloatingToolbarBack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FloatingToolbarBack.h; sourceTree = "<group>"; };
 		4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FloatingToolbarBack.m; sourceTree = "<group>"; };
 		4D4E8A5B17F76A8B00764300 /* MinusIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = MinusIconTemplate.pdf; sourceTree = "<group>"; };
@@ -490,6 +499,10 @@
 				4D7FC0C7172C218C00D0614C /* SequencerState.m */,
 				4D7FC0C3172C215900D0614C /* SequencerPageState.h */,
 				4D7FC0C4172C215900D0614C /* SequencerPageState.m */,
+				4D418018186A4E9300FCB58C /* SequencerAutomation.h */,
+				4D418019186A4E9300FCB58C /* SequencerAutomation.m */,
+				4D41801B186A56EB00FCB58C /* SequencerAutomationChange.h */,
+				4D41801C186A56EB00FCB58C /* SequencerAutomationChange.m */,
 			);
 			name = "Sequencer Model";
 			sourceTree = "<group>";
@@ -547,6 +560,8 @@
 				4D82B13A17117AEF00AD8222 /* EatsDebugGridView.m */,
 				4D4E8A5817F757DE00764300 /* FloatingToolbarBack.h */,
 				4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */,
+				4D056CEB186BA63800A99F00 /* EatsNSTableCellViewLightBackground.h */,
+				4D056CEC186BA63800A99F00 /* EatsNSTableCellViewLightBackground.m */,
 				4DC940A7170064B6005FD88D /* ScaleGeneratorSheetController.h */,
 				4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
@@ -694,6 +709,7 @@
 				4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */,
 				4DC940A9170064B6005FD88D /* ScaleGeneratorSheetController.m in Sources */,
 				4DC940AE170068E9005FD88D /* JCSSheetController.m in Sources */,
+				4D056CED186BA63800A99F00 /* EatsNSTableCellViewLightBackground.m in Sources */,
 				4D6D735A170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m in Sources */,
 				4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */,
 				4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */,
@@ -705,6 +721,7 @@
 				4DA8A91E170B8805001C26EB /* WMPool.m in Sources */,
 				4DA8A91F170B8805001C26EB /* WMScale.m in Sources */,
 				4D82B13B17117AEF00AD8222 /* EatsDebugGridView.m in Sources */,
+				4D41801D186A56EB00FCB58C /* SequencerAutomationChange.m in Sources */,
 				4DADBEEB171A1F8A0091F952 /* WMPool+Utils.m in Sources */,
 				4D1AEF0A171B026600317D56 /* EatsWMNoteValueTransformer.m in Sources */,
 				4D7FC0C5172C215900D0614C /* SequencerPageState.m in Sources */,
@@ -713,6 +730,7 @@
 				4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */,
 				4DAC2D7F179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m in Sources */,
 				4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */,
+				4D41801A186A4E9300FCB58C /* SequencerAutomation.m in Sources */,
 				4DCACCB717BFDA9F0021575F /* Constants.m in Sources */,
 				4DCACCC017C016100021575F /* SequencerNote.m in Sources */,
 				4DCACCC117C016140021575F /* SequencerPage.m in Sources */,

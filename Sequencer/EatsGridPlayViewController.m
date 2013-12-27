@@ -39,11 +39,13 @@
 @property EatsGridButtonView                *sliceButton;
 @property EatsGridButtonView                *bpmDecrementButton;
 @property EatsGridButtonView                *bpmIncrementButton;
-@property EatsGridButtonView                *clearButton;
+//@property EatsGridButtonView                *clearButton;
+@property EatsGridButtonView                *automationButton;
 @property EatsGridButtonView                *exitButton;
 
+@property NSTimer                           *automationLongPressTimer;
 @property NSTimer                           *bpmRepeatTimer;
-@property NSTimer                           *clearTimer;
+//@property NSTimer                           *clearTimer;
 
 @property NSTimer                           *inOutAnimationTimer;
 @property uint                              inOutAnimationFrame;
@@ -203,15 +205,19 @@
         self.bpmIncrementButton = [[EatsGridButtonView alloc] init];
         self.bpmIncrementButton.x = self.width - 3;
         
-        self.clearButton = [[EatsGridButtonView alloc] init];
-        self.clearButton.x = self.width - 2;
-        self.clearButton.inactiveBrightness = 5;
+//        self.clearButton = [[EatsGridButtonView alloc] init];
+//        self.clearButton.x = self.width - 2;
+//        self.clearButton.inactiveBrightness = 5;
+        
+        self.automationButton = [[EatsGridButtonView alloc] init];
+        self.automationButton.x = self.width - 2;
+        self.automationButton.inactiveBrightness = 5;
         
         self.exitButton = [[EatsGridButtonView alloc] init];
         self.exitButton.x = self.width - 1;
         self.exitButton.inactiveBrightness = 5;
         
-        self.controlButtons = [NSArray arrayWithObjects:self.bpmDecrementButton, self.bpmIncrementButton, self.clearButton, self.exitButton, nil];
+        self.controlButtons = [NSArray arrayWithObjects:self.bpmDecrementButton, self.bpmIncrementButton, self.automationButton, self.exitButton, nil];
         
         for( EatsGridButtonView *button in self.controlButtons ) {
             button.delegate = self;
@@ -607,27 +613,27 @@
     });
 }
 
-- (void) clearIncrement:(NSTimer *)timer
-{
-    dispatch_async(self.gridQueue, ^(void) {
-        if( self.patternView.wipe >= 100 ) {
-            [self stopClear];
-            [self.sequencer clearNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
-            
-        } else {
-            self.patternView.wipe = self.patternView.wipe + 10;
-            [self updateView];
-        }
-    });
-}
+//- (void) clearIncrement:(NSTimer *)timer
+//{
+//    dispatch_async(self.gridQueue, ^(void) {
+//        if( self.patternView.wipe >= 100 ) {
+//            [self stopClear];
+//            [self.sequencer clearNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+//            
+//        } else {
+//            self.patternView.wipe = self.patternView.wipe + 10;
+//            [self updateView];
+//        }
+//    });
+//}
 
-- (void) stopClear
-{
-    [self.clearTimer invalidate];
-    self.clearTimer = nil;
-    self.patternView.wipe = 0;
-    self.clearButton.buttonState = EatsButtonViewState_Inactive;
-}
+//- (void) stopClear
+//{
+//    [self.clearTimer invalidate];
+//    self.clearTimer = nil;
+//    self.patternView.wipe = 0;
+//    self.clearButton.buttonState = EatsButtonViewState_Inactive;
+//}
 
 
 
@@ -1308,30 +1314,72 @@
             
             [self updateView];
             
-        // Clear button
-        } else if( sender == self.clearButton ) {
+//        // Clear button
+//        } else if( sender == self.clearButton ) {
+//            if ( buttonDown ) {
+//                sender.buttonState = EatsButtonViewState_Down;
+//                
+//                dispatch_async(dispatch_get_main_queue(), ^(void) {
+//                
+//                    self.clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+//                                                                   target:self
+//                                                                 selector:@selector(clearIncrement:)
+//                                                                 userInfo:nil
+//                                                                  repeats:YES];
+//                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+//                    
+//                    // Make sure we fire even when the UI is tracking mouse down stuff
+//                    [runloop addTimer:self.clearTimer forMode: NSRunLoopCommonModes];
+//                    [runloop addTimer:self.clearTimer forMode: NSEventTrackingRunLoopMode];
+//                    
+//                });
+//                
+//            } else {
+//                sender.buttonState = EatsButtonViewState_Inactive;
+//                
+//                [self stopClear];
+//            }
+//            
+//            [self updateView];
+
+        // Automation button
+        } else if( sender == self.automationButton ) {
+            
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
-                
-                    self.clearTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
-                                                                   target:self
-                                                                 selector:@selector(clearIncrement:)
-                                                                 userInfo:nil
-                                                                  repeats:YES];
+                    
+                    self.automationLongPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.6
+                                                                           target:self
+                                                                         selector:@selector(automationLongPressTimeout:)
+                                                                         userInfo:nil
+                                                                          repeats:NO];
                     NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                     
                     // Make sure we fire even when the UI is tracking mouse down stuff
-                    [runloop addTimer:self.clearTimer forMode: NSRunLoopCommonModes];
-                    [runloop addTimer:self.clearTimer forMode: NSEventTrackingRunLoopMode];
-                    
+                    [runloop addTimer:self.automationLongPressTimer forMode: NSRunLoopCommonModes];
+                    [runloop addTimer:self.automationLongPressTimer forMode: NSEventTrackingRunLoopMode];
                 });
                 
             } else {
                 sender.buttonState = EatsButtonViewState_Inactive;
                 
-                [self stopClear];
+                // Short press (long presses are handled by the timer)
+                if( self.automationLongPressTimer ) {
+                    
+                    [self.automationLongPressTimer invalidate];
+                    self.automationLongPressTimer = nil;
+                    
+                    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording ) {
+                        [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Playing];
+                        NSLog(@"Automation: Playing");
+                        
+                    } else {
+                        [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Inactive];
+                        NSLog(@"Automation: Inactive");
+                    }
+                }
             }
             
             [self updateView];
@@ -1344,8 +1392,8 @@
             // We check to make sure the exit button was pressed in this view (not just being released after transitioning from sequencer mode)
             } else if( sender.buttonState == EatsButtonViewState_Down ) {
                 
-                if( self.clearTimer )
-                    [self stopClear];
+//                if( self.clearTimer )
+//                    [self stopClear];
                 
                 // Start animateOut
                 [self animateInOutIncrement:-1];
@@ -1358,6 +1406,21 @@
         }
         
     });
+}
+
+- (void) automationLongPressTimeout:(NSTimer *)sender
+{
+    [self.automationLongPressTimer invalidate];
+    self.automationLongPressTimer = nil;
+    
+    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive ) {
+        [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Armed];
+        NSLog(@"Automation: Armed");
+        
+    } else {
+        [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Recording];
+        NSLog(@"Automation: Recording");
+    }
 }
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender

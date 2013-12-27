@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "SequencerAutomation.h"
 
 #define SEQUENCER_SONG_BPM_MIN 20
 #define SEQUENCER_SONG_BPM_MAX 300
@@ -20,5 +21,7 @@
 @property int                   patternQuantization;
 
 @property NSArray               *pages; // Position in array denotes id
+
+@property SequencerAutomation   *automation;
 
 @end
