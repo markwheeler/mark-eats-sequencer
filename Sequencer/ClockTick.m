@@ -190,7 +190,8 @@ typedef enum EatsStepAdvance {
             
             // Change pattern
             if( change.automationType == EatsSequencerAutomationType_SetNextPatternId ) {
-                [self.sequencer setNextOrCurrentPatternId:[change.values valueForKey:@"value"] forPage:change.pageId];
+                // Setting currentPatternId rather than next so as to make the loop change regardless of what loop may be set
+                [self.sequencer setCurrentPatternId:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
                 
             // Scrub step
             } else if( change.automationType == EatsSequencerAutomationType_SetNextStep ) {
