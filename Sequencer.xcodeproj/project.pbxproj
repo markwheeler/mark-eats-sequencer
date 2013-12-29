@@ -85,6 +85,7 @@
 		4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589816FD129100BC36E6 /* EatsGridView.m */; };
 		4DB0589C16FD1AE000BC36E6 /* EatsGridHorizontalSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */; };
 		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
+		4DBBF9191870967100F1605E /* EatsPieChartProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DBBF9181870967100F1605E /* EatsPieChartProgress.m */; };
 		4DBE3EC317F950F800344CFC /* Quincy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DBE3EC217F950F800344CFC /* Quincy.framework */; };
 		4DBE3EC417F950FC00344CFC /* Quincy.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DBE3EC217F950F800344CFC /* Quincy.framework */; };
 		4DC19BE31719AB380094B0D8 /* ShadowRule.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE11719AB380094B0D8 /* ShadowRule.png */; };
@@ -246,6 +247,8 @@
 		4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalSliderView.h; sourceTree = "<group>"; };
 		4DB0589B16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalSliderView.m; sourceTree = "<group>"; };
 		4DB87FB616E4435A00BA58BC /* Preferences.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Preferences.xib; sourceTree = "<group>"; };
+		4DBBF9171870967100F1605E /* EatsPieChartProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsPieChartProgress.h; sourceTree = "<group>"; };
+		4DBBF9181870967100F1605E /* EatsPieChartProgress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsPieChartProgress.m; sourceTree = "<group>"; };
 		4DBE3EC217F950F800344CFC /* Quincy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Quincy.framework; sourceTree = "<group>"; };
 		4DC19BE11719AB380094B0D8 /* ShadowRule.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowRule.png; sourceTree = "<group>"; };
 		4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ShadowRule@2x.png"; sourceTree = "<group>"; };
@@ -567,6 +570,8 @@
 				4D1B69F3186DF8290081304D /* EatsNSTableViewClickPassThrough.m */,
 				4D056CEB186BA63800A99F00 /* EatsNSTableCellViewLightBackground.h */,
 				4D056CEC186BA63800A99F00 /* EatsNSTableCellViewLightBackground.m */,
+				4DBBF9171870967100F1605E /* EatsPieChartProgress.h */,
+				4DBBF9181870967100F1605E /* EatsPieChartProgress.m */,
 				4DC940A7170064B6005FD88D /* ScaleGeneratorSheetController.h */,
 				4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */,
 				4D6115E016E431BD00140AF8 /* Document.xib */,
@@ -697,6 +702,7 @@
 				4DCF8E2B16E446D6002EDD46 /* PreferencesController.m in Sources */,
 				4DCF8E3B16E44AD7002EDD46 /* EatsCommunicationManager.m in Sources */,
 				4D7515B516E4583D00A8E3F2 /* EatsMIDIManager.m in Sources */,
+				4DBBF9191870967100F1605E /* EatsPieChartProgress.m in Sources */,
 				4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */,
 				4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */,
 				4D7E51EE16E5ADFB005A8DC3 /* EatsMonome.m in Sources */,

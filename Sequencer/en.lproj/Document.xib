@@ -9,6 +9,9 @@
             <connections>
                 <outlet property="activeAutomationStaticTextField" destination="6Ls-Zu-0bN" id="uwe-bw-Lnw"/>
                 <outlet property="activeAutomationTableView" destination="5Ny-0K-mk6" id="y2m-j0-tEQ"/>
+                <outlet property="automationCountBox" destination="tnB-Kg-pgj" id="Wih-a3-Lgm"/>
+                <outlet property="automationCountPieChart" destination="zLz-Zw-Kgt" id="FK2-AG-zMa"/>
+                <outlet property="automationCountTextField" destination="YEI-FG-J5h" id="Gik-AP-Gpu"/>
                 <outlet property="automationLoopLengthStepper" destination="nDw-r4-hAY" id="Huo-02-OWl"/>
                 <outlet property="automationLoopLengthTextField" destination="8g4-8e-6xf" id="vpr-Ni-wsg"/>
                 <outlet property="bpmStepper" destination="101619" id="107482"/>
@@ -262,6 +265,31 @@
                             <action selector="automationLoopLengthTextField:" target="-2" id="lrI-pI-g0V"/>
                         </connections>
                     </textField>
+                    <box autoresizesSubviews="NO" title="Automation count" boxType="custom" borderType="none" titlePosition="noTitle" id="tnB-Kg-pgj">
+                        <rect key="frame" x="350" y="536" width="86" height="25"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <view key="contentView">
+                            <rect key="frame" x="0.0" y="0.0" width="86" height="25"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <customView id="zLz-Zw-Kgt" customClass="EatsPieChartProgress">
+                                    <rect key="frame" x="6" y="4" width="16" height="16"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                </customView>
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="YEI-FG-J5h">
+                                    <rect key="frame" x="27" y="4" width="67" height="17"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="1.1.1" id="7rh-0w-R3r">
+                                        <font key="font" metaFont="system"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                            </subviews>
+                        </view>
+                        <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                        <color key="fillColor" name="windowBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </box>
                     <customView id="107125" customClass="KeyboardInputView">
                         <rect key="frame" x="-3" y="0.0" width="830" height="575"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>

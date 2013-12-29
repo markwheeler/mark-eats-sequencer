@@ -107,5 +107,6 @@ extern NSString *const kSequencerPageStatePlayModeDidChangeNotification;
 // Automation
 
 extern NSString *const kSequencerAutomationLoopLengthDidChangeNotification;
+extern NSString *const kSequencerAutomationTickDidChangeNotification;
 extern NSString *const kSequencerAutomationModeDidChangeNotification;
 extern NSString *const kSequencerAutomationChangesDidChangeNotification;

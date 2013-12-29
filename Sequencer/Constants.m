@@ -97,5 +97,6 @@ NSString *const kSequencerPageStatePlayModeDidChangeNotification = @"SequencerPa
 // Automation
 
 NSString *const kSequencerAutomationLoopLengthDidChangeNotification = @"SequencerAutomationLoopLengthDidChangeNotification";
+NSString *const kSequencerAutomationTickDidChangeNotification = @"SequencerAutomationTickDidChangeNotification";
 NSString *const kSequencerAutomationModeDidChangeNotification = @"SequencerAutomationModeDidChangeNotification";
 NSString *const kSequencerAutomationChangesDidChangeNotification = @"SequencerAutomationChangesDidChangeNotification";

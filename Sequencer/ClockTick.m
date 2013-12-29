@@ -184,8 +184,6 @@ typedef enum EatsStepAdvance {
     // Do automation stuff if this is a 64th
     if( _currentTick % (_ticksPerMeasure / MIN_QUANTIZATION ) == 0 && ( self.sequencer.automationMode == EatsSequencerAutomationMode_Recording || self.sequencer.automationMode == EatsSequencerAutomationMode_Playing ) ) {
         
-        [self.sequencer incrementAutomationCurrentTick];
-        
         NSSet *changesForThisTick = [self.sequencer automationChangesForTick:self.sequencer.automationCurrentTick];
         
         for( SequencerAutomationChange *change in changesForThisTick ) {
@@ -219,8 +217,6 @@ typedef enum EatsStepAdvance {
     
     for(uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
         
-
-    
         // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
         EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
         
@@ -434,6 +430,11 @@ typedef enum EatsStepAdvance {
             
         }
         
+    }
+    
+    // Advance automation tick if appropriate
+    if( _currentTick % (_ticksPerMeasure / MIN_QUANTIZATION ) == 0 && ( self.sequencer.automationMode == EatsSequencerAutomationMode_Recording || self.sequencer.automationMode == EatsSequencerAutomationMode_Playing ) ) {
+        [self.sequencer incrementAutomationCurrentTick];
     }
     
     [self incrementTick];

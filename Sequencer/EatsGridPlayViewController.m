@@ -1371,14 +1371,10 @@
                     [self.automationLongPressTimer invalidate];
                     self.automationLongPressTimer = nil;
                     
-                    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording ) {
+                    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording )
                         [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Playing];
-                        NSLog(@"Automation: Playing");
-                        
-                    } else {
+                    else
                         [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Inactive];
-                        NSLog(@"Automation: Inactive");
-                    }
                 }
             }
             
@@ -1413,14 +1409,10 @@
     [self.automationLongPressTimer invalidate];
     self.automationLongPressTimer = nil;
     
-    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive ) {
+    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive )
         [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Armed];
-        NSLog(@"Automation: Armed");
-        
-    } else {
+    else
         [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Recording];
-        NSLog(@"Automation: Recording");
-    }
 }
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender

@@ -16,6 +16,7 @@
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
 #import "EatsWMNoteValueTransformer.h"
+#import "EatsPieChartProgress.h"
 
 @interface Document ()
 
@@ -55,6 +56,9 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSButton              *removeAllAutomationButton;
 @property (nonatomic, weak) IBOutlet NSTextField           *automationLoopLengthTextField;
 @property (nonatomic, weak) IBOutlet NSStepper             *automationLoopLengthStepper;
+@property (weak) IBOutlet NSBox                            *automationCountBox;
+@property (weak) IBOutlet NSTextField                      *automationCountTextField;
+@property (weak) IBOutlet EatsPieChartProgress             *automationCountPieChart;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;
@@ -229,6 +233,8 @@ typedef enum DocumentPageAnimationDirection {
     
     // Sequencer automation notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationLoopLengthDidChange:) name:kSequencerAutomationLoopLengthDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationTickDidChange:) name:kSequencerAutomationTickDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationModeDidChange:) name:kSequencerAutomationModeDidChangeNotification object:self.sequencer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationChangesDidChange:) name:kSequencerAutomationChangesDidChangeNotification object:self.sequencer];
     
     // Match the grid (even if it's the default there's stuff in here that needs to get called)
@@ -353,6 +359,7 @@ typedef enum DocumentPageAnimationDirection {
     
     self.clockLateIndicator.alphaValue = 0.0;
     self.removeAllAutomationButton.alphaValue = 0.0;
+    self.automationCountBox.alphaValue = 0.0;
     
     self.activeAutomationTableView.delegate = self;
     self.debugGridView.delegate = self;
@@ -689,6 +696,20 @@ typedef enum DocumentPageAnimationDirection {
     });
 }
 
+- (void) automationTickDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updateAutomationTick];
+    });
+}
+
+- (void) automationModeDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self updateAutomationMode];
+    });
+}
+
 - (void) automationChangesDidChange:(NSNotification *)notification
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
@@ -730,6 +751,7 @@ typedef enum DocumentPageAnimationDirection {
     [self updateAutomationLoopLength];
     [self updateStepQuantizationPopup];
     [self updatePatternQuantizationPopup];
+    [self updateAutomationMode];
     [self updateAutomationStatus];
 }
 
@@ -972,6 +994,60 @@ typedef enum DocumentPageAnimationDirection {
         [[NSAnimationContext currentContext] setDuration:0.1];
         [[self.removeAllAutomationButton animator] setAlphaValue:0.0];
         [[self.removeAllAutomationButton animator] setEnabled:NO];
+        [NSAnimationContext endGrouping];
+    }
+}
+
+- (void) updateAutomationTick
+{
+    // Label
+    
+    uint tick = self.sequencer.automationCurrentTick ;
+    uint bars = ( tick + MIN_QUANTIZATION ) / MIN_QUANTIZATION;
+    uint beats = ( ( tick % MIN_QUANTIZATION ) + ( MIN_QUANTIZATION / 4 ) ) / ( MIN_QUANTIZATION / 4 );
+    uint sixteenths = ( ( tick % ( MIN_QUANTIZATION / 4) ) + ( MIN_QUANTIZATION / 16 ) ) / ( MIN_QUANTIZATION / 16 );
+    
+    self.automationCountTextField.stringValue = [NSString stringWithFormat:@"%u.%u.%u", bars, beats, sixteenths];
+    
+    // Pie chart
+    self.automationCountPieChart.progress = (float)tick / ( self.sequencer.automationLoopLength * MIN_QUANTIZATION );
+    self.automationCountPieChart.needsDisplay = YES;
+}
+
+- (void) updateAutomationMode
+{
+    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Armed || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording ) {
+        
+        NSColor *recordingRed = [NSColor colorWithCalibratedRed:0.76 green:0.18 blue:0.01 alpha:1.0];
+        self.automationCountTextField.textColor = recordingRed;
+        self.automationCountPieChart.activeSliceColor = recordingRed;
+        self.automationCountPieChart.inactiveSliceColor = [NSColor colorWithCalibratedRed:0.87 green:0.81 blue:0.80 alpha:1.0];
+        
+    } else {
+        
+        self.automationCountTextField.textColor = [NSColor controlTextColor];
+        self.automationCountPieChart.activeSliceColor = [NSColor darkGrayColor];
+        self.automationCountPieChart.inactiveSliceColor = [NSColor colorWithCalibratedHue:0.0 saturation:0.0 brightness:0.8 alpha:1.0];
+    }
+    
+    // Inactive (hide)
+    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive ) {
+        
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:0.1];
+        [[self.automationCountBox animator] setAlphaValue:0.0];
+        [self.automationLoopLengthTextField setHidden:NO];
+        [self.automationLoopLengthStepper setHidden:NO];
+        [NSAnimationContext endGrouping];
+        
+    // Playing, armed, recording (show)
+    } else {
+        
+        [NSAnimationContext beginGrouping];
+        [[NSAnimationContext currentContext] setDuration:0.1];
+        [[self.automationCountBox animator] setAlphaValue:1.0];
+        [[self.automationLoopLengthTextField animator] setHidden:YES];
+        [[self.automationLoopLengthStepper animator] setHidden:YES];
         [NSAnimationContext endGrouping];
     }
 }
@@ -1468,6 +1544,23 @@ typedef enum DocumentPageAnimationDirection {
                 [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
     
+    // Automation
+    // a (without any modifier)
+    } else if( keyCode.intValue == 0 && modifierFlags.intValue == 256 ) {
+        
+        if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording )
+            [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Playing];
+        else
+            [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Inactive];
+        
+    // Shift + a
+    } else if( keyCode.intValue == 0 && modifierFlags.intValue & NSShiftKeyMask ) {
+        
+        if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive )
+            [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Armed];
+        else
+            [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Recording];
+        
     // Play mode
     // p (without any modifier)
     } else if( keyCode.intValue == 35 && modifierFlags.intValue == 256 )

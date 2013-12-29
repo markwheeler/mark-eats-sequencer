@@ -1649,6 +1649,8 @@
 
 - (void) setCurrentPatternId:(int)patternId forPage:(uint)pageId
 {
+    // TODO does this need to be recorded for automation? Should recording actually happen in setNextOrCurrent..?
+    
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     if( patternId >= 0 && patternId < page.patterns.count ) {
@@ -1668,6 +1670,12 @@
 
 - (void) setNextPatternId:(NSNumber *)patternId forPage:(uint)pageId
 {
+    // Add automation if appropriate
+    if( patternId == nil && [self nextPatternIdForPage:pageId] ) {
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[self nextPatternIdForPage:pageId] forKey:@"value"];
+        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetNextPatternId withValues:values forPage:pageId];
+    }
+    
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     if( patternId.intValue >= 0 && patternId.intValue < page.patterns.count ) {
@@ -1730,6 +1738,12 @@
 
 - (void) setNextStep:(NSNumber *)step forPage:(uint)pageId
 {
+    // Add automation if appropriate
+    if( step == nil && [self nextStepForPage:pageId] ) {
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[self nextStepForPage:pageId] forKey:@"value"];
+        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetNextStep withValues:values forPage:pageId];
+    }
+    
     if( step.intValue >= 0 && step.intValue < self.sharedPreferences.gridWidth ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.nextStep = step;
@@ -1865,11 +1879,15 @@
 - (uint) automationCurrentTick
 {
     return self.song.automation.currentTick;
+    
+    [self postNotification:kSequencerAutomationTickDidChangeNotification];
 }
 
 - (void) resetAutomationCurrentTick
 {
     self.song.automation.currentTick = 0;
+    
+    [self postNotification:kSequencerAutomationTickDidChangeNotification];
 }
 
 - (void) incrementAutomationCurrentTick
@@ -1878,6 +1896,8 @@
     if( newTick >= MIN_QUANTIZATION * [self automationLoopLength] )
         newTick = 0;
     self.song.automation.currentTick = newTick;
+    
+    [self postNotification:kSequencerAutomationTickDidChangeNotification];
 }
 
 
