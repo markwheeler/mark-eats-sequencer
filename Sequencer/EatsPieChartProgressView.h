@@ -1,5 +1,5 @@
 //
-//  EatsPieChartProgress.h
+//  EatsPieChartProgressView.h
 //  Sequencer
 //
 //  Created by Mark Wheeler on 29/12/2013.
@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface EatsPieChartProgress : NSView
+@interface EatsPieChartProgressView : NSView
 
 @property float     progress; // 0-1
 @property NSColor   *activeSliceColor;

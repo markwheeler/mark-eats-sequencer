@@ -272,7 +272,7 @@
                             <rect key="frame" x="0.0" y="0.0" width="86" height="25"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <customView id="zLz-Zw-Kgt" customClass="EatsPieChartProgress">
+                                <customView id="zLz-Zw-Kgt" customClass="EatsPieChartProgressView">
                                     <rect key="frame" x="6" y="4" width="16" height="16"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 </customView>

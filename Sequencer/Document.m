@@ -16,7 +16,7 @@
 #import "ScaleGeneratorSheetController.h"
 #import "EatsGridNavigationController.h"
 #import "EatsWMNoteValueTransformer.h"
-#import "EatsPieChartProgress.h"
+#import "EatsPieChartProgressView.h"
 
 @interface Document ()
 
@@ -58,7 +58,7 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSStepper             *automationLoopLengthStepper;
 @property (weak) IBOutlet NSBox                            *automationCountBox;
 @property (weak) IBOutlet NSTextField                      *automationCountTextField;
-@property (weak) IBOutlet EatsPieChartProgress             *automationCountPieChart;
+@property (weak) IBOutlet EatsPieChartProgressView         *automationCountPieChart;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *stepQuantizationPopup;
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *patternQuantizationPopup;

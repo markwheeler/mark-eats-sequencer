@@ -1,16 +1,14 @@
 //
-//  EatsPieChartProgress.m
+//  EatsPieChartProgressView.m
 //  Sequencer
 //
 //  Created by Mark Wheeler on 29/12/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
 //
 
-#import "EatsPieChartProgress.h"
+#import "EatsPieChartProgressView.h"
 
-#define PI 3.14159265358979323846
-
-@implementation EatsPieChartProgress
+@implementation EatsPieChartProgressView
 
 - (id)initWithFrame:(NSRect)frame
 {
