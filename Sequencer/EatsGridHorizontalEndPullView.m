@@ -25,7 +25,7 @@
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns with playhead
+    // Generate the columns
     for(uint x = 0; x < self.width; x++) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
