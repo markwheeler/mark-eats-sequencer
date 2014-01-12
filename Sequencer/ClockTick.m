@@ -211,11 +211,11 @@ typedef enum EatsStepAdvance {
                     
                 // Loop
                 } else if( change.automationType == EatsSequencerAutomationType_SetLoop ) {
-                    [self.sequencer setLoopStart:[[change.values valueForKey:@"startValue"] intValue] andLoopEnd:[[change.values valueForKey:@"endValue"] intValue] forPage:change.pageId];
+                    [self.sequencer setLoopStartWithoutRegisteringUndo:[[change.values valueForKey:@"startValue"] intValue] andLoopEnd:[[change.values valueForKey:@"endValue"] intValue] forPage:change.pageId];
                     
                 // Transpose
                 } else if( change.automationType == EatsSequencerAutomationType_SetTranspose ) {
-                    [self.sequencer setTranspose:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+                    [self.sequencer setTransposeWithoutRegisteringUndo:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
                     
                 // Play mode
                 } else if( change.automationType == EatsSequencerAutomationType_SetPlayMode ) {

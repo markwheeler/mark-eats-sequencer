@@ -517,8 +517,10 @@
     
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
-        [[self.undoManager prepareWithInvocationTarget:self] setLoopStart:page.loopStart forPage:pageId];
-        [self.undoManager setActionName:@"Loop Change"];
+        if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
+            [[self.undoManager prepareWithInvocationTarget:self] setLoopStart:page.loopStart forPage:pageId];
+            [self.undoManager setActionName:@"Loop Change"];
+        }
         
         page.loopStart = loopStart;
     }
@@ -547,8 +549,10 @@
     
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
-        [[self.undoManager prepareWithInvocationTarget:self] setLoopEnd:page.loopEnd forPage:pageId];
-        [self.undoManager setActionName:@"Loop Change"];
+        if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
+            [[self.undoManager prepareWithInvocationTarget:self] setLoopEnd:page.loopEnd forPage:pageId];
+            [self.undoManager setActionName:@"Loop Change"];
+        }
         
         page.loopEnd = loopEnd;
     }
@@ -569,11 +573,22 @@
 - (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forPage:(uint)pageId
 {
     if( loopStart >= 0 && loopStart < self.sharedPreferences.gridWidth && loopEnd >= 0 && loopEnd < self.sharedPreferences.gridWidth ) {
-    
-        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
-        [[self.undoManager prepareWithInvocationTarget:self] setLoopStart:page.loopStart andLoopEnd:page.loopEnd forPage:pageId];
-        [self.undoManager setActionName:@"Loop Change"];
+        if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
+            SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+            [[self.undoManager prepareWithInvocationTarget:self] setLoopStart:page.loopStart andLoopEnd:page.loopEnd forPage:pageId];
+            [self.undoManager setActionName:@"Loop Change"];
+        }
+        
+        [self setLoopStartWithoutRegisteringUndo:loopStart andLoopEnd:loopEnd forPage:pageId];
+    }
+}
+
+- (void) setLoopStartWithoutRegisteringUndo:(int)loopStart andLoopEnd:(int)loopEnd forPage:(uint)pageId
+{
+    if( loopStart >= 0 && loopStart < self.sharedPreferences.gridWidth && loopEnd >= 0 && loopEnd < self.sharedPreferences.gridWidth ) {
+        
+        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
         page.loopStart = loopStart;
         page.loopEnd = loopEnd;
@@ -799,11 +814,21 @@
 {
     if( transpose >= SEQUENCER_MIDI_MAX * -1 && transpose <= SEQUENCER_MIDI_MAX ) {
         
+        if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
+            SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+            [[self.undoManager prepareWithInvocationTarget:self] setTranspose:page.transpose forPage:pageId];
+            [self.undoManager setActionName:@"Transpose Change"];
+        }
+    
+        [self setTransposeWithoutRegisteringUndo:transpose forPage:pageId];
+    }
+}
+
+- (void) setTransposeWithoutRegisteringUndo:(int)transpose forPage:(uint)pageId
+{
+    if( transpose >= SEQUENCER_MIDI_MAX * -1 && transpose <= SEQUENCER_MIDI_MAX ) {
+        
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        
-        [[self.undoManager prepareWithInvocationTarget:self] setTranspose:page.transpose forPage:pageId];
-        [self.undoManager setActionName:@"Transpose Change"];
-        
         page.transpose = transpose;
     }
     
@@ -835,23 +860,6 @@
         page.transposeZeroStep = transposeZeroStep;
     }
     
-    [self postNotification:kSequencerPageTransposeZeroStepDidChangeNotification forPage:pageId];
-}
-
-- (void) setTranspose:(int)transpose andTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId
-{
-    if( transpose >= SEQUENCER_MIDI_MAX * -1 && transpose <= SEQUENCER_MIDI_MAX && transposeZeroStep >= 0 && transposeZeroStep < self.sharedPreferences.gridWidth ) {
-        
-        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-        
-        [[self.undoManager prepareWithInvocationTarget:self] setTranspose:page.transpose forPage:pageId];
-        [self.undoManager setActionName:@"Transpose Change"];
-        
-        page.transpose = transpose;
-        page.transposeZeroStep = transposeZeroStep;
-    }
-    
-    [self postNotification:kSequencerPageTransposeDidChangeNotification forPage:pageId];
     [self postNotification:kSequencerPageTransposeZeroStepDidChangeNotification forPage:pageId];
 }
 
@@ -2012,21 +2020,18 @@
     
     if( pageId < kSequencerNumberOfPages ) {
         
-        // TODO Should this be undoable?
+        NSMutableSet *newChanges = [[self automationChanges] mutableCopy];
+
+        // Check if there's an existing change that we need to remove
+        NSSet *changesToRemove = [newChanges objectsPassingTest:^(id obj, BOOL *stop) {
+            SequencerAutomationChange *change = (SequencerAutomationChange *)obj;
+            BOOL testResult = ( change.tick == self.automationCurrentTick && change.automationType == type && change.pageId == pageId );
+            return testResult;
+        }];
         
-        dispatch_sync(self.sequencerQueue, ^(void) {
-            
-            // Check if there's an existing change that we need to remove
-            NSSet *changesToRemove = [self.song.automation.changes objectsPassingTest:^(id obj, BOOL *stop) {
-                SequencerAutomationChange *change = (SequencerAutomationChange *)obj;
-                BOOL testResult = ( change.tick == self.automationCurrentTick && change.automationType == type && change.pageId == pageId );
-                return testResult;
-            }];
-            
-            for( SequencerAutomationChange *change in changesToRemove ) { // There should only ever be 1 object in this set
-                [self.song.automation.changes removeObject:change];
-            }
-        });
+        for( SequencerAutomationChange *change in changesToRemove ) { // There should only ever be 1 object in this set
+            [newChanges removeObject:change];
+        }
         
         // Add the new one
         SequencerAutomationChange *newChange = [[SequencerAutomationChange alloc] init];
@@ -2035,44 +2040,36 @@
         newChange.automationType = type;
         newChange.values = values;
         
-        dispatch_sync(self.sequencerQueue, ^(void) {
-            [self.song.automation.changes addObject:newChange];
-        });
+        [newChanges addObject:newChange];
         
-        [self postNotification:kSequencerAutomationChangesDidChangeNotification forPage:pageId];
+        [self setAutomationChanges:newChanges];
     }
 }
 
 - (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId
 {
+    NSMutableSet *newChanges = [[self automationChanges] mutableCopy];
     
-    // TODO should this be undoable? Have a way to add a whole row of automation back in??
-    
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    NSSet *changesToRemove = [newChanges objectsPassingTest:^(id obj, BOOL *stop) {
+        SequencerAutomationChange *change = (SequencerAutomationChange *)obj;
+        BOOL testResult = ( change.automationType == type && change.pageId == pageId );
+        return testResult;
+    }];
 
-        NSSet *changesToRemove = [self.song.automation.changes objectsPassingTest:^(id obj, BOOL *stop) {
-            SequencerAutomationChange *change = (SequencerAutomationChange *)obj;
-            BOOL testResult = ( change.automationType == type && change.pageId == pageId );
-            return testResult;
-        }];
-
-        for( SequencerAutomationChange *change in changesToRemove ) {
-            [self.song.automation.changes removeObject:change];
-        }
-    });
+    for( SequencerAutomationChange *change in changesToRemove ) {
+        [newChanges removeObject:change];
+    }
     
-    [self postNotification:kSequencerAutomationChangesDidChangeNotification forPage:pageId];
+    [self setAutomationChanges:newChanges];
 }
 
 - (void) removeAllAutomation
 {
     if( [[self automationChanges] count] ) {
-    
-        dispatch_sync(self.sequencerQueue, ^(void) {
-            self.song.automation.changes = [NSMutableSet set];
-        });
         
-        [self postNotification:kSequencerAutomationChangesDidChangeNotification];
+        // Send an empty set
+        [self setAutomationChanges:[NSSet set]];
+        
         [self postNotification:kSequencerAutomationRemoveAllChangesNotification];
         
     }
@@ -2081,6 +2078,20 @@
 
 
 #pragma mark - Private methods
+
+// Automation
+
+- (void) setAutomationChanges:(NSSet *)changes
+{
+    [[self.undoManager prepareWithInvocationTarget:self] setAutomationChanges:[self automationChanges]];
+    [self.undoManager setActionName:@"Automation Change"];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        self.song.automation.changes = changes;
+    });
+    
+    [self postNotification:kSequencerAutomationChangesDidChangeNotification];
+}
 
 
 // Some useful methods for notifications to use

@@ -28,7 +28,7 @@ typedef enum EatsSequencerAutomationType {
 @property uint                          currentTick;
 @property EatsSequencerAutomationMode   mode;
 @property uint                          loopLength;
-@property NSMutableSet                  *changes; // Contains SequencerAutomationChange objects
+@property NSSet                         *changes; // Contains SequencerAutomationChange objects
 
 @property NSArray                       *automationTypes;
 

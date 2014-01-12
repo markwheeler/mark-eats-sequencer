@@ -87,6 +87,7 @@
 - (void) incrementLoopEndForPage:(uint)pageId;
 - (void) decrementLoopEndForPage:(uint)pageId;
 - (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forPage:(uint)pageId;
+- (void) setLoopStartWithoutRegisteringUndo:(int)loopStart andLoopEnd:(int)loopEnd forPage:(uint)pageId;
 
 - (void) setLoopStartForAllPages:(int)loopStart;
 - (void) setLoopEndForAllPages:(int)loopEnd;
@@ -115,13 +116,12 @@
 
 - (int) transposeForPage:(uint)pageId;
 - (void) setTranspose:(int)transpose forPage:(uint)pageId;
+- (void) setTransposeWithoutRegisteringUndo:(int)transpose forPage:(uint)pageId;
 - (void) incrementTransposeForPage:(uint)pageId;
 - (void) decrementTransposeForPage:(uint)pageId;
 
 - (int) transposeZeroStepForPage:(uint)pageId;
 - (void) setTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId;
-
-- (void) setTranspose:(int)transpose andTransposeZeroStep:(int)transposeZeroStep forPage:(uint)pageId;
 
 - (NSArray *) pitchesForPage:(uint)pageId;
 - (void) setPitches:(NSArray *)pitches forPage:(uint)pageId;

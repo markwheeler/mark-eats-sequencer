@@ -126,6 +126,7 @@ typedef enum DocumentPageAnimationDirection {
         
         // Create the Sequencer
         self.sequencer = [[Sequencer alloc] init];
+//        [self.undoManager setGroupsByEvent:NO];
         self.sequencer.undoManager = self.undoManager;
         
         // Add dummy data for testing
@@ -152,7 +153,7 @@ typedef enum DocumentPageAnimationDirection {
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    //NSLog(@"Document deallocated OK");
+//    NSLog(@"Document deallocated OK");
 }
 
 - (NSString *) windowNibName
@@ -454,7 +455,7 @@ typedef enum DocumentPageAnimationDirection {
     // Leave them
     if( returnCode == NSOKButton ) {
         
-        // Remove them
+    // Remove them
     } else {
         [self.sequencer removeNotesOutsideOfGrid];
     }
@@ -713,9 +714,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) automationChangesDidChange:(NSNotification *)notification
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        if( [self.sequencer isNotificationFromCurrentPage:notification] || ![notification.userInfo valueForKey:@"pageId"] ) {
-            [self updateActiveAutomation];
-        }
+        [self updateActiveAutomation];
         [self updateAutomationStatus];
     });
 }
@@ -1240,11 +1239,19 @@ typedef enum DocumentPageAnimationDirection {
 
 - (IBAction)transposeTextField:(NSTextField *)sender
 {
+    // Add automation
+    NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:sender.intValue] forKey:@"value"];
+    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetTranspose withValues:values forPage:self.sequencer.currentPageId];
+    
     [self.sequencer setTranspose:sender.intValue forPage:self.sequencer.currentPageId];
 }
 
 - (IBAction)transposeStepper:(NSStepper *)sender
 {
+    // Add automation
+    NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:sender.intValue] forKey:@"value"];
+    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetTranspose withValues:values forPage:self.sequencer.currentPageId];
+    
     [self.sequencer setTranspose:sender.intValue forPage:self.sequencer.currentPageId];
 }
 
