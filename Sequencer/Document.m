@@ -124,9 +124,11 @@ typedef enum DocumentPageAnimationDirection {
         // Get the prefs singleton
         self.sharedPreferences = [Preferences sharedPreferences];
         
+        // Set the undo manager to not auto-group stuff. This could be done in a non-doc-wide way if need be but for now this is OK
+        [self.undoManager setGroupsByEvent:NO];
+        
         // Create the Sequencer
         self.sequencer = [[Sequencer alloc] init];
-//        [self.undoManager setGroupsByEvent:NO];
         self.sequencer.undoManager = self.undoManager;
         
         // Add dummy data for testing

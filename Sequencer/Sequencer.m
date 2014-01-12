@@ -279,8 +279,10 @@
         
     });
     
+    [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] addBackNotesPreviouslyRemoved:removedNoteDictionaries];
     [self.undoManager setActionName:@"Remove Notes"];
+    [self.undoManager endUndoGrouping];
     
     return removedNoteDictionaries.count;
 }
@@ -309,7 +311,9 @@
         
     });
     
+    [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] removeNotesOutsideOfGrid];
+    [self.undoManager endUndoGrouping];
 }
 
 
@@ -321,8 +325,10 @@
 - (void) setBPM:(float)bpm
 {
     if( bpm >= SEQUENCER_SONG_BPM_MIN && bpm <= SEQUENCER_SONG_BPM_MAX ) {
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setBPM:self.song.bpm];
         [self.undoManager setActionName:@"BPM Change"];
+        [self.undoManager endUndoGrouping];
     }
     
     [self setBPMWithoutRegisteringUndo:bpm];
@@ -368,8 +374,10 @@
     }];
     
     if( index != NSNotFound ) {
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setStepQuantization:self.song.stepQuantization];
         [self.undoManager setActionName:@"Step Quantization Change"];
+        [self.undoManager endUndoGrouping];
         
         self.song.stepQuantization = stepQuantization;
     }
@@ -401,8 +409,10 @@
     }];
     
     if( index != NSNotFound ) {
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setPatternQuantization:self.song.patternQuantization];
         [self.undoManager setActionName:@"Pattern Quantization Change"];
+        [self.undoManager endUndoGrouping];
         
         [self setPatternQuantizationWithoutRegisteringUndo:patternQuantization];
     }
@@ -442,8 +452,10 @@
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setChannel:page.channel forPage:pageId];
         [self.undoManager setActionName:@"Channel Change"];
+        [self.undoManager endUndoGrouping];
         
         page.channel = channel;
     }
@@ -462,8 +474,10 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
+    [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] setName:page.name forPage:pageId];
     [self.undoManager setActionName:@"Page name Change"];
+    [self.undoManager endUndoGrouping];
     
     page.name = name;
     
@@ -486,8 +500,10 @@
     if( index != NSNotFound ) {
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setStepLength:page.stepLength forPage:pageId];
         [self.undoManager setActionName:@"Step Length Change"];
+        [self.undoManager endUndoGrouping];
         
         page.stepLength = stepLength;
     }
@@ -518,8 +534,10 @@
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
         if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setLoopStart:page.loopStart forPage:pageId];
             [self.undoManager setActionName:@"Loop Change"];
+            [self.undoManager endUndoGrouping];
         }
         
         page.loopStart = loopStart;
@@ -550,8 +568,10 @@
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
         if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setLoopEnd:page.loopEnd forPage:pageId];
             [self.undoManager setActionName:@"Loop Change"];
+            [self.undoManager endUndoGrouping];
         }
         
         page.loopEnd = loopEnd;
@@ -576,8 +596,10 @@
         
         if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
             SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setLoopStart:page.loopStart andLoopEnd:page.loopEnd forPage:pageId];
             [self.undoManager setActionName:@"Loop Change"];
+            [self.undoManager endUndoGrouping];
         }
         
         [self setLoopStartWithoutRegisteringUndo:loopStart andLoopEnd:loopEnd forPage:pageId];
@@ -730,8 +752,10 @@
     if( index != NSNotFound ) {
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setSwingType:page.swingType andSwingAmount:page.swingAmount forPage:pageId];
         [self.undoManager setActionName:@"Swing Change"];
+        [self.undoManager endUndoGrouping];
         
         page.swingType = swingType;
     }
@@ -757,8 +781,10 @@
     if( index != NSNotFound ) {
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setSwingType:page.swingType andSwingAmount:page.swingAmount forPage:pageId];
         [self.undoManager setActionName:@"Swing Change"];
+        [self.undoManager endUndoGrouping];
         
         page.swingAmount = swingAmount;
     }
@@ -776,8 +802,10 @@
     if( index != NSNotFound ) {
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setSwingType:page.swingType andSwingAmount:page.swingAmount forPage:pageId];
         [self.undoManager setActionName:@"Swing Change"];
+        [self.undoManager endUndoGrouping];
         
         page.swingType = swingType;
         page.swingAmount = swingAmount;
@@ -796,8 +824,10 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
+    [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] setVelocityGroove:page.velocityGroove forPage:pageId];
     [self.undoManager setActionName:@"Velocity Groove Change"];
+    [self.undoManager endUndoGrouping];
     
     page.velocityGroove = velocityGroove;
     
@@ -816,8 +846,10 @@
         
         if( self.automationMode != EatsSequencerAutomationMode_Armed && self.automationMode != EatsSequencerAutomationMode_Recording ) {
             SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setTranspose:page.transpose forPage:pageId];
             [self.undoManager setActionName:@"Transpose Change"];
+            [self.undoManager endUndoGrouping];
         }
     
         [self setTransposeWithoutRegisteringUndo:transpose forPage:pageId];
@@ -878,8 +910,10 @@
     
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setPitches:page.pitches forPage:pageId];
         [self.undoManager setActionName:@"Pitches Change"];
+        [self.undoManager endUndoGrouping];
         
         page.pitches = [pitches mutableCopy];
     }
@@ -898,8 +932,10 @@
     if( pitch >= SEQUENCER_MIDI_MIN && pitch <= SEQUENCER_MIDI_MAX && row < SEQUENCER_SIZE ) {
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setPitch:[[page.pitches objectAtIndex:row] intValue] atRow:row forPage:pageId];
         [self.undoManager setActionName:@"Pitch Change"];
+        [self.undoManager endUndoGrouping];
         
         [page.pitches replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:pitch]];
     }
@@ -976,9 +1012,11 @@
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     dispatch_sync(self.sequencerQueue, ^(void) {
-    
+        
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[page.patterns objectAtIndex:patternId] forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
         
         [page.patterns replaceObjectAtIndex:patternId withObject:[notes mutableCopy]];
         
@@ -1015,8 +1053,10 @@
     dispatch_sync(self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
         
         for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
             if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
@@ -1043,8 +1083,10 @@
     dispatch_sync(self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
         
         for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
             if( note.step < self.sharedPreferences.gridWidth && note.row < self.sharedPreferences.gridHeight ) {
@@ -1074,8 +1116,10 @@
         dispatch_sync(self.sequencerQueue, ^(void) {
             
             NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
             [self.undoManager setActionName:@"Pattern Change"];
+            [self.undoManager endUndoGrouping];
             
             for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
                 
@@ -1116,8 +1160,10 @@
     dispatch_sync(self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
         
         for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
             
@@ -1148,8 +1194,10 @@
         dispatch_sync(self.sequencerQueue, ^(void) {
             
             NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
             [self.undoManager setActionName:@"Pattern Change"];
+            [self.undoManager endUndoGrouping];
             
             for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
                 
@@ -1180,8 +1228,10 @@
     dispatch_sync(self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
         
         for( SequencerNote *note in [page.patterns objectAtIndex:patternId] ){
             
@@ -1209,9 +1259,11 @@
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     dispatch_sync(self.sequencerQueue, ^(void) {
-    
+        
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] copy] forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
     
         [[page.patterns objectAtIndex:patternId] removeAllObjects];
         
@@ -1226,9 +1278,11 @@
     SequencerPage *toPage = [self.song.pages objectAtIndex:toPageId];
     
     dispatch_sync(self.sequencerQueue, ^(void) {
-    
+        
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[toPage.patterns objectAtIndex:toPatternId] forPattern:toPatternId inPage:toPageId];
         [self.undoManager setActionName:@"Pattern Copy"];
+        [self.undoManager endUndoGrouping];
 
         NSMutableSet *fromNotes = [[NSMutableSet alloc] initWithSet:[fromPage.patterns objectAtIndex:fromPatternId] copyItems:YES];
         [toPage.patterns replaceObjectAtIndex:toPatternId withObject:fromNotes];
@@ -1250,8 +1304,10 @@
         NSSet *currentNotes = [[page.patterns objectAtIndex:patternId] copy];
         [[page.patterns objectAtIndex:patternId] removeAllObjects];
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:currentNotes forPattern:patternId inPage:pageId];
         [self.undoManager setActionName:@"Pattern Change"];
+        [self.undoManager endUndoGrouping];
         
     });
     
@@ -1443,8 +1499,10 @@
             for( SequencerNote *note in notes ) {
                 if( note.row == row && note.step == step ) {
                     
+                    [self.undoManager beginUndoGrouping];
                     [[self.undoManager prepareWithInvocationTarget:self] setLength:note.length forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
                     [self.undoManager setActionName:@"Note Length Change"];
+                    [self.undoManager endUndoGrouping];
                     
                     note.length = length;
                     
@@ -1493,8 +1551,10 @@
             for( SequencerNote *note in notes ) {
                 if( note.row == row && note.step == step ) {
                     
+                    [self.undoManager beginUndoGrouping];
                     [[self.undoManager prepareWithInvocationTarget:self] setVelocity:note.velocity forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
                     [self.undoManager setActionName:@"Note Velocity Change"];
+                    [self.undoManager endUndoGrouping];
                     
                     note.velocity = velocity;
                     
@@ -1535,8 +1595,10 @@
 
 - (void) addNoteAtStep:(uint)step atRow:(uint)row withLength:(uint)length withVelocity:(uint)velocity inPattern:(uint)patternId inPage:(uint)pageId
 {
+    [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] removeNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
     [self.undoManager setActionName:@"Pattern Change"];
+    [self.undoManager endUndoGrouping];
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
@@ -1575,8 +1637,10 @@
         
         if( noteToRemove ) {
         
+            [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] addNoteAtStep:step atRow:row withLength:noteToRemove.length withVelocity:noteToRemove.velocity inPattern:patternId inPage:pageId];
             [self.undoManager setActionName:@"Pattern Change"];
+            [self.undoManager endUndoGrouping];
             
             SequencerPage *page = [self.song.pages objectAtIndex:pageId];
             NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
@@ -1908,8 +1972,10 @@
 {
     if (bars >= 1 && bars <= 128 ) {
         
+        [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setAutomationLoopLength:self.song.automation.loopLength];
         [self.undoManager setActionName:@"Automation Loop Length Change"];
+        [self.undoManager endUndoGrouping];
         
         self.song.automation.loopLength = bars;
         
@@ -2083,8 +2149,10 @@
 
 - (void) setAutomationChanges:(NSSet *)changes
 {
+    [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] setAutomationChanges:[self automationChanges]];
     [self.undoManager setActionName:@"Automation Change"];
+    [self.undoManager endUndoGrouping];
     
     dispatch_sync(self.sequencerQueue, ^(void) {
         self.song.automation.changes = changes;
