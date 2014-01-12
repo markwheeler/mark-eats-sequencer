@@ -49,6 +49,11 @@ NSString *const kExternalClockStopNotification = @"ExternalClockStopNotification
 NSString *const kExternalClockBPMNotification = @"ExternalClockBPMNotification";
 
 
+// Tick
+
+NSString *const kClockMinQuantizationTick = @"ClockMinQuantizationTick";
+
+
 // Preferences
 
 NSString *const kPreferencesThatRequiresGridRedrawDidChangeNotification = @"PreferencesThatRequiresGridRedrawDidChangeNotification";

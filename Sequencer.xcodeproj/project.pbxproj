@@ -91,6 +91,7 @@
 		4DC19BE31719AB380094B0D8 /* ShadowRule.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE11719AB380094B0D8 /* ShadowRule.png */; };
 		4DC19BE41719AB380094B0D8 /* ShadowRule@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */; };
 		4DC19BE61719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */; };
+		4DC6F9911871BE2700B3E48B /* EatsGridBoxView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC6F9901871BE2700B3E48B /* EatsGridBoxView.m */; };
 		4DC940A9170064B6005FD88D /* ScaleGeneratorSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */; };
 		4DC940AE170068E9005FD88D /* JCSSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC940AD170068E9005FD88D /* JCSSheetController.m */; };
 		4DCACCB717BFDA9F0021575F /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DCACCB617BFDA9F0021575F /* Constants.m */; };
@@ -253,6 +254,8 @@
 		4DC19BE11719AB380094B0D8 /* ShadowRule.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowRule.png; sourceTree = "<group>"; };
 		4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ShadowRule@2x.png"; sourceTree = "<group>"; };
 		4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PreferencesAdvancedIconTemplate.pdf; sourceTree = "<group>"; };
+		4DC6F98F1871BE2700B3E48B /* EatsGridBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridBoxView.h; sourceTree = "<group>"; };
+		4DC6F9901871BE2700B3E48B /* EatsGridBoxView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridBoxView.m; sourceTree = "<group>"; };
 		4DC940A7170064B6005FD88D /* ScaleGeneratorSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScaleGeneratorSheetController.h; sourceTree = "<group>"; };
 		4DC940A8170064B6005FD88D /* ScaleGeneratorSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScaleGeneratorSheetController.m; sourceTree = "<group>"; };
 		4DC940AC170068E9005FD88D /* JCSSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JCSSheetController.h; sourceTree = "<group>"; };
@@ -342,6 +345,8 @@
 				4DB0589816FD129100BC36E6 /* EatsGridView.m */,
 				4DB0589116FCC82F00BC36E6 /* EatsGridSubView.h */,
 				4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */,
+				4DC6F98F1871BE2700B3E48B /* EatsGridBoxView.h */,
+				4DC6F9901871BE2700B3E48B /* EatsGridBoxView.m */,
 				4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */,
 				4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */,
 				4DB0589A16FD1ADF00BC36E6 /* EatsGridHorizontalSliderView.h */,
@@ -727,6 +732,7 @@
 				4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */,
 				4D2772461709C8EA00A8069B /* EatsVelocityUtils.m in Sources */,
 				4DA8A91A170B8805001C26EB /* WMChord.m in Sources */,
+				4DC6F9911871BE2700B3E48B /* EatsGridBoxView.m in Sources */,
 				4DA8A91B170B8805001C26EB /* WMData.m in Sources */,
 				4DA8A91C170B8805001C26EB /* WMNote.m in Sources */,
 				4DA8A91D170B8805001C26EB /* WMNoteCollection.m in Sources */,

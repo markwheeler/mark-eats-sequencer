@@ -1101,7 +1101,6 @@ typedef enum DocumentPageAnimationDirection {
 
 - (IBAction)removeAllAutomationButton:(NSButton *)sender
 {
-    NSLog(@"Remove all auto");
     [self.sequencer removeAllAutomation];
 }
 
@@ -1214,6 +1213,10 @@ typedef enum DocumentPageAnimationDirection {
 
 - (IBAction) pagePlaybackControls:(NSSegmentedControl *)sender
 {
+    // Add automation
+    NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:sender.selectedSegment] forKey:@"value"];
+    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+    
     [self.sequencer setPlayMode:(int)sender.selectedSegment forPage:self.sequencer.currentPageId];
 }
 
@@ -1563,24 +1566,53 @@ typedef enum DocumentPageAnimationDirection {
         
     // Play mode
     // p (without any modifier)
-    } else if( keyCode.intValue == 35 && modifierFlags.intValue == 256 )
+    } else if( keyCode.intValue == 35 && modifierFlags.intValue == 256 ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Pause] forKey:@"value"];
+        [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+        
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
+        
     // >
-    else if( keyCode.intValue == 47 )
+    } else if( keyCode.intValue == 47 ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Forward] forKey:@"value"];
+        [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+        
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
+        
     // <
-    else if( keyCode.intValue == 43 )
+    } else if( keyCode.intValue == 43 ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Reverse] forKey:@"value"];
+        [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+        
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
+        
     // ? (without any modifier)
-    else if( keyCode.intValue == 44 && modifierFlags.intValue == 256 )
+    } else if( keyCode.intValue == 44 && modifierFlags.intValue == 256 ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Random] forKey:@"value"];
+        [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+        
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
+        
     // s (without any modifier)
-    else if( keyCode.intValue == 1 && modifierFlags.intValue == 256 )
+    } else if( keyCode.intValue == 1 && modifierFlags.intValue == 256 ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Slice] forKey:@"value"];
+        [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+        
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Slice forPage:self.sequencer.currentPageId];
     
     // Transpose
     // [
-    else if( keyCode.intValue == 33 )
+    } else if( keyCode.intValue == 33 )
         [self.sequencer decrementTransposeForPage:self.sequencer.currentPageId];
     // ]
     else if( keyCode.intValue == 30 )

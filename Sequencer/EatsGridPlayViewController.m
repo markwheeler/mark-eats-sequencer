@@ -21,6 +21,9 @@
 @property Preferences                       *sharedPreferences;
 @property Sequencer                         *sequencer;
 
+@property EatsGridBoxView                   *boxOverlayView;
+@property NSTimer                           *boxOverlayFadeTimer;
+
 @property EatsGridHorizontalShiftView       *transposeView;
 @property EatsGridLoopBraceView             *loopBraceView;
 @property EatsGridPatternView               *patternView;
@@ -45,6 +48,7 @@
 
 @property NSTimer                           *automationLongPressTimer;
 @property NSTimer                           *bpmRepeatTimer;
+@property BOOL                              automationShortPress;
 //@property NSTimer                           *clearTimer;
 
 @property NSTimer                           *inOutAnimationTimer;
@@ -211,7 +215,6 @@
         
         self.automationButton = [[EatsGridButtonView alloc] init];
         self.automationButton.x = self.width - 2;
-        self.automationButton.inactiveBrightness = 5;
         
         self.exitButton = [[EatsGridButtonView alloc] init];
         self.exitButton.x = self.width - 1;
@@ -260,6 +263,8 @@
         // Update everything
         [self updatePage];
         [self updatePlayMode];
+        [self updateAutomationMode];
+        [self updateAutomationStatus];
         [self updatePattern];
         if( self.height > 8 ) {
             [self updateTranspose];
@@ -268,6 +273,8 @@
         [self updateLoop];
         [self updatePatternNotes];
         
+        // Clock tick notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clockMinQuantizationTick:) name:kClockMinQuantizationTick object:nil];
         
         // Sequencer page notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageLoopDidChange:) name:kSequencerPageLoopDidChangeNotification object:self.sequencer];
@@ -293,6 +300,9 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStatePlayModeDidChange:) name:kSequencerPageStatePlayModeDidChangeNotification object:self.sequencer];
         
+        // Sequencer automation notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationModeDidChange:) name:kSequencerAutomationModeDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationChangesDidChange:) name:kSequencerAutomationChangesDidChangeNotification object:self.sequencer];
         
         // Start animateIn
         self.inOutAnimationFrame = 0;
@@ -574,6 +584,48 @@
     }
 }
 
+- (void) flashBoxOverlay
+{
+    // Create a box and then fade it out as a visual cue that the automation has been cleared
+    self.boxOverlayView = [[EatsGridBoxView alloc] init];
+    self.boxOverlayView.width = self.width;
+    self.boxOverlayView.height = self.height;
+    [self.subViews addObject:self.boxOverlayView];
+    
+    [self.boxOverlayFadeTimer invalidate];
+    self.boxOverlayFadeTimer = nil;
+    
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        self.boxOverlayFadeTimer = [NSTimer scheduledTimerWithTimeInterval:0.03
+                                                                    target:self
+                                                                  selector:@selector(boxOverlayFadeIncrement:)
+                                                                  userInfo:nil
+                                                                   repeats:YES];
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        
+        // Make sure we fire even when the UI is tracking mouse down stuff
+        [runloop addTimer:self.boxOverlayFadeTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.boxOverlayFadeTimer forMode: NSEventTrackingRunLoopMode];
+    });
+
+}
+
+- (void) boxOverlayFadeIncrement:(NSTimer *)timer
+{
+    self.boxOverlayView.brightness --;
+    
+    if( self.boxOverlayView.brightness == 0 ) {
+        
+        [self.boxOverlayFadeTimer invalidate];
+        self.boxOverlayFadeTimer = nil;
+        
+        dispatch_sync(self.gridQueue, ^(void) {
+            [self.subViews removeObject:self.boxOverlayView];
+            self.boxOverlayView = nil;
+        });
+    }
+}
+
 
 - (void) decrementBPMRepeat:(NSTimer *)timer
 {
@@ -634,6 +686,27 @@
 //    self.patternView.wipe = 0;
 //    self.clearButton.buttonState = EatsButtonViewState_Inactive;
 //}
+
+- (void) incrementAutomationFlashForTick:(int)tick
+{
+    // We only update every second tick (32nds) to keep the refresh rate reasonable
+    if( tick % 2 && ( self.sequencer.automationMode == EatsSequencerAutomationMode_Armed || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording ) ) {
+        
+        int newBrightness = self.automationButton.activeBrightness;
+        
+        // Blink twice as fast when armed
+        if( self.sequencer.automationMode == EatsSequencerAutomationMode_Armed )
+            newBrightness -= 2;
+        else if (self.sequencer.automationMode == EatsSequencerAutomationMode_Recording )
+            newBrightness --;
+        
+        if( newBrightness < 0 )
+            newBrightness = 15;
+        self.automationButton.activeBrightness = newBrightness;
+        
+        [self updateView];
+    }
+}
 
 
 
@@ -703,6 +776,27 @@
             button.buttonState = EatsButtonViewState_Inactive;
         i++;
     }
+}
+
+- (void) updateAutomationMode
+{
+    // Light up when playing, armed or recording
+    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive )
+        self.automationButton.buttonState = EatsButtonViewState_Inactive;
+    else
+        self.automationButton.buttonState = EatsButtonViewState_Active;
+    
+    self.automationButton.activeBrightness = 15;
+}
+
+
+- (void) updateAutomationStatus
+{
+    // Show some light if automation is recorded
+    if( self.sequencer.automationChanges.count )
+        self.automationButton.inactiveBrightness = 5;
+    else
+        self.automationButton.inactiveBrightness = 0;
 }
 
 - (void) updatePattern
@@ -855,6 +949,13 @@
 
 
 #pragma mark - Notifications
+
+// Clock tick notifications
+- (void) clockMinQuantizationTick:(NSNotification *)notification {
+    dispatch_async(self.gridQueue, ^(void) {
+        [self incrementAutomationFlashForTick:[[notification.userInfo valueForKey:@"tick"] intValue]];
+    });
+}
 
 // Sequencer page notifications
 - (void) pageLoopDidChange:(NSNotification *)notification
@@ -1016,6 +1117,22 @@
     });
 }
 
+- (void) automationModeDidChange:(NSNotification *)notification
+{
+    dispatch_async(self.gridQueue, ^(void) {
+        [self updateAutomationMode];
+        [self updateView];
+    });
+}
+
+- (void) automationChangesDidChange:(NSNotification *)notification
+{
+    dispatch_async(self.gridQueue, ^(void) {
+        [self updateAutomationStatus];
+        [self updateView];
+    });
+}
+
 
 
 #pragma mark - Sub view delegate methods
@@ -1037,10 +1154,9 @@
                 sender.buttonState = EatsButtonViewState_Inactive;
                 [self updatePage];
             }
-        }
         
         // Pattern buttons
-        if ( [self.patternButtons containsObject:sender] ) {
+        } else if ( [self.patternButtons containsObject:sender] ) {
             
             uint pressedPattern = (uint)[self.patternButtons indexOfObject:sender];
             
@@ -1077,10 +1193,9 @@
             }
             
             [self updateView];
-        }
         
         // Pattern buttons for other pages
-        if ( [self.patternsOnOtherPagesButtons containsObject:sender] ) {
+        } else if ( [self.patternsOnOtherPagesButtons containsObject:sender] ) {
             
             // For large grids
             if( self.height > 8 ) {
@@ -1149,10 +1264,9 @@
             }
             
             [self updateView];
-        }
         
         // Scrub buttons for other pages
-        if ( [self.scrubOtherPagesButtons containsObject:sender] ) {
+        } else if ( [self.scrubOtherPagesButtons containsObject:sender] ) {
             
             int pressedStep = (int)[self.scrubOtherPagesButtons indexOfObject:sender];
             
@@ -1202,42 +1316,50 @@
             }
             
             [self updateView];
-        }
         
-        // Play mode forward button
-        if( sender == self.forwardButton ) {
-            if ( buttonDown ) {
-                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Forward )
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-                else
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
-            }
+        // Play mode buttons
+        } else if( [self.playModeButtons containsObject:sender] ) {
             
-        // Play mode reverse button
-        } else if( sender == self.reverseButton ) {
-            if ( buttonDown ) {
-                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-                else
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
-            }
+            if( buttonDown ) {
             
-        // Play mode random button
-        } else if( sender == self.randomButton ) {
-            if ( buttonDown ) {
-                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Random )
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-                else
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
-            }
-            
-        // Play mode slice button
-        } else if( sender == self.sliceButton ) {
-            if ( buttonDown ) {
-                if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Slice )
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
-                else
-                    [self.sequencer setPlayMode:EatsSequencerPlayMode_Slice forPage:self.sequencer.currentPageId];
+                EatsSequencerPlayMode playMode;
+                
+                // Play mode forward button
+                if( sender == self.forwardButton ) {
+                    if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Forward )
+                        playMode = EatsSequencerPlayMode_Pause;
+                    else
+                        playMode = EatsSequencerPlayMode_Forward;
+                    
+                // Play mode reverse button
+                } else if( sender == self.reverseButton ) {
+                    if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Reverse )
+                        playMode = EatsSequencerPlayMode_Pause;
+                    else
+                        playMode = EatsSequencerPlayMode_Reverse;
+                    
+                // Play mode random button
+                } else if( sender == self.randomButton ) {
+                    if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Random )
+                        playMode = EatsSequencerPlayMode_Pause;
+                    else
+                        playMode = EatsSequencerPlayMode_Random;
+                
+                // Play mode slice button
+                } else {
+                    if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Slice )
+                        playMode = EatsSequencerPlayMode_Pause;
+                    else
+                        playMode = EatsSequencerPlayMode_Slice;
+                    
+                }
+                
+                // Add automation
+                NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:playMode] forKey:@"value"];
+                [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+                
+                [self.sequencer setPlayMode:playMode forPage:self.sequencer.currentPageId];
+                
             }
             
         // BPM- button
@@ -1348,6 +1470,8 @@
             if ( buttonDown ) {
                 sender.buttonState = EatsButtonViewState_Down;
                 
+                self.automationShortPress = YES;
+                
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
                     
                     self.automationLongPressTimer = [NSTimer scheduledTimerWithTimeInterval:0.6
@@ -1363,19 +1487,25 @@
                 });
                 
             } else {
-                sender.buttonState = EatsButtonViewState_Inactive;
+                
+                [self.automationLongPressTimer invalidate];
+                self.automationLongPressTimer = nil;
                 
                 // Short press (long presses are handled by the timer)
-                if( self.automationLongPressTimer ) {
+                if( self.automationShortPress ) {
                     
-                    [self.automationLongPressTimer invalidate];
-                    self.automationLongPressTimer = nil;
+                    self.automationShortPress = NO;
                     
                     if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording )
                         [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Playing];
                     else
                         [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Inactive];
                 }
+                
+                if( self.sequencer.automationMode == EatsButtonViewState_Inactive )
+                    sender.buttonState = EatsButtonViewState_Inactive;
+                else
+                    sender.buttonState = EatsButtonViewState_Active;
             }
             
             [self updateView];
@@ -1404,19 +1534,56 @@
     });
 }
 
-- (void) automationLongPressTimeout:(NSTimer *)sender
+- (void) automationLongPressTimeout:(NSTimer *)timer
 {
     [self.automationLongPressTimer invalidate];
     self.automationLongPressTimer = nil;
     
-    if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive )
-        [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Armed];
-    else
-        [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Recording];
+    dispatch_async(self.gridQueue, ^(void) {
+        self.automationShortPress = NO;
+        
+        if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive )
+            [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Armed];
+        else
+            [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Recording];
+        
+        // TODO: Animation?
+        
+    });
+    
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        
+        self.automationLongPressTimer = [NSTimer scheduledTimerWithTimeInterval:2
+                                                                         target:self
+                                                                       selector:@selector(automationLongerPressTimeout:)
+                                                                       userInfo:nil
+                                                                        repeats:NO];
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        
+        // Make sure we fire even when the UI is tracking mouse down stuff
+        [runloop addTimer:self.automationLongPressTimer forMode: NSRunLoopCommonModes];
+        [runloop addTimer:self.automationLongPressTimer forMode: NSEventTrackingRunLoopMode];
+    });
 }
+
+- (void) automationLongerPressTimeout:(NSTimer *)timer
+{
+    [self.automationLongPressTimer invalidate];
+    self.automationLongPressTimer = nil;
+    
+    dispatch_async(self.gridQueue, ^(void) {
+        [self flashBoxOverlay];
+        [self.sequencer removeAllAutomation];
+    });
+}
+
 
 - (void) eatsGridHorizontalShiftViewUpdated:(EatsGridHorizontalShiftView *)sender
 {
+    // Add automation
+    NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:sender.shift] forKey:@"value"];
+    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetTranspose withValues:values forPage:self.sequencer.currentPageId];
+    
     [self.sequencer setTranspose:sender.shift andTransposeZeroStep:sender.zeroStep forPage:self.sequencer.currentPageId];
 }
 
@@ -1424,6 +1591,13 @@
 {
     uint start = [EatsGridUtils percentageToSteps:sender.startPercentage width:self.width];
     uint end = [EatsGridUtils percentageToSteps:sender.endPercentage width:self.width];
+    
+    // Add automation
+    NSDictionary *values = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:start], @"startValue",
+                                                                      [NSNumber numberWithUnsignedInt:end], @"endValue",
+                                                                      nil];
+    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:values forPage:self.sequencer.currentPageId];
+    
     [self.sequencer setLoopStart:start andLoopEnd:end forPage:self.sequencer.currentPageId];
 }
 
@@ -1435,8 +1609,14 @@
     if( down ) {
         
         // Scrub the loop
-        if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Pause )
+        if( [self.sequencer playModeForPage:self.sequencer.currentPageId] == EatsSequencerPlayMode_Pause ) {
+            
+            // Add automation
+            NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Forward] forKey:@"value"];
+            [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:self.sequencer.currentPageId];
+            
             [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
+        }
         [self.sequencer setNextStep:[NSNumber numberWithUnsignedInt:x] forPage:self.sequencer.currentPageId];
         
     }

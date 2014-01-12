@@ -60,6 +60,11 @@ extern NSString *const kExternalClockStopNotification;
 extern NSString *const kExternalClockBPMNotification;
 
 
+// Tick
+
+extern NSString *const kClockMinQuantizationTick;
+
+
 // Preferences
 
 extern NSString *const kPreferencesThatRequiresGridRedrawDidChangeNotification;

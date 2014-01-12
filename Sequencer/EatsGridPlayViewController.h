@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "EatsGridView.h"
+#import "EatsGridBoxView.h"
 #import "EatsGridButtonView.h"
 #import "EatsGridLoopBraceView.h"
 #import "EatsGridHorizontalShiftView.h"

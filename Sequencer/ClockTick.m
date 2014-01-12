@@ -180,35 +180,48 @@ typedef enum EatsStepAdvance {
     [self stopNotes:toRemove atTime:ns];
     [_activeNotes removeObjectsInArray:toRemove];
     
+    // Keep track of what needs to advance
+    NSMutableArray *stepHasBeenAutomated = [NSMutableArray arrayWithCapacity:kSequencerNumberOfPages];
+    for(uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+        [stepHasBeenAutomated addObject:[NSNumber numberWithBool:NO]];
+    }
     
-    // Do automation stuff if this is a 64th
-    if( _currentTick % (_ticksPerMeasure / MIN_QUANTIZATION ) == 0 && ( self.sequencer.automationMode == EatsSequencerAutomationMode_Recording || self.sequencer.automationMode == EatsSequencerAutomationMode_Playing ) ) {
+    // If this is a 64th...
+    if( _currentTick % (_ticksPerMeasure / MIN_QUANTIZATION ) == 0 ) {
         
-        NSSet *changesForThisTick = [self.sequencer automationChangesForTick:self.sequencer.automationCurrentTick];
+        // Send this notification just for animations etc
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:_currentTick / ( _ticksPerMeasure / MIN_QUANTIZATION )] forKey:@"tick"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kClockMinQuantizationTick object:self userInfo:userInfo];
         
-        for( SequencerAutomationChange *change in changesForThisTick ) {
+        // Do automation stuff
+        if( self.sequencer.automationMode == EatsSequencerAutomationMode_Recording || self.sequencer.automationMode == EatsSequencerAutomationMode_Playing ) {
+            NSSet *changesForThisTick = [self.sequencer automationChangesForTick:self.sequencer.automationCurrentTick];
             
-            // Change pattern
-            if( change.automationType == EatsSequencerAutomationType_SetNextPatternId ) {
-                // Setting currentPatternId rather than next so as to make the loop change regardless of what loop may be set
-                [self.sequencer setCurrentPatternId:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+            for( SequencerAutomationChange *change in changesForThisTick ) {
                 
-            // Scrub step
-            } else if( change.automationType == EatsSequencerAutomationType_SetNextStep ) {
-                [self.sequencer setNextStep:[change.values valueForKey:@"value"] forPage:change.pageId];
-               
-            // Loop
-            } else if( change.automationType == EatsSequencerAutomationType_SetLoop ) {
-                [self.sequencer setLoopStart:[[change.values valueForKey:@"startValue"] intValue] andLoopEnd:[[change.values valueForKey:@"endValue"] intValue] forPage:change.pageId];
-                
-            // Transpose
-            } else if( change.automationType == EatsSequencerAutomationType_SetTranspose ) {
-                [self.sequencer setTranspose:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
-                
-            // Play mode
-            } else if( change.automationType == EatsSequencerAutomationType_SetPlayMode ) {
-                [self.sequencer setPlayMode:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
-                
+                // Change pattern
+                if( change.automationType == EatsSequencerAutomationType_SetNextPatternId ) {
+                    // Setting currentPatternId rather than next so as to make the loop change regardless of what loop may be set
+                    [self.sequencer setCurrentPatternId:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+                    
+                // Scrub step
+                } else if( change.automationType == EatsSequencerAutomationType_SetNextStep ) {
+                    [self.sequencer setNextStep:[change.values valueForKey:@"value"] forPage:change.pageId];
+                    [stepHasBeenAutomated replaceObjectAtIndex:change.pageId withObject:[NSNumber numberWithBool:YES]];
+                    
+                // Loop
+                } else if( change.automationType == EatsSequencerAutomationType_SetLoop ) {
+                    [self.sequencer setLoopStart:[[change.values valueForKey:@"startValue"] intValue] andLoopEnd:[[change.values valueForKey:@"endValue"] intValue] forPage:change.pageId];
+                    
+                // Transpose
+                } else if( change.automationType == EatsSequencerAutomationType_SetTranspose ) {
+                    [self.sequencer setTranspose:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+                    
+                // Play mode
+                } else if( change.automationType == EatsSequencerAutomationType_SetPlayMode ) {
+                    [self.sequencer setPlayMode:[[change.values valueForKey:@"value"] intValue] forPage:change.pageId];
+                    
+                }
             }
         }
     }
@@ -232,6 +245,12 @@ typedef enum EatsStepAdvance {
             
             // If the page has been scrubbed
             if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
+                
+                if( ![[stepHasBeenAutomated objectAtIndex:pageId] boolValue] ) {
+                    // Add automation
+                    NSDictionary *values = [NSDictionary dictionaryWithObject:[[self.sequencer nextStepForPage:pageId] copy] forKey:@"value"]; // TODO potential crash here because nextStepForPage is nil?
+                    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetNextStep withValues:values forPage:pageId];
+                }
                 
                 playNow = [[self.sequencer nextStepForPage:pageId] intValue];
                 [self.sequencer setNextStep:nil forPage:pageId];
@@ -331,6 +350,11 @@ typedef enum EatsStepAdvance {
             
             // Check if we need to advance the pattern (depending on where we are within it)
             if( [self.sequencer nextPatternIdForPage:pageId] && positionWithinLoop % (_minQuantization / patternQuantization ) == 0 ) {
+                
+                // Add automation
+                NSDictionary *values = [NSDictionary dictionaryWithObject:[[self.sequencer nextPatternIdForPage:pageId] copy] forKey:@"value"];
+                [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetNextPatternId withValues:values forPage:pageId];
+                
                 [self.sequencer setCurrentPatternId:[[self.sequencer nextPatternIdForPage:pageId] intValue] forPage:pageId];
                 [self.sequencer setNextPatternId:nil forPage:pageId];
             }
@@ -463,7 +487,6 @@ typedef enum EatsStepAdvance {
         
     // If the sequence needs to advance
     } else if( _currentTick % (_ticksPerMeasure / [self.sequencer stepLengthForPage:pageId] ) == 0 && [self.sequencer playModeForPage:pageId] != EatsSequencerPlayMode_Slice ) {
-        
         return EatsStepAdvance_Normal;
         
     } else {

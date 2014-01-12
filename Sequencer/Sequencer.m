@@ -521,11 +521,6 @@
         [self.undoManager setActionName:@"Loop Change"];
         
         page.loopStart = loopStart;
-        
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:loopStart], @"startValue",
-                                                                                                                                 [NSNumber numberWithInt:[self loopEndForPage:pageId]], @"endValue",
-                                                                                                                                 nil]
-                                                                                                                                 forPage:pageId];
     }
     
     [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
@@ -556,11 +551,6 @@
         [self.undoManager setActionName:@"Loop Change"];
         
         page.loopEnd = loopEnd;
-        
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:[self loopStartForPage:pageId]], @"startValue",
-                                                                                                                                 [NSNumber numberWithInt:loopEnd], @"endValue",
-                                                                                                                                 nil]
-                                                                                                                                 forPage:pageId];
     }
     
     [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
@@ -587,11 +577,6 @@
         
         page.loopStart = loopStart;
         page.loopEnd = loopEnd;
-        
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:loopStart], @"startValue",
-                                                                                                                                 [NSNumber numberWithInt:loopEnd], @"endValue",
-                                                                                                                                 nil]
-                                                                                                                                 forPage:pageId];
     }
     
     [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
@@ -820,8 +805,6 @@
         [self.undoManager setActionName:@"Transpose Change"];
         
         page.transpose = transpose;
-        
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetTranspose withValues:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:transpose] forKey:@"value"] forPage:pageId];
     }
     
     [self postNotification:kSequencerPageTransposeDidChangeNotification forPage:pageId];
@@ -866,8 +849,6 @@
         
         page.transpose = transpose;
         page.transposeZeroStep = transposeZeroStep;
-        
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetTranspose withValues:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:transpose] forKey:@"value"] forPage:pageId];
     }
     
     [self postNotification:kSequencerPageTransposeDidChangeNotification forPage:pageId];
@@ -928,6 +909,10 @@
     // Start fwd playback from loop start
     if( [self playModeForPage:pageId] == EatsSequencerPlayMode_Pause ) {
         
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:EatsSequencerPlayMode_Forward] forKey:@"value"];
+        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:pageId];
+        
         [self setPlayMode:EatsSequencerPlayMode_Forward forPage:pageId];
         [self setNextStep:[NSNumber numberWithInt:[self loopStartForPage:pageId]] forPage:pageId];
         
@@ -935,6 +920,11 @@
         
     // Pause a pattern that is playing
     } else if( [self currentPatternIdForPage:pageId] == patternId ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:EatsSequencerPlayMode_Pause] forKey:@"value"];
+        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:values forPage:pageId];
+        
         [self setPlayMode:EatsSequencerPlayMode_Pause forPage:pageId];
         
     } else {
@@ -1649,8 +1639,6 @@
 
 - (void) setCurrentPatternId:(int)patternId forPage:(uint)pageId
 {
-    // TODO does this need to be recorded for automation? Should recording actually happen in setNextOrCurrent..?
-    
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     if( patternId >= 0 && patternId < page.patterns.count ) {
@@ -1670,12 +1658,6 @@
 
 - (void) setNextPatternId:(NSNumber *)patternId forPage:(uint)pageId
 {
-    // Add automation if appropriate
-    if( patternId == nil && [self nextPatternIdForPage:pageId] ) {
-        NSDictionary *values = [NSDictionary dictionaryWithObject:[self nextPatternIdForPage:pageId] forKey:@"value"];
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetNextPatternId withValues:values forPage:pageId];
-    }
-    
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
     if( patternId.intValue >= 0 && patternId.intValue < page.patterns.count ) {
@@ -1738,12 +1720,6 @@
 
 - (void) setNextStep:(NSNumber *)step forPage:(uint)pageId
 {
-    // Add automation if appropriate
-    if( step == nil && [self nextStepForPage:pageId] ) {
-        NSDictionary *values = [NSDictionary dictionaryWithObject:[self nextStepForPage:pageId] forKey:@"value"];
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetNextStep withValues:values forPage:pageId];
-    }
-    
     if( step.intValue >= 0 && step.intValue < self.sharedPreferences.gridWidth ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.nextStep = step;
@@ -1864,10 +1840,8 @@
     if( playMode >= 0 && playMode <= 4 ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.playMode = playMode;
-        [self setNextStep:nil forPage:pageId];
-        
-        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetPlayMode withValues:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:playMode] forKey:@"value"] forPage:pageId];
-    	}
+        //[self setNextStep:nil forPage:pageId]; // Taken this out as it was messing up some automation stuff and didn't really seem required
+    }
     
     [self postNotification:kSequencerPageStatePlayModeDidChangeNotification forPage:pageId];
 }
@@ -1953,7 +1927,13 @@
 
 - (NSSet *) automationChanges
 {
-    return [self.song.automation.changes copy];
+    __block NSSet *changes;
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        changes = [self.song.automation.changes copy];
+    });
+    
+    return changes;
 }
 
 - (NSSet *) automationChangesForTick:(uint)tick
@@ -2019,6 +1999,50 @@
     return [activeForPage copy];
 }
 
+- (void) addAutomationChangeOfType:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values forPage:(uint)pageId
+{
+    // If we're inactive or playing, ignore
+    if( self.automationMode == EatsSequencerAutomationMode_Inactive || self.automationMode == EatsSequencerAutomationMode_Playing ) {
+        return;
+        
+    // If we're armed, start recording
+    } else if( self.automationMode == EatsSequencerAutomationMode_Armed ) {
+        [self setAutomationMode:EatsSequencerAutomationMode_Recording];
+    }
+    
+    if( pageId < kSequencerNumberOfPages ) {
+        
+        // TODO Should this be undoable?
+        
+        dispatch_sync(self.sequencerQueue, ^(void) {
+            
+            // Check if there's an existing change that we need to remove
+            NSSet *changesToRemove = [self.song.automation.changes objectsPassingTest:^(id obj, BOOL *stop) {
+                SequencerAutomationChange *change = (SequencerAutomationChange *)obj;
+                BOOL testResult = ( change.tick == self.automationCurrentTick && change.automationType == type && change.pageId == pageId );
+                return testResult;
+            }];
+            
+            for( SequencerAutomationChange *change in changesToRemove ) { // There should only ever be 1 object in this set
+                [self.song.automation.changes removeObject:change];
+            }
+        });
+        
+        // Add the new one
+        SequencerAutomationChange *newChange = [[SequencerAutomationChange alloc] init];
+        newChange.tick = self.automationCurrentTick;
+        newChange.pageId = pageId;
+        newChange.automationType = type;
+        newChange.values = values;
+        
+        dispatch_sync(self.sequencerQueue, ^(void) {
+            [self.song.automation.changes addObject:newChange];
+        });
+        
+        [self postNotification:kSequencerAutomationChangesDidChangeNotification forPage:pageId];
+    }
+}
+
 - (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId
 {
     
@@ -2042,7 +2066,9 @@
 
 - (void) removeAllAutomation
 {
-    self.song.automation.changes = [NSMutableSet set];
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        self.song.automation.changes = [NSMutableSet set];
+    });
     
     [self postNotification:kSequencerAutomationChangesDidChangeNotification];
 }
@@ -2051,50 +2077,6 @@
 
 #pragma mark - Private methods
 
-// Add an automation change
-
-- (void) addAutomationChangeOfType:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values forPage:(uint)pageId
-{
-    // If we're inactive or playing, ignore
-    if( self.automationMode == EatsSequencerAutomationMode_Inactive || self.automationMode == EatsSequencerAutomationMode_Playing ) {
-        return;
-    
-    // If we're armed, start recording
-    } else if( self.automationMode == EatsSequencerAutomationMode_Armed ) {
-        [self setAutomationMode:EatsSequencerAutomationMode_Recording];
-        NSLog(@"Automation: Recording");
-    }
-    
-    if( pageId < kSequencerNumberOfPages ) {
-    
-        // TODO Should this be undoable?
-    
-        dispatch_sync(self.sequencerQueue, ^(void) {
-            
-            // Check if there's an existing change that we need to remove
-            NSSet *changesToRemove = [self.song.automation.changes objectsPassingTest:^(id obj, BOOL *stop) {
-                SequencerAutomationChange *change = (SequencerAutomationChange *)obj;
-                BOOL testResult = ( change.tick == self.automationCurrentTick && change.automationType == type && change.pageId == pageId );
-                return testResult;
-            }];
-            
-            for( SequencerAutomationChange *change in changesToRemove ) { // There should only ever be 1 object in this set
-                [self.song.automation.changes removeObject:change];
-            }
-        });
-        
-        // Add the new one
-        SequencerAutomationChange *newChange = [[SequencerAutomationChange alloc] init];
-        newChange.tick = self.automationCurrentTick;
-        newChange.pageId = pageId;
-        newChange.automationType = type;
-        newChange.values = values;
-        
-        [self.song.automation.changes addObject:newChange];
-        
-        [self postNotification:kSequencerAutomationChangesDidChangeNotification forPage:pageId];
-    }
-}
 
 // Some useful methods for notifications to use
 

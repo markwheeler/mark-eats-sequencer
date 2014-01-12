@@ -237,6 +237,7 @@
 - (NSSet *) automationChangesForTick:(uint)tick;
 - (NSSet *) automationChangesForPage:(uint)pageId;
 - (NSArray *) automationTypeNamesActiveForPage:(uint)pageId;
+- (void) addAutomationChangeOfType:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values forPage:(uint)pageId;
 - (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId;
 - (void) removeAllAutomation;
 
