@@ -303,6 +303,7 @@
         // Sequencer automation notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationModeDidChange:) name:kSequencerAutomationModeDidChangeNotification object:self.sequencer];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationChangesDidChange:) name:kSequencerAutomationChangesDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(automationRemoveAllChanges:) name:kSequencerAutomationRemoveAllChangesNotification object:self.sequencer];
         
         // Start animateIn
         self.inOutAnimationFrame = 0;
@@ -595,6 +596,8 @@
     [self.boxOverlayFadeTimer invalidate];
     self.boxOverlayFadeTimer = nil;
     
+    [self updateView];
+    
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         self.boxOverlayFadeTimer = [NSTimer scheduledTimerWithTimeInterval:0.03
                                                                     target:self
@@ -624,6 +627,8 @@
             self.boxOverlayView = nil;
         });
     }
+    
+    [self updateView];
 }
 
 
@@ -1133,6 +1138,13 @@
     });
 }
 
+- (void) automationRemoveAllChanges:(NSNotification *)notification
+{
+    dispatch_async(self.gridQueue, ^(void) {
+        [self flashBoxOverlay];
+    });
+}
+
 
 
 #pragma mark - Sub view delegate methods
@@ -1547,8 +1559,6 @@
         else
             [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Recording];
         
-        // TODO: Animation?
-        
     });
     
     dispatch_async(dispatch_get_main_queue(), ^(void) {
@@ -1572,7 +1582,6 @@
     self.automationLongPressTimer = nil;
     
     dispatch_async(self.gridQueue, ^(void) {
-        [self flashBoxOverlay];
         [self.sequencer removeAllAutomation];
     });
 }

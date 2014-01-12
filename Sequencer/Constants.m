@@ -105,3 +105,4 @@ NSString *const kSequencerAutomationLoopLengthDidChangeNotification = @"Sequence
 NSString *const kSequencerAutomationTickDidChangeNotification = @"SequencerAutomationTickDidChangeNotification";
 NSString *const kSequencerAutomationModeDidChangeNotification = @"SequencerAutomationModeDidChangeNotification";
 NSString *const kSequencerAutomationChangesDidChangeNotification = @"SequencerAutomationChangesDidChangeNotification";
+NSString *const kSequencerAutomationRemoveAllChangesNotification = @"SequencerAutomationRemoveAllChangesNotification";

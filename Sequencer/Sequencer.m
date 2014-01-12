@@ -2066,11 +2066,16 @@
 
 - (void) removeAllAutomation
 {
-    dispatch_sync(self.sequencerQueue, ^(void) {
-        self.song.automation.changes = [NSMutableSet set];
-    });
+    if( [[self automationChanges] count] ) {
     
-    [self postNotification:kSequencerAutomationChangesDidChangeNotification];
+        dispatch_sync(self.sequencerQueue, ^(void) {
+            self.song.automation.changes = [NSMutableSet set];
+        });
+        
+        [self postNotification:kSequencerAutomationChangesDidChangeNotification];
+        [self postNotification:kSequencerAutomationRemoveAllChangesNotification];
+        
+    }
 }
 
 
