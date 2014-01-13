@@ -1104,22 +1104,16 @@
 - (void) pageStatePlayModeDidChange:(NSNotification *)notification
 {
     dispatch_async(self.gridQueue, ^(void) {
-        BOOL needsToUpdate = NO;
         
         [self updatePattern];
         
-        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
             [self updatePlayMode];
-            needsToUpdate = YES;
-        }
         
-        if( self.height > 8 ) {
+        if( self.height > 8 )
             [self updateScrubOtherPages];
-            needsToUpdate = YES;
-        }
         
-        if( needsToUpdate )
-            [self updateView];
+        [self updateView];
     });
 }
 
