@@ -1106,9 +1106,10 @@
     dispatch_async(self.gridQueue, ^(void) {
         BOOL needsToUpdate = NO;
         
+        [self updatePattern];
+        
         if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
             [self updatePlayMode];
-            [self updatePattern];
             needsToUpdate = YES;
         }
         
