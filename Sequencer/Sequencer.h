@@ -238,6 +238,8 @@
 - (NSSet *) automationChangesForPage:(uint)pageId;
 - (NSArray *) automationTypeNamesActiveForPage:(uint)pageId;
 - (void) addAutomationChangeOfType:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values forPage:(uint)pageId;
+- (void) addAutomationChangeOfTypeForAllPages:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values;
+- (void) addAutomationChangeOfType:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values forAllPagesExcept:(uint)pageId;
 - (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId;
 - (void) removeAllAutomation;
 

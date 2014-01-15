@@ -2112,6 +2112,22 @@
     }
 }
 
+- (void) addAutomationChangeOfTypeForAllPages:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        [self addAutomationChangeOfType:type withValues:values forPage:i];
+    }
+}
+
+- (void) addAutomationChangeOfType:(EatsSequencerAutomationType)type withValues:(NSDictionary *)values forAllPagesExcept:(uint)pageId
+{
+    for( int i = 0; i < kSequencerNumberOfPages; i ++ ) {
+        if( i != pageId ) {
+            [self addAutomationChangeOfType:type withValues:values forPage:i];
+        }
+    }
+}
+
 - (void) removeAutomationChangesOfType:(EatsSequencerAutomationType)type forPage:(uint)pageId
 {
     NSMutableSet *newChanges = [[self automationChanges] mutableCopy];

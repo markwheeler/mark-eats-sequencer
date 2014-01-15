@@ -1280,14 +1280,32 @@
             if ( buttonDown ) {
                 
                 if( self.sharedPreferences.loopFromScrubArea && self.lastDownScrubOtherPagesKey  ) {
+                    
+                    int loopEnd = pressedStep - 1;
+                    if( loopEnd < 0 )
+                        loopEnd += self.width;
+                    
+                    // Add automation
+                    NSDictionary *values = [NSDictionary dictionaryWithObjectsAndKeys:[self.lastDownScrubOtherPagesKey copy], @"startValue",
+                                                                                      [NSNumber numberWithInt:loopEnd], @"endValue",
+                                                                                      nil];
+                    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:values forAllPagesExcept:self.sequencer.currentPageId];
+                    
                     // Set loop
-                    [self.sequencer setLoopStart:self.lastDownScrubOtherPagesKey.intValue andLoopEnd:pressedStep - 1 forAllPagesExcept:self.sequencer.currentPageId];
+                    [self.sequencer setLoopStart:self.lastDownScrubOtherPagesKey.intValue andLoopEnd:loopEnd forAllPagesExcept:self.sequencer.currentPageId];
                     self.setLoopOnOtherPages = YES;
                     
                 } else {
                     
                     if( self.sharedPreferences.loopFromScrubArea ) {
                         if( !self.setLoopOnOtherPages ) {
+                            
+                            // Add automation
+                            NSDictionary *values = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"startValue",
+                                                                                              [NSNumber numberWithInt:self.sharedPreferences.gridWidth - 1], @"endValue",
+                                                                                              nil];
+                            [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:values forAllPagesExcept:self.sequencer.currentPageId];
+                            
                             // Reset loop
                             [self.sequencer setLoopStart:0 andLoopEnd:self.sharedPreferences.gridWidth - 1 forAllPagesExcept:self.sequencer.currentPageId];
                         }
@@ -1629,9 +1647,16 @@
 
 - (void) eatsGridPatternViewSelection:(NSDictionary *)selection sender:(EatsGridPatternView *)sender
 {
-    uint start = [[selection valueForKey:@"start"] unsignedIntValue];
-    uint end = [[selection valueForKey:@"end"] unsignedIntValue];
-    [self.sequencer setLoopStart:start andLoopEnd:end forPage:self.sequencer.currentPageId];
+    NSNumber *start = [selection valueForKey:@"start"];
+    NSNumber *end = [selection valueForKey:@"end"];
+    
+    // Add automation
+    NSDictionary *values = [NSDictionary dictionaryWithObjectsAndKeys:start, @"startValue",
+                                                                      end, @"endValue",
+                                                                      nil];
+    [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetLoop withValues:values forPage:self.sequencer.currentPageId];
+    
+    [self.sequencer setLoopStart:start.unsignedIntValue andLoopEnd:end.unsignedIntValue forPage:self.sequencer.currentPageId];
 }
 
 @end
