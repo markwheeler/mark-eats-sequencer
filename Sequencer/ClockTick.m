@@ -248,7 +248,7 @@ typedef enum EatsStepAdvance {
                 
                 if( ![[stepHasBeenAutomated objectAtIndex:pageId] boolValue] ) {
                     // Add automation
-                    NSDictionary *values = [NSDictionary dictionaryWithObject:[[self.sequencer nextStepForPage:pageId] copy] forKey:@"value"]; // TODO potential crash here because nextStepForPage is nil?
+                    NSDictionary *values = [NSDictionary dictionaryWithObject:[[self.sequencer nextStepForPage:pageId] copy] forKey:@"value"]; // Potential crash here because nextStepForPage is nil? Never has though!
                     [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetNextStep withValues:values forPage:pageId];
                 }
                 
