@@ -96,11 +96,11 @@
             // Put OK in
             if(x >= self.okLeftMargin && x < self.okLeftMargin + [okArray count] && y >= self.okTopMargin && y < self.okTopMargin + [[okArray objectAtIndex:0] count]) {
                 if(!self.particleA || x <= [[self.particleA valueForKey:@"x"] unsignedIntValue])
-                    [[gridArray objectAtIndex:x] insertObject:[[okArray objectAtIndex:x - self.okLeftMargin] objectAtIndex:y - self.okTopMargin] atIndex:y];
+                    [(NSMutableArray *)[gridArray objectAtIndex:x] insertObject:[[okArray objectAtIndex:x - self.okLeftMargin] objectAtIndex:y - self.okTopMargin] atIndex:y];
                 else
-                    [[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
+                    [(NSMutableArray *)[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
             } else {
-                [[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
+                [(NSMutableArray *)[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
             }
         }
     }

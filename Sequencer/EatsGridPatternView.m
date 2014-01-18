@@ -81,13 +81,13 @@
         // Generate the rows
         for(uint y = 0; y < self.height; y++) {
             if( self.width * self.wipe / 100 >= x + 1 )
-                [[viewArray objectAtIndex:x] insertObject:wipeBrighnessResult atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:wipeBrighnessResult atIndex:y];
             else if( x == self.currentStep )
-                [[viewArray objectAtIndex:x] insertObject:playheadBrighnessResult atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:playheadBrighnessResult atIndex:y];
             else if( self.nextStep && x == self.nextStep.intValue )
-                [[viewArray objectAtIndex:x] insertObject:nextStepBrighnessResult atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:nextStepBrighnessResult atIndex:y];
             else
-                [[viewArray objectAtIndex:x] insertObject:zero atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:zero atIndex:y];
         }
     }
     
