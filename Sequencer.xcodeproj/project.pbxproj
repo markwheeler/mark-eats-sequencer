@@ -44,12 +44,6 @@
 		4D64B2211797A059007BD78F /* EatsPlusOneValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D64B2201797A059007BD78F /* EatsPlusOneValueTransformer.m */; };
 		4D6B1F5817B0CA72000F50CE /* Mark Eats Sequencer User Guide.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D6B1F5717B0CA72000F50CE /* Mark Eats Sequencer User Guide.pdf */; };
 		4D6D735A170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */; };
-		4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
-		4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
-		4D7515AF16E457C000A8E3F2 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4D7515A316E4557000A8E3F2 /* VVOSC.framework */; };
-		4D7515B016E457CC00A8E3F2 /* VVBasics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D7515A116E4557000A8E3F2 /* VVBasics.framework */; };
-		4D7515B116E457CE00A8E3F2 /* VVMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D7515A216E4557000A8E3F2 /* VVMIDI.framework */; };
-		4D7515B216E457D200A8E3F2 /* VVOSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D7515A316E4557000A8E3F2 /* VVOSC.framework */; };
 		4D7515B516E4583D00A8E3F2 /* EatsMIDIManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */; };
 		4D7515B816E45EB900A8E3F2 /* EatsClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515B716E45EB900A8E3F2 /* EatsClock.m */; };
 		4D7515BB16E464E900A8E3F2 /* EatsExternalClockCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D7515BA16E464E900A8E3F2 /* EatsExternalClockCalculator.m */; };
@@ -107,6 +101,9 @@
 		4DEFF97117C15039005708EE /* EatsQuantizationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DEFF97017C15039005708EE /* EatsQuantizationUtils.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
 		4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7DA3317A815F400538081 /* KeyboardInputView.m */; };
+		4DF87EF9188B30B900FEB6F1 /* VVBasics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; };
+		4DF87EFA188B30B900FEB6F1 /* VVMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */; };
+		4DF87EFB188B30B900FEB6F1 /* VVOSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 		4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */; };
 /* End PBXBuildFile section */
@@ -118,9 +115,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4D7515AD16E457BC00A8E3F2 /* VVBasics.framework in CopyFiles */,
-				4D7515AE16E457BE00A8E3F2 /* VVMIDI.framework in CopyFiles */,
-				4D7515AF16E457C000A8E3F2 /* VVOSC.framework in CopyFiles */,
 				4DBE3EC417F950FC00344CFC /* Quincy.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,9 +183,6 @@
 		4D6B1F5717B0CA72000F50CE /* Mark Eats Sequencer User Guide.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Mark Eats Sequencer User Guide.pdf"; sourceTree = "<group>"; };
 		4D6D7358170117F4006D7EF9 /* EatsGridHorizontalSelectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalSelectionView.h; sourceTree = "<group>"; };
 		4D6D7359170117F4006D7EF9 /* EatsGridHorizontalSelectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridHorizontalSelectionView.m; sourceTree = "<group>"; };
-		4D7515A116E4557000A8E3F2 /* VVBasics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVBasics.framework; sourceTree = "<group>"; };
-		4D7515A216E4557000A8E3F2 /* VVMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVMIDI.framework; sourceTree = "<group>"; };
-		4D7515A316E4557000A8E3F2 /* VVOSC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVOSC.framework; sourceTree = "<group>"; };
 		4D7515B316E4583D00A8E3F2 /* EatsMIDIManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsMIDIManager.h; sourceTree = "<group>"; };
 		4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsMIDIManager.m; sourceTree = "<group>"; };
 		4D7515B616E45EB900A8E3F2 /* EatsClock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsClock.h; sourceTree = "<group>"; };
@@ -286,6 +277,9 @@
 		4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsSwingUtils.m; sourceTree = "<group>"; };
 		4DF7DA3217A815F400538081 /* KeyboardInputView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyboardInputView.h; sourceTree = "<group>"; };
 		4DF7DA3317A815F400538081 /* KeyboardInputView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeyboardInputView.m; sourceTree = "<group>"; };
+		4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVBasics.framework; sourceTree = "<group>"; };
+		4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVMIDI.framework; sourceTree = "<group>"; };
+		4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VVOSC.framework; sourceTree = "<group>"; };
 		4DF8A5F2170391C5002F5AA6 /* EatsGridLoopBraceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridLoopBraceView.h; sourceTree = "<group>"; };
 		4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridLoopBraceView.m; sourceTree = "<group>"; };
 		4DFAE994179B94F10076153D /* EatsGridHorizontalShiftView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridHorizontalShiftView.h; sourceTree = "<group>"; };
@@ -298,10 +292,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				4DBE3EC317F950F800344CFC /* Quincy.framework in Frameworks */,
+				4DF87EF9188B30B900FEB6F1 /* VVBasics.framework in Frameworks */,
+				4DF87EFA188B30B900FEB6F1 /* VVMIDI.framework in Frameworks */,
+				4DF87EFB188B30B900FEB6F1 /* VVOSC.framework in Frameworks */,
 				4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */,
-				4D7515B016E457CC00A8E3F2 /* VVBasics.framework in Frameworks */,
-				4D7515B116E457CE00A8E3F2 /* VVMIDI.framework in Frameworks */,
-				4D7515B216E457D200A8E3F2 /* VVOSC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -389,10 +383,10 @@
 		4D6115CA16E431BD00140AF8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */,
+				4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */,
+				4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */,
 				4DBE3EC217F950F800344CFC /* Quincy.framework */,
-				4D7515A116E4557000A8E3F2 /* VVBasics.framework */,
-				4D7515A216E4557000A8E3F2 /* VVMIDI.framework */,
-				4D7515A316E4557000A8E3F2 /* VVOSC.framework */,
 				4D6115CB16E431BD00140AF8 /* Cocoa.framework */,
 				4D6115CD16E431BD00140AF8 /* Other Frameworks */,
 			);
@@ -866,7 +860,9 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
+					"$(SRCROOT)",
+					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/vvopensource/build@rpath",
+					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/Sequencer",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
@@ -887,7 +883,9 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
+					"$(SRCROOT)",
+					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/vvopensource/build@rpath",
+					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/Sequencer",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
