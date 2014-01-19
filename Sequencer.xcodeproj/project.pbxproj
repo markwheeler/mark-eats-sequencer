@@ -417,7 +417,7 @@
 				4D7515B316E4583D00A8E3F2 /* EatsMIDIManager.h */,
 				4D7515B416E4583D00A8E3F2 /* EatsMIDIManager.m */,
 				4D6115E316E431BD00140AF8 /* MainMenu.xib */,
-				4DCACCAF17BFD9630021575F /* Sequencer Model */,
+				4DCACCAF17BFD9630021575F /* Sequencer Brain */,
 				4DCACCB117BFD9BF0021575F /* Clock */,
 				4DCACCB417BFDA290021575F /* Utils Etc */,
 				4DCACCB317BFD9F40021575F /* Document */,
@@ -489,7 +489,7 @@
 			name = JCSSheetController;
 			sourceTree = "<group>";
 		};
-		4DCACCAF17BFD9630021575F /* Sequencer Model */ = {
+		4DCACCAF17BFD9630021575F /* Sequencer Brain */ = {
 			isa = PBXGroup;
 			children = (
 				4DCACCB817BFDAF30021575F /* Sequencer.h */,
@@ -509,7 +509,7 @@
 				4D41801B186A56EB00FCB58C /* SequencerAutomationChange.h */,
 				4D41801C186A56EB00FCB58C /* SequencerAutomationChange.m */,
 			);
-			name = "Sequencer Model";
+			name = "Sequencer Brain";
 			sourceTree = "<group>";
 		};
 		4DCACCB017BFD9940021575F /* Grid Interface */ = {
