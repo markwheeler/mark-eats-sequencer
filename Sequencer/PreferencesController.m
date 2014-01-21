@@ -24,6 +24,8 @@
 @property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsNameColumn;
 @property (nonatomic, weak) IBOutlet NSArrayController *midiDestinationsArrayController;
 
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputChannelPopup;
+
 @property (nonatomic, weak) IBOutlet NSPopUpButton     *clockSourcePopup;
 
 @end
@@ -53,6 +55,17 @@
     // Populate
     [self updateOSC];
     [self updateMIDI];
+    
+    // Tilt output
+    [self.tiltMIDIOutputChannelPopup removeAllItems];
+    [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"None"]];
+    for( int i = 1; i <= 16; i ++ ) {
+        [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"%i", i]];
+    }
+    if( self.sharedPreferences.tiltMIDIOutputChannel )
+        [self.tiltMIDIOutputChannelPopup selectItemAtIndex:self.sharedPreferences.tiltMIDIOutputChannel.integerValue + 1];
+    else
+        [self.tiltMIDIOutputChannelPopup selectItemAtIndex:0];
     
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -236,6 +249,18 @@
             [self.sharedPreferences.enabledMIDIOutputNames addObject:nodeName];
     }
     
+}
+
+- (IBAction)tiltMIDIOutputChannelPopup:(NSPopUpButton *)sender
+{
+    if( sender.indexOfSelectedItem > 0 && sender.indexOfSelectedItem <= 16 ) {
+        self.sharedPreferences.tiltMIDIOutputChannel = [NSNumber numberWithInt:sender.indexOfSelectedItem - 1];
+        [self.delegate performSelector:@selector(gridControllerTiltSensor:) withObject:[NSNumber numberWithBool:YES]];
+        
+    } else {
+        self.sharedPreferences.tiltMIDIOutputChannel = nil;
+        [self.delegate performSelector:@selector(gridControllerTiltSensor:) withObject:[NSNumber numberWithBool:NO]];
+    }
 }
 
 - (IBAction)clockSourcePopup:(NSPopUpButton *)sender

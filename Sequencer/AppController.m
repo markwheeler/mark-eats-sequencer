@@ -200,10 +200,23 @@
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
     self.sharedPreferences.gridType = EatsGridType_Monome;
+    
+    if( self.sharedPreferences.tiltMIDIOutputChannel )
+        [self gridControllerTiltSensor:[NSNumber numberWithBool:YES]];
+    else
+        [self gridControllerTiltSensor:[NSNumber numberWithBool:NO]];
+    
     NSLog(@"Connected to grid controller: %@ / Size: %ux%u / Type: %i / Varibright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
+}
+
+- (void) gridControllerTiltSensor:(NSNumber *)enable
+{
+    if( self.sharedPreferences.gridType == EatsGridType_Monome ) {
+        [EatsMonome monomeTiltSensor:enable.boolValue atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
+    }
 }
 
 
@@ -349,14 +362,51 @@
                                     down:[keyValues[2] intValue]];
     
     
-    // Tilt from the monome (ignored for now)
+    // Tilt from the monome
     
     } else if( [o.address isEqualTo:[NSString stringWithFormat:@"/%@/tilt", self.sharedCommunicationManager.oscPrefix]] ) {
-        /*NSMutableArray *tiltValues = [[NSMutableArray alloc] initWithCapacity:4];
-        for (NSString *i in [o valueArray]) {
-            [tiltValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", i]]];
+        
+        for( int i = 1; i < o.valueCount - 1; i ++ ) {
+            // We ignore the last value, z, because it's not that fun. z just seems to measure 'how upside down' the monome is
+            
+            int tiltValue = [[self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:i]]] intValue];
+            int tiltCenter;
+            int tiltMin;
+            int tiltMax;
+            
+            if( i == 1 ) { // x
+                tiltCenter = self.sharedPreferences.gridTiltXCenter;
+                tiltMin = self.sharedPreferences.gridTiltXMin;
+                tiltMax = self.sharedPreferences.gridTiltXMax;
+            } else { // y
+                tiltCenter = self.sharedPreferences.gridTiltYCenter;
+                tiltMin = self.sharedPreferences.gridTiltYMin;
+                tiltMax = self.sharedPreferences.gridTiltYMax;
+            }
+            
+            // Cut off anything over
+            if( tiltValue > tiltMax )
+                tiltValue = tiltMax;
+            else if( tiltValue < tiltMin )
+                tiltValue = tiltMin;
+            
+            int distanceFromCenter;
+            int midiTiltValue;
+            
+            // Convert to 0-63
+            if( tiltValue <= tiltCenter ) {
+                distanceFromCenter = tiltCenter - tiltValue;
+                midiTiltValue = 63 - roundf( 63.0 * ( (float)distanceFromCenter / ( tiltCenter - tiltMin ) ) );
+            
+            // or 64-127
+            } else {
+                distanceFromCenter = tiltValue - tiltCenter;
+                midiTiltValue = 63 + roundf( 64.0 * ( (float)distanceFromCenter / ( tiltMax - tiltCenter ) ) );
+            }
+            
+            //NSLog(@"Tilt axis %i conversion: %i -> %i", i, tiltValue, midiTiltValue);
+            [self sendTiltFromAxis:i - 1 withValue:midiTiltValue];
         }
-        NSLog(@"OSC received %@ %@", [o address], tiltValues);*/
         
     
     // Other OSC input addressed to us is logged
@@ -446,6 +496,23 @@
         NSLog(@"Failed to open file: %@",filePath);
     }
 
+}
+
+- (void) sendTiltFromAxis:(int)axis withValue:(int)midiValue
+{
+    if( self.sharedPreferences.tiltMIDIOutputChannel ) {
+        
+        VVMIDIMessage *msg = nil;
+        //	Create a message
+        msg = [VVMIDIMessage createFromVals:VVMIDIControlChangeVal
+                                           :self.sharedPreferences.tiltMIDIOutputChannel.intValue
+                                           :1 + axis // Goes out on CC 1-3
+                                           :midiValue
+                                           timestamp:0];
+        // Send it
+        if (msg != nil)
+            [_sharedCommunicationManager.midiManager sendMsg:msg];
+    }
 }
 
 
