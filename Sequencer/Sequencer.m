@@ -196,18 +196,29 @@
         if( page.loopStart >= self.sharedPreferences.gridWidth || page.loopEnd >= self.sharedPreferences.gridWidth ) {
             page.loopStart = 0;
             page.loopEnd = self.sharedPreferences.gridWidth - 1;
+            [self postNotification:kSequencerPageLoopDidChangeNotification forPage:pageId];
         }
-        if( page.transposeZeroStep >= self.sharedPreferences.gridWidth )
+        if( page.transposeZeroStep >= self.sharedPreferences.gridWidth ) {
             page.transposeZeroStep = (self.sharedPreferences.gridWidth) / 2 - 1;
+            [self postNotification:kSequencerPageTransposeZeroStepDidChangeNotification forPage:pageId];
+        }
         
-        if( pageState.currentStep >= self.sharedPreferences.gridWidth )
+        if( pageState.currentStep >= self.sharedPreferences.gridWidth ) {
             pageState.currentStep = page.loopEnd;
-        if( pageState.nextStep.intValue >= self.sharedPreferences.gridWidth )
+            [self postNotification:kSequencerPageStateCurrentStepDidChangeNotification forPage:pageId];
+        }
+        if( pageState.nextStep.intValue >= self.sharedPreferences.gridWidth ) {
             pageState.nextStep = nil;
-        if( pageState.currentPatternId >= self.sharedPreferences.gridWidth )
+            [self postNotification:kSequencerPageStateNextStepDidChangeNotification forPage:pageId];
+        }
+        if( pageState.currentPatternId >= self.sharedPreferences.gridWidth ) {
             pageState.currentPatternId = 0;
-        if( pageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth )
+            [self postNotification:kSequencerPageStateCurrentPatternIdDidChangeNotification forPage:pageId];
+        }
+        if( pageState.nextPatternId.intValue >= self.sharedPreferences.gridWidth ) {
             pageState.nextPatternId = nil;
+            [self postNotification:kSequencerPageStateNextPatternIdDidChangeNotification forPage:pageId];
+        }
     }
 }
 
@@ -1711,9 +1722,7 @@
 
 - (void) setCurrentPatternId:(int)patternId forPage:(uint)pageId
 {
-    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    
-    if( patternId >= 0 && patternId < page.patterns.count ) {
+    if( patternId >= 0 && patternId < self.sharedPreferences.gridWidth ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.currentPatternId = patternId;
     }
@@ -1730,9 +1739,7 @@
 
 - (void) setNextPatternId:(NSNumber *)patternId forPage:(uint)pageId
 {
-    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
-    
-    if( patternId.intValue >= 0 && patternId.intValue < page.patterns.count ) {
+    if( patternId.intValue >= 0 && patternId.intValue < self.sharedPreferences.gridWidth ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.nextPatternId = patternId;
     }
