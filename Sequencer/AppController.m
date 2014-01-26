@@ -501,7 +501,7 @@
         int height = [sizeValues[1] intValue];
         
         if( width <= 0 || width > 16 || height <= 0 || height > 16 ) {
-            NSLog(@"WARNING: Monome returned width: %i height: %i using 8x8 instead", width, height);
+            NSLog(@"WARNING: Monome returned size: %ix%i using 8x8 instead", width, height);
             width = 8;
             height = 8;
         }
