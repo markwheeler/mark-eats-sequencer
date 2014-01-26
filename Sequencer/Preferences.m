@@ -26,8 +26,8 @@
 {
     self = [super init];
     if (self) {
-        self.gridWidth = 32;
-        self.gridHeight = 32;
+        self.gridWidth = 16;
+        self.gridHeight = 16;
     }
     return self;
 }

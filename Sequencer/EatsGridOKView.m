@@ -42,9 +42,9 @@
         self.particleATrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
         self.particleBTrail = [NSMutableArray arrayWithCapacity:TRAIL_LENGTH];
         
-        // Set the particle start positions
-        self.particleA = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2) - 1], @"y", nil];
-        self.particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:(self.height / 2)], @"y", nil];
+        // Setup the particle data structure
+        self.particleA = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:99], @"y", nil];
+        self.particleB = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:0], @"x", [NSNumber numberWithUnsignedInt:0], @"y", nil];
 
     }
     return self;
@@ -52,21 +52,26 @@
 
 - (NSArray *) viewArray
 {
-    if( !self.visible ) return nil;
+    // Copying these so that they values can't change mid-way through
+    uint selfWidth = self.width;
+    uint selfHeight = self.height;
+    uint currentFrame = self.currentFrame;
     
-    self.okLeftMargin = (self.width - [self.okArray count]) / 2;
-    self.okTopMargin = (self.height - [[self.okArray objectAtIndex:0] count]) / 2;
+    if( !self.visible || selfWidth < 1 || selfHeight < 1 ) return nil;
+    
+    self.okLeftMargin = (selfWidth - [self.okArray count]) / 2;
+    self.okTopMargin = (selfHeight - [[self.okArray objectAtIndex:0] count]) / 2;
     
     // Move the particles
-    if (self.currentFrame < self.height / 2 ) {
-        [self.particleA setObject:[NSNumber numberWithUnsignedInt:self.height / 2 - 1 - self.currentFrame]  forKey:@"y"];
-        [self.particleB setObject:[NSNumber numberWithUnsignedInt:self.height / 2 + self.currentFrame]  forKey:@"y"];
-    } else if (self.currentFrame <= (self.height / 2) + self.width - 2) {
-        [self.particleA setObject:[NSNumber numberWithUnsignedInt:self.currentFrame - self.height / 2 + 1]  forKey:@"x"];
-        [self.particleB setObject:[NSNumber numberWithUnsignedInt:self.currentFrame - self.height / 2 + 1]  forKey:@"x"];
-    } else if (self.currentFrame <= self.width + self.height - 3) {
-        [self.particleA setObject:[NSNumber numberWithUnsignedInt:self.currentFrame - self.height / 2 + 2 - self.width]  forKey:@"y"];
-        [self.particleB setObject:[NSNumber numberWithUnsignedInt:self.height - 1 + self.width + self.height / 2 - 2 - self.currentFrame]  forKey:@"y"];
+    if (currentFrame < selfHeight / 2 ) {
+        [self.particleA setObject:[NSNumber numberWithUnsignedInt:selfHeight / 2 - 1 - currentFrame]  forKey:@"y"];
+        [self.particleB setObject:[NSNumber numberWithUnsignedInt:selfHeight / 2 + currentFrame]  forKey:@"y"];
+    } else if (currentFrame <= (selfHeight / 2) + selfWidth - 2) {
+        [self.particleA setObject:[NSNumber numberWithUnsignedInt:currentFrame - selfHeight / 2 + 1]  forKey:@"x"];
+        [self.particleB setObject:[NSNumber numberWithUnsignedInt:currentFrame - selfHeight / 2 + 1]  forKey:@"x"];
+    } else if (currentFrame <= selfWidth + selfHeight - 3) {
+        [self.particleA setObject:[NSNumber numberWithUnsignedInt:currentFrame - selfHeight / 2 + 2 - selfWidth]  forKey:@"y"];
+        [self.particleB setObject:[NSNumber numberWithUnsignedInt:selfHeight - 1 + selfWidth + selfHeight / 2 - 2 - currentFrame]  forKey:@"y"];
     } else {
         self.particleA = nil;
         self.particleB = nil;
@@ -76,7 +81,7 @@
     if( self.sharedPreferences.gridSupportsVariableBrightness ) {
         int lengthOfPulseCycle = 90;
         int halfLengthOfPulseCycle = lengthOfPulseCycle / 2;
-        int pulseCycle = self.currentFrame % lengthOfPulseCycle;
+        int pulseCycle = currentFrame % lengthOfPulseCycle;
         if( pulseCycle < lengthOfPulseCycle / 2 )
             self.okBrightness = [NSNumber numberWithInt:4 + roundf(11.0 * ( (float)pulseCycle / halfLengthOfPulseCycle ) )];
         else
@@ -86,13 +91,13 @@
     }
     
     // Generate the array
-    NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.height * self.width];
+    NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:selfHeight * selfWidth];
     NSNumber *zero = [NSNumber numberWithInt:0];
     NSArray *okArray = [self okArray];
     
-    for(uint x = 0; x < self.width; x++) {
-        [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
-        for(uint y = 0; y < self.height; y++) {
+    for(uint x = 0; x < selfWidth; x++) {
+        [gridArray insertObject:[NSMutableArray arrayWithCapacity:selfHeight] atIndex:x];
+        for(uint y = 0; y < selfHeight; y++) {
             // Put OK in
             if(x >= self.okLeftMargin && x < self.okLeftMargin + [okArray count] && y >= self.okTopMargin && y < self.okTopMargin + [[okArray objectAtIndex:0] count]) {
                 if(!self.particleA || x <= [[self.particleA valueForKey:@"x"] unsignedIntValue])

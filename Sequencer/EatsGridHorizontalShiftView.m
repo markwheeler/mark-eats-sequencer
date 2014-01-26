@@ -19,7 +19,7 @@
 
 - (NSArray *) viewArray
 {
-    if( !self.visible ) return nil;
+    if( !self.visible || self.width < 1 || self.height < 1 ) return nil;
     
     int tailLength;
     int tailBaseBrightness;

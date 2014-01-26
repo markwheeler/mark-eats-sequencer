@@ -82,10 +82,6 @@
 
 - (void) redrawGridController:(NSArray *)gridArray
 {
-    // TODO just for testing connect bug
-    if( !gridArray.count )
-        NSLog(@"WARNING: redrawGridController: gridArray arrived empty");
-    
     // Cut up the complete 2D array into 8x8 1D arrays ready for sending to the monome
     
     // For each 8-wide block...
@@ -171,10 +167,6 @@
 
 - (void) monomeLEDLevelMapXOffset:(NSUInteger)x yOffset:(NSUInteger)y levels:(NSArray *)l;
 {
-    // TODO just for testing connect bug
-    if( !l.count )
-        NSLog(@"WARNING: monomeLEDLevelMapXOffset: levels arrived empty");
-    
     NSString *oscAddress;
     NSMutableArray *levels;
     

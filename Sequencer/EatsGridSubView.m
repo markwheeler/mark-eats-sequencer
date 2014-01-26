@@ -26,10 +26,10 @@
 - (NSArray *) viewArray
 {
     // Over-ride this
+
+    if( !self.visible || self.width < 1 || self.height < 1 ) return nil;
     
     // Displays all lights on
-
-    if( !self.visible ) return nil;
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     

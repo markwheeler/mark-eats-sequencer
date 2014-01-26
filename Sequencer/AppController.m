@@ -497,7 +497,16 @@
             [sizeValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
         }
         
-        [self gridControllerSetWidth:[sizeValues[0] intValue] height:[sizeValues[1] intValue]];
+        int width = [sizeValues[0] intValue];
+        int height = [sizeValues[1] intValue];
+        
+        if( width <= 0 || width > 16 || height <= 0 || height > 16 ) {
+            NSLog(@"WARNING: Monome returned width: %i height: %i using 8x8 instead", width, height);
+            width = 8;
+            height = 8;
+        }
+        
+        [self gridControllerSetWidth:width height:height];
         
         if( self.gridControllerConnectionTimer )
             [self gridControllerConnected:EatsGridType_Monome];

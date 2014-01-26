@@ -20,7 +20,7 @@
 
 - (NSArray *) viewArray
 {
-    if( !self.visible ) return nil;
+    if( !self.visible || self.width < 1 || self.height < 1 ) return nil;
     
     uint startPercentageAsStep = [EatsGridUtils percentageToSteps:self.startPercentage width:self.width];
     uint endPercentageAsStep = [EatsGridUtils percentageToSteps:self.endPercentage width:self.width];
