@@ -15,6 +15,7 @@
 @property NSString      *oscPrefix;
 
 + (void) connectToMonomeAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort withPrefix:(NSString *)prefix;
++ (void) disconnectFromMonomeAtPort:(OSCOutPort *)outPort;
 + (void) monomeTiltSensor:(BOOL)enable atPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix;
 
 - (id) initWithOSCPort:(OSCOutPort *)port oscPrefix:(NSString *)prefix;

@@ -140,11 +140,21 @@
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
     
+    EatsGridType needToDisconnect = EatsGridType_None;
+    if( self.sharedPreferences.gridType == EatsGridType_Monome )
+        needToDisconnect = self.sharedPreferences.gridType;
+    
     self.sharedPreferences.gridType = EatsGridType_None;
     self.sharedPreferences.gridWidth = 16;
     self.sharedPreferences.gridHeight = 16;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
+    
+    // If we're already connected to a monome then disconnect
+    if( needToDisconnect == EatsGridType_Monome ) {
+        NSLog(@"Disconnecting from monome");
+        [EatsMonome disconnectFromMonomeAtPort:self.sharedCommunicationManager.oscOutPort];
+    }
 }
 
 - (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode
@@ -640,7 +650,7 @@
         
         
     // Anything else just gets ignored
-        
+    
     } else {
         if(o.valueCount > 1) {
             NSMutableString *miscValues = [[NSMutableString alloc] init];

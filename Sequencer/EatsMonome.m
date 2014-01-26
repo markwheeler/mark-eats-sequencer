@@ -70,6 +70,21 @@
     [outPort sendThisMessage:newMsg];
 }
 
++ (void) disconnectFromMonomeAtPort:(OSCOutPort *)outPort
+{
+    OSCMessage *newMsg;
+    
+    // Set port
+    newMsg = [OSCMessage createWithAddress:@"/sys/port"];
+    [newMsg addInt:999]; // Dummy port so we won't receive anything more
+    [outPort sendThisMessage:newMsg];
+    
+    // Set prefix
+    newMsg = [OSCMessage createWithAddress:@"/sys/prefix"];
+    [newMsg addString:@"monome"];
+    [outPort sendThisMessage:newMsg];
+}
+
 + (void) monomeTiltSensor:(BOOL)enable atPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix
 {
     // Enable or disable tilt sensor
