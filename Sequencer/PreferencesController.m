@@ -84,8 +84,13 @@
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(gridControllerConnected:)
-                                                 name:kGridControllerConnectedNotification
+                                             selector:@selector(gridControllerCalibrating:)
+                                                 name:kGridControllerCalibratingNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(gridControllerDoneCalibrating:)
+                                                 name:kGridControllerDoneCalibratingNotification
                                                object:nil];
 }
 
@@ -118,7 +123,7 @@
         // Set popup to active controller
         if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
             [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:s] ];
-            [self gridControllerConnected:nil];
+            [self gridControllerDoneCalibrating:nil];
         }
             
     }
@@ -175,7 +180,12 @@
     [self.gridControllerStatus setStringValue:@"Trying to connect..."];
 }
 
-- (void) gridControllerConnected:(NSNotification *)notification
+- (void) gridControllerCalibrating:(NSNotification *)notification
+{
+    [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Calibrating tilt sensor..."]];
+}
+
+- (void) gridControllerDoneCalibrating:(NSNotification *)notification
 {
     NSString *gridName;
     if(self.sharedPreferences.gridType == EatsGridType_Monome)
@@ -255,11 +265,9 @@
 {
     if( sender.indexOfSelectedItem > 0 && sender.indexOfSelectedItem <= 16 ) {
         self.sharedPreferences.tiltMIDIOutputChannel = [NSNumber numberWithInt:sender.indexOfSelectedItem - 1];
-        [self.delegate performSelector:@selector(gridControllerTiltSensor:) withObject:[NSNumber numberWithBool:YES]];
         
     } else {
         self.sharedPreferences.tiltMIDIOutputChannel = nil;
-        [self.delegate performSelector:@selector(gridControllerTiltSensor:) withObject:[NSNumber numberWithBool:NO]];
     }
 }
 

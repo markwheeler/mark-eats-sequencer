@@ -29,6 +29,8 @@ NSString *const kGridControllerNoneNotification = @"GridControllerNoneNotificati
 NSString *const kGridControllerConnectingNotification = @"GridControllerConnectingNotification";
 NSString *const kGridControllerConnectionErrorNotification = @"GridControllerConnectionErrorNotification";
 NSString *const kGridControllerConnectedNotification = @"GridControllerConnectedNotification";
+NSString *const kGridControllerCalibratingNotification = @"GridControllerCalibratingNotification";
+NSString *const kGridControllerDoneCalibratingNotification = @"GridControllerDoneCalibratingNotification";
 NSString *const kGridControllerSetRotationNotification = @"GridControllerSetRotationNotification";
 NSString *const kGridControllerSizeChangedNotification = @"GridControllerSizeChangedNotification";
 

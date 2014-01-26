@@ -70,13 +70,15 @@
     [outPort sendThisMessage:newMsg];
 }
 
-+ (void) monomeTiltSensor:(BOOL)enable atPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix {
++ (void) monomeTiltSensor:(BOOL)enable atPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix
+{
     // Enable or disable tilt sensor
     OSCMessage *newMsg = [OSCMessage createWithAddress:[NSString stringWithFormat:@"%@/tilt/set", prefix]];
     [newMsg addInt:0];
     [newMsg addInt:enable];
     [outPort sendThisMessage:newMsg];
 }
+
 
 - (void) redrawGridController:(NSArray *)gridArray
 {

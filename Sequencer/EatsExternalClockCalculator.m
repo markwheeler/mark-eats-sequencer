@@ -81,7 +81,7 @@
     int totalRemoved = 0;
     for(NSNumber *obj in valueSet) {
         
-        if([obj longLongValue] < (average * r) || [obj longLongValue] > (average * (1+r))) {
+        if([obj longLongValue] < (average * r) || [obj longLongValue] > (average * (1+r))) { // TODO is there a bug in this code which means it is more generous below the average value than above it??
             //NSLog(@"Skipped interval of %fms", [obj floatValue] / 1000000000.0);
             totalRemoved++;
         } else {

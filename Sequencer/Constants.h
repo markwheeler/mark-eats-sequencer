@@ -40,6 +40,8 @@ extern NSString *const kGridControllerNoneNotification;
 extern NSString *const kGridControllerConnectingNotification;
 extern NSString *const kGridControllerConnectionErrorNotification;
 extern NSString *const kGridControllerConnectedNotification;
+extern NSString *const kGridControllerCalibratingNotification;
+extern NSString *const kGridControllerDoneCalibratingNotification;
 extern NSString *const kGridControllerSetRotationNotification;
 extern NSString *const kGridControllerSizeChangedNotification;
 

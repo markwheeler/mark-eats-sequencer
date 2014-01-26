@@ -125,17 +125,6 @@
                                                 <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="1287"/>
                                             </connections>
                                         </slider>
-                                        <button verticalHuggingPriority="750" id="8X0-NL-E0w">
-                                            <rect key="frame" x="253" y="77" width="110" height="32"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="push" title="Calibrate tilt" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WdK-ts-8ZB">
-                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                            <connections>
-                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="tlY-VN-ahW"/>
-                                            </connections>
-                                        </button>
                                     </subviews>
                                 </view>
                             </tabViewItem>

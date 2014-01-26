@@ -35,12 +35,6 @@
 - (NSDictionary *) defaultPreferences
 {
     return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"gridAutoConnect",
-                                                      [NSNumber numberWithInt:0], @"gridTiltXCenter",
-                                                      [NSNumber numberWithInt:-270], @"gridTiltXMin",
-                                                      [NSNumber numberWithInt:270], @"gridTiltXMax",
-                                                      [NSNumber numberWithInt:0], @"gridTiltYCenter",
-                                                      [NSNumber numberWithInt:-270], @"gridTiltYMin",
-                                                      [NSNumber numberWithInt:270], @"gridTiltYMax",
                                                       [NSNumber numberWithBool:YES], @"showNoteLengthOnGrid",
                                                       [NSNumber numberWithInteger:64], @"defaultMIDINoteVelocity",
                                                       nil];
@@ -59,13 +53,6 @@
     
     self.gridAutoConnect = [preferences boolForKey:@"gridAutoConnect"];
     self.gridSupportsVariableBrightness = [preferences boolForKey:@"gridSupportsVariableBrightness"];
-    
-    self.gridTiltXCenter = [preferences integerForKey:@"gridTiltXCenter"];
-    self.gridTiltXMin = [preferences integerForKey:@"gridTiltXMin"];
-    self.gridTiltXMax = [preferences integerForKey:@"gridTiltXMax"];
-    self.gridTiltYCenter = [preferences integerForKey:@"gridTiltYCenter"];
-    self.gridTiltYMin = [preferences integerForKey:@"gridTiltYMin"];
-    self.gridTiltYMax = [preferences integerForKey:@"gridTiltYMax"];
     
     self.midiClockSourceName = [preferences objectForKey:@"midiClockSourceName"];
     self.sendMIDIClock = [preferences boolForKey:@"sendMIDIClock"];
@@ -97,13 +84,6 @@
     
     [preferences setBool:self.gridAutoConnect forKey:@"gridAutoConnect"];
     [preferences setBool:self.gridSupportsVariableBrightness forKey:@"gridSupportsVariableBrightness"];
-    
-    [preferences setInteger:self.gridTiltXCenter forKey:@"gridTiltXCenter"];
-    [preferences setInteger:self.gridTiltXMin forKey:@"gridTiltXMin"];
-    [preferences setInteger:self.gridTiltXMax forKey:@"gridTiltXMax"];
-    [preferences setInteger:self.gridTiltYCenter forKey:@"gridTiltYCenter"];
-    [preferences setInteger:self.gridTiltYMin forKey:@"gridTiltYMin"];
-    [preferences setInteger:self.gridTiltYMax forKey:@"gridTiltYMax"];
     
     [preferences setObject:self.midiClockSourceName forKey:@"midiClockSourceName"];
     [preferences setBool:self.sendMIDIClock forKey:@"sendMIDIClock"];

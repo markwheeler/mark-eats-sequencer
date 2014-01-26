@@ -28,13 +28,6 @@ typedef enum EatsGridType{
 @property BOOL              gridSupportsVariableBrightness;
 @property uint              gridRotation;
 
-@property int               gridTiltXCenter;
-@property int               gridTiltXMin;
-@property int               gridTiltXMax;
-@property int               gridTiltYCenter;
-@property int               gridTiltYMin;
-@property int               gridTiltYMax;
-
 @property NSMutableArray    *enabledMIDIOutputNames;
 @property NSNumber          *tiltMIDIOutputChannel;
 

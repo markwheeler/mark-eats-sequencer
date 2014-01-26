@@ -18,6 +18,22 @@
 @property Preferences                   *sharedPreferences;
 @property EatsExternalClockCalculator   *externalClockCalculator;
 @property (nonatomic) NSTimer           *gridControllerConnectionTimer;
+@property (nonatomic) NSTimer           *gridControllerCalibrationTimer;
+
+@property int                           gridTiltXCenter;
+@property int                           gridTiltYCenter;
+@property int                           gridTiltRange;
+@property int                           gridTiltDeadZone;
+@property BOOL                          gridTiltXIsInverted;
+@property BOOL                          gridTiltYIsInverted;
+
+@property BOOL                          gridTiltSensorIsCalibrating;
+@property NSMutableSet                  *gridTiltSensorCalibrationData;
+
+@property NSNumber                      *lastTiltSentX;
+@property NSNumber                      *lastTiltSentY;
+@property float                         lastTiltSmoothedX;
+@property float                         lastTiltSmoothedY;
 
 @end
 
@@ -201,10 +217,7 @@
     self.gridControllerConnectionTimer = nil;
     self.sharedPreferences.gridType = EatsGridType_Monome;
     
-    if( self.sharedPreferences.tiltMIDIOutputChannel )
-        [self gridControllerTiltSensor:[NSNumber numberWithBool:YES]];
-    else
-        [self gridControllerTiltSensor:[NSNumber numberWithBool:NO]];
+    [self gridControllerTiltSensor:YES];
     
     NSLog(@"Connected to grid controller: %@ / Size: %ux%u / Type: %i / Varibright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
     
@@ -212,11 +225,174 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
 }
 
-- (void) gridControllerTiltSensor:(NSNumber *)enable
+- (void) gridControllerTiltSensor:(BOOL)enable
 {
     if( self.sharedPreferences.gridType == EatsGridType_Monome ) {
-        [EatsMonome monomeTiltSensor:enable.boolValue atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
+        [EatsMonome monomeTiltSensor:enable atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
+    
+    } else {
+        [self gridControllerTiltSensorDoneCalibrating];
+        return;
     }
+    
+    // If we don't get enough data in time we just timeout
+    [self.gridControllerCalibrationTimer invalidate];
+    self.gridControllerCalibrationTimer = [NSTimer scheduledTimerWithTimeInterval:5
+                                                                          target:self
+                                                                        selector:@selector(gridControllerCalibrationTimeout:)
+                                                                        userInfo:nil
+                                                                         repeats:NO];
+    
+    [self gridControllerTiltSensorStartCalibrating];
+}
+
+- (void) gridControllerTiltSensorStartCalibrating
+{
+    // Reset all the calibration settings
+    self.gridTiltSensorCalibrationData = [NSMutableSet set];
+    self.gridTiltRange = 0;
+    self.gridTiltDeadZone = 0;
+    self.gridTiltXIsInverted = NO;
+    self.gridTiltYIsInverted = NO;
+    self.lastTiltSmoothedX = 63;
+    self.lastTiltSmoothedX = 63;
+    
+    self.gridTiltSensorIsCalibrating = YES;
+    
+    // Let everyone know
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerCalibratingNotification object:self];
+}
+
+- (void) gridControllerTiltSensorDoneCalibrating
+{
+    [self.gridControllerCalibrationTimer invalidate];
+    self.gridControllerCalibrationTimer = nil;
+    
+    if( self.sharedPreferences.gridType == EatsGridType_Monome ) {
+        
+        typedef enum EatsMonomeSensorType {
+            EatsMonomeSensorType_Old,
+            EatsMonomeSensorType_New,
+        } EatsMonomeSensorType;
+        
+        int totalX = 0;
+        int totalY = 0;
+        int minX = 999;
+        int maxX = -999;
+        int minY = 999;
+        int maxY = -999;
+        EatsMonomeSensorType sensorType = EatsMonomeSensorType_Old;
+        
+        for( NSDictionary *data in self.gridTiltSensorCalibrationData ) {
+            
+            int x = [[data valueForKey:@"x"] intValue];
+            int y = [[data valueForKey:@"y"] intValue];
+            
+            totalX += x;
+            totalY += y;
+            
+            if( x < minX ) minX = x;
+            if( x > maxX ) maxX = x;
+            if( y < minY ) minY = y;
+            if( y > maxY ) maxY = y;
+            
+            // If we find a value for z we definitely have a newer sensor
+            // This will only fail to detect correctly if the monome is stood perfectly on edge
+            if( [[data valueForKey:@"z"] intValue] )
+                sensorType = EatsMonomeSensorType_New;
+            
+        }
+        
+        // This is all to remove outliers and deal with both sensor types nicely
+        
+        // Calculate average to get the center
+        float averageX = (float)totalX / self.gridTiltSensorCalibrationData.count;
+        float averageY = (float)totalY / self.gridTiltSensorCalibrationData.count;
+        
+        // Re-calculate average within range
+        totalX = 0;
+        totalY = 0;
+        int totalRemovedX = 0;
+        int totalRemovedY = 0;
+        int rangeX = maxX - minX;
+        int rangeY = maxY - minY;
+        float rangePercentage = 0.5;
+        
+        for( NSDictionary *data in self.gridTiltSensorCalibrationData ) {
+            
+            int x = [[data valueForKey:@"x"] intValue];
+            int y = [[data valueForKey:@"y"] intValue];
+            
+            if( x >= roundf( averageX - ( rangeX * rangePercentage ) ) && x <= roundf( averageX + ( rangeX * rangePercentage ) ) )
+                totalX += x;
+            else {
+                totalRemovedX ++;
+                //NSLog(@"Removed x: %i because it fell outside of %f – %f", x, roundf( averageX - ( rangeX * rangePercentage ) ), roundf( averageX + ( rangeX * rangePercentage ) ) );
+            }
+            
+            if( y >= roundf( averageY - ( rangeY * rangePercentage ) ) && y <= roundf( averageY + ( rangeY * rangePercentage ) ) )
+                totalY += y;
+            else {
+                totalRemovedY ++;
+                //NSLog(@"Removed y: %i because it fell outside of %f – %f", y, roundf( averageY - ( rangeY * rangePercentage ) ), roundf( averageY + ( rangeY * rangePercentage ) ) );
+            }
+        }
+        
+        float rangedAverageX;
+        float rangedAverageY;
+        
+        // We check here just in case we somehow remove them all – we don't want to divide by zero so we take the regular average instead
+        if( totalRemovedX >= self.gridTiltSensorCalibrationData.count ) {
+            rangedAverageX = averageX;
+        } else {
+            rangedAverageX = (float)totalX / ( self.gridTiltSensorCalibrationData.count - totalRemovedX );
+        }
+        
+        if( totalRemovedY >= self.gridTiltSensorCalibrationData.count ) {
+            rangedAverageY = averageY;
+        } else {
+            rangedAverageY = (float)totalY / ( self.gridTiltSensorCalibrationData.count - totalRemovedY );
+        }
+        
+        self.gridTiltXCenter = roundf ( rangedAverageX );
+        self.gridTiltYCenter = roundf ( rangedAverageY );
+        
+        
+        // Set the tilt range
+        if( sensorType == EatsMonomeSensorType_Old ) {
+            // Older monomes
+            self.gridTiltRange = 35;
+            self.gridTiltDeadZone = 2;
+            self.gridTiltXIsInverted = YES;
+            self.gridTiltYIsInverted = YES;
+        } else {
+            // Newer monomes
+            self.gridTiltRange = 245;
+            self.gridTiltDeadZone = 8;
+            self.gridTiltXIsInverted = YES;
+            self.gridTiltYIsInverted = NO;
+        }
+        
+        NSLog(@"Calibrated tilt sensor to XCenter: %i / YCenter: %i / Range: %i / DeadZone: %i", self.gridTiltXCenter, self.gridTiltYCenter, self.gridTiltRange, self.gridTiltDeadZone);
+    }
+    
+    self.gridTiltSensorIsCalibrating = NO;
+    
+    // Let everyone know
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerDoneCalibratingNotification object:self];
+}
+
+- (void) gridControllerCalibrationTimeout:(NSTimer *)timer
+{
+    [self.gridControllerCalibrationTimer invalidate];
+    self.gridControllerCalibrationTimer = nil;
+    
+    self.gridTiltSensorIsCalibrating = NO;
+    
+    NSLog(@"Calibration of tilt sensor timed out");
+    
+    // Let everyone know
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerDoneCalibratingNotification object:self];
 }
 
 
@@ -366,46 +542,75 @@
     
     } else if( [o.address isEqualTo:[NSString stringWithFormat:@"/%@/tilt", self.sharedCommunicationManager.oscPrefix]] ) {
         
-        for( int i = 1; i < o.valueCount - 1; i ++ ) {
-            // We ignore the last value, z, because it's not that fun. z just seems to measure 'how upside down' the monome is
+//        NSLog(@"x: %i", [o.valueArray[1] intValue]);
+//        NSLog(@"y: %i", [o.valueArray[2] intValue]);
+//        NSLog(@"z: %i", [o.valueArray[3] intValue]);
+        
+        // Calibrate
+        if( self.gridTiltSensorIsCalibrating ) {
             
-            int tiltValue = [[self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:i]]] intValue];
-            int tiltCenter;
-            int tiltMin;
-            int tiltMax;
+            // Save it all to process once we have enough
+            NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:o.valueArray[1], @"x",
+                                                                            o.valueArray[2], @"y",
+                                                                            o.valueArray[3], @"z",
+                                                                            nil];
+            [self.gridTiltSensorCalibrationData addObject:data];
             
-            if( i == 1 ) { // x
-                tiltCenter = self.sharedPreferences.gridTiltXCenter;
-                tiltMin = self.sharedPreferences.gridTiltXMin;
-                tiltMax = self.sharedPreferences.gridTiltXMax;
-            } else { // y
-                tiltCenter = self.sharedPreferences.gridTiltYCenter;
-                tiltMin = self.sharedPreferences.gridTiltYMin;
-                tiltMax = self.sharedPreferences.gridTiltYMax;
+            // How much data to collect before we end calibration
+            if( self.gridTiltSensorCalibrationData.count >= 12 )
+                [self gridControllerTiltSensorDoneCalibrating];
+        
+        // Send it out
+        } else if( self.sharedPreferences.tiltMIDIOutputChannel && self.gridTiltRange ) {
+        
+            // Convert the monome values into MIDI values based on calibrated min/max/center
+            
+            for( int i = 1; i < o.valueCount - 1; i ++ ) {
+                // We ignore the last value, z, because it's not that fun. z just seems to measure 'how upside down' the monome is
+
+                int tiltValue = [[self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:i]]] intValue];
+                int tiltCenter;
+
+                if( i == 1 ) { // x
+                    tiltCenter = self.gridTiltXCenter;
+                } else { // y
+                    tiltCenter = self.gridTiltYCenter;
+                }
+                
+                int tiltMin = tiltCenter - self.gridTiltRange;
+                int tiltMax = tiltCenter + self.gridTiltRange;
+                
+                // Cut off anything over
+                if( tiltValue > tiltMax )
+                    tiltValue = tiltMax;
+                else if( tiltValue < tiltMin )
+                    tiltValue = tiltMin;
+
+                int distanceFromCenter;
+                int midiTiltValue;
+
+                // Convert to 0-62
+                if( tiltValue <= tiltCenter - self.gridTiltDeadZone ) {
+                    distanceFromCenter = tiltCenter - tiltValue - self.gridTiltDeadZone;
+                    midiTiltValue = 62 - roundf( 62.0 * ( (float)distanceFromCenter / ( tiltCenter - self.gridTiltDeadZone - tiltMin ) ) );
+                
+                // or 64-127
+                } else if( tiltValue >= tiltCenter + self.gridTiltDeadZone ) {
+                    distanceFromCenter = tiltValue - tiltCenter - self.gridTiltDeadZone;
+                    midiTiltValue = 64 + roundf( 63.0 * ( (float)distanceFromCenter / ( tiltMax - tiltCenter - self.gridTiltDeadZone ) ) );
+                
+                // in the deadzone is 63
+                } else {
+                    midiTiltValue = 63;
+                }
+                
+                // Invert if need be
+                if( ( i == 1 && self.gridTiltXIsInverted ) || ( i == 2 && self.gridTiltYIsInverted ) )
+                    midiTiltValue = 127 - midiTiltValue;
+                
+                //NSLog(@"Tilt axis %i conversion: %i -> %i", i, tiltValue, midiTiltValue);
+                [self sendTiltFromAxis:i - 1 withValue:midiTiltValue];
             }
-            
-            // Cut off anything over
-            if( tiltValue > tiltMax )
-                tiltValue = tiltMax;
-            else if( tiltValue < tiltMin )
-                tiltValue = tiltMin;
-            
-            int distanceFromCenter;
-            int midiTiltValue;
-            
-            // Convert to 0-63
-            if( tiltValue <= tiltCenter ) {
-                distanceFromCenter = tiltCenter - tiltValue;
-                midiTiltValue = 63 - roundf( 63.0 * ( (float)distanceFromCenter / ( tiltCenter - tiltMin ) ) );
-            
-            // or 64-127
-            } else {
-                distanceFromCenter = tiltValue - tiltCenter;
-                midiTiltValue = 63 + roundf( 64.0 * ( (float)distanceFromCenter / ( tiltMax - tiltCenter ) ) );
-            }
-            
-            //NSLog(@"Tilt axis %i conversion: %i -> %i", i, tiltValue, midiTiltValue);
-            [self sendTiltFromAxis:i - 1 withValue:midiTiltValue];
         }
         
     
@@ -502,16 +707,41 @@
 {
     if( self.sharedPreferences.tiltMIDIOutputChannel ) {
         
-        VVMIDIMessage *msg = nil;
-        //	Create a message
-        msg = [VVMIDIMessage createFromVals:VVMIDIControlChangeVal
-                                           :self.sharedPreferences.tiltMIDIOutputChannel.intValue
-                                           :1 + axis // Goes out on CC 1-3
-                                           :midiValue
-                                           timestamp:0];
-        // Send it
-        if (msg != nil)
-            [_sharedCommunicationManager.midiManager sendMsg:msg];
+        // Smooth using a weighted average with the previous value (a simple low pass filter)
+        float last;
+        if( axis == 0 )
+            last = self.lastTiltSmoothedX;
+        else
+            last = self.lastTiltSmoothedY;
+        
+        float alpha = 0.5; // Weight: 1 = no smoothing, 0 = will never move from previous value
+        float smoothed = (alpha * midiValue) + ( (1.0 - alpha) * last );
+        
+        midiValue = roundf ( smoothed );
+        
+        // Check if we just sent the same value
+        if( ( axis == 0 && midiValue != self.lastTiltSentX.intValue ) || ( axis == 1 && midiValue != self.lastTiltSentY.intValue ) ) {
+        
+            VVMIDIMessage *msg = nil;
+            //	Create a message
+            msg = [VVMIDIMessage createFromVals:VVMIDIControlChangeVal
+                                               :self.sharedPreferences.tiltMIDIOutputChannel.intValue
+                                               :1 + axis // Goes out on CC 1-2
+                                               :midiValue
+                                               timestamp:0];
+            // Send it
+            if (msg != nil)
+                [_sharedCommunicationManager.midiManager sendMsg:msg];
+        }
+        
+        // Save it
+        if( axis == 0 ) {
+            self.lastTiltSentX = [NSNumber numberWithInt:midiValue];
+            self.lastTiltSmoothedX = smoothed;
+        } else if( axis == 1 ) {
+            self.lastTiltSentY = [NSNumber numberWithInt:midiValue];
+            self.lastTiltSmoothedY = smoothed;
+        }
     }
 }
 
