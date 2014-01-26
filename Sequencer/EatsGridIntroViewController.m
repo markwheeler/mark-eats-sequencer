@@ -16,8 +16,6 @@
 @property EatsGridOKView        *okView;
 @property NSTimer               *animationTimer;
 
-@property BOOL                  logFirst;
-
 @end
 
 @implementation EatsGridIntroViewController
@@ -33,9 +31,6 @@
     [self addObserver:self forKeyPath:@"height" options:NSKeyValueObservingOptionNew context:NULL];
     
     [self startAnimation];
-    
-    NSLog(@"Done setting up GridIntroView");
-
 }
 
 - (void) dealloc
@@ -49,7 +44,6 @@
                         change:(NSDictionary *)change
                        context:(void *)context {
     
-    NSLog(@"Grid %@ changed", keyPath);
     [self stopAnimation];
     dispatch_async(self.gridQueue, ^(void) {
         [self createSubViews];
@@ -78,7 +72,6 @@
 - (void) startAnimation
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        NSLog(@"Start intro animation");
         [self.animationTimer invalidate];
         self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / FRAMERATE
                                                            target:self
@@ -97,13 +90,7 @@
 {
     dispatch_async(self.gridQueue, ^(void) {
         self.okView.currentFrame ++;
-        if( !self.logFirst )
-            NSLog(@"First intro view update from timer");
         [self updateView];
-        if( !self.logFirst ) {
-            NSLog(@"First intro view update from timer is done");
-            self.logFirst = YES;
-        }
     });
     
     // Commented this out so that OK keeps pulsing
