@@ -12,6 +12,11 @@
 #import "EatsMonome.h"
 #import "EatsDocumentController.h"
 
+typedef enum EatsMonomeSensorType {
+    EatsMonomeSensorType_Old,
+    EatsMonomeSensorType_New,
+} EatsMonomeSensorType;
+
 @interface AppController()
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
@@ -27,7 +32,6 @@
 @property BOOL                          gridTiltXIsInverted;
 @property BOOL                          gridTiltYIsInverted;
 
-@property BOOL                          gridTiltSensorIsCalibrating;
 @property NSMutableSet                  *gridTiltSensorCalibrationData;
 
 @property NSNumber                      *lastTiltSentX;
@@ -249,7 +253,7 @@
     [self.gridControllerCalibrationTimer invalidate];
     self.gridControllerCalibrationTimer = [NSTimer scheduledTimerWithTimeInterval:5
                                                                           target:self
-                                                                        selector:@selector(gridControllerCalibrationTimeout:)
+                                                                         selector:@selector(gridControllerCalibrationTimeout:)
                                                                         userInfo:nil
                                                                          repeats:NO];
     
@@ -267,7 +271,7 @@
     self.lastTiltSmoothedX = 63;
     self.lastTiltSmoothedX = 63;
     
-    self.gridTiltSensorIsCalibrating = YES;
+    self.sharedPreferences.gridTiltSensorIsCalibrating = YES;
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerCalibratingNotification object:self];
@@ -280,95 +284,34 @@
     
     if( self.sharedPreferences.gridType == EatsGridType_Monome ) {
         
-        typedef enum EatsMonomeSensorType {
-            EatsMonomeSensorType_Old,
-            EatsMonomeSensorType_New,
-        } EatsMonomeSensorType;
-        
-        int totalX = 0;
-        int totalY = 0;
-        int minX = 999;
-        int maxX = -999;
-        int minY = 999;
-        int maxY = -999;
-        EatsMonomeSensorType sensorType = EatsMonomeSensorType_Old;
+        // Pull all the data into separate sets for easy processing
+        NSMutableSet *xData = [NSMutableSet setWithCapacity:self.gridTiltSensorCalibrationData.count];
+        NSMutableSet *yData = [NSMutableSet setWithCapacity:self.gridTiltSensorCalibrationData.count];
+        NSMutableSet *zData = [NSMutableSet setWithCapacity:self.gridTiltSensorCalibrationData.count];
         
         for( NSDictionary *data in self.gridTiltSensorCalibrationData ) {
-            
-            int x = [[data valueForKey:@"x"] intValue];
-            int y = [[data valueForKey:@"y"] intValue];
-            
-            totalX += x;
-            totalY += y;
-            
-            if( x < minX ) minX = x;
-            if( x > maxX ) maxX = x;
-            if( y < minY ) minY = y;
-            if( y > maxY ) maxY = y;
-            
-            // If we find a value for z we definitely have a newer sensor
-            // This will only fail to detect correctly if the monome is stood perfectly on edge
-            if( [[data valueForKey:@"z"] intValue] )
-                sensorType = EatsMonomeSensorType_New;
-            
+            [xData addObject:[data valueForKey:@"x"]];
+            [yData addObject:[data valueForKey:@"y"]];
+            [zData addObject:[data valueForKey:@"z"]];
         }
         
-        // This is all to remove outliers and deal with both sensor types nicely
+        EatsMonomeSensorType sensorType;
         
-        // Calculate average to get the center
-        float averageX = (float)totalX / self.gridTiltSensorCalibrationData.count;
-        float averageY = (float)totalY / self.gridTiltSensorCalibrationData.count;
-        
-        // Re-calculate average within range
-        totalX = 0;
-        totalY = 0;
-        int totalRemovedX = 0;
-        int totalRemovedY = 0;
-        int rangeX = maxX - minX;
-        int rangeY = maxY - minY;
-        float rangePercentage = 0.5;
-        
-        for( NSDictionary *data in self.gridTiltSensorCalibrationData ) {
+        // Work out the values
+        if( self.gridTiltSensorCalibrationData.count ) {
+            sensorType = [self monomeSensorTypeFromSetOfZTiltData:zData];
+            self.gridTiltXCenter = [self rangedAverageFromSetOfTiltData:xData];
+            self.gridTiltYCenter = [self rangedAverageFromSetOfTiltData:yData];
             
-            int x = [[data valueForKey:@"x"] intValue];
-            int y = [[data valueForKey:@"y"] intValue];
-            
-            if( x >= roundf( averageX - ( rangeX * rangePercentage ) ) && x <= roundf( averageX + ( rangeX * rangePercentage ) ) )
-                totalX += x;
-            else {
-                totalRemovedX ++;
-                //NSLog(@"Removed x: %i because it fell outside of %f – %f", x, roundf( averageX - ( rangeX * rangePercentage ) ), roundf( averageX + ( rangeX * rangePercentage ) ) );
-            }
-            
-            if( y >= roundf( averageY - ( rangeY * rangePercentage ) ) && y <= roundf( averageY + ( rangeY * rangePercentage ) ) )
-                totalY += y;
-            else {
-                totalRemovedY ++;
-                //NSLog(@"Removed y: %i because it fell outside of %f – %f", y, roundf( averageY - ( rangeY * rangePercentage ) ), roundf( averageY + ( rangeY * rangePercentage ) ) );
-            }
-        }
-        
-        float rangedAverageX;
-        float rangedAverageY;
-        
-        // We check here just in case we somehow remove them all – we don't want to divide by zero so we take the regular average instead
-        if( totalRemovedX >= self.gridTiltSensorCalibrationData.count ) {
-            rangedAverageX = averageX;
+        // If we didn't get ANY calibration data, just use values that would likely be right for an old sensor type
         } else {
-            rangedAverageX = (float)totalX / ( self.gridTiltSensorCalibrationData.count - totalRemovedX );
+            NSLog(@"No tilt calibration data received, assuming default values");
+            sensorType = EatsMonomeSensorType_Old;
+            self.gridTiltXCenter = 126;
+            self.gridTiltYCenter = 126;
         }
         
-        if( totalRemovedY >= self.gridTiltSensorCalibrationData.count ) {
-            rangedAverageY = averageY;
-        } else {
-            rangedAverageY = (float)totalY / ( self.gridTiltSensorCalibrationData.count - totalRemovedY );
-        }
-        
-        self.gridTiltXCenter = roundf ( rangedAverageX );
-        self.gridTiltYCenter = roundf ( rangedAverageY );
-        
-        
-        // Set the tilt range
+        // Set everything else depending on sensor type
         if( sensorType == EatsMonomeSensorType_Old ) {
             // Older monomes
             self.gridTiltRange = 35;
@@ -386,7 +329,7 @@
         NSLog(@"Calibrated tilt sensor to XCenter: %i / YCenter: %i / Range: %i / DeadZone: %i", self.gridTiltXCenter, self.gridTiltYCenter, self.gridTiltRange, self.gridTiltDeadZone);
     }
     
-    self.gridTiltSensorIsCalibrating = NO;
+    self.sharedPreferences.gridTiltSensorIsCalibrating = NO;
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerDoneCalibratingNotification object:self];
@@ -394,15 +337,67 @@
 
 - (void) gridControllerCalibrationTimeout:(NSTimer *)timer
 {
-    [self.gridControllerCalibrationTimer invalidate];
-    self.gridControllerCalibrationTimer = nil;
-    
-    self.gridTiltSensorIsCalibrating = NO;
-    
     NSLog(@"Calibration of tilt sensor timed out");
+    [self gridControllerTiltSensorDoneCalibrating];
+}
+
+- (int) rangedAverageFromSetOfTiltData:(NSSet *)data
+{
+    int total = 0;
+    int min = 999;
+    int max = -999;
     
-    // Let everyone know
-    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerDoneCalibratingNotification object:self];
+    for( NSNumber *tiltValue in data ) {
+        
+        total += tiltValue.intValue;
+        
+        if( tiltValue.intValue < min ) min = tiltValue.intValue;
+        if( tiltValue.intValue > max ) max = tiltValue.intValue;
+    }
+    
+    // This is all to remove outliers and deal with both sensor types nicely
+    
+    // Calculate average to get the center
+    float average = (float)total / data.count;
+    
+    // Re-calculate average within range
+    total = 0;
+    int totalRemoved = 0;
+    int range = max - min;
+    float rangePercentage = 0.5;
+    
+    for( NSNumber *tiltValue in data ) {
+        
+        if( tiltValue.intValue >= roundf( average - ( range * rangePercentage ) ) && tiltValue.intValue <= roundf( average + ( range * rangePercentage ) ) )
+            total += tiltValue.intValue;
+        else {
+            totalRemoved ++;
+            //NSLog(@"Removed value: %i because it fell outside of %f – %f", tiltValue.intValue, roundf( average - ( range * rangePercentage ) ), roundf( average + ( range * rangePercentage ) ) );
+        }
+    }
+    
+    float rangedAverage;
+    
+    // We check here just in case we somehow remove them all – we don't want to divide by zero so we take the regular average instead
+    if( totalRemoved >= data.count ) {
+        rangedAverage = average;
+    } else {
+        rangedAverage = (float)total / ( data.count - totalRemoved );
+    }
+    
+    return roundf ( rangedAverage );
+}
+
+- (EatsMonomeSensorType) monomeSensorTypeFromSetOfZTiltData:(NSSet *)zData
+{
+    // If we find a value for z we definitely have a newer sensor
+    // This will only fail to detect correctly if the monome is stood perfectly on edge
+    
+    for( OSCValue *obj in zData) {
+        if( obj.intValue )
+            return EatsMonomeSensorType_New;
+    }
+    return EatsMonomeSensorType_Old;
 }
 
 
@@ -561,12 +556,10 @@
     
     } else if( [o.address isEqualTo:[NSString stringWithFormat:@"/%@/tilt", self.sharedCommunicationManager.oscPrefix]] ) {
         
-//        NSLog(@"x: %i", [o.valueArray[1] intValue]);
-//        NSLog(@"y: %i", [o.valueArray[2] intValue]);
-//        NSLog(@"z: %i", [o.valueArray[3] intValue]);
+        //NSLog(@"Tilt x: %i y: %i z: %i", [o.valueArray[1] intValue], [o.valueArray[2] intValue], [o.valueArray[3] intValue]);
         
         // Calibrate
-        if( self.gridTiltSensorIsCalibrating ) {
+        if( self.sharedPreferences.gridTiltSensorIsCalibrating ) {
             
             // Save it all to process once we have enough
             NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:o.valueArray[1], @"x",

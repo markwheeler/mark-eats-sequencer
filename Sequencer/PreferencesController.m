@@ -122,8 +122,13 @@
         
         // Set popup to active controller
         if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
-            [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:s] ];
-            [self gridControllerDoneCalibrating:nil];
+            [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:s]];
+            
+            // And set the status correctly
+            if( self.sharedPreferences.gridTiltSensorIsCalibrating )
+                [self gridControllerCalibrating:nil];
+            else
+                [self gridControllerDoneCalibrating:nil];
         }
             
     }
