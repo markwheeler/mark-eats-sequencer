@@ -18,6 +18,9 @@
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */; };
 		4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */; };
+		4D4160BA1895F75800540493 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; };
+		4D4160BB1895F75800540493 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */; };
+		4D4160BC1895F75800540493 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */; };
 		4D41801A186A4E9300FCB58C /* SequencerAutomation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D418019186A4E9300FCB58C /* SequencerAutomation.m */; };
 		4D41801D186A56EB00FCB58C /* SequencerAutomationChange.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D41801C186A56EB00FCB58C /* SequencerAutomationChange.m */; };
 		4D4E8A5A17F757DE00764300 /* FloatingToolbarBack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */; };
@@ -115,6 +118,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4D4160BA1895F75800540493 /* VVBasics.framework in CopyFiles */,
+				4D4160BB1895F75800540493 /* VVMIDI.framework in CopyFiles */,
+				4D4160BC1895F75800540493 /* VVOSC.framework in CopyFiles */,
 				4DBE3EC417F950FC00344CFC /* Quincy.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
