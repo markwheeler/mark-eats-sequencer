@@ -87,7 +87,7 @@ typedef enum EatsMonomeSensorType {
 
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
+    [self gridControllerNone];
     [self.sharedPreferences savePreferences];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -157,6 +157,7 @@ typedef enum EatsMonomeSensorType {
     // If we're already connected to a monome then disconnect
     if( needToDisconnect == EatsGridType_Monome ) {
         NSLog(@"Disconnecting from monome");
+        [EatsMonome monomeTiltSensor:NO atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
         [EatsMonome disconnectFromMonomeAtPort:self.sharedCommunicationManager.oscOutPort];
     }
 }
@@ -231,7 +232,7 @@ typedef enum EatsMonomeSensorType {
     self.gridControllerConnectionTimer = nil;
     self.sharedPreferences.gridType = EatsGridType_Monome;
     
-    [self gridControllerTiltSensor:YES];
+    [self gridControllerTiltSensorStartCalibrating];
     
     NSLog(@"Connected to grid controller: %@ / Size: %ux%u / Type: %i / Varibright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
     
@@ -239,12 +240,14 @@ typedef enum EatsMonomeSensorType {
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
 }
 
-- (void) gridControllerTiltSensor:(BOOL)enable
+- (void) gridControllerTiltSensorStartCalibrating
 {
+    // What type of grid do we have?
     if( self.sharedPreferences.gridType == EatsGridType_Monome ) {
-        [EatsMonome monomeTiltSensor:enable atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
-    
+        [EatsMonome monomeTiltSensor:YES atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
+        
     } else {
+        // The rest don't support it so we're done
         [self gridControllerTiltSensorDoneCalibrating];
         return;
     }
@@ -252,16 +255,11 @@ typedef enum EatsMonomeSensorType {
     // If we don't get enough data in time we just timeout
     [self.gridControllerCalibrationTimer invalidate];
     self.gridControllerCalibrationTimer = [NSTimer scheduledTimerWithTimeInterval:5
-                                                                          target:self
+                                                                           target:self
                                                                          selector:@selector(gridControllerCalibrationTimeout:)
-                                                                        userInfo:nil
-                                                                         repeats:NO];
+                                                                         userInfo:nil
+                                                                          repeats:NO];
     
-    [self gridControllerTiltSensorStartCalibrating];
-}
-
-- (void) gridControllerTiltSensorStartCalibrating
-{
     // Reset all the calibration settings
     self.gridTiltSensorCalibrationData = [NSMutableSet set];
     self.gridTiltRange = 0;
