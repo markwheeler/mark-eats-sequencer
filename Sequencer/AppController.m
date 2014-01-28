@@ -156,9 +156,9 @@ typedef enum EatsMonomeSensorType {
     
     // If we're already connected to a monome then disconnect
     if( needToDisconnect == EatsGridType_Monome ) {
-        NSLog(@"Disconnecting from monome");
-        [EatsMonome monomeTiltSensor:NO atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
-        [EatsMonome disconnectFromMonomeAtPort:self.sharedCommunicationManager.oscOutPort];
+        NSLog(@"Disconnect from monome");
+        [EatsMonome disconnectFromMonomeAtPort:self.sharedCommunicationManager.oscOutPort
+                                    withPrefix:self.sharedCommunicationManager.oscPrefix];
     }
 }
 
@@ -243,11 +243,8 @@ typedef enum EatsMonomeSensorType {
 - (void) gridControllerTiltSensorStartCalibrating
 {
     // What type of grid do we have?
-    if( self.sharedPreferences.gridType == EatsGridType_Monome ) {
-        [EatsMonome monomeTiltSensor:YES atPort:self.sharedCommunicationManager.oscOutPort withPrefix:self.sharedCommunicationManager.oscPrefix];
-        
-    } else {
-        // The rest don't support it so we're done
+    if( self.sharedPreferences.gridType != EatsGridType_Monome ) {
+        // These grids don't support tilt so we're done
         [self gridControllerTiltSensorDoneCalibrating];
         return;
     }

@@ -68,11 +68,23 @@
     newMsg = [OSCMessage createWithAddress:@"/sys/info"];
     [newMsg addInt:[inPort port]];
     [outPort sendThisMessage:newMsg];
+    
+    // Enable tilt sensor
+    newMsg = [OSCMessage createWithAddress:[NSString stringWithFormat:@"%@/tilt/set", prefix]];
+    [newMsg addInt:0];
+    [newMsg addInt:1];
+    [outPort sendThisMessage:newMsg];
 }
 
-+ (void) disconnectFromMonomeAtPort:(OSCOutPort *)outPort
++ (void) disconnectFromMonomeAtPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix
 {
     OSCMessage *newMsg;
+    
+    // Disable tilt sensor
+    newMsg = [OSCMessage createWithAddress:[NSString stringWithFormat:@"%@/tilt/set", prefix]];
+    [newMsg addInt:0];
+    [newMsg addInt:0];
+    [outPort sendThisMessage:newMsg];
     
     // Set port
     newMsg = [OSCMessage createWithAddress:@"/sys/port"];
@@ -82,15 +94,6 @@
     // Set prefix
     newMsg = [OSCMessage createWithAddress:@"/sys/prefix"];
     [newMsg addString:@"monome"];
-    [outPort sendThisMessage:newMsg];
-}
-
-+ (void) monomeTiltSensor:(BOOL)enable atPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix
-{
-    // Enable or disable tilt sensor
-    OSCMessage *newMsg = [OSCMessage createWithAddress:[NSString stringWithFormat:@"%@/tilt/set", prefix]];
-    [newMsg addInt:0];
-    [newMsg addInt:enable];
     [outPort sendThisMessage:newMsg];
 }
 
