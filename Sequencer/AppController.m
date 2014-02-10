@@ -34,10 +34,8 @@ typedef enum EatsMonomeSensorType {
 
 @property NSMutableSet                  *gridTiltSensorCalibrationData;
 
-@property NSNumber                      *lastTiltSentX;
-@property NSNumber                      *lastTiltSentY;
-@property float                         lastTiltSmoothedX;
-@property float                         lastTiltSmoothedY;
+@property NSArray                       *lastTiltSent; // Ints
+@property NSArray                       *lastTiltSmoothed; // Floats
 
 @end
 
@@ -263,8 +261,8 @@ typedef enum EatsMonomeSensorType {
     self.gridTiltDeadZone = 0;
     self.gridTiltXIsInverted = NO;
     self.gridTiltYIsInverted = NO;
-    self.lastTiltSmoothedX = 63;
-    self.lastTiltSmoothedX = 63;
+    self.lastTiltSmoothed = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], nil];
+    self.lastTiltSent = [NSArray arrayWithObjects:[NSNumber numberWithInt:0], [NSNumber numberWithInt:0], [NSNumber numberWithInt:0], [NSNumber numberWithInt:0], nil];
     
     self.sharedPreferences.gridTiltSensorIsCalibrating = YES;
     
@@ -520,6 +518,7 @@ typedef enum EatsMonomeSensorType {
     
         if( o.valueCount == 1 ) {
             int rotation = [[self stripOSCValue:[NSString stringWithFormat:@"%@", o.value]] intValue];
+//            NSLog(@"ROTATION TEST: Received rotation %i", rotation);
             if( rotation >= 0 && rotation < 360 && rotation % 90 == 0 )
                 self.sharedPreferences.gridRotation = rotation;
         }
@@ -545,6 +544,8 @@ typedef enum EatsMonomeSensorType {
         [self sendGridInputNotificationX:[keyValues[0] intValue]
                                        Y:[keyValues[1] intValue]
                                     down:[keyValues[2] intValue]];
+//        if( [keyValues[2] intValue] )
+//            NSLog(@"ROTATION TEST: Key down %i %i", [keyValues[0] intValue], [keyValues[1] intValue]);
     
     
     // Tilt from the monome
@@ -592,31 +593,41 @@ typedef enum EatsMonomeSensorType {
                     tiltValue = tiltMax;
                 else if( tiltValue < tiltMin )
                     tiltValue = tiltMin;
-
+                
                 int distanceFromCenter;
-                int midiTiltValue;
-
-                // Convert to 0-62
+                int midiTiltValueA;
+                int midiTiltValueB;
+                
+                // We split the tilt across 4 MIDI CCs so that they all send 0 when the monome is flat
+                
+                // CC A
                 if( tiltValue <= tiltCenter - self.gridTiltDeadZone ) {
                     distanceFromCenter = tiltCenter - tiltValue - self.gridTiltDeadZone;
-                    midiTiltValue = 62 - roundf( 62.0 * ( (float)distanceFromCenter / ( tiltCenter - self.gridTiltDeadZone - tiltMin ) ) );
+                    midiTiltValueA = roundf( 127.0 * ( (float)distanceFromCenter / ( tiltCenter - self.gridTiltDeadZone - tiltMin ) ) );
+                    midiTiltValueB = 0;
                 
-                // or 64-127
+                // CC B
                 } else if( tiltValue >= tiltCenter + self.gridTiltDeadZone ) {
                     distanceFromCenter = tiltValue - tiltCenter - self.gridTiltDeadZone;
-                    midiTiltValue = 64 + roundf( 63.0 * ( (float)distanceFromCenter / ( tiltMax - tiltCenter - self.gridTiltDeadZone ) ) );
+                    midiTiltValueA = 0;
+                    midiTiltValueB = roundf( 127.0 * ( (float)distanceFromCenter / ( tiltMax - tiltCenter - self.gridTiltDeadZone ) ) );
                 
-                // in the deadzone is 63
+                // in the deadzone
                 } else {
-                    midiTiltValue = 63;
+                    midiTiltValueA = 0;
+                    midiTiltValueB = 0;
                 }
                 
                 // Invert if need be
-                if( ( i == 1 && self.gridTiltXIsInverted ) || ( i == 2 && self.gridTiltYIsInverted ) )
-                    midiTiltValue = 127 - midiTiltValue;
+                if( ( i == 1 && self.gridTiltXIsInverted ) || ( i == 2 && self.gridTiltYIsInverted ) ) {
+                    int tempMidiValue = midiTiltValueA;
+                    midiTiltValueA = midiTiltValueB;
+                    midiTiltValueB = tempMidiValue;
+                }
                 
                 //NSLog(@"Tilt axis %i conversion: %i -> %i", i, tiltValue, midiTiltValue);
-                [self sendTiltFromAxis:i - 1 withValue:midiTiltValue];
+                [self sendTiltFromCC:i * 2 - 2 withValue:midiTiltValueA];
+                [self sendTiltFromCC:i * 2 - 1 withValue:midiTiltValueB];
             }
         }
         
@@ -710,16 +721,13 @@ typedef enum EatsMonomeSensorType {
 
 }
 
-- (void) sendTiltFromAxis:(int)axis withValue:(int)midiValue
+- (void) sendTiltFromCC:(int)cc withValue:(int)midiValue
 {
     if( self.sharedPreferences.tiltMIDIOutputChannel ) {
         
         // Smooth using a weighted average with the previous value (a simple low pass filter)
         float last;
-        if( axis == 0 )
-            last = self.lastTiltSmoothedX;
-        else
-            last = self.lastTiltSmoothedY;
+        last = [[self.lastTiltSmoothed objectAtIndex:cc] floatValue];
         
         float alpha = 0.5; // Weight: 1 = no smoothing, 0 = will never move from previous value
         float smoothed = (alpha * midiValue) + ( (1.0 - alpha) * last );
@@ -727,13 +735,13 @@ typedef enum EatsMonomeSensorType {
         midiValue = roundf ( smoothed );
         
         // Check if we just sent the same value
-        if( ( axis == 0 && midiValue != self.lastTiltSentX.intValue ) || ( axis == 1 && midiValue != self.lastTiltSentY.intValue ) ) {
+        if( midiValue != [[self.lastTiltSent objectAtIndex:cc] intValue] ) {
         
             VVMIDIMessage *msg = nil;
             //	Create a message
             msg = [VVMIDIMessage createFromVals:VVMIDIControlChangeVal
                                                :self.sharedPreferences.tiltMIDIOutputChannel.intValue
-                                               :1 + axis // Goes out on CC 1-2
+                                               :1 + cc // Goes out on CC 1-4
                                                :midiValue
                                                timestamp:0];
             // Send it
@@ -742,13 +750,14 @@ typedef enum EatsMonomeSensorType {
         }
         
         // Save it
-        if( axis == 0 ) {
-            self.lastTiltSentX = [NSNumber numberWithInt:midiValue];
-            self.lastTiltSmoothedX = smoothed;
-        } else if( axis == 1 ) {
-            self.lastTiltSentY = [NSNumber numberWithInt:midiValue];
-            self.lastTiltSmoothedY = smoothed;
-        }
+        NSMutableArray *newLastTiltSent = [self.lastTiltSent mutableCopy];
+        NSMutableArray *newLastTiltSmoothed = [self.lastTiltSmoothed mutableCopy];
+        
+        [newLastTiltSent replaceObjectAtIndex:cc withObject:[NSNumber numberWithInt:midiValue]];
+        [newLastTiltSmoothed replaceObjectAtIndex:cc withObject:[NSNumber numberWithFloat:smoothed]];
+        
+        self.lastTiltSent = newLastTiltSent;
+        self.lastTiltSmoothed = newLastTiltSmoothed;
     }
 }
 

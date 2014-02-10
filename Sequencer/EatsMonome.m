@@ -133,10 +133,14 @@
 
 - (void) setRotation:(NSNotification *)notification
 {
+//    NSLog(@"ROTATION TEST: Set rotation %i", self.sharedPreferences.gridRotation);
+    
     // Create and send the OSC message
     OSCMessage *newMsg = [OSCMessage createWithAddress:@"/sys/rotation"];
     [newMsg addInt:self.sharedPreferences.gridRotation];
     [self.oscOutPort sendThisMessage:newMsg];
+    
+//    NSLog(@"ROTATION TEST: Set rotation done");
 }
 
 - (void) monomeLEDLevelSetX:(NSUInteger)x y:(NSUInteger)y level:(NSUInteger)l
