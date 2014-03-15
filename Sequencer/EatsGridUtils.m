@@ -41,8 +41,8 @@
                     // Don't put in pixels outside the grid (if the view is hanging off the edge)
                     if( x >= 0 && x < width && y >= 0 && y < height ) {
                         // Only replace brighter pixels
-                        if( [[[gridArray objectAtIndex:x] objectAtIndex:y] intValue] < [[[viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y] intValue] )
-                            [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:[[viewArray objectAtIndex:x - view.x] objectAtIndex:y - view.y]];
+                        if( [[[gridArray objectAtIndex:x] objectAtIndex:y] intValue] < number.intValue )
+                            [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:number];
                     }
                     y ++;
                 }

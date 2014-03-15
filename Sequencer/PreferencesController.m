@@ -269,7 +269,7 @@
 - (IBAction)tiltMIDIOutputChannelPopup:(NSPopUpButton *)sender
 {
     if( sender.indexOfSelectedItem > 0 && sender.indexOfSelectedItem <= 16 ) {
-        self.sharedPreferences.tiltMIDIOutputChannel = [NSNumber numberWithInt:sender.indexOfSelectedItem - 1];
+        self.sharedPreferences.tiltMIDIOutputChannel = [NSNumber numberWithInteger:sender.indexOfSelectedItem - 1];
         
     } else {
         self.sharedPreferences.tiltMIDIOutputChannel = nil;
