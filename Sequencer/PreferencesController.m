@@ -7,6 +7,7 @@
 //
 
 #import "PreferencesController.h"
+#import "InputMappingOutlineViewController.h"
 
 @interface PreferencesController ()
 
@@ -20,6 +21,8 @@
 @property (nonatomic, weak) IBOutlet NSTextField       *gridControllerStatus;
 @property (nonatomic, weak) IBOutlet NSSlider          *gridControllerRotation;
 
+@property (nonatomic, weak) IBOutlet NSOutlineView     *inputMappingOutlineView;
+
 @property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsEnableColumn;
 @property (nonatomic, weak) IBOutlet NSTableColumn     *midiDestinationsNameColumn;
 @property (nonatomic, weak) IBOutlet NSArrayController *midiDestinationsArrayController;
@@ -27,6 +30,8 @@
 @property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputChannelPopup;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton     *clockSourcePopup;
+
+@property (nonatomic) InputMappingOutlineViewController *inputMappingOutlineViewController;
 
 @end
 
@@ -67,6 +72,10 @@
     else
         [self.tiltMIDIOutputChannelPopup selectItemAtIndex:0];
     
+    [self populateInputMapping];
+    
+    
+    // Notifications
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(gridControllerNone:)
@@ -167,6 +176,120 @@
         
         [self.midiDestinationsArrayController addObject:value];
     }
+}
+
+
+
+#pragma mark - Private methods
+
+- (NSArray *) sequencerFunctionPaths
+{
+    NSMutableArray *functionPaths = [NSMutableArray arrayWithCapacity:64];
+    
+    // Sequencer
+    NSMutableArray *sequencerChildren = [NSMutableArray array];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"BPM" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"IncrementBPM" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"DecrementBPM" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"StepQuantization" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"IncrementStepQuantization" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"DecrementStepQuantization" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"PatternQuantization" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"IncrementPatternQuantization" forKey:@"path"]];
+    [sequencerChildren addObject:[NSDictionary dictionaryWithObject:@"DecrementPatternQuantization" forKey:@"path"]];
+    [functionPaths addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"Sequencer", @"path", sequencerChildren, @"children", nil]];
+    
+    // Pages
+    for( int i = 0; i < kSequencerNumberOfPages + 3; i ++ ) {
+        
+        NSMutableArray *pageChildren = [NSMutableArray array];
+        [pageChildren addObject:[NSDictionary dictionaryWithObject:@"LoopStart" forKey:@"path"]];
+        [pageChildren addObject:[NSDictionary dictionaryWithObject:@"IncrementLoopStart" forKey:@"path"]];
+        [pageChildren addObject:[NSDictionary dictionaryWithObject:@"DecrementLoopStart" forKey:@"path"]];
+        [pageChildren addObject:[NSDictionary dictionaryWithObject:@"LoopEnd" forKey:@"path"]];
+        [pageChildren addObject:[NSDictionary dictionaryWithObject:@"IncrementLoopEnd" forKey:@"path"]];
+        [pageChildren addObject:[NSDictionary dictionaryWithObject:@"DecrementLoopEnd" forKey:@"path"]];
+        
+        NSString *pageName;
+        if( i == 0 )
+            pageName = [NSString stringWithFormat:@"CurrentPage"];
+        else if( i == 1 )
+            pageName = [NSString stringWithFormat:@"AllPages"];
+        else if( i == 2 )
+            pageName = [NSString stringWithFormat:@"AllPagesExceptCurrentPage"];
+        else
+            pageName = [NSString stringWithFormat:@"Page%i", i - 2];
+        [functionPaths addObject:[NSDictionary dictionaryWithObjectsAndKeys:pageName, @"path", pageChildren, @"children", nil]];
+    }
+    
+    // TODO: Lots more here
+    
+    return functionPaths;
+}
+
+- (void) populateInputMapping
+{
+    // Sets up the input tab
+    
+    self.inputMappingOutlineViewController = [[InputMappingOutlineViewController alloc] init];
+    //    self.inputMappingOutlineView.dataSource = self.inputMappingViewController;
+    self.inputMappingOutlineView.delegate = self.inputMappingOutlineViewController;
+    
+    // Move this to outline view controller?
+    NSMutableArray *inputMapping = [NSMutableArray array];
+    
+    NSMutableArray *channels = [NSMutableArray arrayWithCapacity:16];
+    for( int i = 1; i <= 16; i ++ ) {
+        [channels addObject:[NSNumber numberWithInt:i]];
+    }
+    
+    NSArray *functionPaths = [self sequencerFunctionPaths]; // TODO
+    
+    for( NSDictionary *elem in functionPaths ) {
+    
+        // If it has children (everything should)
+        if( [elem objectForKey:@"children"] ) {
+            
+            NSMutableDictionary *parent = [NSMutableDictionary dictionaryWithObjectsAndKeys:[elem objectForKey:@"path"], @"path", nil];
+            
+            // This is a branch
+            [parent setObject:[NSNumber numberWithBool:NO] forKey:@"isLeaf"];
+            
+            NSArray *elemChildren = [elem objectForKey:@"children"];
+            NSMutableArray *parentChildren = [NSMutableArray arrayWithCapacity:elemChildren.count];
+            
+            // Go through all the children
+            for( NSDictionary *elemChild in elemChildren ) {
+                NSDictionary *parentChild = [NSDictionary dictionaryWithObjectsAndKeys:[elemChild objectForKey:@"path"], @"path",
+                                                                                       [NSString stringWithFormat:@"Hi"], @"a",
+                                                                                       [NSArray arrayWithObjects:@"None", @"MIDI Device 1", @"MIDI Device 2", nil], @"device",
+                                                                                       [NSArray arrayWithObjects:@"C3", @"G2", nil], @"noteOrCC",
+                                                                                       [NSArray arrayWithObjects:[NSNumber numberWithInt:1], [NSNumber numberWithInt:2], [NSNumber numberWithInt:3], nil], @"channel",
+                                                                                       [NSNumber numberWithInt:12], @"min",
+                                                                                       [NSNumber numberWithInt:111], @"max",
+                                                                                       [NSNumber numberWithBool:YES], @"isLeaf",
+                                                                                       nil];
+                
+                [parentChildren addObject:parentChild];
+                
+                // TODO: Set the node according to preferences
+                // Prefs format idea: basically the same as above but instead of the lists of things it has to have the selected item (device string, channel int, etc)
+                //[self.sharedPreferences.inputMappings objectAtIndex:0];
+            }
+            
+            // Add the children to the parent
+            [parent setObject:parentChildren forKey:@"children"];
+            
+            // Add the node
+            [inputMapping addObject:parent];
+        }
+        
+        
+    }
+    
+    self.inputMappingData = [inputMapping mutableCopy];
+
+    
 }
 
 - (void) gridControllerNone:(NSNotification *)notification

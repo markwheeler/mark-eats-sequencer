@@ -22,6 +22,8 @@
 
 @property (nonatomic, weak) id delegate;
 
+@property (nonatomic) NSMutableArray              *inputMappingData;
+
 - (void) updateOSC;
 - (void) updateMIDI;
 

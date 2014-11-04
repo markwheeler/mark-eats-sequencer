@@ -54,6 +54,8 @@
     self.gridAutoConnect = [preferences boolForKey:@"gridAutoConnect"];
     self.gridSupportsVariableBrightness = [preferences boolForKey:@"gridSupportsVariableBrightness"];
     
+    self.inputMappings = [preferences objectForKey:@"inputMappings"];
+    
     self.midiClockSourceName = [preferences objectForKey:@"midiClockSourceName"];
     self.sendMIDIClock = [preferences boolForKey:@"sendMIDIClock"];
     
@@ -84,6 +86,8 @@
     
     [preferences setBool:self.gridAutoConnect forKey:@"gridAutoConnect"];
     [preferences setBool:self.gridSupportsVariableBrightness forKey:@"gridSupportsVariableBrightness"];
+    
+    [preferences setObject:self.inputMappings forKey:@"inputMappings"];
     
     [preferences setObject:self.midiClockSourceName forKey:@"midiClockSourceName"];
     [preferences setBool:self.sendMIDIClock forKey:@"sendMIDIClock"];

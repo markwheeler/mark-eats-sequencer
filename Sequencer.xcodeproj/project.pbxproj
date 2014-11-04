@@ -18,9 +18,9 @@
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
 		4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */; };
 		4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */; };
-		4D4160BA1895F75800540493 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; };
-		4D4160BB1895F75800540493 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */; };
-		4D4160BC1895F75800540493 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */; };
+		4D4160BA1895F75800540493 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		4D4160BB1895F75800540493 /* VVMIDI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		4D4160BC1895F75800540493 /* VVOSC.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		4D41801A186A4E9300FCB58C /* SequencerAutomation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D418019186A4E9300FCB58C /* SequencerAutomation.m */; };
 		4D41801D186A56EB00FCB58C /* SequencerAutomationChange.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D41801C186A56EB00FCB58C /* SequencerAutomationChange.m */; };
 		4D4E8A5A17F757DE00764300 /* FloatingToolbarBack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4E8A5917F757DE00764300 /* FloatingToolbarBack.m */; };
@@ -30,6 +30,7 @@
 		4D4E8A6417F76CC000764300 /* ArrowLeftIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A6017F76CC000764300 /* ArrowLeftIconTemplate.pdf */; };
 		4D4E8A6517F76CC000764300 /* ArrowRightIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A6117F76CC000764300 /* ArrowRightIconTemplate.pdf */; };
 		4D4E8A6617F76CC000764300 /* ArrowUpIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D4E8A6217F76CC000764300 /* ArrowUpIconTemplate.pdf */; };
+		4D53A78618F3CF0E009C342F /* InputMappingOutlineViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D53A78518F3CF0E009C342F /* InputMappingOutlineViewController.m */; };
 		4D54CAC117B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */; };
 		4D54CAC217B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */; };
 		4D54CAC417B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */; };
@@ -84,7 +85,7 @@
 		4DB87FB716E4435B00BA58BC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DB87FB616E4435A00BA58BC /* Preferences.xib */; };
 		4DBBF9191870967100F1605E /* EatsPieChartProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DBBF9181870967100F1605E /* EatsPieChartProgressView.m */; };
 		4DBE3EC317F950F800344CFC /* Quincy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DBE3EC217F950F800344CFC /* Quincy.framework */; };
-		4DBE3EC417F950FC00344CFC /* Quincy.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DBE3EC217F950F800344CFC /* Quincy.framework */; };
+		4DBE3EC417F950FC00344CFC /* Quincy.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DBE3EC217F950F800344CFC /* Quincy.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		4DC19BE31719AB380094B0D8 /* ShadowRule.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE11719AB380094B0D8 /* ShadowRule.png */; };
 		4DC19BE41719AB380094B0D8 /* ShadowRule@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE21719AB380094B0D8 /* ShadowRule@2x.png */; };
 		4DC19BE61719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4DC19BE51719AF7F0094B0D8 /* PreferencesAdvancedIconTemplate.pdf */; };
@@ -162,6 +163,8 @@
 		4D4E8A6017F76CC000764300 /* ArrowLeftIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowLeftIconTemplate.pdf; sourceTree = "<group>"; };
 		4D4E8A6117F76CC000764300 /* ArrowRightIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowRightIconTemplate.pdf; sourceTree = "<group>"; };
 		4D4E8A6217F76CC000764300 /* ArrowUpIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ArrowUpIconTemplate.pdf; sourceTree = "<group>"; };
+		4D53A78418F3CF0E009C342F /* InputMappingOutlineViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputMappingOutlineViewController.h; sourceTree = "<group>"; };
+		4D53A78518F3CF0E009C342F /* InputMappingOutlineViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InputMappingOutlineViewController.m; sourceTree = "<group>"; };
 		4D54CABC17B60E3B00139D6D /* PlaybackPauseIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackPauseIconTemplate.pdf; sourceTree = "<group>"; };
 		4D54CABD17B60E3B00139D6D /* PlaybackPlayIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackPlayIconTemplate.pdf; sourceTree = "<group>"; };
 		4D54CABF17B60E3B00139D6D /* PlaybackReverseIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackReverseIconTemplate.pdf; sourceTree = "<group>"; };
@@ -553,6 +556,8 @@
 				4D172E8716E5BD090012C019 /* Preferences.m */,
 				4DCF8E2916E446D6002EDD46 /* PreferencesController.h */,
 				4DCF8E2A16E446D6002EDD46 /* PreferencesController.m */,
+				4D53A78418F3CF0E009C342F /* InputMappingOutlineViewController.h */,
+				4D53A78518F3CF0E009C342F /* InputMappingOutlineViewController.m */,
 				4DA8646017E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.h */,
 				4DA8646117E7EF7D00FAC789 /* EatsNSTextFieldWithDisabledColor.m */,
 				4DB87FB616E4435A00BA58BC /* Preferences.xib */,
@@ -631,7 +636,7 @@
 		4D6115C016E431BD00140AF8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Mark Eats";
 			};
 			buildConfigurationList = 4D6115C316E431BD00140AF8 /* Build configuration list for PBXProject "Sequencer" */;
@@ -747,6 +752,7 @@
 				4D64B2211797A059007BD78F /* EatsPlusOneValueTransformer.m in Sources */,
 				4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */,
 				4DAC2D7F179CF04B00267EC3 /* EatsGridHorizontalEndPullView.m in Sources */,
+				4D53A78618F3CF0E009C342F /* InputMappingOutlineViewController.m in Sources */,
 				4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */,
 				4D41801A186A4E9300FCB58C /* SequencerAutomation.m in Sources */,
 				4DCACCB717BFDA9F0021575F /* Constants.m in Sources */,
