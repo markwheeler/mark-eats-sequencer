@@ -477,7 +477,7 @@ typedef enum EatsMonomeSensorType {
             return;
         
         NSString *monomeId = [self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:0]]];
-        NSString *displayName = [NSString stringWithFormat:@"%@ %@", [[o.valueArray objectAtIndex:1] stringValue], monomeId];
+        NSString *displayName = [NSString stringWithFormat:@"%@ (%@)", [[o.valueArray objectAtIndex:1] stringValue], monomeId];
         int monomePort = [[self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:2]]] intValue];
         
         BOOL didAdd = [self.sharedCommunicationManager addAvailableGridDeviceOfType:EatsGridType_Monome withLabel:monomeId withDisplayName:displayName atPort:monomePort probablySupportsVariableBrightness:[EatsMonome doesMonomeSupportVariableBrightness:monomeId]];
