@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "PreferencesController.h"
+#import "EatsGridDevice.h"
 #import <VVMIDI/VVMIDI.h>
 #import <Quincy/BWQuincyManager.h>
 #import "EatsCommunicationManager.h"
@@ -18,7 +19,7 @@
 
 // Preferences controller delegate methods
 - (void) gridControllerNone;
-- (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
+- (void) gridControllerConnectToDevice:(EatsGridDevice *)gridDevice;
 
 // MIDI delegate methods
 - (void) setupChanged;

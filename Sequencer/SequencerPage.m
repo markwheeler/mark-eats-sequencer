@@ -12,7 +12,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, Channel: %i, Name: %@, StepLength: %i, LoopStart: %i, LoopEnd: %i, SwingType: %i, SwingAmount: %i, VelocityGroove: %i, Transpose: %i, TransposeZeroStep: %i, Patterns: %@, Pitches: %@,>", NSStringFromClass([self class]), self, self.channel, self.name, self.stepLength, self.loopStart, self.loopEnd, self.swingType, self.swingAmount, self.velocityGroove, self.transpose, self.transposeZeroStep, self.patterns, self.pitches];
+    return [NSString stringWithFormat:@"<%@: %p, Channel: %i, Name: %@, StepLength: %i, LoopStart: %i, LoopEnd: %i, SwingType: %i, SwingAmount: %i, VelocityGroove: %i, Transpose: %i, TransposeZeroStep: %i, Patterns: %@, Pitches: %@>", NSStringFromClass([self class]), self, self.channel, self.name, self.stepLength, self.loopStart, self.loopEnd, self.swingType, self.swingAmount, self.velocityGroove, self.transpose, self.transposeZeroStep, self.patterns, self.pitches];
 }
 
 - (id) initWithCoder:(NSCoder *)decoder {

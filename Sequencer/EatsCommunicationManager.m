@@ -31,7 +31,7 @@
         NSLog(@"MIDI destination: %@", self.midiManager.virtualDest.name);
         
         // Create OSC manager
-        self.oscManager = [[OSCManager alloc] initWithServiceType:@"_monome-osc._udp"];
+        self.oscManager = [[OSCManager alloc] initWithoutZeroConf];
         [self.oscManager setInPortLabelBase:@"Mark Eats Seq"];
         
         // Set OSC defaults
@@ -62,6 +62,9 @@
             NSLog(@"Error creating OSC out port");
 
         NSLog(@"OSC prefix: %@", self.oscPrefix);
+        
+        // Create availableGridDevices
+        self.availableGridDevices = [NSMutableArray arrayWithCapacity:4];
     }
     
     return self;
@@ -71,5 +74,49 @@
 //{
 //    NSLog(@"%s", __func__);
 //}
+
+- (BOOL) addAvailableGridDeviceOfType:(EatsGridType)gridType withLabel:(NSString *)label withDisplayName:(NSString *)displayName atPort:(int)port probablySupportsVariableBrightness:(BOOL)variableBrightness
+{
+    // Check we don't already have it listed
+    for( EatsGridDevice *gridDevice in self.availableGridDevices ) {
+        if( gridDevice.type == gridType && [gridDevice.label isEqualToString:label] ) {
+            // Skip adding
+            return NO;
+        }
+    }
+    
+    // Make a new gridDevice
+    EatsGridDevice *gridDevice = [[EatsGridDevice alloc] init];
+    gridDevice.type = gridType;
+    gridDevice.label = label;
+    gridDevice.displayName = displayName;
+    gridDevice.port = port;
+    gridDevice.probablySupportsVariableBrightness = variableBrightness;
+    
+    // Add the device to the list of available grids
+    [self.availableGridDevices addObject:gridDevice];
+    return YES;
+}
+
+- (BOOL) removeAvailableGridDeviceOfType:(EatsGridType)gridType withLabel:(NSString *)label
+{
+    EatsGridDevice *gridDeviceToRemove;
+    
+    // Find it by going through the array
+    for( EatsGridDevice *gridDevice in self.availableGridDevices ) {
+        if( gridDevice.type == gridType && [gridDevice.label isEqualToString:label] ) {
+            gridDeviceToRemove = gridDevice;
+            break;
+        }
+    }
+    
+    // Remove it
+    if( gridDeviceToRemove ) {
+        [self.availableGridDevices removeObject:gridDeviceToRemove];
+        return YES;
+    } else {
+        return NO;
+    }
+}
 
 @end

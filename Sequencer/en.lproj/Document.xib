@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5053" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5053"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6250"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="Document">
@@ -141,7 +141,7 @@
                     <segmentedControl verticalHuggingPriority="750" id="102811">
                         <rect key="frame" x="24" y="497" width="777" height="20"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <segmentedCell key="cell" alignment="left" style="roundRect" trackingMode="selectOne" id="102812">
+                        <segmentedCell key="cell" borderStyle="border" alignment="left" style="roundRect" trackingMode="selectOne" id="102812">
                             <font key="font" metaFont="cellTitle"/>
                             <segments>
                                 <segment label="1" width="96" selected="YES"/>
@@ -159,14 +159,14 @@
                         </connections>
                     </segmentedControl>
                     <imageView id="102982">
-                        <rect key="frame" x="0.0" y="474" width="841" height="8"/>
+                        <rect key="frame" x="0.0" y="472" width="841" height="8"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="axesIndependently" image="ShadowRule" id="102983"/>
                     </imageView>
                     <segmentedControl verticalHuggingPriority="750" id="104077">
                         <rect key="frame" x="160" y="534" width="71" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <segmentedCell key="cell" alignment="left" style="texturedSquare" trackingMode="selectOne" id="104078">
+                        <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="selectOne" id="104078">
                             <font key="font" metaFont="system"/>
                             <segments>
                                 <segment image="PlaybackStopIconTemplate" imageScaling="none" width="34" selected="YES">
@@ -298,7 +298,7 @@
                             <segmentedControl verticalHuggingPriority="750" id="106528">
                                 <rect key="frame" x="627" y="415" width="176" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" alignment="left" style="texturedSquare" trackingMode="selectOne" id="106535">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="selectOne" id="106535">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment image="PlaybackPauseIconTemplate" imageScaling="none" width="34">
@@ -362,7 +362,7 @@
                             <segmentedControl verticalHuggingPriority="750" id="106523">
                                 <rect key="frame" x="27" y="421" width="390" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" alignment="left" style="roundRect" trackingMode="selectOne" id="106544">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="roundRect" trackingMode="selectOne" id="106544">
                                     <font key="font" metaFont="cellTitle"/>
                                     <segments>
                                         <segment width="23">
@@ -461,7 +461,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" id="106556">
-                                            <rect key="frame" x="0.0" y="0.0" width="149" height="306"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="145" height="19"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -625,7 +625,6 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="5Ny-0K-mk6" customClass="EatsNSTableViewClickPassThrough">
-                                            <rect key="frame" x="0.0" y="0.0" width="177" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="windowBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -696,7 +695,6 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="nZ7-Qj-qqO">
-                                    <rect key="frame" x="-100" y="-100" width="0.0" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="3Ll-Wj-RSI">
@@ -717,7 +715,7 @@
                             <segmentedControl verticalHuggingPriority="750" id="107990">
                                 <rect key="frame" x="21" y="18" width="101" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" alignment="left" style="texturedSquare" trackingMode="momentary" id="107991">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="momentary" id="107991">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment image="ArrowLeftIconTemplate" width="24"/>
@@ -737,7 +735,7 @@
                             <segmentedControl verticalHuggingPriority="750" id="108189">
                                 <rect key="frame" x="132" y="18" width="51" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" alignment="left" style="texturedSquare" trackingMode="momentary" id="108190">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="momentary" id="108190">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment image="MinusIconTemplate" width="24"/>
@@ -751,7 +749,7 @@
                             <segmentedControl verticalHuggingPriority="750" id="108209">
                                 <rect key="frame" x="193" y="18" width="51" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <segmentedCell key="cell" alignment="left" style="texturedSquare" trackingMode="momentary" id="108210">
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="momentary" id="108210">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment image="MinusIconTemplate" width="24"/>
@@ -797,7 +795,7 @@
                 <outlet property="delegate" destination="-2" id="17"/>
             </connections>
         </window>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <arrayController editable="NO" automaticallyPreparesContent="YES" id="dFo-NJ-uPG" userLabel="ActiveAutomationArrayController">
             <declaredKeys>
                 <string>typeName</string>
@@ -814,7 +812,7 @@
         <image name="ArrowRightIconTemplate" width="16" height="16"/>
         <image name="ArrowUpIconTemplate" width="16" height="16"/>
         <image name="MinusIconTemplate" width="16" height="16"/>
-        <image name="NSStopProgressFreestandingTemplate" width="83" height="83"/>
+        <image name="NSStopProgressFreestandingTemplate" width="14" height="14"/>
         <image name="PlaybackPauseIconTemplate" width="16" height="16"/>
         <image name="PlaybackPlayIconTemplate" width="16" height="16"/>
         <image name="PlaybackRandomIconTemplate" width="16" height="16"/>

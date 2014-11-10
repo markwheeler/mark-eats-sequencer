@@ -58,7 +58,7 @@
     [self.preferencesToolbar setSelectedItemIdentifier:@"0"];
 
     // Populate
-    [self updateOSC];
+    [self updateAvailableGridDevices];
     [self updateMIDI];
     
     // Tilt output
@@ -112,34 +112,28 @@
 
 #pragma mark - Public methods
 
-// TODO: Detect monome disconnects. MLRV seems able to do this!
-// Implement this once we've switched over to pure OSC connecting (ie, no Bonjour)
-
-- (void) updateOSC
+- (void) updateAvailableGridDevices
 {
-    NSArray *oscPortLabelArray = [self.sharedCommunicationManager.oscManager outPortLabelArray];
-    
     [self.gridControllerPopup removeAllItems];
     [self.gridControllerPopup addItemWithTitle:@"None"];
-    [self.gridControllerStatus setStringValue:@""];
     
-    for (NSString *s in oscPortLabelArray) {
+    for( EatsGridDevice *gridDevice in self.sharedCommunicationManager.availableGridDevices ) {
         
-        // Avoid listing the app's port
-        if(![s isEqualToString:self.sharedCommunicationManager.oscOutputPortLabel])
-            [self.gridControllerPopup addItemWithTitle:s];
+        [self.gridControllerPopup addItemWithTitle:gridDevice.displayName];
         
         // Set popup to active controller
-        if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
-            [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:s]];
+        if( gridDevice.type == EatsGridType_Monome && [gridDevice.label isEqualToString:self.sharedPreferences.gridMonomeId] ) {
+            [self.gridControllerPopup selectItemAtIndex:[self.gridControllerPopup indexOfItemWithTitle:gridDevice.displayName]];
             
             // And set the status correctly
-            if( self.sharedPreferences.gridTiltSensorIsCalibrating )
-                [self gridControllerCalibrating:nil];
-            else
-                [self gridControllerDoneCalibrating:nil];
+            if( self.sharedPreferences.gridType != EatsGridType_None ) {
+                if( self.sharedPreferences.gridTiltSensorIsCalibrating )
+                    [self gridControllerCalibrating:nil];
+                else
+                    [self gridControllerDoneCalibrating:nil];
+            }
         }
-            
+        
     }
 }
 
@@ -315,13 +309,7 @@
 
 - (void) gridControllerDoneCalibrating:(NSNotification *)notification
 {
-    NSString *gridName;
-    if(self.sharedPreferences.gridType == EatsGridType_Monome)
-        gridName = [NSString stringWithFormat:@"monome %u", self.sharedPreferences.gridWidth * self.sharedPreferences.gridHeight];
-    else if(self.sharedPreferences.gridType == EatsGridType_Launchpad)
-        gridName = @"Launchpad";
-    
-    [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected OK to %@", gridName]];
+    [self.gridControllerStatus setStringValue:[NSString stringWithFormat:@"Connected OK"]];
 }
 
 
@@ -337,9 +325,8 @@
     // Find the output port corresponding to the label of the selected item
     NSInteger selectedItem = [sender indexOfSelectedItem];
     
+    // A device
 	if ( selectedItem > 0 ) {
-        
-        NSString *titleOfItem = [sender titleOfSelectedItem];
         
         // First set to none to clear the grid
         [self.delegate performSelector:@selector(gridControllerNone)];
@@ -347,9 +334,15 @@
         [sender selectItemAtIndex:selectedItem];
         
         // Then connect
-        [self.delegate performSelector:@selector(gridControllerConnectToDeviceType:withOSCLabelOrMIDINode:) withObject:[NSNumber numberWithInt:EatsGridType_Monome] withObject:titleOfItem];
+        EatsGridDevice *gridDevice = [self.sharedCommunicationManager.availableGridDevices objectAtIndex:selectedItem - 1];
+        [self.delegate performSelector:@selector(gridControllerConnectToDevice:) withObject:gridDevice];
+        
+        // Make an educated guess about varibright support
+        self.sharedPreferences.gridSupportsVariableBrightness = gridDevice.probablySupportsVariableBrightness;
+        
+    // None
     } else {
-        self.sharedPreferences.gridOSCLabel = nil;
+        self.sharedPreferences.gridMonomeId = nil;
         self.sharedPreferences.gridMIDINodeName = nil;
         [self.delegate performSelector:@selector(gridControllerNone)];
     }

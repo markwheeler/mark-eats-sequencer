@@ -14,8 +14,12 @@
 @property OSCOutPort    *oscOutPort;
 @property NSString      *oscPrefix;
 
++ (void) lookForMonomesAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort;
++ (void) beNotifiedOfMonomeChangesAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort;
 + (void) connectToMonomeAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort withPrefix:(NSString *)prefix;
 + (void) disconnectFromMonomeAtPort:(OSCOutPort *)outPort withPrefix:(NSString *)prefix;
+
++ (BOOL) doesMonomeSupportVariableBrightness:(NSString *)serial;
 
 - (id) initWithOSCPort:(OSCOutPort *)port oscPrefix:(NSString *)prefix;
 - (void) redrawGridController:(NSArray *)gridArray;

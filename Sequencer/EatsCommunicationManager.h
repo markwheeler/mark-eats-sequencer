@@ -8,6 +8,7 @@
 //  Singleton that gives access to MIDI and OSC managers
 
 #import <Foundation/Foundation.h>
+#import "EatsGridDevice.h"
 #import "EatsMIDIManager.h"
 #import <VVOSC/VVOSC.h>
 
@@ -22,6 +23,11 @@
 @property NSString          *oscOutputPortLabel;
 @property NSString          *oscPrefix;
 
+@property NSMutableArray    *availableGridDevices;
+
 + (id)sharedCommunicationManager;
+
+- (BOOL) addAvailableGridDeviceOfType:(EatsGridType)gridType withLabel:(NSString *)label withDisplayName:(NSString *)displayName atPort:(int)port probablySupportsVariableBrightness:(BOOL)variableBrightness; // Returns YES if it actually added it
+- (BOOL) removeAvailableGridDeviceOfType:(EatsGridType)gridType withLabel:(NSString *)label; // Returns YES if it actually removed it
 
 @end

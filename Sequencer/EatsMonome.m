@@ -45,6 +45,47 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
++ (void) lookForMonomesAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort
+{
+    NSString *oldAddress = [outPort.addressString copy];
+    short oldPort = outPort.port;
+    
+    // Set the port to local SerialOSC default and look there
+    [outPort setAddressString:@"127.0.0.1" andPort:12002];
+    
+    OSCMessage *newMsg;
+    
+    // Get list
+    newMsg = [OSCMessage createWithAddress:@"/serialosc/list"];
+    [newMsg addString:@"localhost"];
+    [newMsg addInt:[inPort port]];
+    [outPort sendThisMessage:newMsg];
+    
+    // Return the port to it's previous settings
+    [outPort setAddressString:oldAddress andPort:oldPort];
+
+}
+
++ (void) beNotifiedOfMonomeChangesAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort
+{
+    NSString *oldAddress = [outPort.addressString copy];
+    short oldPort = outPort.port;
+    
+    // Set the port to local SerialOSC default and look there
+    [outPort setAddressString:@"127.0.0.1" andPort:12002];
+    
+    OSCMessage *newMsg;
+    
+    // Setup notify
+    newMsg = [OSCMessage createWithAddress:@"/serialosc/notify"];
+    [newMsg addString:@"localhost"];
+    [newMsg addInt:[inPort port]];
+    [outPort sendThisMessage:newMsg];
+    
+    // Return the port to it's previous settings
+    [outPort setAddressString:oldAddress andPort:oldPort];
+}
+
 + (void) connectToMonomeAtPort:(OSCOutPort *)outPort fromPort:(OSCInPort *)inPort withPrefix:(NSString *)prefix
 {
     OSCMessage *newMsg;
@@ -95,6 +136,24 @@
     newMsg = [OSCMessage createWithAddress:@"/sys/prefix"];
     [newMsg addString:@"monome"];
     [outPort sendThisMessage:newMsg];
+}
+
+
++ (BOOL) doesMonomeSupportVariableBrightness:(NSString *)serial
+{
+    // We want to see if the monome serial starts with m0000 or similar
+    // See https://github.com/monome/libmonome/blob/master/src/private/devices.h for serial number patterns
+    
+    // Now we need to look for each of those above
+    NSRange searchedRange = NSMakeRange( 0, serial.length );
+    NSError *error = nil;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"m[0-9][0-9][0-9][0-9]" options:0 error:&error];
+    NSTextCheckingResult *match = [regex firstMatchInString:serial options:0 range:searchedRange];
+    
+    if( match && match.range.location == 0 )
+        return YES;
+    else
+        return NO;
 }
 
 

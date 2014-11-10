@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 @protocol KeyboardInputViewDelegateProtocol
-- (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+- (void) keyDownFromKeyboardInputView:(NSEvent *)keyEvent;
 @optional
 - (void) swipeBack;
 - (void) swipeForward;

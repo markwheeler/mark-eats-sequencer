@@ -10,7 +10,7 @@
 
 @protocol EatsNSTableViewClickPassThroughDelegateProtocol
 @optional
-- (void) keyDownFromTableView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+- (void) keyDownFromTableView:(NSEvent *)keyEvent;
 @end
 
 @interface EatsNSTableViewClickPassThrough : NSTableView

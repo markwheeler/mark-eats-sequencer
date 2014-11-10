@@ -48,7 +48,7 @@
     [preferences registerDefaults:[self defaultPreferences]];
     
     // Load user settings
-    self.gridOSCLabel = [preferences objectForKey:@"gridOSCLabel"];
+    self.gridMonomeId = [preferences objectForKey:@"gridMonomeId"];
     self.gridMIDINodeName = [preferences objectForKey:@"gridMIDINodeName"];
     
     self.gridAutoConnect = [preferences boolForKey:@"gridAutoConnect"];
@@ -75,13 +75,13 @@
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     
-    NSString *oscLabel = nil;
+    NSString *monomeId = nil;
     NSString *midiNodeName = nil;
     if( self.gridAutoConnect ) {
-        oscLabel = self.gridOSCLabel;
+        monomeId = self.gridMonomeId;
         midiNodeName = self.gridMIDINodeName;
     }
-    [preferences setObject:oscLabel forKey:@"gridOSCLabel"];
+    [preferences setObject:monomeId forKey:@"gridMonomeId"];
     [preferences setObject:midiNodeName forKey:@"gridMIDINodeName"];
     
     [preferences setBool:self.gridAutoConnect forKey:@"gridAutoConnect"];

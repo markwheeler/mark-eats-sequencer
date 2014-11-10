@@ -61,16 +61,11 @@ typedef enum EatsMonomeSensorType {
         self.sharedCommunicationManager.midiManager.delegate = self;
         self.sharedCommunicationManager.oscManager.delegate = self;
         
-        // Register to receive notifications that the list of OSC outputs has changed
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCOutPortsChangedNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(oscOutputsChangedNotification:) name:OSCInPortsChangedNotification object:nil];
-        
-        // Fake an outputs-changed notification to make sure my list of destinations updates (in case it refreshes before I'm awake)
-        [self oscOutputsChangedNotification:nil];
-        
         self.externalClockCalculator = [[EatsExternalClockCalculator alloc] init];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
+        
+        [self gridControllerLookForDevices];
         
         // Firing this with a delay just so all the windows have time to draw etc (might be a better approach but this works!)
         [self performSelector:@selector(checkForFirstRun) withObject:nil afterDelay:0.5];
@@ -160,24 +155,14 @@ typedef enum EatsMonomeSensorType {
     }
 }
 
-- (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode
+- (void) gridControllerConnectToDevice:(EatsGridDevice *)gridDevice
 {
-    if( gridType.intValue == EatsGridType_Monome ) {
+    if( gridDevice.type == EatsGridType_Monome ) {
         
-        OSCOutPort *selectedPort = nil;
+        // Set the OSC out port and address
+        [self.sharedCommunicationManager.oscOutPort setAddressString:@"127.0.0.1" andPort:gridDevice.port];
         
-        selectedPort = [self.sharedCommunicationManager.oscManager findOutputWithLabel:(NSString *)labelOrNode];
-        if (selectedPort == nil)
-            return;
-        
-        // Set the OSC Out Port
-        
-        //NSLog(@"Selected OSC out address %@", [selectedPort addressString]);
-        //NSLog(@"Selected OSC out port %@", [NSString stringWithFormat:@"%d",[selectedPort port]]);
-        
-        [self.sharedCommunicationManager.oscOutPort setAddressString:[selectedPort addressString] andPort:[selectedPort port]];
-        
-        self.sharedPreferences.gridOSCLabel = (NSString *)labelOrNode;
+        self.sharedPreferences.gridMonomeId = gridDevice.label;
         self.sharedPreferences.gridMIDINodeName = nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectingNotification object:self];
@@ -194,7 +179,7 @@ typedef enum EatsMonomeSensorType {
                                withPrefix:self.sharedCommunicationManager.oscPrefix];
         
         
-    } else if ( gridType.intValue == EatsGridType_Launchpad ) {
+    } else if ( gridDevice.type == EatsGridType_Launchpad ) {
         
         // Connect using midiNode
         
@@ -208,7 +193,7 @@ typedef enum EatsMonomeSensorType {
     [self.gridControllerConnectionTimer invalidate];
     self.gridControllerConnectionTimer = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerNoneNotification object:self];
-    self.sharedPreferences.gridOSCLabel = nil;
+    self.sharedPreferences.gridMonomeId = nil;
     self.sharedPreferences.gridMIDINodeName = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectionErrorNotification object:self];
 }
@@ -232,7 +217,7 @@ typedef enum EatsMonomeSensorType {
     
     [self gridControllerTiltSensorStartCalibrating];
     
-    NSLog(@"Connected to grid controller: %@ / Size: %ux%u / Type: %i / Varibright: %i", self.sharedPreferences.gridOSCLabel, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
+    NSLog(@"Connected to grid controller: %@ / Size: %ux%u / Type: %i / Varibright: %i", self.sharedPreferences.gridMonomeId, self.sharedPreferences.gridWidth, self.sharedPreferences.gridHeight, self.sharedPreferences.gridType, self.sharedPreferences.gridSupportsVariableBrightness);
     
     // Let everyone know
     [[NSNotificationCenter defaultCenter] postNotificationName:kGridControllerConnectedNotification object:self];
@@ -456,24 +441,6 @@ typedef enum EatsMonomeSensorType {
 
 #pragma mark - OSC Manager notifications and methods
 
-- (void) oscOutputsChangedNotification:(NSNotification *)note
-{
-    // Auto-connect and make sure our device hasn't disappeared
-    BOOL stillActive = NO;
-    for(NSString *s in [self.sharedCommunicationManager.oscManager outPortLabelArray] ) {
-        if( [s isEqualToString:self.sharedPreferences.gridOSCLabel] ) {
-            NSLog(@"Auto-connecting...");
-            stillActive = YES;
-            [self gridControllerConnectToDeviceType:[NSNumber numberWithInt:EatsGridType_Monome ] withOSCLabelOrMIDINode:s];
-        }
-    }
-    
-    if( !stillActive )
-       [self gridControllerNone];
-    
-    // Update the prefs window
-    [self.preferencesController updateOSC];
-}
 
 - (void) receivedOSCMessage:(OSCMessage *)o
 {
@@ -485,11 +452,65 @@ typedef enum EatsMonomeSensorType {
 
 - (void) processOSCMessage:(OSCMessage *)o
 {
+    
+    // Log everything except tilt
+//    if( ![o.address isEqualToString:@"/markeatsseq/tilt"] ) {
+//        if( o.valueCount > 1 ) {
+//            NSMutableString *miscValues = [[NSMutableString alloc] init];
+//            for (NSString *s in [o valueArray]) {
+//                [miscValues appendFormat:@"%@ ", [self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
+//            }
+//            NSLog(@"OSC received %@ %@", o.address, miscValues);
+//        } else if(o.valueCount) {
+//            NSLog(@"OSC received %@ %@", o.address, [self stripOSCValue:[NSString stringWithFormat:@"%@", o.value]]);
+//        }
+//
+//    }
+    
     // Pick out the messages we want to deal with
+    
+    // Device or device added
+    
+    if( [o.address isEqualTo:@"/serialosc/device"] || [o.address isEqualTo:@"/serialosc/add"] ) {
+        
+        if( o.valueCount < 1 )
+            return;
+        
+        NSString *monomeId = [self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:0]]];
+        NSString *displayName = [NSString stringWithFormat:@"%@ %@", [[o.valueArray objectAtIndex:1] stringValue], monomeId];
+        int monomePort = [[self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:2]]] intValue];
+        
+        BOOL didAdd = [self.sharedCommunicationManager addAvailableGridDeviceOfType:EatsGridType_Monome withLabel:monomeId withDisplayName:displayName atPort:monomePort probablySupportsVariableBrightness:[EatsMonome doesMonomeSupportVariableBrightness:monomeId]];
+        
+        if( didAdd )
+            [self availableGridDevicesHaveChanged];
+        
+        // Keep receiving notifications
+        if( [o.address isEqualTo:@"/serialosc/add"] ) {
+            [EatsMonome beNotifiedOfMonomeChangesAtPort:self.sharedCommunicationManager.oscOutPort fromPort:self.sharedCommunicationManager.oscInPort];
+        }
+        
+        
+    // Device Removed
+    } else if( [o.address isEqualTo:@"/serialosc/remove"] ) {
+        
+        if( o.valueCount < 1 )
+            return;
+        
+        NSString *monomeId = [self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:0]]];
+        
+        BOOL didRemove = [self.sharedCommunicationManager removeAvailableGridDeviceOfType:EatsGridType_Monome withLabel:monomeId];
+        
+        if( didRemove )
+            [self availableGridDevicesHaveChanged];
+        
+        [EatsMonome beNotifiedOfMonomeChangesAtPort:self.sharedCommunicationManager.oscOutPort fromPort:self.sharedCommunicationManager.oscInPort];
+        
     
     // Size info
     
-    if( [o.address isEqualTo:@"/sys/size"] ) {
+    } else if( [o.address isEqualTo:@"/sys/size"] ) {
+        
         NSMutableArray *sizeValues = [[NSMutableArray alloc] initWithCapacity:2];
         for ( NSString *s in  o.valueArray ) {
             [sizeValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
@@ -674,6 +695,35 @@ typedef enum EatsMonomeSensorType {
 
 
 #pragma mark - Private methods
+
+
+- (void) gridControllerLookForDevices
+{
+    [EatsMonome lookForMonomesAtPort:self.sharedCommunicationManager.oscOutPort fromPort:self.sharedCommunicationManager.oscInPort];
+    [EatsMonome beNotifiedOfMonomeChangesAtPort:self.sharedCommunicationManager.oscOutPort fromPort:self.sharedCommunicationManager.oscInPort];
+}
+
+- (void) availableGridDevicesHaveChanged
+{
+    // Auto-connect and make sure our device hasn't disappeared
+    BOOL stillActive = NO;
+    
+    for( EatsGridDevice *gridDevice in self.sharedCommunicationManager.availableGridDevices ) {
+        if( gridDevice.type == EatsGridType_Monome && [gridDevice.label isEqualToString:self.sharedPreferences.gridMonomeId] ) {
+            stillActive = YES;
+            if( self.sharedPreferences.gridType == EatsGridType_None ) {
+                NSLog(@"Auto-connecting...");
+                [self gridControllerConnectToDevice:gridDevice];
+            }
+        }
+    }
+    
+    if( !stillActive )
+        [self gridControllerNone];
+    
+    // Update the prefs window
+    [self.preferencesController updateAvailableGridDevices];
+}
 
 - (void) checkForFirstRun
 {

@@ -9,11 +9,12 @@
 #import <Cocoa/Cocoa.h>
 #import "Preferences.h"
 #import "EatsCommunicationManager.h"
+#import "EatsGridDevice.h"
 
 @protocol PreferencesControllerDelegateProtocol
 
 - (void) gridControllerNone;
-- (void) gridControllerConnectToDeviceType:(NSNumber *)gridType withOSCLabelOrMIDINode:(id)labelOrNode;
+- (void) gridControllerConnectToDevice:(NSDictionary *)gridDevice;
 
 @end
 
@@ -24,7 +25,7 @@
 
 @property (nonatomic) NSMutableArray              *inputMappingData;
 
-- (void) updateOSC;
+- (void) updateAvailableGridDevices;
 - (void) updateMIDI;
 
 @end

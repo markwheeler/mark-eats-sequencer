@@ -17,7 +17,6 @@
                 <outlet property="midiDestinationsNameColumn" destination="185" id="630"/>
                 <outlet property="preferencesTabView" destination="18" id="615"/>
                 <outlet property="preferencesToolbar" destination="4" id="614"/>
-                <outlet property="preferencesWindow" destination="1" id="656"/>
                 <outlet property="tiltMIDIOutputChannelPopup" destination="Gma-Wg-k06" id="YRF-lD-zB9"/>
                 <outlet property="window" destination="1" id="3"/>
             </connections>
@@ -325,7 +324,7 @@
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" id="183">
-                                                        <rect key="frame" x="0.0" y="0.0" width="358" height="19"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="538" height="19"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <size key="intercellSpacing" width="3" height="2"/>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

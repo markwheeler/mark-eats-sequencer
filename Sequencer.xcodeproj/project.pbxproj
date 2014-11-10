@@ -102,6 +102,7 @@
 		4DD0B5B616E702250025AB1C /* EatsGridSequencerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B516E702250025AB1C /* EatsGridSequencerViewController.m */; };
 		4DD0B5B916E702330025AB1C /* EatsGridPlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */; };
 		4DE3666716FE74CD0032ED99 /* EatsGridButtonView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */; };
+		4DEC5BE61A09DAA1004B1FC9 /* EatsGridDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DEC5BE51A09DAA1004B1FC9 /* EatsGridDevice.m */; };
 		4DEFF97117C15039005708EE /* EatsQuantizationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DEFF97017C15039005708EE /* EatsQuantizationUtils.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
 		4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7DA3317A815F400538081 /* KeyboardInputView.m */; };
@@ -280,6 +281,8 @@
 		4DD0B5B816E702320025AB1C /* EatsGridPlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridPlayViewController.m; sourceTree = "<group>"; };
 		4DE3666516FE74CD0032ED99 /* EatsGridButtonView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridButtonView.h; sourceTree = "<group>"; };
 		4DE3666616FE74CD0032ED99 /* EatsGridButtonView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridButtonView.m; sourceTree = "<group>"; };
+		4DEC5BE41A09DAA1004B1FC9 /* EatsGridDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridDevice.h; sourceTree = "<group>"; };
+		4DEC5BE51A09DAA1004B1FC9 /* EatsGridDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridDevice.m; sourceTree = "<group>"; };
 		4DEFF96F17C15039005708EE /* EatsQuantizationUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsQuantizationUtils.h; sourceTree = "<group>"; };
 		4DEFF97017C15039005708EE /* EatsQuantizationUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsQuantizationUtils.m; sourceTree = "<group>"; };
 		4DF1FD971708FB4500AB043B /* EatsSwingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsSwingUtils.h; sourceTree = "<group>"; };
@@ -368,6 +371,8 @@
 				4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */,
 				4D7E51EC16E5ADFB005A8DC3 /* EatsMonome.h */,
 				4D7E51ED16E5ADFB005A8DC3 /* EatsMonome.m */,
+				4DEC5BE41A09DAA1004B1FC9 /* EatsGridDevice.h */,
+				4DEC5BE51A09DAA1004B1FC9 /* EatsGridDevice.m */,
 			);
 			name = "EatsGrid Framework";
 			sourceTree = "<group>";
@@ -724,6 +729,7 @@
 				4D36B25616FBB32C008057FC /* ClockTick.m in Sources */,
 				4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */,
 				4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */,
+				4DEC5BE61A09DAA1004B1FC9 /* EatsGridDevice.m in Sources */,
 				4D1B69F4186DF8290081304D /* EatsNSTableViewClickPassThrough.m in Sources */,
 				4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */,
 				4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */,

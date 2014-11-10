@@ -28,13 +28,13 @@
 - (void) renameCurrentPageStartAlert;
 - (void) showClockLateIndicator;
 
-- (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+- (void) keyDownFromEatsDebugGridView:(NSEvent *)keyEvent;
 - (void) cutCurrentPattern;
 - (void) copyCurrentPattern;
 - (void) pasteToCurrentPattern;
 
-- (void) keyDownFromTableView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
-- (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags;
+- (void) keyDownFromTableView:(NSEvent *)keyEvent;
+- (void) keyDownFromKeyboardInputView:(NSEvent *)keyEvent;
 - (void) swipeForward;
 - (void) swipeBack;
 

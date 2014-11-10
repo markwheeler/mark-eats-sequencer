@@ -1327,230 +1327,240 @@ typedef enum DocumentPageAnimationDirection {
     [self.sequencer pasteboardPasteNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
 }
 
-- (void) keyDownFromTableView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
+- (void) keyDownFromTableView:(NSEvent *)keyEvent;
 {
-    [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
+    [self keyDownFromKeyboardInputView:keyEvent];
 }
 
-- (void) keyDownFromEatsDebugGridView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
+- (void) keyDownFromEatsDebugGridView:(NSEvent *)keyEvent;
 {
+    // Note that keys won't reach here unless they have been added to eatsDebugGridView's list
+    
+    uint keyCode = keyEvent.keyCode;
+    NSEventModifierFlags modifierFlags = keyEvent.modifierFlags;
+    
     // Shortcuts for highlighted pattern
     
     // Shift + Left
-    if( keyCode.intValue == 123 && modifierFlags.intValue & NSShiftKeyMask )
+    if( keyCode == 123 && modifierFlags & NSShiftKeyMask )
         // Decrease length
         [self.sequencer decrementLengthOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Shift + Right
-    else if( keyCode.intValue == 124 && modifierFlags.intValue & NSShiftKeyMask )
+    else if( keyCode == 124 && modifierFlags & NSShiftKeyMask )
         // Increase length
         [self.sequencer incrementLengthOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Shift + Up
-    else if( keyCode.intValue == 126 && modifierFlags.intValue & NSShiftKeyMask )
+    else if( keyCode == 126 && modifierFlags & NSShiftKeyMask )
         // Increase velocity
         [self.sequencer incrementVelocityOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Shift + Down
-    else if( keyCode.intValue == 125 && modifierFlags.intValue & NSShiftKeyMask )
+    else if( keyCode == 125 && modifierFlags & NSShiftKeyMask )
         // Decrease velocity
         [self.sequencer decrementVelocityOfNotesForPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Left
-    else if( keyCode.intValue == 123 )
+    else if( keyCode == 123 )
         // Shift pattern left 1
         [self.sequencer shiftPatternLeft:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Right
-    else if( keyCode.intValue == 124 )
+    else if( keyCode == 124 )
         // Shift pattern right 1
         [self.sequencer shiftPatternRight:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Up
-    else if( keyCode.intValue == 126 )
+    else if( keyCode == 126 )
         // Shift pattern up 1
         [self.sequencer shiftPatternUp:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Down
-    else if( keyCode.intValue == 125 )
+    else if( keyCode == 125 )
         // Shift pattern down 1
         [self.sequencer shiftPatternDown:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     
     // Send the rest to the main keyboard input handling
     else
-        [self keyDownFromKeyboardInputView:keyCode withModifierFlags:modifierFlags];
+        [self keyDownFromKeyboardInputView:keyEvent];
 }
 
 
 
 #pragma mark - Keyboard and trackpad input from KeyboardInputView
 
-- (void) keyDownFromKeyboardInputView:(NSNumber *)keyCode withModifierFlags:(NSNumber *)modifierFlags
+- (void) keyDownFromKeyboardInputView:(NSEvent *)keyEvent
 {
+    // Note that keys won't reach here unless they have been added to keyboardInputView's list
+    
+    uint keyCode = keyEvent.keyCode;
+    NSEventModifierFlags modifierFlags = keyEvent.modifierFlags;
+    
     // Sequencer playback
     // Space (without any modifier)
-    if( keyCode.intValue == 49 && modifierFlags.intValue == 256 )
+    if( keyCode == 49 && modifierFlags == 256 )
        [self toggleSequencerPlayback];
     
     // BPM
     // -
-    else if( keyCode.intValue == 27 )
+    else if( keyCode == 27 )
         [self.sequencer decrementBPM];
     // +
-    else if( keyCode.intValue == 24 )
+    else if( keyCode == 24 )
         [self.sequencer incrementBPM];
 
     // Pages
     // F1
-    else if( keyCode.intValue == 122 )
+    else if( keyCode == 122 )
         [self.sequencer setCurrentPageId:0];
     // F2
-    else if( keyCode.intValue == 120 )
+    else if( keyCode == 120 )
         [self.sequencer setCurrentPageId:1];
     // F3
-    else if( keyCode.intValue == 99 )
+    else if( keyCode == 99 )
         [self.sequencer setCurrentPageId:2];
     // F4
-    else if( keyCode.intValue == 118 )
+    else if( keyCode == 118 )
         [self.sequencer setCurrentPageId:3];
     // F5
-    else if( keyCode.intValue == 96 )
+    else if( keyCode == 96 )
         [self.sequencer setCurrentPageId:4];
     // F6
-    else if( keyCode.intValue == 97 )
+    else if( keyCode == 97 )
         [self.sequencer setCurrentPageId:5];
     // F7
-    else if( keyCode.intValue == 98 )
+    else if( keyCode == 98 )
         [self.sequencer setCurrentPageId:6];
     // F8
-    else if( keyCode.intValue == 100 )
+    else if( keyCode == 100 )
         [self.sequencer setCurrentPageId:7];
     
     // Left
-    else if( keyCode.intValue == 123 )
+    else if( keyCode == 123 )
         [self.sequencer decrementCurrentPageId];
     // Right
-    else if( keyCode.intValue == 124 )
+    else if( keyCode == 124 )
         [self.sequencer incrementCurrentPageId];
     
     // Patterns
     // 1
-    else if( keyCode.intValue == 18 ) {
+    else if( keyCode == 18 ) {
         int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
+        if( modifierFlags & NSShiftKeyMask )
             nextPatternId = 10;
         else
             nextPatternId = 0;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
+        if( modifierFlags & NSAlternateKeyMask )
             [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
             [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 2
-    } else if( keyCode.intValue == 19 ) {
+    } else if( keyCode == 19 ) {
         int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
+        if( modifierFlags & NSShiftKeyMask )
             nextPatternId = 11;
         else
             nextPatternId = 1;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
+        if( modifierFlags & NSAlternateKeyMask )
             [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
             [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 3
-    } else if( keyCode.intValue == 20 ) {
+    } else if( keyCode == 20 ) {
         int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
+        if( modifierFlags & NSShiftKeyMask )
             nextPatternId = 12;
         else
             nextPatternId = 2;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
+        if( modifierFlags & NSAlternateKeyMask )
             [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
             [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 4
-    } else if( keyCode.intValue == 21 ) {
+    } else if( keyCode == 21 ) {
         int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
+        if( modifierFlags & NSShiftKeyMask )
             nextPatternId = 13;
         else
             nextPatternId = 3;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
+        if( modifierFlags & NSAlternateKeyMask )
             [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
             [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 5
-    } else if( keyCode.intValue == 23 ) {
+    } else if( keyCode == 23 ) {
         int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
+        if( modifierFlags & NSShiftKeyMask )
             nextPatternId = 14;
         else
             nextPatternId = 4;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
+        if( modifierFlags & NSAlternateKeyMask )
             [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
             [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 6
-    } else if( keyCode.intValue == 22 ) {
+    } else if( keyCode == 22 ) {
         int nextPatternId;
-        if( modifierFlags.intValue & NSShiftKeyMask )
+        if( modifierFlags & NSShiftKeyMask )
             nextPatternId = 15;
         else
             nextPatternId = 5;
         
-        if( modifierFlags.intValue & NSAlternateKeyMask )
+        if( modifierFlags & NSAlternateKeyMask )
             [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
         else
             [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         
     // 7
-    } else if( keyCode.intValue == 26 ) {
-        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+    } else if( keyCode == 26 ) {
+        if( !(modifierFlags & NSShiftKeyMask) ) {
             int nextPatternId = 6;
         
-            if( modifierFlags.intValue & NSAlternateKeyMask )
+            if( modifierFlags & NSAlternateKeyMask )
                 [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
                 [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
         
     // 8
-    } else if( keyCode.intValue == 28 ) {
-        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+    } else if( keyCode == 28 ) {
+        if( !(modifierFlags & NSShiftKeyMask) ) {
             int nextPatternId = 7;
         
-            if( modifierFlags.intValue & NSAlternateKeyMask )
+            if( modifierFlags & NSAlternateKeyMask )
                 [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
                 [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
         
     // 9
-    } else if( keyCode.intValue == 25 ) {
-        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+    } else if( keyCode == 25 ) {
+        if( !(modifierFlags & NSShiftKeyMask) ) {
             int nextPatternId = 8;
             
-            if( modifierFlags.intValue & NSAlternateKeyMask )
+            if( modifierFlags & NSAlternateKeyMask )
                 [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
                 [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
         }
         
     // 0
-    } else if( keyCode.intValue == 29 ) {
-        if( !(modifierFlags.intValue & NSShiftKeyMask) ) {
+    } else if( keyCode == 29 ) {
+        if( !(modifierFlags & NSShiftKeyMask) ) {
             int nextPatternId = 9;
             
-            if( modifierFlags.intValue & NSAlternateKeyMask )
+            if( modifierFlags & NSAlternateKeyMask )
                 [self.sequencer setNextOrCurrentPatternIdForAllPages:[NSNumber numberWithInt:nextPatternId]];
             else
                 [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInt:nextPatternId] forPage:self.sequencer.currentPageId];
@@ -1558,7 +1568,7 @@ typedef enum DocumentPageAnimationDirection {
     
     // Automation
     // a (without any modifier)
-    } else if( keyCode.intValue == 0 && modifierFlags.intValue == 256 ) {
+    } else if( keyCode == 0 && modifierFlags == 256 ) {
         
         if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording )
             [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Playing];
@@ -1566,7 +1576,7 @@ typedef enum DocumentPageAnimationDirection {
             [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Inactive];
         
     // Shift + a
-    } else if( keyCode.intValue == 0 && modifierFlags.intValue & NSShiftKeyMask ) {
+    } else if( keyCode == 0 && modifierFlags & NSShiftKeyMask ) {
         
         if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive )
             [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Armed];
@@ -1575,7 +1585,7 @@ typedef enum DocumentPageAnimationDirection {
         
     // Play mode
     // p (without any modifier)
-    } else if( keyCode.intValue == 35 && modifierFlags.intValue == 256 ) {
+    } else if( keyCode == 35 && modifierFlags == 256 ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Pause] forKey:@"value"];
@@ -1584,7 +1594,7 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Pause forPage:self.sequencer.currentPageId];
         
     // >
-    } else if( keyCode.intValue == 47 ) {
+    } else if( keyCode == 47 ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Forward] forKey:@"value"];
@@ -1593,7 +1603,7 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Forward forPage:self.sequencer.currentPageId];
         
     // <
-    } else if( keyCode.intValue == 43 ) {
+    } else if( keyCode == 43 ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Reverse] forKey:@"value"];
@@ -1602,7 +1612,7 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
         
     // ? (without any modifier)
-    } else if( keyCode.intValue == 44 && modifierFlags.intValue == 256 ) {
+    } else if( keyCode == 44 && modifierFlags == 256 ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Random] forKey:@"value"];
@@ -1611,7 +1621,7 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
         
     // s (without any modifier)
-    } else if( keyCode.intValue == 1 && modifierFlags.intValue == 256 ) {
+    } else if( keyCode == 1 && modifierFlags == 256 ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Slice] forKey:@"value"];
@@ -1621,20 +1631,21 @@ typedef enum DocumentPageAnimationDirection {
     
     // Transpose
     // [
-    } else if( keyCode.intValue == 33 )
+    } else if( keyCode == 33 )
         [self.sequencer decrementTransposeForPage:self.sequencer.currentPageId];
     // ]
-    else if( keyCode.intValue == 30 )
+    else if( keyCode == 30 )
         [self.sequencer incrementTransposeForPage:self.sequencer.currentPageId];
     
     // Debug info
     // d (without any modifier)
-    else if( keyCode.intValue == 2 && modifierFlags.intValue == 256 )
+    else if( keyCode == 2 && modifierFlags == 256 )
         [self logDebugInfo];
+    
     
     // Log the rest
 //    else
-//        NSLog(@"keyDown code: %@ withModifierFlags: %@", keyCode, modifierFlags );
+//        NSLog(@"keyDown code: %u withModifierFlags: %lu", keyCode, modifierFlags );
 }
 
 - (void) swipeForward

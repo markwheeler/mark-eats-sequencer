@@ -7,14 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EatsGridDevice.h"
 #import <VVOSC/VVOSC.h>
 #import <VVMIDI/VVMIDI.h>
-
-typedef enum EatsGridType{
-    EatsGridType_None,
-    EatsGridType_Monome,
-    EatsGridType_Launchpad
-} EatsGridType;
 
 @interface Preferences : NSObject
 
@@ -23,7 +18,7 @@ typedef enum EatsGridType{
 @property EatsGridType      gridType;
 @property BOOL              gridTiltSensorIsCalibrating;
 
-@property NSString          *gridOSCLabel;
+@property NSString          *gridMonomeId;
 @property NSString          *gridMIDINodeName;
 
 @property BOOL              gridAutoConnect;
