@@ -734,7 +734,7 @@ typedef enum DocumentPageAnimationDirection {
     [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
     for( int i = 0; i < self.currentPatternSegmentedControl.segmentCount; i ++ ) {
         [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i + 1] forSegment:i];
-        [self.currentPatternSegmentedControl setWidth:22.5 forSegment:i];
+//        [self.currentPatternSegmentedControl setWidth:23 forSegment:i];
     }
     
     // Pitch list
