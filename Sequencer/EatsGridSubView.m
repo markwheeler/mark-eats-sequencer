@@ -23,6 +23,11 @@
     return self;
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p, x: %i, y: %i, width: %u, height: %u, opacity: %f, visible: %u, enabled: %u>", NSStringFromClass([self class]), self, self.x, self.y, self.width, self.height, self.opacity, self.visible, self.enabled];
+}
+
 - (NSArray *) viewArray
 {
     // Over-ride this
@@ -33,16 +38,16 @@
     
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
-    // Generate the columns with playhead
-    for(uint x = 0; x < self.width; x++) {
+    // Generate the columns
+    for( uint x = 0; x < self.width; x ++ ) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
-        for(uint y = 0; y < self.height; y++) {
+        for( uint y = 0; y < self.height; y ++ ) {
             [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15] atIndex:y];
         }
     }
     
-    return viewArray;
+    return [viewArray copy];
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down

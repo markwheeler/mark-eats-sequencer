@@ -446,7 +446,7 @@ typedef enum EatsMonomeSensorType {
 {
     // Work out what to do with the message on the main thread
     [self performSelectorOnMainThread:@selector(processOSCMessage:)
-                           withObject:o
+                           withObject:[o copy]
                         waitUntilDone:NO];
 }
 
@@ -461,10 +461,12 @@ typedef enum EatsMonomeSensorType {
 //                [miscValues appendFormat:@"%@ ", [self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
 //            }
 //            NSLog(@"OSC received %@ %@", o.address, miscValues);
+//            NSLog( @"valueArray: %@", o.valueArray );
+//            
 //        } else if(o.valueCount) {
 //            NSLog(@"OSC received %@ %@", o.address, [self stripOSCValue:[NSString stringWithFormat:@"%@", o.value]]);
+//            NSLog( @"value: %@", o.value );
 //        }
-//
 //    }
     
     // Pick out the messages we want to deal with
@@ -793,7 +795,8 @@ typedef enum EatsMonomeSensorType {
                                                :self.sharedPreferences.tiltMIDIOutputChannel.intValue
                                                :1 + cc // Goes out on CC 1-4
                                                :midiValue
-                                               timestamp:0];
+                                               :-1
+                                               :0];
             // Send it
             if (msg != nil)
                 [_sharedCommunicationManager.midiManager sendMsg:msg];

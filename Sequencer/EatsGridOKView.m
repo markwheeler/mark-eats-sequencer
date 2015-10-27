@@ -154,7 +154,7 @@
         [self.particleBTrail removeObjectAtIndex:0];
     }
     
-    return gridArray;
+    return [gridArray copy];
 }
 
 
@@ -164,8 +164,10 @@
                                                                       [NSNumber numberWithUnsignedInt:y], @"y",
                                                                       [NSNumber numberWithBool:down], @"down",
                                                                       nil];
-    if([self.delegate respondsToSelector:@selector(eatsGridOKViewPressAt: sender:)])
-        [self.delegate performSelector:@selector(eatsGridOKViewPressAt: sender:) withObject:xyDown withObject:self];
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+        if([self.delegate respondsToSelector:@selector(eatsGridOKViewPressAt: sender:)])
+            [self.delegate performSelector:@selector(eatsGridOKViewPressAt: sender:) withObject:[xyDown copy] withObject:self];
+    });
 }
 
 - (NSArray *) okArray {

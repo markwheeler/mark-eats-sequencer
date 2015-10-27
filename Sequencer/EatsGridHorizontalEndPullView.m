@@ -54,7 +54,7 @@
         }
     }
     
-    return viewArray;
+    return [viewArray copy];
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
@@ -74,8 +74,10 @@
             
             self.setSelection = YES;
             
-            if([self.delegate respondsToSelector:@selector(eatsGridHorizontalEndPullViewUpdated:)])
-                [self.delegate performSelector:@selector(eatsGridHorizontalEndPullViewUpdated:) withObject:self];
+            dispatch_async( dispatch_get_main_queue(), ^(void) {
+                if([self.delegate respondsToSelector:@selector(eatsGridHorizontalEndPullViewUpdated:)])
+                    [self.delegate performSelector:@selector(eatsGridHorizontalEndPullViewUpdated:) withObject:self];
+            });
             
         } else {
             // Log the last press
@@ -92,8 +94,10 @@
                 self.leftValue = 0;
                 self.rightValue = 0;
                 
-                if([self.delegate respondsToSelector:@selector(eatsGridHorizontalEndPullViewUpdated:)])
-                    [self.delegate performSelector:@selector(eatsGridHorizontalEndPullViewUpdated:) withObject:self];
+                dispatch_async( dispatch_get_main_queue(), ^(void) {
+                    if([self.delegate respondsToSelector:@selector(eatsGridHorizontalEndPullViewUpdated:)])
+                        [self.delegate performSelector:@selector(eatsGridHorizontalEndPullViewUpdated:) withObject:self];
+                });
             }
             self.lastDownKey = nil;
             self.setSelection = NO;

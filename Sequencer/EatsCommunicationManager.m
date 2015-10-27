@@ -31,7 +31,7 @@
         NSLog(@"MIDI destination: %@", self.midiManager.virtualDest.name);
         
         // Create OSC manager
-        self.oscManager = [[OSCManager alloc] initWithoutZeroConf];
+        self.oscManager = [[OSCManager alloc] init];
         [self.oscManager setInPortLabelBase:@"Mark Eats Seq"];
         
         // Set OSC defaults

@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>6DA7DB4F-6FF7-4BD0-B7EA-8A79AEB8E041</string>
 	<key>IDESourceControlProjectName</key>
-	<string>Sequencer</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>A200849F20D12E6A2A3702DAC2ACC4683A408F6A</key>
 		<string>https://bitbucket.org/markwheeler/mark-eats-sequencer.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Sequencer.xcodeproj</string>
+	<string>Sequencer.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>A200849F20D12E6A2A3702DAC2ACC4683A408F6A</key>

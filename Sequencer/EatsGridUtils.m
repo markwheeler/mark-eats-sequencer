@@ -20,34 +20,60 @@
     NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
     
     // Generate the columns
-    for(int x = 0; x < width; x++) {
+    for(int x = 0; x < width; x ++ ) {
         [gridArray insertObject:[NSMutableArray arrayWithCapacity:height] atIndex:x];
         // Generate the rows
-        for(int y = 0; y < height; y++) {
+        for(int y = 0; y < height; y ++ ) {
             [[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
         }
     }
     
+    // Go through the sub views
+    
+    // DEBUG LOG
+//    NSLog( @"!--------------------------- w %u h %u", width, height );
     for( EatsGridSubView *view in views ) {
+        // DEBUG LOG
+//        NSLog( @"!View %@", view);
         if( view.visible ) {
             
-            NSArray *viewArray = [view.viewArray copy];
-            int x = view.x;
-            int y;
-            for( NSArray *column in viewArray ) {
-                y = view.y;
-                for( NSNumber *number in column ) {
-                    
-                    // Don't put in pixels outside the grid (if the view is hanging off the edge)
-                    if( x >= 0 && x < width && y >= 0 && y < height ) {
-                        // Only replace brighter pixels
-                        if( [[[gridArray objectAtIndex:x] objectAtIndex:y] intValue] < number.intValue )
-                            [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:number];
+            NSArray *viewArray = [view viewArray];
+            
+            if( [viewArray count] ) { // TODO should be able to remove this debug check
+                int x = view.x;
+                int y;
+                for( NSArray *column in viewArray ) {
+                    y = view.y;
+                    for( NSNumber *number in column ) {
+                        
+                        // Don't put in pixels outside the grid (if the view is hanging off the edge)
+                        if( x >= 0 && x < width && y >= 0 && y < height ) {
+                            // Only replace brighter pixels
+                            if( [[[gridArray objectAtIndex:x] objectAtIndex:y] intValue] < number.intValue )
+                                [[gridArray objectAtIndex:x] replaceObjectAtIndex:y withObject:number];
+                        }
+                        y ++;
                     }
-                    y ++;
+                    x ++;
                 }
-                x ++;
+                
+            // DEBUG LOG If the view array is empty, what went wrong?
+            } else {
+                NSLog( @"Empty view array from: %@", view );
+                NSLog( @"Break!" );
             }
+        }
+    }
+    
+    // TODO remove this debug code
+//    NSUInteger noOfCols = [gridArray count];
+    NSUInteger noOfRows = [[gridArray objectAtIndex:0] count];
+//    NSLog( @"!gridArray is %lux%lu", (unsigned long)noOfCols, (unsigned long)noOfRows );
+    // The following checks that all the columns have the correct number of rows in them
+    for( int i = 0; i < gridArray.count; i ++ ) {
+        if( [[gridArray objectAtIndex:i] count] != noOfRows ) {
+            NSLog( @"gridArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[gridArray objectAtIndex:i] count] );
+            NSLog(@"DUMP OF gridArray %@", gridArray );
         }
     }
     

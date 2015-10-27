@@ -19,7 +19,6 @@
 @interface EatsGridPlayViewController ()
 
 @property Preferences                       *sharedPreferences;
-@property Sequencer                         *sequencer;
 
 @property EatsGridBoxView                   *boxOverlayView;
 @property NSTimer                           *boxOverlayFadeTimer;

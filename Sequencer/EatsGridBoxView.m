@@ -34,7 +34,7 @@
         }
     }
     
-    return viewArray;
+    return [viewArray copy];
 }
 
 @end

@@ -22,6 +22,7 @@
 
 ///	OSCInPort handles everything needed to receive OSC data on a given port
 /*!
+\ingroup VVOSC
 You should never create or destroy an instance of this class manually.  OSCInPort instances should be created/destroyed by the OSCManager.
 
 Each OSCInPort is running in its own separate thread- so make sure anything called as a result of received OSC input is thread-safe!  When OSCInPort receives data, it gets parsed and passed to the in port's delegate as a series of OSCMessages consisting of an address path and an OSCValue.  By default, the inport's delegate is the manager which created it- and by default, managers pass this data on to *their* delegates (your objects/app).
@@ -44,6 +45,8 @@ the documentation here only covers the basics, the header file for this class is
 	MutLockDict				*queryDict;	//	key is the address of the dispatched query, object is a OSCQueryReply object
 	
 	NSString				*portLabel;		//!<the "name" of the port (added to distinguish multiple osc input ports for bonjour)
+	OSSpinLock				zeroConfLock;
+	VVStopwatch				*zeroConfSwatch;	//	bonjour services need ~5 seconds between destroy/creation or the changes get ignored- this is how we track this time
 	NSNetService			*zeroConfDest;	//	bonjour service for publishing this input's address...only active if there's a portLabel!
 	
 	NSMutableArray			*scratchArray;	//	array of OSCMessage objects.  used for serial messaging.
@@ -88,7 +91,7 @@ the documentation here only covers the basics, the header file for this class is
 - (void) setPort:(unsigned short)n;
 - (NSString *) portLabel;
 - (void) setPortLabel:(NSString *)n;
-- (NSNetService *) zeroConfDest;
+- (NSString *) zeroConfName;
 - (BOOL) bound;
 - (NSString *) ipAddressString;
 

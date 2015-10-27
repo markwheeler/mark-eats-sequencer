@@ -162,21 +162,32 @@
     // Cut up the complete 2D array into 8x8 1D arrays ready for sending to the monome
     
     // For each 8-wide block...
-    for(int i = 0; i < [gridArray count] / 8; i++) {
+    for(int i = 0; i < [gridArray count] / 8; i ++) {
         
         // ...and for each 8-high block within those
-        for( int j = 0; j < [[gridArray objectAtIndex:0] count] / 8; j++ ) {
+        for( int j = 0; j < [[gridArray objectAtIndex:0] count] / 8; j ++ ) {
             
             // Create a 1D array that's going to get sent as a map
             NSMutableArray *levelsArray = [NSMutableArray arrayWithCapacity:64];
             
-            for( int y = 0 + 8 * j; y < 8 * (j + 1); y++ ) {
-                for( NSUInteger x = 0 + 8 * i; x < 8 * (i + 1); x++ ) {
+            for( int y = 8 * j; y < 8 * (j + 1); y ++ ) {
+                for( uint x = 8 * i; x < 8 * (i + 1); x ++ ) {
+                    
+                    // DEBUG LOG
+                    if( [gridArray count] <= x ) { // TODO remove this debug code
+                        NSLog( @"gridArray count is %lu, trying to access %u", (unsigned long)[gridArray count], x );
+                        NSLog(@"DUMP OF gridArray %@", gridArray );
+                    }
+                    if( [[gridArray objectAtIndex:x] count] <= y ) {
+                        NSLog( @"gridArray col %i count is %lu, tring to access %i", x, (unsigned long)[[gridArray objectAtIndex:x] count], y );
+                        NSLog(@"DUMP OF gridArray %@", gridArray );
+                    }
+                    
                     [levelsArray addObject:[[gridArray objectAtIndex:x] objectAtIndex:y]];
                 }
             }
             
-            [self monomeLEDLevelMapXOffset:0 + 8 * i yOffset:0 + 8 * j levels:levelsArray];
+            [self monomeLEDLevelMapXOffset:8 * i yOffset:8 * j levels:levelsArray];
         }
     }
     

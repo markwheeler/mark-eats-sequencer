@@ -70,22 +70,22 @@
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
     // Get the NSNumber objects ready so we don't have to create loads of them in the for loops
-    NSNumber *wipeBrighnessResult = [NSNumber numberWithInt:15 * self.opacity];
-    NSNumber *playheadBrighnessResult = [NSNumber numberWithInt:self.playheadBrightness * self.opacity];
-    NSNumber *nextStepBrighnessResult = [NSNumber numberWithInt:self.nextStepBrightness * self.opacity];
+    NSNumber *wipeBrightnessResult = [NSNumber numberWithInt:15 * self.opacity];
+    NSNumber *playheadBrightnessResult = [NSNumber numberWithInt:self.playheadBrightness * self.opacity];
+    NSNumber *nextStepBrightnessResult = [NSNumber numberWithInt:self.nextStepBrightness * self.opacity];
     NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
     
     // Generate the columns with playhead and nextStep
-    for(uint x = 0; x < self.width; x++) {
+    for( uint x = 0; x < self.width; x ++ ) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
-        for(uint y = 0; y < self.height; y++) {
+        for( uint y = 0; y < self.height; y ++ ) {
             if( self.width * self.wipe / 100 >= x + 1 )
-                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:wipeBrighnessResult atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:wipeBrightnessResult atIndex:y];
             else if( x == self.currentStep )
-                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:playheadBrighnessResult atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:playheadBrightnessResult atIndex:y];
             else if( self.nextStep && x == self.nextStep.intValue )
-                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:nextStepBrighnessResult atIndex:y];
+                [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:nextStepBrightnessResult atIndex:y];
             else
                 [(NSMutableArray *)[viewArray objectAtIndex:x] insertObject:zero atIndex:y];
         }
@@ -153,15 +153,28 @@
                 noteLengthBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:self.noteLengthBrightness * self.opacity];
             }
             
+            
+            // DEBUG LOG
+            // TODO remove debug code
+            if( [viewArray count] <= note.step )
+                NSLog( @"View array is %lu but note step is %u", (unsigned long)[viewArray count], note.step );
+            if( [[viewArray objectAtIndex:note.step] count] <= row )
+                NSLog( @"View array's column is %lu but note (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:note.step] count], row );
+            
+            
+            
             // Put in the active note while editing
             if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && self.mode == EatsPatternViewMode_NoteEdit ) {
+                
                 [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
                 noteLengthBrightnessWithVelocity = [NSNumber numberWithInt:12 * self.opacity];
             }
             
             // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < noteBrightnessWithVelocity.intValue )
+            else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < noteBrightnessWithVelocity.intValue ) {
+                
                 [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:noteBrightnessWithVelocity];
+            }
             
             // Put the length tails in when appropriate
             if( self.sharedPreferences.showNoteLengthOnGrid || ( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row ) ) {
@@ -182,6 +195,13 @@
                     else if( tailDraw >= self.width )
                         tailDraw -= self.width;
                     
+                    // DEBUG LOG
+                    // TODO remove debug code
+                    if( [viewArray count] <= tailDraw )
+                        NSLog( @"View array is %lu but tailDraw is %u", (unsigned long)[viewArray count], tailDraw );
+                    if( [[viewArray objectAtIndex:tailDraw] count] <= row )
+                        NSLog( @"View array's column is %lu but tailDraw (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:tailDraw] count], row );
+                    
                     if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessWithVelocity.intValue )
                         [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessWithVelocity];
                     
@@ -195,18 +215,58 @@
         
         NSNumber *pressBrightnessResult = [NSNumber numberWithInt:self.pressBrightness * self.opacity];
         
-        NSOrderedSet *currentlyDownKeys = [self.currentlyDownKeys copy]; // Copy it so it can't get mutated while we're enumerating
+        
+        
+        // TODO this following line may have crashed before (crash log "2015-05-10 Crash while adding note to grid? Or maybe held?")
+        
+        
+        
+        
+        NSOrderedSet *currentlyDownKeys = [self.currentlyDownKeys copy]; // Copy it so it can't get mutated while we're enumerating (this should be unnecessary as we're always on gridQueue?)
         
         for( NSDictionary *key in currentlyDownKeys ) {
-            [[viewArray objectAtIndex:[[key valueForKey:@"x"] intValue]] replaceObjectAtIndex:[[key valueForKey:@"y"] intValue] withObject:pressBrightnessResult];
+            
+            int keyX = [[key valueForKey:@"x"] intValue];
+            int keyY = [[key valueForKey:@"y"] intValue];
+            
+            // DEBUG LOG
+            // TODO remove debug code
+            if( [viewArray count] <= keyX )
+                NSLog( @"View array is %lu but keyX is %u", (unsigned long)[viewArray count], keyX );
+            if( [[viewArray objectAtIndex:keyX] count] <= keyY )
+                NSLog( @"View array's column is %lu but keyY is %u", (unsigned long)[[viewArray objectAtIndex:keyX] count], keyY );
+            
+            
+            [[viewArray objectAtIndex:keyX] replaceObjectAtIndex:keyY withObject:pressBrightnessResult];
         }
     }
+    
+    
+    
+    // DEBUG LOG
+    // TODO remove this debug code
+    NSUInteger noOfCols = [viewArray count];
+    NSUInteger noOfRows = [[viewArray objectAtIndex:0] count];
+    if( noOfCols != self.width || noOfRows != self.height )
+        NSLog(@"Pattern viewArray is wrong size %u %u %@", self.width, self.height, viewArray );
+    
+    // DEBUG LOG
+    // The following checks that all the columns have the correct number of rows in them
+    for( int i = 0; i < viewArray.count; i ++ ) {
+        if( [[viewArray objectAtIndex:i] count] != noOfRows ) {
+            NSLog( @"Pattern viewArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[viewArray objectAtIndex:i] count] );
+            NSLog(@"DUMP OF viewArray %@", viewArray );
+        }
+    }
+    
+    
     
     return viewArray;
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
 {
+    
     // Remove down keys
     if( !down && ( self.mode == EatsPatternViewMode_Play || self.mode == EatsPatternViewMode_Edit ) ) {
         [self removeDownKeyAtX:x y:y];
@@ -228,8 +288,11 @@
                 NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[[self.currentlyDownKeys lastObject] valueForKey:@"x"], @"start",
                                            [NSNumber numberWithInt:loopEndX], @"end",
                                            nil];
-                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
-                    [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                
+                dispatch_async( dispatch_get_main_queue(), ^(void) {
+                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
+                            [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                });
                 
                 
             } else {
@@ -240,8 +303,11 @@
                     NSDictionary *selection = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], @"start",
                                                [NSNumber numberWithUnsignedInt:self.width - 1], @"end",
                                                nil];
-                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
-                        [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                    
+                    dispatch_async( dispatch_get_main_queue(), ^(void) {
+                        if([self.delegate respondsToSelector:@selector(eatsGridPatternViewSelection: sender:)])
+                            [self.delegate performSelector:@selector(eatsGridPatternViewSelection: sender:) withObject:selection withObject:self];
+                    });
                     
                     
                 }
@@ -251,8 +317,11 @@
                                         [NSNumber numberWithUnsignedInt:y], @"y",
                                         [NSNumber numberWithBool:down], @"down",
                                         nil];
-                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
-                    [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+                
+                dispatch_async( dispatch_get_main_queue(), ^(void) {
+                    if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
+                        [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+                });
             }
             
             
@@ -265,8 +334,10 @@
                                     [NSNumber numberWithUnsignedInt:y], @"y",
                                     [NSNumber numberWithBool:down], @"down",
                                     nil];
-            if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
-                [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+            dispatch_async( dispatch_get_main_queue(), ^(void) {
+                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
+                    [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+            });
             
         }
         
@@ -282,7 +353,7 @@
         
         // Down
         if( down ) {
-            dispatch_async(dispatch_get_main_queue(), ^(void) {
+            dispatch_async( dispatch_get_main_queue(), ^(void) {
                 
                 [self.longPressTimer invalidate];
                 self.longPressTimer = [NSTimer scheduledTimerWithTimeInterval:LONG_PRESS_TIME
@@ -322,23 +393,34 @@
                                 [NSNumber numberWithUnsignedInt:y], @"y",
                                 [NSNumber numberWithBool:down], @"down",
                                 nil];
-        if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
-            [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+        
+        dispatch_async( dispatch_get_main_queue(), ^(void) {
+            if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
+                [self.delegate performSelector:@selector(eatsGridPatternViewPressAt: sender:) withObject:xyDown withObject:self];
+        });
     }
     
 }
 
 - (void) longPressTimeout:(NSTimer *)sender
 {
-    if( self.lastLongPressKey ) {
-        // Send the long press to delegate
-        if([self.delegate respondsToSelector:@selector(eatsGridPatternViewLongPressAt: sender:)])
-            [self.delegate performSelector:@selector(eatsGridPatternViewLongPressAt: sender:) withObject:self.lastLongPressKey withObject:self];
+    dispatch_async( self.gridQueue, ^(void) {
+    
+        if( self.lastLongPressKey ) {
+            
+            // Send the long press to delegate
+            NSDictionary *copyOfLastLongPressKey = [self.lastLongPressKey copy];
+            dispatch_async( dispatch_get_main_queue(), ^(void) {
+                if([self.delegate respondsToSelector:@selector(eatsGridPatternViewLongPressAt: sender:)])
+                    [self.delegate performSelector:@selector(eatsGridPatternViewLongPressAt: sender:) withObject:copyOfLastLongPressKey withObject:self];
+            });
+            
+            [self removeDownKeyAtX:[[self.lastLongPressKey valueForKey:@"x"] unsignedIntValue] y:[[self.lastLongPressKey valueForKey:@"y"] unsignedIntValue]];
+            
+            self.lastLongPressKey = nil;
+        }
         
-        [self removeDownKeyAtX:[[self.lastLongPressKey valueForKey:@"x"] unsignedIntValue] y:[[self.lastLongPressKey valueForKey:@"y"] unsignedIntValue]];
-        
-        self.lastLongPressKey = nil;
-    }
+    });
 }
 
 - (void) removeDownKeyAtX:(uint)x y:(uint)y

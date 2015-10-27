@@ -72,22 +72,26 @@
     if( ![self.delegate performSelector:@selector(isActive)] )
         return;
     
-    uint x = [[notification.userInfo valueForKey:@"x"] unsignedIntValue];
-    uint y = [[notification.userInfo valueForKey:@"y"] unsignedIntValue];
-    BOOL down = [[notification.userInfo valueForKey:@"down"] boolValue];
+    dispatch_async( self.gridQueue, ^(void) {
     
-    // Pass the message down to the appropriate sub view
-    
-    BOOL foundSubView = NO;
-    NSEnumerator *enumerator = [self.subViews objectEnumerator];
-    EatsGridSubView *subView;
-    
-    while ( (subView = [enumerator nextObject]) && !foundSubView) {
-        if(x >= subView.x && x < subView.x + subView.width && y >= subView.y && y < subView.y + subView.height && subView.visible && subView.enabled ) {
-            [subView inputX:x - subView.x y:y - subView.y down:down];
-            foundSubView = YES;
+        uint x = [[notification.userInfo valueForKey:@"x"] unsignedIntValue];
+        uint y = [[notification.userInfo valueForKey:@"y"] unsignedIntValue];
+        BOOL down = [[notification.userInfo valueForKey:@"down"] boolValue];
+        
+        // Pass the message down to the appropriate sub view
+        
+        BOOL foundSubView = NO;
+        NSEnumerator *enumerator = [self.subViews objectEnumerator];
+        EatsGridSubView *subView;
+        
+        while ( (subView = [enumerator nextObject]) && !foundSubView) {
+            if(x >= subView.x && x < subView.x + subView.width && y >= subView.y && y < subView.y + subView.height && subView.visible && subView.enabled ) {
+                [subView inputX:x - subView.x y:y - subView.y down:down];
+                foundSubView = YES;
+            }
         }
-    }
+        
+    });
 }
 
 @end

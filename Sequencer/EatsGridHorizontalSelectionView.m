@@ -42,7 +42,7 @@
         }
     }
     
-    return viewArray;
+    return [viewArray copy];
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
@@ -68,8 +68,10 @@
             self.lastDownKey = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:x], @"x", [NSNumber numberWithUnsignedInt:y], @"y", nil];
         }
         
-        if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSelectionViewUpdated:)])
-            [self.delegate performSelector:@selector(eatsGridHorizontalSelectionViewUpdated:) withObject:self];
+        dispatch_async( dispatch_get_main_queue(), ^(void) {
+            if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSelectionViewUpdated:)])
+                [self.delegate performSelector:@selector(eatsGridHorizontalSelectionViewUpdated:) withObject:self];
+        });
         
     // Release
     } else {

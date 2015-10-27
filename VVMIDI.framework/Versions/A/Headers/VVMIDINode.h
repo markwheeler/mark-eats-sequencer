@@ -8,14 +8,13 @@
 
 
 extern BOOL			_VVMIDIFourteenBitCCs;	//	NO by default. according to MIDI spec, CCs 32-64 are the LSBs of 14-bit values (CCs 0-31 are the MSBs).  some controllers/apps don't support the spec properly, and expect these CCs to be 64 different (low-res) values.  set this BOOL to NO if you want this fmwk to treat CCs 0-64 as 7-bit vals, in violation of the spec!
-
+extern double		_machTimeToNsFactor;
 
 
 
 @interface VVMIDINode : NSObject {
 	MIDIEndpointRef			endpointRef;	//	the endpoint for this particular node
 	NSMutableDictionary		*properties;	//	dict or source properties (just for the hell of it)
-	MIDIClientRef			clientRef;		//	the client receives the data
 	MIDIPortRef				portRef;		//	the port is owned by the client, and connects it to the endpoint
 	CAClockRef				mtcClockRef;
 	CAClockRef				bpmClockRef;
@@ -52,7 +51,6 @@ extern BOOL			_VVMIDIFourteenBitCCs;	//	NO by default. according to MIDI spec, C
 
 - (void) loadProperties;
 - (void) receivedMIDI:(NSArray *)a;
-- (void) setupChanged;
 
 - (void) sendMsg:(VVMIDIMessage *)m;
 - (void) sendMsgs:(NSArray *)a;
@@ -84,6 +82,5 @@ extern BOOL			_VVMIDIFourteenBitCCs;	//	NO by default. according to MIDI spec, C
 @end
 
 void myMIDIReadProc(const MIDIPacketList *pktList, void *readProcRefCon, void *srcConnRefCon);
-void myMIDINotificationProc(const MIDINotification *msg, void *refCon);
 void senderReadProc(const MIDIPacketList *pktList, void *readProcRefCon, void *srcConnRefCon);
 void clockListenerProc(void *userData, CAClockMessage msg, const void *param);

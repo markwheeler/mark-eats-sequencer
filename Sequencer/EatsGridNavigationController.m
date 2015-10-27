@@ -165,18 +165,18 @@
     // Only send msgs to the grid controller if we're the active document
     if( !self.isActive ) return;
     
-    if(self.sharedPreferences.gridType == EatsGridType_Monome && self.sharedCommunicationManager.oscOutPort) {
-        if(![self.deviceInterface isKindOfClass:[EatsMonome class]])
+    if( self.sharedPreferences.gridType == EatsGridType_Monome && self.sharedCommunicationManager.oscOutPort ) {
+        if( ![self.deviceInterface isKindOfClass:[EatsMonome class]] )
             self.deviceInterface = [[EatsMonome alloc] initWithOSCPort:self.sharedCommunicationManager.oscOutPort oscPrefix:self.sharedCommunicationManager.oscPrefix];
         
-    } else if(self.sharedPreferences.gridType == EatsGridType_Launchpad && self.sharedPreferences.gridMIDINodeName) {
+    } else if( self.sharedPreferences.gridType == EatsGridType_Launchpad && self.sharedPreferences.gridMIDINodeName ) {
         //if(![self.deviceInterface isKindOfClass:[EatsLaunchpad class])
         //    self.deviceInterface = [[EatsLaunchpad alloc] initWithMIDINode:self.sharedPreferences.gridMIDINodeName];
         
     }
     
-    if(self.sharedPreferences.gridType != EatsGridType_None && [self.deviceInterface respondsToSelector:@selector(redrawGridController:)])
-        [self.deviceInterface performSelector:@selector(redrawGridController:) withObject:gridArray];
+    if( self.sharedPreferences.gridType != EatsGridType_None && [self.deviceInterface respondsToSelector:@selector( redrawGridController: )] )
+        [self.deviceInterface performSelector:@selector( redrawGridController: ) withObject:gridArray];
 
 }
 

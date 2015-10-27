@@ -23,7 +23,6 @@
 
 @property Preferences                       *sharedPreferences;
 
-@property Sequencer                         *sequencer;
 @property SequencerNote                     *activeEditNote;
 @property BOOL                              lastDownWasInEditMode;
 
@@ -61,7 +60,8 @@
         self.patternView.height = self.height;
         self.patternView.mode = EatsPatternViewMode_Edit;
         self.patternView.patternHeight = self.height;
-
+        self.patternView.gridQueue = self.gridQueue;
+        
         self.velocityView = [[EatsGridHorizontalSliderView alloc] init];
         self.velocityView.delegate = self;
         self.velocityView.x = 0;
@@ -234,8 +234,8 @@
 
 - (void) enterNoteEditModeFor:(SequencerNote *)note
 {
-    // TODO temp logging to track down bug x6
-    NSLog(@"1 entering note edit mode for: %@", note);
+    // DEBUG LOG temp logging to track down bug x6
+    NSLog(@"1 entering note edit mode for: %i,%i %@", note.step, note.row, note );
     
     dispatch_async(self.gridQueue, ^(void) {
         self.patternView.mode = EatsPatternViewMode_NoteEdit;
@@ -270,7 +270,8 @@
         
         [self updateView];
         
-        NSLog(@"2 entering note edit mode for: %@", note);
+        // DEBUG LOG
+        NSLog(@"2 entering note edit mode for: %i,%i %@", note.step, note.row, note );
         
         dispatch_async(dispatch_get_main_queue(), ^(void) {
             
@@ -285,7 +286,8 @@
             [runloop addTimer:self.editNoteAnimationTimer forMode: NSRunLoopCommonModes];
             [runloop addTimer:self.editNoteAnimationTimer forMode: NSEventTrackingRunLoopMode];
             
-            NSLog(@"3 entering note edit mode for: %@", note);
+            // DEBUG LOG
+            NSLog(@"3 entering note edit mode for: %i,%i %@", note.step, note.row, note );
             
         });
     });
@@ -359,6 +361,7 @@
 {
     dispatch_async(self.gridQueue, ^(void) {
         
+        // DEBUG LOG
         NSLog(@"4 entering note edit mode");
         
         self.editNoteAnimationFrame ++;
@@ -393,10 +396,12 @@
             self.editNoteAnimationTimer = nil;
         }
         
+        // DEBUG LOG
         NSLog(@"5 entering note edit mode");
         
         [self updateView];
         
+        // DEBUG LOG
         NSLog(@"6 entering note edit mode");
     });
 
@@ -684,6 +689,9 @@
     
     // See if we have a note there
     SequencerNote *foundNote = [self.sequencer noteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // DEBUG LOG
+    NSLog( @"Long press at %@", xy );
     
     if( foundNote )
         [self enterNoteEditModeFor:foundNote];

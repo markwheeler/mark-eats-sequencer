@@ -138,7 +138,7 @@ typedef enum EatsStepAdvance {
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
         // Send song position 0
         VVMIDIMessage *msg = nil;
-        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 timestamp:(uint64_t)(mach_absolute_time() * _machTimeToNsFactor)];
+        msg = [VVMIDIMessage createFromVals:VVMIDISongPosPointerVal :0 :0 :0 :-1 :(uint64_t)(mach_absolute_time() * _machTimeToNsFactor)];
         if (msg != nil)
             [_sharedCommunicationManager.midiManager sendMsg:msg];
     }
@@ -513,7 +513,7 @@ typedef enum EatsStepAdvance {
 {
     VVMIDIMessage *msg = nil;
 	//	Create a message
-	msg = [VVMIDIMessage createFromVals:VVMIDINoteOnVal :c :n :v timestamp:ns];
+    msg = [VVMIDIMessage createFromVals:VVMIDINoteOnVal :c :n :v :-1 :ns];
     // Send it
 	if (msg != nil)
 		[_sharedCommunicationManager.midiManager sendMsg:msg];
@@ -526,7 +526,7 @@ typedef enum EatsStepAdvance {
 {
     VVMIDIMessage *msg = nil;
 	//	Create a message
-	msg = [VVMIDIMessage createFromVals:VVMIDINoteOffVal :c :n :v timestamp:ns];
+    msg = [VVMIDIMessage createFromVals:VVMIDINoteOffVal :c :n :v :-1 :ns];
     // Send it
 	if (msg != nil)
 		[_sharedCommunicationManager.midiManager sendMsg:msg];

@@ -48,13 +48,15 @@
         }
     }
     
-    return viewArray;
+    return [viewArray copy];
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
 {
-    if([self.delegate respondsToSelector:@selector(eatsGridButtonViewPressed: sender:)])
-        [self.delegate performSelector:@selector(eatsGridButtonViewPressed: sender:) withObject:[NSNumber numberWithBool:down] withObject:self];
+    dispatch_async( dispatch_get_main_queue(), ^(void) {
+        if([self.delegate respondsToSelector:@selector(eatsGridButtonViewPressed: sender:)])
+            [self.delegate performSelector:@selector(eatsGridButtonViewPressed: sender:) withObject:[NSNumber numberWithBool:down] withObject:self];
+    });
 }
 
 @end

@@ -20,10 +20,10 @@
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:self.width];
     
     // Generate the columns
-    for(uint x = 0; x < self.width; x++) {
+    for(uint x = 0; x < self.width; x ++ ) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:self.height] atIndex:x];
         // Generate the rows
-        for(uint y = 0; y < self.height; y++) {
+        for(uint y = 0; y < self.height; y ++ ) {
             
             if( x == percentageAsStep )
                 [[viewArray objectAtIndex:x] insertObject:[NSNumber numberWithUnsignedInt:15 * self.opacity] atIndex:y];
@@ -34,7 +34,26 @@
         }
     }
     
-    return viewArray;
+    
+    // DEBUG LOG
+    // TODO remove this debug code
+    NSUInteger noOfCols = [viewArray count];
+    NSUInteger noOfRows = [[viewArray objectAtIndex:0] count];
+    if( noOfCols != self.width || noOfRows != self.height )
+        NSLog(@"Slider viewArray is wrong size %u %u %@", self.width, self.height, viewArray );
+    
+    // DEBUG LOG
+    // The following checks that all the columns have the correct number of rows in them
+    for( int i = 0; i < viewArray.count; i ++ ) {
+        if( [[viewArray objectAtIndex:i] count] != noOfRows ) {
+            NSLog( @"Slider viewArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[viewArray objectAtIndex:i] count] );
+            NSLog(@"DUMP OF viewArray %@", viewArray );
+        }
+    }
+
+    
+    
+    return [viewArray copy];
 }
 
 - (void) inputX:(uint)x y:(uint)y down:(BOOL)down
@@ -44,8 +63,10 @@
 
         self.percentage = [EatsGridUtils stepsToPercentage:x width:self.width];
         
-        if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
-            [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];
+        dispatch_async( dispatch_get_main_queue(), ^(void) {
+            if([self.delegate respondsToSelector:@selector(eatsGridHorizontalSliderViewUpdated:)])
+                [self.delegate performSelector:@selector(eatsGridHorizontalSliderViewUpdated:) withObject:self];
+        });
     }
 }
 

@@ -52,4 +52,6 @@ typedef enum EatsPatternViewFoldFrom {
 @property uint                      noteLengthBrightness;
 @property uint                      pressBrightness;
 
+@property dispatch_queue_t          gridQueue;
+
 @end
