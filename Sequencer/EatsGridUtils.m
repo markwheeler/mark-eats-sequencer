@@ -65,7 +65,7 @@
         }
     }
     
-    // TODO remove this debug code
+    // DEBUG LOG TODO remove this debug code
 //    NSUInteger noOfCols = [gridArray count];
     NSUInteger noOfRows = [[gridArray objectAtIndex:0] count];
 //    NSLog( @"!gridArray is %lux%lu", (unsigned long)noOfCols, (unsigned long)noOfRows );

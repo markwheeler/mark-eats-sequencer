@@ -427,7 +427,11 @@ typedef enum EatsMonomeSensorType {
                 
             } else if([m type] == VVMIDIClockVal) {
                 
-                NSNumber *externalBPM = [self.externalClockCalculator externalClockTick:m.timestamp];
+                uint64_t timeStamp = m.timestamp;
+                if( !timeStamp )
+                    timeStamp = mach_absolute_time() * _machTimeToNsFactor;
+                
+                NSNumber *externalBPM = [self.externalClockCalculator externalClockTick:timeStamp];
                 if( externalBPM ) {
                     [[NSNotificationCenter defaultCenter] postNotificationName:kExternalClockBPMNotification object:self userInfo:[NSDictionary dictionaryWithObject:externalBPM forKey:@"bpm"]];
                 }

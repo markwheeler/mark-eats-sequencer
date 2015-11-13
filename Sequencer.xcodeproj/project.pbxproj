@@ -77,6 +77,9 @@
 		4DADBEE4171A10610091F952 /* scales.json in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEDC171A10610091F952 /* scales.json */; };
 		4DADBEE5171A10610091F952 /* WMRubyData.rb in Resources */ = {isa = PBXBuildFile; fileRef = 4DADBEDE171A10610091F952 /* WMRubyData.rb */; };
 		4DADBEEB171A1F8A0091F952 /* WMPool+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DADBEEA171A1F890091F952 /* WMPool+Utils.m */; };
+		4DAF2D051BF5A27500EE3D1B /* VVBasics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; };
+		4DAF2D061BF5A27500EE3D1B /* VVMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */; };
+		4DAF2D071BF5A27500EE3D1B /* VVOSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */; };
 		4DB0589016FCBC7D00BC36E6 /* EatsGridPatternView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0588F16FCBC7D00BC36E6 /* EatsGridPatternView.m */; };
 		4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589216FCC82F00BC36E6 /* EatsGridSubView.m */; };
 		4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0589516FD10EE00BC36E6 /* EatsGridUtils.m */; };
@@ -106,9 +109,6 @@
 		4DEFF97117C15039005708EE /* EatsQuantizationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DEFF97017C15039005708EE /* EatsQuantizationUtils.m */; };
 		4DF1FD991708FB4500AB043B /* EatsSwingUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF1FD981708FB4500AB043B /* EatsSwingUtils.m */; };
 		4DF7DA3417A815F400538081 /* KeyboardInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7DA3317A815F400538081 /* KeyboardInputView.m */; };
-		4DF87EF9188B30B900FEB6F1 /* VVBasics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; };
-		4DF87EFA188B30B900FEB6F1 /* VVMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF7188B30B900FEB6F1 /* VVMIDI.framework */; };
-		4DF87EFB188B30B900FEB6F1 /* VVOSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF87EF8188B30B900FEB6F1 /* VVOSC.framework */; };
 		4DF8A5F4170391C5002F5AA6 /* EatsGridLoopBraceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8A5F3170391C5002F5AA6 /* EatsGridLoopBraceView.m */; };
 		4DFAE996179B94F10076153D /* EatsGridHorizontalShiftView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DFAE995179B94F10076153D /* EatsGridHorizontalShiftView.m */; };
 /* End PBXBuildFile section */
@@ -304,10 +304,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				4DBE3EC317F950F800344CFC /* Quincy.framework in Frameworks */,
-				4DF87EF9188B30B900FEB6F1 /* VVBasics.framework in Frameworks */,
-				4DF87EFA188B30B900FEB6F1 /* VVMIDI.framework in Frameworks */,
-				4DF87EFB188B30B900FEB6F1 /* VVOSC.framework in Frameworks */,
 				4D6115CC16E431BD00140AF8 /* Cocoa.framework in Frameworks */,
+				4DAF2D051BF5A27500EE3D1B /* VVBasics.framework in Frameworks */,
+				4DAF2D061BF5A27500EE3D1B /* VVMIDI.framework in Frameworks */,
+				4DAF2D071BF5A27500EE3D1B /* VVOSC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -880,8 +880,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/vvopensource/build@rpath",
-					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/Sequencer",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
@@ -906,8 +905,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/vvopensource/build@rpath",
-					"/Volumes/Macintosh\\ HD/Documents/Projects/Sequencer/05\\ Build/Sequencer",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Sequencer/Sequencer-Prefix.pch";
