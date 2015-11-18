@@ -12,7 +12,7 @@
 
 #define MIDI_CLOCK_PPQN 24
 
-@property (nonatomic) NSMutableSet      *externalClockIntervals;
+@property (nonatomic) NSMutableArray    *externalClockIntervals;
 @property (nonatomic) uint64_t          externalPulsePreviousTimestamp;
 
 @end
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if (self) {
-        _externalClockIntervals = [NSMutableSet setWithCapacity:MIDI_CLOCK_PPQN];
+        _externalClockIntervals = [NSMutableArray arrayWithCapacity:MIDI_CLOCK_PPQN];
     }
     
     return self;
@@ -50,7 +50,7 @@
         float rangedAverageIntervalInNs = [self rangedAverage:_externalClockIntervals range:0.7]; // Range defines how extreme a peak has to be to consider it noise
         
         // Convert it into a BPM and return it
-        // Secs in a min  ((interview in ns * MIDI standard ppqn / ns in a sec)
+        // Secs in a min  ((interval in ns * MIDI standard ppqn ) / ns in a sec)
         float bpm = 60.0 / ((rangedAverageIntervalInNs * MIDI_CLOCK_PPQN) / 1000000000.0);
         
         // Reset everything
@@ -66,20 +66,20 @@
     _externalPulsePreviousTimestamp = 0;
 }
 
-- (float) rangedAverage:(NSMutableSet *)valueSet range:(float)r
+- (float) rangedAverage:(NSMutableArray *)valueArray range:(float)r
 {
     // Calculate average
     float total = 0;
-    for(NSNumber *obj in valueSet) {
+    for(NSNumber *obj in valueArray) {
         total += [obj floatValue];
     }
     
-    float average = total / [valueSet count];
+    float average = total / [valueArray count];
     
     // Re-calculate average within range
     total = 0;
     int totalRemoved = 0;
-    for(NSNumber *obj in valueSet) {
+    for(NSNumber *obj in valueArray) {
         
         if([obj longLongValue] < (average * r) || [obj longLongValue] > (average * (1+r))) { // TODO is there a bug in this code which means it is more generous below the average value than above it?? Also why should the range be dictated by the average? See noise remove in calibration code for a better way.
             //NSLog(@"Skipped interval of %fms", [obj floatValue] / 1000000000.0);
@@ -88,7 +88,7 @@
             total += [obj longLongValue];
         }
     }
-    average = total / ([valueSet count] - totalRemoved);
+    average = total / ([valueArray count] - totalRemoved);
     
     //NSLog(@"Returned ranged average of %f (removed %i)", average / 1000000000.0, totalRemoved);
     return average;
