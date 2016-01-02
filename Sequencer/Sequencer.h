@@ -17,7 +17,7 @@
 #import "SequencerAutomation.h"
 #import "SequencerAutomationChange.h"
 
-#define SEQUENCER_SONG_VERSION 0
+#define SEQUENCER_SONG_VERSION 1
 
 #define SEQUENCER_SIZE 16
 #define SEQUENCER_MIDI_MIN 0
@@ -26,9 +26,13 @@
 #define MIN_QUANTIZATION 64
 #define MAX_QUANTIZATION 1
 
+#define NUMBER_OF_MODULATION_BUSSES 2
+
 @interface Sequencer : NSObject
 
 @property NSUndoManager         *undoManager;
+
+@property NSArray               *modulationDestinationsArray;
 
 @property NSArray               *stepQuantizationArray;
 @property NSArray               *patternQuantizationArray;
@@ -104,6 +108,9 @@
 - (void) incrementLoopEndForAllPagesExcept:(uint)pageId;
 - (void) decrementLoopEndForAllPagesExcept:(uint)pageId;
 - (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forAllPagesExcept:(uint)pageId;
+
+- (uint) modulationDestinationIdForBus:(uint)busId forPage:(uint)pageId;
+- (void) setModulationDestinationId:(uint)destinationId forBus:(uint)busId forPage:(uint)pageId;
 
 - (int) swingTypeForPage:(uint)pageId;
 - (void) setSwingType:(int)swingType forPage:(uint)pageId;

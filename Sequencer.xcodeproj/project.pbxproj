@@ -16,6 +16,7 @@
 		4D2772461709C8EA00A8069B /* EatsVelocityUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */; };
 		4D2B42D317D2A665009B2286 /* PlaybackSliceIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4D2B42D217D2A665009B2286 /* PlaybackSliceIconTemplate.pdf */; };
 		4D36B25616FBB32C008057FC /* ClockTick.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D36B25516FBB32C008057FC /* ClockTick.m */; };
+		4D3B61A01C384E0300B5B429 /* EatsModulationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3B619F1C384E0300B5B429 /* EatsModulationUtils.m */; };
 		4D3ED27817C30E2A00D7D0DD /* EatsGridIntroViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */; };
 		4D3ED27B17C30ECF00D7D0DD /* EatsGridOKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D3ED27A17C30ECE00D7D0DD /* EatsGridOKView.m */; };
 		4D4160BA1895F75800540493 /* VVBasics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DF87EF6188B30B900FEB6F1 /* VVBasics.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -148,6 +149,8 @@
 		4D2B42D217D2A665009B2286 /* PlaybackSliceIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PlaybackSliceIconTemplate.pdf; sourceTree = "<group>"; };
 		4D36B25416FBB32C008057FC /* ClockTick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClockTick.h; sourceTree = "<group>"; };
 		4D36B25516FBB32C008057FC /* ClockTick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ClockTick.m; sourceTree = "<group>"; };
+		4D3B619E1C384DF400B5B429 /* EatsModulationUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EatsModulationUtils.h; sourceTree = "<group>"; };
+		4D3B619F1C384E0300B5B429 /* EatsModulationUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsModulationUtils.m; sourceTree = "<group>"; };
 		4D3ED27617C30E2A00D7D0DD /* EatsGridIntroViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridIntroViewController.h; sourceTree = "<group>"; };
 		4D3ED27717C30E2A00D7D0DD /* EatsGridIntroViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EatsGridIntroViewController.m; sourceTree = "<group>"; };
 		4D3ED27917C30ECE00D7D0DD /* EatsGridOKView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EatsGridOKView.h; sourceTree = "<group>"; };
@@ -604,6 +607,8 @@
 				4DEFF97017C15039005708EE /* EatsQuantizationUtils.m */,
 				4D2772441709C8EA00A8069B /* EatsVelocityUtils.h */,
 				4D2772451709C8EA00A8069B /* EatsVelocityUtils.m */,
+				4D3B619E1C384DF400B5B429 /* EatsModulationUtils.h */,
+				4D3B619F1C384E0300B5B429 /* EatsModulationUtils.m */,
 				4D64B21F1797A059007BD78F /* EatsPlusOneValueTransformer.h */,
 				4D64B2201797A059007BD78F /* EatsPlusOneValueTransformer.m */,
 				4D1AEF08171B026600317D56 /* EatsWMNoteValueTransformer.h */,
@@ -731,6 +736,7 @@
 				4DB0589316FCC82F00BC36E6 /* EatsGridSubView.m in Sources */,
 				4DEC5BE61A09DAA1004B1FC9 /* EatsGridDevice.m in Sources */,
 				4D1B69F4186DF8290081304D /* EatsNSTableViewClickPassThrough.m in Sources */,
+				4D3B61A01C384E0300B5B429 /* EatsModulationUtils.m in Sources */,
 				4DB0589616FD10EE00BC36E6 /* EatsGridUtils.m in Sources */,
 				4DB0589916FD129200BC36E6 /* EatsGridView.m in Sources */,
 				4DB0589C16FD1AE000BC36E6 /* EatsGridHorizontalSliderView.m in Sources */,

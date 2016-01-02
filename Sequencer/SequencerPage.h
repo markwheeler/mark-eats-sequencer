@@ -17,6 +17,7 @@
 @property int                   loopStart;
 @property int                   loopEnd;
 
+@property NSArray               *modulationDestinationIds;
 @property int                   swingType;
 @property int                   swingAmount;
 @property BOOL                  velocityGroove;

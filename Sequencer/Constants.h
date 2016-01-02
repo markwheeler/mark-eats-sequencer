@@ -83,6 +83,8 @@ extern NSString *const kSequencerPageNameDidChangeNotification;
 extern NSString *const kSequencerPageStepLengthDidChangeNotification;
 extern NSString *const kSequencerPageLoopDidChangeNotification;
 
+extern NSString *const kSequencerPageModulationDestinationsDidChangeNotification;
+
 extern NSString *const kSequencerPageSwingDidChangeNotification;
 extern NSString *const kSequencerPageVelocityGrooveDidChangeNotification;
 extern NSString *const kSequencerPageTransposeDidChangeNotification;

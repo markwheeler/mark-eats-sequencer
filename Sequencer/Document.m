@@ -69,6 +69,10 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
 @property (nonatomic, weak) IBOutlet NSTableView           *rowPitchesTableView;
+
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *modulationDestinationAPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *modulationDestinationBPopup;
+
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *stepLengthPopup;
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *swingPopup;
 @property (nonatomic, weak) IBOutlet NSButton              *velocityGrooveCheckbox;
@@ -206,6 +210,8 @@ typedef enum DocumentPageAnimationDirection {
     
     // Sequencer page notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageNameDidChange:) name:kSequencerPageNameDidChangeNotification object:self.sequencer];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageModulationDestinationsDidChange:) name:kSequencerPageModulationDestinationsDidChangeNotification object:self.sequencer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStepLengthDidChange:) name:kSequencerPageStepLengthDidChangeNotification object:self.sequencer];
     
@@ -369,10 +375,18 @@ typedef enum DocumentPageAnimationDirection {
     
     self.debugGridViewFloatingToolbar.alphaValue = 0.0;
     
+    // Setup modulation popups
+    [self.modulationDestinationAPopup removeAllItems];
+    [self.modulationDestinationBPopup removeAllItems];
+    for( NSDictionary *modulationDestination in self.sequencer.modulationDestinationsArray ) {
+        [self.modulationDestinationAPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
+        [self.modulationDestinationBPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
+    }
+    
     // Setup step quantization & step length popups
     [self.stepQuantizationPopup removeAllItems];
     [self.stepLengthPopup removeAllItems];
-    for( NSDictionary *quantization in self.sequencer.stepQuantizationArray) {
+    for( NSDictionary *quantization in self.sequencer.stepQuantizationArray ) {
         [self.stepQuantizationPopup addItemWithTitle:[quantization valueForKey:@"label"]];
         [self.stepLengthPopup addItemWithTitle:[quantization valueForKey:@"label"]];
     }
@@ -561,6 +575,16 @@ typedef enum DocumentPageAnimationDirection {
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         [self updateNameForPage:[[notification.userInfo valueForKey:@"pageId"] unsignedIntValue]];
+    });
+}
+
+- (void) pageModulationDestinationsDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] ) {
+            [self updateModulationAPopup];
+            [self updateModulationBPopup];
+        }
     });
 }
 
@@ -762,6 +786,8 @@ typedef enum DocumentPageAnimationDirection {
     [self updatePatternNotes];
     [self updateChannel];
     [self updatePitches];
+    [self updateModulationAPopup];
+    [self updateModulationBPopup];
     [self updatePlayMode];
     [self updateStepLengthPopup];
     [self updateSwingPopup];
@@ -922,6 +948,16 @@ typedef enum DocumentPageAnimationDirection {
     }
     
     self.currentPagePitches = newArray;
+}
+
+- (void) updateModulationAPopup
+{
+    [self.modulationDestinationAPopup selectItemAtIndex:[self.sequencer modulationDestinationIdForBus:0 forPage:self.sequencer.currentPageId]];
+}
+     
+- (void) updateModulationBPopup
+{
+    [self.modulationDestinationBPopup selectItemAtIndex:[self.sequencer modulationDestinationIdForBus:1 forPage:self.sequencer.currentPageId]];
 }
 
 - (void) updatePlayMode
@@ -1211,6 +1247,18 @@ typedef enum DocumentPageAnimationDirection {
         }];
     }
 }
+
+
+- (IBAction) modulationDestinationAPopup:(NSPopUpButton *)sender
+{
+    [self.sequencer setModulationDestinationId:(uint)[sender indexOfSelectedItem] forBus:0 forPage:self.sequencer.currentPageId];
+}
+
+- (IBAction) modulationDestinationBPopup:(NSPopUpButton *)sender
+{
+    [self.sequencer setModulationDestinationId:(uint)[sender indexOfSelectedItem] forBus:1 forPage:self.sequencer.currentPageId];
+}
+
 
 - (IBAction) pagePlaybackControls:(NSSegmentedControl *)sender
 {

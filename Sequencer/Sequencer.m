@@ -12,6 +12,7 @@
 #import "Preferences.h"
 #import "EatsQuantizationUtils.h"
 #import "EatsSwingUtils.h"
+#import "EatsModulationUtils.h"
 #import "WMPool+Utils.h"
 
 @interface Sequencer()
@@ -47,6 +48,7 @@
     self.song.automation = [[SequencerAutomation alloc] init];
     self.state = [[SequencerState alloc] init];
     
+    self.modulationDestinationsArray = [EatsModulationUtils modulationDestinationsArray];
     self.stepQuantizationArray = [EatsQuantizationUtils stepQuantizationArray];
     self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayForGridWidth:self.sharedPreferences.gridWidth];
     self.swingArray = [EatsSwingUtils swingArray];
@@ -81,6 +83,14 @@
         page.velocityGroove = YES;
         page.transposeZeroStep = 7;
         
+        // Create the default modulation destinations
+        NSMutableArray *modulationDestinationIds = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
+        for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
+            [modulationDestinationIds addObject:[NSNumber numberWithUnsignedInt:0]];
+        }
+        
+        page.modulationDestinationIds = [modulationDestinationIds copy];
+        
         // Create the default pitches
         NSArray *sequenceOfNotes;
         if (channel == 10 || channel == 11)
@@ -96,7 +106,7 @@
         
         // Create the empty patterns
         NSMutableArray *patterns = [NSMutableArray arrayWithCapacity:SEQUENCER_SIZE];
-        for( int j = 0; j < SEQUENCER_SIZE; j++) {
+        for( int j = 0; j < SEQUENCER_SIZE; j ++ ) {
             NSMutableSet *pattern = [NSMutableSet setWithCapacity:16]; // Just a guess as to an average amount of notes there might be in each pattern
             [patterns addObject:pattern];
         }
@@ -163,7 +173,24 @@
         outError = [NSError errorWithDomain:kSequencerErrorDomain code:SequencerErrorCode_UnarchiveFailed userInfo:nil];
         
     } else if( newSong.songVersion <= SEQUENCER_SONG_VERSION ) {
-        // In future we'll need to deal with data migration here
+        
+        // In future we'll need to deal with more data migration here
+        
+        // Add modulation destinations if we're opening an old file that doesn't have them (version 0, modulation added in version 1)
+        for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
+            SequencerPage *newPage = [newSong.pages objectAtIndex:pageId];
+            if( newPage.modulationDestinationIds.count < NUMBER_OF_MODULATION_BUSSES ) {
+                
+                NSMutableArray *modulationDestinationIds = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
+                for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
+                    [modulationDestinationIds addObject:[NSNumber numberWithUnsignedInt:0]];
+                }
+                
+                newPage.modulationDestinationIds = [modulationDestinationIds copy];
+            }
+        }
+        
+        // Use it
         self.song = newSong;
         
     } else {
@@ -742,6 +769,47 @@
             [self setLoopStart:loopStart andLoopEnd:loopEnd forPage:i];
         }
     }
+}
+
+
+- (uint) modulationDestinationIdForBus:(uint)busId forPage:(uint)pageId
+{
+    __block uint idToReturn = 0;
+    
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+    
+        if( busId < page.modulationDestinationIds.count )
+            idToReturn = [[page.modulationDestinationIds objectAtIndex:busId] unsignedIntValue];
+    });
+    
+    return idToReturn;
+    
+}
+
+- (void) setModulationDestinationId:(uint)destinationId forBus:(uint)busId forPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    dispatch_sync(self.sequencerQueue, ^(void) {
+        
+        if( busId < page.modulationDestinationIds.count && destinationId < self.modulationDestinationsArray.count ) {
+            
+            [self.undoManager beginUndoGrouping];
+            [[self.undoManager prepareWithInvocationTarget:self] setModulationDestinationId:[[page.modulationDestinationIds objectAtIndex:busId] unsignedIntValue] forBus:busId forPage:pageId];
+            [self.undoManager setActionName:@"Modulation Destination Change"];
+            [self.undoManager endUndoGrouping];
+            
+            NSMutableArray *modulationDestinationIdsMutable = [page.modulationDestinationIds mutableCopy];
+            [modulationDestinationIdsMutable replaceObjectAtIndex:busId withObject:[NSNumber numberWithUnsignedInt:destinationId]];
+            page.modulationDestinationIds = [modulationDestinationIdsMutable copy];
+            
+            [self postNotification:kSequencerPageModulationDestinationsDidChangeNotification forPage:pageId];
+                
+        }
+    });
+    
 }
 
 
