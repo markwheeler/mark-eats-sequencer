@@ -12,7 +12,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, Step: %i, Row: %i, Length: %i, Velocity: %i,>", NSStringFromClass([self class]), self, self.step, self.row, self.length, self.velocity];
+    return [NSString stringWithFormat:@"<%@: %p, Step: %i, Row: %i, Length: %i, Velocity: %i, ModulationValues: %@>", NSStringFromClass([self class]), self, self.step, self.row, self.length, self.velocity, self.modulationValues];
 }
 
 - (id) initWithCoder:(NSCoder *)decoder {
@@ -24,6 +24,7 @@
     self.row = [decoder decodeInt32ForKey:@"row"];
     self.length = [decoder decodeInt32ForKey:@"length"];
     self.velocity = [decoder decodeInt32ForKey:@"velocity"];
+    self.modulationValues = [decoder decodeObjectForKey:@"modulationValues"];
     
     return self;
 }
@@ -33,6 +34,7 @@
     [encoder encodeInt32:self.row forKey:@"row"];
     [encoder encodeInt32:self.length forKey:@"length"];
     [encoder encodeInt32:self.velocity forKey:@"velocity"];
+    [encoder encodeObject:self.modulationValues forKey:@"modulationValues"];
 }
 
 - (id) copyWithZone:(NSZone *)zone
@@ -44,6 +46,7 @@
         [copy setRow:self.row];
         [(SequencerNote *)copy setLength:self.length];
         [copy setVelocity:self.velocity];
+        [copy setModulationValues:self.modulationValues];
     }
     
     return copy;

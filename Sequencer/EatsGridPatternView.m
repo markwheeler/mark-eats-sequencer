@@ -15,7 +15,10 @@
 #define NEXT_STEP_BRIGHTNESS 8
 #define NOTE_BRIGHTNESS 15
 #define NOTE_LENGTH_BRIGHTNESS 10
+#define ACTIVE_EDIT_NOTE_BRIGHTNESS 15
+#define ACTIVE_EDIT_NOTE_LENGTH_BRIGHTNESS 12
 #define PRESS_BRIGHTNESS 15
+#define NOTE_EDIT_FADE_AMOUNT 8
 #define LONG_PRESS_TIME 0.4
 
 @interface EatsGridPatternView ()
@@ -52,11 +55,7 @@
     if (self) {
         self.sharedPreferences = [Preferences sharedPreferences];
         
-        self.playheadBrightness = PLAYHEAD_BRIGHTNESS;
-        self.nextStepBrightness = NEXT_STEP_BRIGHTNESS;
-        self.noteBrightness = NOTE_BRIGHTNESS;
-        self.noteLengthBrightness = NOTE_LENGTH_BRIGHTNESS;
-        self.pressBrightness = PRESS_BRIGHTNESS;
+        self.noteEditModeAnimationAmount = 0.0;
         
         self.currentlyDownKeys = [[NSMutableOrderedSet alloc] initWithCapacity:4];
     }
@@ -71,8 +70,8 @@
     
     // Get the NSNumber objects ready so we don't have to create loads of them in the for loops
     NSNumber *wipeBrightnessResult = [NSNumber numberWithInt:15 * self.opacity];
-    NSNumber *playheadBrightnessResult = [NSNumber numberWithInt:self.playheadBrightness * self.opacity];
-    NSNumber *nextStepBrightnessResult = [NSNumber numberWithInt:self.nextStepBrightness * self.opacity];
+    NSNumber *playheadBrightnessResult = [NSNumber numberWithInt:PLAYHEAD_BRIGHTNESS * self.opacity];
+    NSNumber *nextStepBrightnessResult = [NSNumber numberWithInt:NEXT_STEP_BRIGHTNESS * self.opacity];
     NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
     
     // Generate the columns with playhead and nextStep
@@ -95,7 +94,7 @@
     // Work out how much we need to fold
     int scaleDifference = self.patternHeight - self.height;
     
-    for(SequencerNote *note in self.notes) {
+    for( SequencerNote *note in self.notes ) {
 
         if( scaleDifference < 0 ) scaleDifference = 0;
         
@@ -134,23 +133,35 @@
             }
             
             // Calculate brightness based on note velocity if supported
-            NSNumber *noteBrightnessWithVelocity;
-            NSNumber *noteLengthBrightnessWithVelocity;
+            NSNumber *noteBrightnessWithVelocityAndFade;
+            NSNumber *noteLengthBrightnessWithVelocityAndFade;
+            
+            uint noteBrightnessWithVelocity;
+            uint noteLengthBrightnessWithVelocity;
             
             if( self.sharedPreferences.gridSupportsVariableBrightness ) {
                 
                 float velocityPercentage = (float)note.velocity / SEQUENCER_MIDI_MAX;
                 
-                float noteBrightness = ( self.noteBrightness / 2.0 ) + ( ( self.noteBrightness / 2.0 ) * velocityPercentage );
-                float lengthBrightness = ( self.noteLengthBrightness / 2.0 ) + ( ( self.noteLengthBrightness / 2.0 ) * velocityPercentage );
+                float noteBrightnessWithFade = NOTE_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT * self.noteEditModeAnimationAmount;
+                noteBrightnessWithFade = ( noteBrightnessWithFade / 2.0 ) + ( ( noteBrightnessWithFade / 2.0 ) * velocityPercentage );
+                noteBrightnessWithVelocityAndFade = [NSNumber numberWithUnsignedInt:roundf( noteBrightnessWithFade * self.opacity )];
                 
-                noteBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:roundf( noteBrightness * self.opacity )];
-                noteLengthBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:roundf( lengthBrightness * self.opacity )];
+                noteBrightnessWithVelocity = roundf( ( ( NOTE_BRIGHTNESS / 2.0 ) + ( ( NOTE_BRIGHTNESS / 2.0 ) * velocityPercentage ) ) * self.opacity );
+                
+                float noteLengthBrightnessWithFade = NOTE_LENGTH_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT * self.noteEditModeAnimationAmount;
+                noteLengthBrightnessWithFade = ( noteLengthBrightnessWithFade / 2.0 ) + ( ( noteLengthBrightnessWithFade / 2.0 ) * velocityPercentage );
+                noteLengthBrightnessWithVelocityAndFade = [NSNumber numberWithUnsignedInt:roundf( noteLengthBrightnessWithFade * self.opacity )];
+                
+                noteLengthBrightnessWithVelocity = roundf( ( ( NOTE_LENGTH_BRIGHTNESS / 2.0 ) + ( ( NOTE_LENGTH_BRIGHTNESS / 2.0 ) * velocityPercentage ) ) * self.opacity );
                 
             } else {
                 
-                noteBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:self.noteBrightness * self.opacity];
-                noteLengthBrightnessWithVelocity = [NSNumber numberWithUnsignedInt:self.noteLengthBrightness * self.opacity];
+                noteBrightnessWithVelocityAndFade = [NSNumber numberWithUnsignedInt:NOTE_BRIGHTNESS * self.opacity];
+                noteLengthBrightnessWithVelocityAndFade = [NSNumber numberWithUnsignedInt:NOTE_LENGTH_BRIGHTNESS * self.opacity];
+                
+                noteBrightnessWithVelocity = roundf( NOTE_BRIGHTNESS * self.opacity );
+                noteLengthBrightnessWithVelocity = roundf( NOTE_LENGTH_BRIGHTNESS * self.opacity );
             }
             
             
@@ -166,14 +177,24 @@
             // Put in the active note while editing
             if( note.step == self.activeEditNote.step && note.row == self.activeEditNote.row && self.mode == EatsPatternViewMode_NoteEdit ) {
                 
-                [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:15 * self.opacity]];
-                noteLengthBrightnessWithVelocity = [NSNumber numberWithInt:12 * self.opacity];
+                // If animating in or out
+                float editNoteDefaultBrightness;
+                if( self.animatingIn )
+                    editNoteDefaultBrightness = PRESS_BRIGHTNESS * self.opacity;
+                else
+                    editNoteDefaultBrightness = noteBrightnessWithVelocity;
+                
+                int activeEditNoteBrightness = roundf( ( ACTIVE_EDIT_NOTE_BRIGHTNESS * self.noteEditModeAnimationAmount * self.opacity ) + editNoteDefaultBrightness * ( 1.0 - self.noteEditModeAnimationAmount ) );
+                int activeEditNoteLengthBrightness = roundf( ( ACTIVE_EDIT_NOTE_LENGTH_BRIGHTNESS * self.noteEditModeAnimationAmount * self.opacity ) + noteLengthBrightnessWithVelocity * ( 1.0 - self.noteEditModeAnimationAmount ) );
+                
+                [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:[NSNumber numberWithInt:activeEditNoteBrightness]];
+                noteLengthBrightnessWithVelocityAndFade = [NSNumber numberWithInt:activeEditNoteLengthBrightness];
             }
             
             // Put the rest in (unless there's something brighter there)
-            else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < noteBrightnessWithVelocity.intValue ) {
+            else if( [[[viewArray objectAtIndex:note.step] objectAtIndex:row] intValue] < noteBrightnessWithVelocityAndFade.intValue ) {
                 
-                [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:noteBrightnessWithVelocity];
+                [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:row withObject:noteBrightnessWithVelocityAndFade];
             }
             
             // Put the length tails in when appropriate
@@ -202,8 +223,8 @@
                     if( [[viewArray objectAtIndex:tailDraw] count] <= row )
                         NSLog( @"View array's column is %lu but tailDraw (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:tailDraw] count], row );
                     
-                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessWithVelocity.intValue )
-                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessWithVelocity];
+                    if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessWithVelocityAndFade.intValue )
+                        [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessWithVelocityAndFade];
                     
                 }
             }
@@ -213,7 +234,7 @@
     // Put in any down keys
     if( self.mode == EatsPatternViewMode_Edit ) {
         
-        NSNumber *pressBrightnessResult = [NSNumber numberWithInt:self.pressBrightness * self.opacity];
+        NSNumber *pressBrightnessResult = [NSNumber numberWithInt:PRESS_BRIGHTNESS * self.opacity];
         
         
         

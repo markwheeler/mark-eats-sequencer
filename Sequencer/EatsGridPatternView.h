@@ -42,15 +42,11 @@ typedef enum EatsPatternViewFoldFrom {
 
 @property uint                      patternHeight;
 @property SequencerNote             *activeEditNote;
+@property float                     noteEditModeAnimationAmount;
+@property BOOL                      animatingIn;
 @property EatsPatternViewMode       mode;
 @property EatsPatternViewFoldFrom   foldFrom;
 @property uint                      wipe; // 0-100
-
-@property uint                      playheadBrightness;
-@property uint                      nextStepBrightness;
-@property uint                      noteBrightness;
-@property uint                      noteLengthBrightness;
-@property uint                      pressBrightness;
 
 @property dispatch_queue_t          gridQueue;
 

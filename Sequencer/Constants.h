@@ -96,6 +96,7 @@ extern NSString *const kSequencerPagePatternNotesDidChangeNotification;
 
 extern NSString *const kSequencerNoteLengthDidChangeNotification;
 extern NSString *const kSequencerNoteVelocityDidChangeNotification;
+extern NSString *const kSequencerNoteModulationValuesDidChangeNotification;
 
 
 // State

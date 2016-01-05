@@ -12,12 +12,9 @@
 #import "Preferences.h"
 
 #define ANIMATION_FRAMERATE 15
-
 #define PAGE_ANIMATION_EASE 0.04
+#define NOTE_EDIT_IN_OUT_ANIMATION_LENGTH 4
 
-#define NOTE_DEFAULT_BRIGHTNESS 15
-#define NOTE_LENGTH_DEFAULT_BRIGHTNESS 10
-#define NOTE_EDIT_FADE_AMOUNT 8 // Used to have this set to 10 before implementing velocity-based brightness
 
 @interface EatsGridSequencerViewController ()
 
@@ -29,6 +26,8 @@
 @property EatsGridPatternView               *patternView;
 @property EatsGridHorizontalSliderView      *velocityView;
 @property EatsGridHorizontalSliderView      *lengthView;
+@property EatsGridHorizontalSliderView      *modulationValueAView;
+@property EatsGridHorizontalSliderView      *modulationValueBView;
 
 @property NSTimer                           *editNoteAnimationTimer;
 @property uint                              editNoteAnimationFrame;
@@ -79,10 +78,30 @@
         self.lengthView.height = 1;
         self.lengthView.fillBar = YES;
         self.lengthView.visible = NO;
+        
+        self.modulationValueAView = [[EatsGridHorizontalSliderView alloc] init];
+        self.modulationValueAView.delegate = self;
+        self.modulationValueAView.x = 0;
+        self.modulationValueAView.y = 2;
+        self.modulationValueAView.width = self.width;
+        self.modulationValueAView.height = 1;
+        self.modulationValueAView.fillBar = YES;
+        self.modulationValueAView.visible = NO;
+        
+        self.modulationValueBView = [[EatsGridHorizontalSliderView alloc] init];
+        self.modulationValueBView.delegate = self;
+        self.modulationValueBView.x = 0;
+        self.modulationValueBView.y = 3;
+        self.modulationValueBView.width = self.width;
+        self.modulationValueBView.height = 1;
+        self.modulationValueBView.fillBar = YES;
+        self.modulationValueBView.visible = NO;
 
         self.subViews = [[NSMutableSet alloc] initWithObjects:self.patternView,
                                                               self.velocityView,
                                                               self.lengthView,
+                                                              self.modulationValueAView,
+                                                              self.modulationValueBView,
                                                               nil];
 
         [self updatePatternNotes];
@@ -94,6 +113,7 @@
         // Sequencer note notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteVelocityDidChange:) name:kSequencerNoteVelocityDidChangeNotification object:self.sequencer];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteModulationValuesDidChange:) name:kSequencerNoteModulationValuesDidChangeNotification object:self.sequencer];
 
         // Sequencer state notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
@@ -116,17 +136,6 @@
 
 - (void) updateView
 {
-    if( self.sharedPreferences.gridSupportsVariableBrightness ) {
-        // Here we check if it's enabled so as to not mess up the animation
-        if( self.patternView.mode == EatsPatternViewMode_NoteEdit && self.patternView.enabled )
-            self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-        else if( self.patternView.mode == EatsPatternViewMode_Edit && self.patternView.enabled )
-            self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
-        
-    } else {
-        self.patternView.noteBrightness = 15;
-    }
-    
     [super updateView];
 }
 
@@ -246,27 +255,40 @@
         // Display sliders at bottom
         if( note.row > ( self.height / 2 ) - 1 ) {
             self.patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
+            
             self.velocityView.y = self.height - 1;
+            self.lengthView.y = self.height;
+            self.modulationValueAView.y = self.height + 1;
+            self.modulationValueBView.y = self.height + 2;
+            
             self.velocityView.visible = YES;
             
         // Display sliders at top
         } else {
             self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
             self.patternView.y = 1;
-            self.lengthView.y = 0;
-            self.lengthView.visible = YES;
+            
+            self.velocityView.y = -3;
+            self.lengthView.y = -2;
+            self.modulationValueAView.y = -1;
+            self.modulationValueBView.y = 0;
+            
+            self.modulationValueBView.visible = YES;
         }
         
         self.patternView.height = self.height - 1;
         self.patternView.activeEditNote = note;
         
-        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        float animationProgress = ( self.editNoteAnimationFrame + 1 ) / (float)NOTE_EDIT_IN_OUT_ANIMATION_LENGTH;
+        
+        self.patternView.noteEditModeAnimationAmount = animationProgress;
+        self.patternView.animatingIn = YES;
         
         self.activeEditNote = note;
         
         [self updateNoteVelocity];
         [self updateNoteLength];
+        [self updateNoteModulationValues];
         
         [self updateView];
         
@@ -275,7 +297,7 @@
         
         dispatch_async(dispatch_get_main_queue(), ^(void) {
             
-            self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+            self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ( ANIMATION_FRAMERATE * 2.0 )
                                                                target:self
                                                              selector:@selector(animateInNoteEditMode:)
                                                              userInfo:nil
@@ -304,27 +326,35 @@
         if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
             
             self.velocityView.y ++;
-            self.lengthView.visible = NO;
+            self.lengthView.y ++;
+            self.modulationValueAView.y ++;
+            self.modulationValueBView.visible = NO;
             
         // To top
         } else {
             
             self.patternView.y --;
+            
             self.velocityView.visible = NO;
             self.lengthView.y --;
+            self.modulationValueAView.y --;
+            self.modulationValueBView.y --;
             
         }
         
-        self.patternView.height = self.height - 1;
+        self.patternView.height = self.height - 3;
         
-        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
-        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - ( NOTE_EDIT_FADE_AMOUNT / 2 );
+        float animationProgress = 1.0 - ( ( self.editNoteAnimationFrame + 1 ) / (float)NOTE_EDIT_IN_OUT_ANIMATION_LENGTH );
+        
+        self.patternView.noteEditModeAnimationAmount = animationProgress;
+        self.patternView.animatingIn = NO;
+        
         
         [self updateView];
         
         dispatch_async(dispatch_get_main_queue(), ^(void) {
         
-            self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ANIMATION_FRAMERATE
+            self.editNoteAnimationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / ( ANIMATION_FRAMERATE * 2.0 )
                                                                    target:self
                                                                  selector:@selector(animateOutNoteEditMode:)
                                                                  userInfo:nil
@@ -344,12 +374,13 @@
     self.activeEditNote = nil;
     self.velocityView.visible = NO;
     self.lengthView.visible = NO;
+    self.modulationValueAView.visible = NO;
+    self.modulationValueBView.visible = NO;
     self.patternView.y = 0;
     self.patternView.height = self.height;
     self.patternView.enabled = YES;
     self.patternView.activeEditNote = nil;
     self.patternView.mode = EatsPatternViewMode_Edit;
-    self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
     
     if( self.editNoteAnimationTimer ) {
         [self.editNoteAnimationTimer invalidate];
@@ -359,41 +390,62 @@
 
 - (void) animateInNoteEditMode:(NSTimer *)timer
 {
-    dispatch_async(self.gridQueue, ^(void) {
+    dispatch_async( self.gridQueue, ^(void) {
         
         // DEBUG LOG
         NSLog(@"4 entering note edit mode");
         
         self.editNoteAnimationFrame ++;
         
-        // From bottom
-        if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-
-            self.velocityView.y --;
-            self.lengthView.y = self.height - 1;
-            self.lengthView.visible = YES;
-
-        // From top
-        } else {
+        if( self.editNoteAnimationFrame < NOTE_EDIT_IN_OUT_ANIMATION_LENGTH ) {
             
-            self.patternView.y ++;
-            self.velocityView.y = 0;
-            self.lengthView.y ++;
-            self.velocityView.visible = YES;
+            float animationProgress = ( self.editNoteAnimationFrame + 1 ) / (float)NOTE_EDIT_IN_OUT_ANIMATION_LENGTH;
             
-        }
-        
-        self.patternView.height --;
-        
-        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS - NOTE_EDIT_FADE_AMOUNT;
-        
-        if( self.editNoteAnimationFrame == 1 ) { // Final frame
-
+            self.patternView.noteEditModeAnimationAmount = animationProgress;
+            
+            self.patternView.height --;
+            
+            // From bottom
+            if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+                
+                self.velocityView.y --;
+                self.lengthView.y --;
+                self.modulationValueAView.y --;
+                self.modulationValueBView.y --;
+                
+                if( self.lengthView.y < self.height )
+                    self.lengthView.visible = YES;
+                if( self.modulationValueAView.y < self.height )
+                    self.modulationValueAView.visible = YES;
+                if( self.modulationValueBView.y < self.height )
+                    self.modulationValueBView.visible = YES;
+                
+            // From top
+            } else {
+                
+                self.patternView.y ++;
+                
+                self.velocityView.y ++;
+                self.lengthView.y ++;
+                self.modulationValueAView.y ++;
+                self.modulationValueBView.y ++;
+                
+                if( self.velocityView.y >= 0 )
+                    self.velocityView.visible = YES;
+                if( self.lengthView.y >= 0 )
+                    self.lengthView.visible = YES;
+                if( self.modulationValueAView.y >= 0 )
+                    self.modulationValueAView.visible = YES;
+                
+            }
+            
+        } else { // Final frame
+            
             self.patternView.enabled = YES;
             
             [timer invalidate];
             self.editNoteAnimationTimer = nil;
+            
         }
         
         // DEBUG LOG
@@ -410,34 +462,55 @@
 - (void) animateOutNoteEditMode:(NSTimer *)timer
 {
     dispatch_async(self.gridQueue, ^(void) {
+        
         self.editNoteAnimationFrame ++;
         
-        // To bottom
-        if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+        if( self.editNoteAnimationFrame < NOTE_EDIT_IN_OUT_ANIMATION_LENGTH ) {
             
-            self.velocityView.visible = NO;
+            float animationProgress = 1.0 - ( ( self.editNoteAnimationFrame + 1 ) / (float)NOTE_EDIT_IN_OUT_ANIMATION_LENGTH );
             
-        // To top
-        } else {
+            self.patternView.noteEditModeAnimationAmount = animationProgress;
             
-            self.patternView.y --;
-            self.lengthView.visible = NO;
-            
-        }
+            self.patternView.height ++;
         
-        self.patternView.height ++;
-        
-        self.patternView.noteBrightness = NOTE_DEFAULT_BRIGHTNESS;
-        self.patternView.noteLengthBrightness = NOTE_LENGTH_DEFAULT_BRIGHTNESS;
-        
-        if( self.editNoteAnimationFrame == 1 ) { // Final frame
+            // To bottom
+            if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
+                
+                self.velocityView.y ++;
+                self.lengthView.y ++;
+                self.modulationValueAView.y ++;
+                
+                if( self.velocityView.y >= self.height )
+                    self.velocityView.visible = NO;
+                if( self.lengthView.y >= self.height )
+                    self.lengthView.visible = NO;
+                if( self.modulationValueAView.y >= self.height )
+                    self.modulationValueAView.visible = NO;
+                
+            // To top
+            } else {
+                
+                self.patternView.y --;
+                
+                self.lengthView.y --;
+                self.modulationValueAView.y --;
+                self.modulationValueBView.y --;
+                
+                if( self.lengthView.y < 0 )
+                    self.lengthView.visible = NO;
+                if( self.modulationValueAView.y < 0 )
+                    self.modulationValueAView.visible = NO;
+                if( self.modulationValueBView.y < 0 )
+                    self.modulationValueBView.visible = NO;
+            }
+            
+        } else { // Final frame
             
             self.patternView.activeEditNote = nil;
             self.patternView.mode = EatsPatternViewMode_Edit;
             self.patternView.enabled = YES;
             
             self.activeEditNote = nil;
-
             
             [timer invalidate];
             self.editNoteAnimationTimer = nil;
@@ -478,11 +551,33 @@
     self.activeEditNote = [self.sequencer noteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     self.patternView.activeEditNote = self.activeEditNote;
     
-    float percentageForVelocitySlider = 100.0 * ( (self.activeEditNote.velocity - oneStepOf127 ) / range );
+    float percentageForVelocitySlider = 100.0 * ( ( self.activeEditNote.velocity - oneStepOf127 ) / range );
     if( percentageForVelocitySlider < 0 )
         percentageForVelocitySlider = 0;
     
     self.velocityView.percentage = percentageForVelocitySlider;
+}
+
+- (void) updateNoteModulationValues
+{
+    
+    // A
+    float range = 127.0;
+    self.activeEditNote = [self.sequencer noteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    self.patternView.activeEditNote = self.activeEditNote;
+    
+    float percentageForVelocitySlider = 100.0 * ( ( [self.activeEditNote.modulationValues[0] intValue] ) / range );
+    if( percentageForVelocitySlider < 0 )
+        percentageForVelocitySlider = 0;
+    
+    self.modulationValueAView.percentage = percentageForVelocitySlider;
+    
+    // B
+    percentageForVelocitySlider = 100.0 * ( ( [self.activeEditNote.modulationValues[1] intValue] ) / range );
+    if( percentageForVelocitySlider < 0 )
+        percentageForVelocitySlider = 0;
+    
+    self.modulationValueBView.percentage = percentageForVelocitySlider;
 }
 
 - (void) updatePageLeft
@@ -555,6 +650,19 @@
             }
             [self updatePatternNotes];
             [self updateView];
+        }
+    });
+}
+
+- (void) noteModulationValuesDidChange:(NSNotification *)notification
+{
+    dispatch_async(self.gridQueue, ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPattern:notification] ) {
+            SequencerNote *note = [notification.userInfo valueForKey:@"note"];
+            if( self.activeEditNote && note.row == self.activeEditNote.row && note.step ==  self.activeEditNote.step ) {
+                [self updateNoteModulationValues];
+                [self updateView];
+            }
         }
     });
 }
@@ -632,7 +740,7 @@
 {
 
     // Velocity
-    if(sender == self.velocityView) {
+    if( sender == self.velocityView ) {
         
         float oneStepOf127 = 127.0 / sender.width;
         float range = 127.0 - oneStepOf127;
@@ -643,9 +751,28 @@
         [self.sequencer setVelocity:newVelocity forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         
     // Length
-    } else if(sender == self.lengthView) {
+    } else if( sender == self.lengthView ) {
         int newLength = roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1;
         [self.sequencer setLength:newLength forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+    
+    // Modulation Value A
+    } else if( sender == self.modulationValueAView ) {
+        
+        float range = 127.0;
+        
+        uint newValue = range * ( sender.percentage / 100.0 );
+        
+        [self.sequencer setModulationValue:newValue forBus:0 forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        
+    // Modulation Value B
+    } else if( sender == self.modulationValueBView ) {
+        
+        float range = 127.0;
+        
+        uint newValue = range * ( sender.percentage / 100.0 );
+        
+        [self.sequencer setModulationValue:newValue forBus:1 forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        
     }
 }
 

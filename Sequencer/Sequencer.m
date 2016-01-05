@@ -136,7 +136,7 @@
 
 - (void) updatePatternQuantizationSettings
 {
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayForGridWidth:self.sharedPreferences.gridWidth];
         
@@ -174,9 +174,11 @@
         
     } else if( newSong.songVersion <= SEQUENCER_SONG_VERSION ) {
         
-        // In future we'll need to deal with more data migration here
+        // Deal with data migration from older files
         
-        // Add modulation destinations if we're opening an old file that doesn't have them (version 0, modulation added in version 1)
+        // For files older than v1
+        
+        // Add modulation destinations if we're opening an old file that doesn't have them
         for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
             SequencerPage *newPage = [newSong.pages objectAtIndex:pageId];
             if( newPage.modulationDestinationIds.count < NUMBER_OF_MODULATION_BUSSES ) {
@@ -187,6 +189,29 @@
                 }
                 
                 newPage.modulationDestinationIds = [modulationDestinationIds copy];
+            }
+        }
+        
+        // Add modulation values to notes if they don't have them
+        for( SequencerPage *page in newSong.pages ) {
+            for( NSMutableSet *pattern in page.patterns ) {
+                for( SequencerNote *note in pattern ) {
+                    
+                    if( note.modulationValues.count < NUMBER_OF_MODULATION_BUSSES ) {
+                        
+                        // Add as many default modulation values as needed
+                        NSMutableArray *modulationValues;
+                        if( note.modulationValues.count )
+                            modulationValues = [note.modulationValues mutableCopy];
+                        else
+                            modulationValues = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
+                        
+                        for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES - note.modulationValues.count; b ++ ) {
+                            [modulationValues addObject:[NSNumber numberWithUnsignedInt:0]];
+                        }
+                        note.modulationValues = [modulationValues copy];
+                    }
+                }
             }
         }
         
@@ -255,7 +280,7 @@
 {
     __block NSMutableSet *notesOutsideOfGrid = [NSMutableSet set];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
             SequencerPage *page = [self.song.pages objectAtIndex:pageId];
@@ -281,7 +306,7 @@
 {
     __block NSMutableSet *removedNoteDictionaries = [NSMutableSet set];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
             SequencerPage *page = [self.song.pages objectAtIndex:pageId];
@@ -301,6 +326,7 @@
                                                                                               [NSNumber numberWithInt:noteToRemove.row], @"row",
                                                                                               [NSNumber numberWithInt:noteToRemove.length], @"length",
                                                                                               [NSNumber numberWithInt:noteToRemove.velocity], @"velocity",
+                                                                                              noteToRemove.modulationValues, @"modulationValues",
                                                                                               [NSNumber numberWithInt:patternId], @"patternId",
                                                                                               [NSNumber numberWithInt:pageId], @"pageId",
                                                                                               nil];
@@ -327,7 +353,7 @@
 
 - (void) addBackNotesPreviouslyRemoved:(NSSet *)noteDictionaries
 {
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         for( NSDictionary *noteDictionary in noteDictionaries ) {
             
@@ -341,6 +367,7 @@
             note.row = [[noteDictionary valueForKey:@"row"] intValue];
             note.length = [[noteDictionary valueForKey:@"length"] intValue];
             note.velocity = [[noteDictionary valueForKey:@"velocity"] intValue];
+            note.modulationValues = [noteDictionary valueForKey:@"modulationValues"];
             
             [pattern addObject:note];
             
@@ -778,7 +805,7 @@
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         if( busId < page.modulationDestinationIds.count )
             idToReturn = [[page.modulationDestinationIds objectAtIndex:busId] unsignedIntValue];
@@ -792,7 +819,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         if( busId < page.modulationDestinationIds.count && destinationId < self.modulationDestinationsArray.count ) {
             
@@ -1061,7 +1088,7 @@
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *notes = [page.patterns objectAtIndex:patternId];
         notesToReturn = [[NSSet alloc] initWithSet:notes copyItems:YES];
@@ -1077,7 +1104,7 @@
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         notesCount = (uint)[[page.patterns objectAtIndex:patternId] count];
         
@@ -1090,7 +1117,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[page.patterns objectAtIndex:patternId] forPattern:patternId inPage:pageId];
@@ -1129,7 +1156,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
         [self.undoManager beginUndoGrouping];
@@ -1159,7 +1186,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
         [self.undoManager beginUndoGrouping];
@@ -1192,7 +1219,7 @@
     
     if( velocity >= SEQUENCER_MIDI_MIN && velocity <= SEQUENCER_MIDI_MAX ) {
        
-        dispatch_sync(self.sequencerQueue, ^(void) {
+        dispatch_sync( self.sequencerQueue, ^(void) {
             
             NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
             [self.undoManager beginUndoGrouping];
@@ -1236,7 +1263,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
 
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
         [self.undoManager beginUndoGrouping];
@@ -1270,7 +1297,7 @@
     
     if( length >= 1 && length <= self.sharedPreferences.gridWidth ) {
         
-        dispatch_sync(self.sequencerQueue, ^(void) {
+        dispatch_sync( self.sequencerQueue, ^(void) {
             
             NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
             [self.undoManager beginUndoGrouping];
@@ -1304,7 +1331,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[NSSet alloc] initWithSet:[page.patterns objectAtIndex:patternId] copyItems:YES];
         [self.undoManager beginUndoGrouping];
@@ -1337,7 +1364,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[[page.patterns objectAtIndex:patternId] copy] forPattern:patternId inPage:pageId];
@@ -1356,7 +1383,7 @@
     SequencerPage *fromPage = [self.song.pages objectAtIndex:fromPageId];
     SequencerPage *toPage = [self.song.pages objectAtIndex:toPageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         [self.undoManager beginUndoGrouping];
         [[self.undoManager prepareWithInvocationTarget:self] setNotes:[toPage.patterns objectAtIndex:toPatternId] forPattern:toPatternId inPage:toPageId];
@@ -1378,7 +1405,7 @@
     
     [self pasteboardCopyNotesForPattern:patternId inPage:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *currentNotes = [[page.patterns objectAtIndex:patternId] copy];
         [[page.patterns objectAtIndex:patternId] removeAllObjects];
@@ -1434,7 +1461,7 @@
     
     __block SequencerNote *noteToReturn = nil;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *notes = [page.patterns objectAtIndex:patternId];
     
@@ -1516,7 +1543,7 @@
     
     __block NSSet *notesToCheck;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         NSSet *notes = [page.patterns objectAtIndex:patternId];
         notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
@@ -1538,7 +1565,7 @@
     
     __block NSSet *notesToCheck;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         
         NSSet *notes = [page.patterns objectAtIndex:patternId];
         notesToCheck = [[NSSet alloc] initWithSet:notes copyItems:YES];
@@ -1571,7 +1598,7 @@
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
-        dispatch_sync(self.sequencerQueue, ^(void) {
+        dispatch_sync( self.sequencerQueue, ^(void) {
         
             NSSet *notes = [page.patterns objectAtIndex:patternId];
             
@@ -1623,7 +1650,7 @@
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
-        dispatch_sync(self.sequencerQueue, ^(void) {
+        dispatch_sync( self.sequencerQueue, ^(void) {
         
             NSSet *notes = [page.patterns objectAtIndex:patternId];
             
@@ -1658,6 +1685,79 @@
     [self setVelocity:[self velocityForNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] - 1 forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
 }
 
+- (uint) modulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+{
+    __block uint valueToReturn = 0;
+    
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    dispatch_sync( self.sequencerQueue, ^(void) {
+        
+        NSSet *notes = [page.patterns objectAtIndex:patternId];
+        
+        for( SequencerNote *note in notes ) {
+            if( note.row == row && note.step == step ) {
+                
+                if( busId < note.modulationValues.count )
+                    valueToReturn = [note.modulationValues[busId] unsignedIntValue];
+                
+                return;
+            }
+        }
+        
+    });
+    
+    return valueToReturn;
+}
+
+- (void) setModulationValue:(uint)value forBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+{
+    
+    if( value >= SEQUENCER_MIDI_MIN && value <= SEQUENCER_MIDI_MAX ) {
+        
+        SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+        
+        dispatch_sync( self.sequencerQueue, ^(void) {
+            
+            NSSet *notes = [page.patterns objectAtIndex:patternId];
+            
+            for( SequencerNote *note in notes ) {
+                if( note.row == row && note.step == step ) {
+                    
+                    if( busId < note.modulationValues.count ) {
+                        
+                        [self.undoManager beginUndoGrouping];
+                        [[self.undoManager prepareWithInvocationTarget:self] setModulationValue:[note.modulationValues[busId] unsignedIntValue] forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+                        [self.undoManager setActionName:@"Note Modulation Value Change"];
+                        [self.undoManager endUndoGrouping];
+                        
+                        NSMutableArray *modulationValues = [note.modulationValues mutableCopy];
+                        modulationValues[busId] = [NSNumber numberWithUnsignedInt:value];
+                        note.modulationValues = [modulationValues copy];
+                        
+                        [self postNotification:kSequencerNoteModulationValuesDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
+                        
+                    }
+                    
+                    return;
+                }
+            }
+            
+        });
+        
+    }
+}
+
+- (void) incrementModulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self setModulationValue:[self modulationValueForBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] + 1 forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+}
+
+- (void) decrementModulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+{
+    [self setModulationValue:[self modulationValueForBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] - 1 forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+}
+
 - (void) addOrRemoveNoteThatIsSelectableAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
     SequencerNote *note = [self noteThatIsSelectableAtStep:step atRow:row inPattern:patternId inPage:pageId];
@@ -1687,7 +1787,14 @@
     note.length = length;
     note.velocity = velocity;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    // Create the default modulation values
+    NSMutableArray *modulationValues = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
+    for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
+        [modulationValues addObject:[NSNumber numberWithUnsignedInt:0]];
+    }
+    note.modulationValues = [modulationValues copy];
+    
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         NSMutableSet *pattern = [page.patterns objectAtIndex:patternId];
         [pattern addObject:note];
@@ -1701,7 +1808,7 @@
 {
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
     
         NSSet *notes = [page.patterns objectAtIndex:patternId];
         
@@ -2078,7 +2185,7 @@
 {
     __block NSSet *changes;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         changes = [self.song.automation.changes copy];
     });
     
@@ -2089,7 +2196,7 @@
 {
     __block NSSet *changesToCheck;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         changesToCheck = [[NSSet alloc] initWithSet:self.song.automation.changes copyItems:YES];
     });
     
@@ -2106,7 +2213,7 @@
 {
     __block NSSet *changesToCheck;
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         changesToCheck = [[NSSet alloc] initWithSet:self.song.automation.changes copyItems:YES];
     });
     
@@ -2245,7 +2352,7 @@
     [self.undoManager setActionName:@"Automation Change"];
     [self.undoManager endUndoGrouping];
     
-    dispatch_sync(self.sequencerQueue, ^(void) {
+    dispatch_sync( self.sequencerQueue, ^(void) {
         self.song.automation.changes = changes;
     });
     

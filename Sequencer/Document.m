@@ -226,6 +226,7 @@ typedef enum DocumentPageAnimationDirection {
     // Sequencer note notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteVelocityDidChange:) name:kSequencerNoteVelocityDidChangeNotification object:self.sequencer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteLengthDidChange:) name:kSequencerNoteLengthDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noteModulationValuesDidChange:) name:kSequencerNoteModulationValuesDidChangeNotification object:self.sequencer];
     
     // Sequencer state notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stateCurrentPageDidChangeLeft:) name:kSequencerStateCurrentPageDidChangeLeftNotification object:self.sequencer];
@@ -652,6 +653,11 @@ typedef enum DocumentPageAnimationDirection {
         if( [self.sequencer isNotificationFromCurrentPattern:notification] )
             [self updatePatternNotes];
     });
+}
+
+- (void) noteModulationValuesDidChange:(NSNotification *)notification
+{
+    
 }
 
 // Sequencer state notifications

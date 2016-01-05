@@ -14,5 +14,6 @@
 @property int                   row;
 @property int                   length;
 @property int                   velocity;
+@property NSArray               *modulationValues;
 
 @end
