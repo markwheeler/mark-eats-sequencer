@@ -380,6 +380,7 @@
     self.patternView.height = self.height;
     self.patternView.enabled = YES;
     self.patternView.activeEditNote = nil;
+    self.patternView.noteEditModeAnimationAmount = 0.0;
     self.patternView.mode = EatsPatternViewMode_Edit;
     
     if( self.editNoteAnimationTimer ) {

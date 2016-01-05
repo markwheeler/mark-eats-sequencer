@@ -155,7 +155,7 @@ typedef enum EatsStepAdvance {
     //if( [NSThread isMainThread] ) NSLog(@"%s is running on main thread", __func__);
     
     // Every second tick (even) – 1/96 notes – send MIDI Clock pulse
-    if( _currentTick % (_ppqn / _midiClockPPQN) == 0
+    if( _currentTick % ( _ppqn / _midiClockPPQN ) == 0
        && self.sharedPreferences.sendMIDIClock
        && self.sharedPreferences.midiClockSourceName == nil
        && [[_delegate valueForKey:@"isActive"] boolValue] ) {
@@ -359,7 +359,41 @@ typedef enum EatsStepAdvance {
                 [self.sequencer setNextPatternId:nil forPage:pageId];
             }
 
-
+            
+            int channel = [self.sequencer channelForPage:pageId];
+            
+            // Set modulation values to zero
+            NSMutableArray *modulationValuesToSend = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
+            for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
+                modulationValuesToSend[b] = [NSNumber numberWithUnsignedInt:0];
+            }
+            
+            // Calculate swing for this step
+            
+            uint64_t nsSwing = 0;
+            
+            // We only add swing and velocity groove when playing forward or reverse
+            if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
+                
+                // Reverse position if we're playing in reverse
+                if( playMode == EatsSequencerPlayMode_Reverse ) {
+                    int sixtyFourthsPerStep = _minQuantization / [self.sequencer stepLengthForPage:pageId];
+                    position = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - position;
+                }
+                
+                // Don't apply swing to the time sigs that don't fit into the loop
+                if( _minQuantization % [self.sequencer stepLengthForPage:pageId] == 0 ) {
+                    
+                    // Calculate the swing based on note position etc
+                    nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
+                                                                     type:[self.sequencer swingTypeForPage:pageId]
+                                                                   amount:[self.sequencer swingAmountForPage:pageId]
+                                                                      bpm:_bpm
+                                                             qnPerMeasure:_qnPerMeasure
+                                                          minQuantization:_minQuantization];
+                }
+            }
+            
             // Get the notes
             
             NSSet *notes = [self.sequencer notesAtStep:playNow inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
@@ -376,34 +410,12 @@ typedef enum EatsStepAdvance {
                 if( pitch > SEQUENCER_MIDI_MAX )
                     pitch = SEQUENCER_MIDI_MAX;
                 
-                //Set the basic note properties
-                int channel = [self.sequencer channelForPage:pageId];
+                // Calculate velocity
+                
                 int velocity = note.velocity;
-                
-                // Calculate swing and velocity
-                
-                uint64_t nsSwing = 0;
                 
                 // We only add swing and velocity groove when playing forward or reverse
                 if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
-                    
-                    // Reverse position if we're playing in reverse
-                    if( playMode == EatsSequencerPlayMode_Reverse ) {
-                        int sixtyFourthsPerStep = _minQuantization / [self.sequencer stepLengthForPage:pageId];
-                        position = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - position;
-                    }
-                    
-                    // Don't apply swing to the time sigs that don't fit into the loop
-                    if( _minQuantization % [self.sequencer stepLengthForPage:pageId] == 0 ) {
-                    
-                        // Calculate the swing based on note position etc
-                        nsSwing = [EatsSwingUtils calculateSwingNsForPosition:position
-                                                                         type:[self.sequencer swingTypeForPage:pageId]
-                                                                       amount:[self.sequencer swingAmountForPage:pageId]
-                                                                          bpm:_bpm
-                                                                 qnPerMeasure:_qnPerMeasure
-                                                              minQuantization:_minQuantization];
-                    }
                     
                     // Velocity groove if enabled
                     if( [self.sequencer velocityGrooveForPage:pageId] ) {
@@ -414,12 +426,20 @@ typedef enum EatsStepAdvance {
                     }
                 }
                 
-                
                 // Send MIDI note
                 [self startMIDINote:pitch
                           onChannel:channel
                        withVelocity:velocity
                              atTime:ns + nsSwing];
+                
+                // Check modulation
+                for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
+                    uint modulationValue = [self.sequencer modulationValueForBus:b forNoteAtStep:note.step atRow:note.row inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+                    if( modulationValue > [modulationValuesToSend[b] unsignedIntValue] )
+                        modulationValuesToSend[b] = [NSNumber numberWithUnsignedInt:modulationValue];
+                }
+                
+                // Set note length
                 
                 // This number in the end here is the _ticksPerMeasure steps that the note will be in length.
                 int length = roundf( (float)note.length * ( _ticksPerMeasure / (float)[self.sequencer stepLengthForPage:pageId] ) );
@@ -451,6 +471,20 @@ typedef enum EatsStepAdvance {
                         [note setObject:[NSNumber numberWithInt:length] forKey:@"lengthRemaining"];
                 }
                 
+            }
+            
+            // Send modulation if there's a note playing
+            if( notes.count ) {
+                for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
+                    uint modulationDestinationId = [self.sequencer modulationDestinationIdForBus:b forPage:pageId];
+                    if( modulationDestinationId ) {
+                        
+                        NSDictionary *modulationDestination = self.sequencer.modulationDestinationsArray[modulationDestinationId];
+                        
+                        [self sendMIDIModulationValue:[modulationValuesToSend[b] unsignedIntValue] ofType:[[modulationDestination objectForKey:@"type"] unsignedIntValue] onChannel:channel toControllerNumber:[[modulationDestination objectForKey:@"controllerNumber"] unsignedIntValue] atTime:ns + nsSwing];
+                        
+                    }
+                }
             }
             
         }
@@ -540,6 +574,25 @@ typedef enum EatsStepAdvance {
     // Send it
 	if (msg != nil)
 		[_sharedCommunicationManager.midiManager sendMsg:msg];
+}
+
+- (void) sendMIDIModulationValue:(uint)value
+                          ofType:(VVMIDIMsgType)type
+                       onChannel:(uint)channel
+              toControllerNumber:(uint)controllerNumber
+                          atTime:(uint64_t)ns
+{
+    VVMIDIMessage *msg = nil;
+    // Create a message
+    if( type == VVMIDIChannelPressureVal )
+        msg = [VVMIDIMessage createFromVals:type :channel :value :-1 :-1 :ns];
+    else if( type == VVMIDIPitchWheelVal )
+        msg = [VVMIDIMessage createFromVals:type :channel :value :value :-1 :ns];
+    else
+        msg = [VVMIDIMessage createFromVals:type :channel :controllerNumber :value :-1 :ns];
+    // Send it
+    if (msg != nil)
+        [_sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
 - (void) stopNotes:(NSArray *)notes atTime:(uint64_t)ns
