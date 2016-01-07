@@ -73,7 +73,10 @@ NSString *const kSequencerPageNameDidChangeNotification = @"SequencerPageNameDid
 NSString *const kSequencerPageStepLengthDidChangeNotification = @"SequencerPageStepLengthDidChangeNotification";
 NSString *const kSequencerPageLoopDidChangeNotification = @"SequencerPageLoopDidChangeNotification";
 
+NSString *const kSequencerPageSendNotesDidChangeNotification = @"SequencerPageSendNotesDidChangeNotification";
+
 NSString *const kSequencerPageModulationDestinationsDidChangeNotification = @"SequencerPageModulationDestinationsDidChangeNotification";
+NSString *const kSequencerPageModulationSmoothDidChangeNotification = @"SequencerPageModulationSmoothDidChangeNotification";
 
 NSString *const kSequencerPageSwingDidChangeNotification = @"SequencerPageSwingDidChangeNotification";
 NSString *const kSequencerPageVelocityGrooveDidChangeNotification = @"SequencerPageVelocityGrooveDidChangeNotification";

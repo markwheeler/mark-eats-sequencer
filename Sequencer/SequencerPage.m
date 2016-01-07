@@ -12,7 +12,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, Channel: %i, Name: %@, StepLength: %i, LoopStart: %i, LoopEnd: %i, ModulationDestinationIds: %@, SwingType: %i, SwingAmount: %i, VelocityGroove: %i, Transpose: %i, TransposeZeroStep: %i, Patterns: %@, Pitches: %@>", NSStringFromClass([self class]), self, self.channel, self.name, self.stepLength, self.loopStart, self.loopEnd, self.modulationDestinationIds, self.swingType, self.swingAmount, self.velocityGroove, self.transpose, self.transposeZeroStep, self.patterns, self.pitches];
+    return [NSString stringWithFormat:@"<%@: %p, Channel: %i, Name: %@, StepLength: %i, LoopStart: %i, LoopEnd: %i, SendNotes: %i, ModulationDestinationIds: %@, ModulationSmooth: %i, SwingType: %i, SwingAmount: %i, VelocityGroove: %i, Transpose: %i, TransposeZeroStep: %i, Patterns: %@, Pitches: %@>", NSStringFromClass([self class]), self, self.channel, self.name, self.stepLength, self.loopStart, self.loopEnd, self.sendNotes, self.modulationDestinationIds, self.modulationSmooth, self.swingType, self.swingAmount, self.velocityGroove, self.transpose, self.transposeZeroStep, self.patterns, self.pitches];
 }
 
 - (id) initWithCoder:(NSCoder *)decoder {
@@ -27,7 +27,10 @@
     self.loopStart = [decoder decodeInt32ForKey:@"loopStart"];
     self.loopEnd = [decoder decodeInt32ForKey:@"loopEnd"];
     
+    self.sendNotes = [decoder decodeBoolForKey:@"sendNotes"];
+    
     self.modulationDestinationIds = [decoder decodeObjectForKey:@"modulationDestinationIds"];
+    self.modulationSmooth = [decoder decodeBoolForKey:@"modulationSmooth"];
     
     self.swingType = [decoder decodeInt32ForKey:@"swingType"];
     self.swingAmount = [decoder decodeInt32ForKey:@"swingAmount"];
@@ -49,7 +52,10 @@
     [encoder encodeInt32:self.loopStart forKey:@"loopStart"];
     [encoder encodeInt32:self.loopEnd forKey:@"loopEnd"];
     
+    [encoder encodeBool:self.sendNotes forKey:@"sendNotes"];
+    
     [encoder encodeObject:self.modulationDestinationIds forKey:@"modulationDestinationIds"];
+    [encoder encodeBool:self.modulationSmooth forKey:@"modulationSmooth"];
     
     [encoder encodeInt32:self.swingType forKey:@"swingType"];
     [encoder encodeInt32:self.swingAmount forKey:@"swingAmount"];

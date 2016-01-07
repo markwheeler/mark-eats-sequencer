@@ -26,11 +26,13 @@
                 <outlet property="documentWindow" destination="5" id="100146"/>
                 <outlet property="modulationDestinationAPopup" destination="y0b-Or-pxA" id="mRn-Yb-sN2"/>
                 <outlet property="modulationDestinationBPopup" destination="uUJ-Vc-xXU" id="iA4-Dr-KEM"/>
+                <outlet property="modulationSmoothCheckbox" destination="bzW-X5-EuR" id="E5g-T2-Ree"/>
                 <outlet property="pagePlaybackControls" destination="106528" id="107076"/>
                 <outlet property="pageView" destination="107125" id="107423"/>
                 <outlet property="patternQuantizationPopup" destination="101843" id="102048"/>
                 <outlet property="removeAllAutomationButton" destination="gGY-Ec-dt3" id="Vqm-fO-Fz3"/>
                 <outlet property="rowPitchesTableView" destination="106556" id="107078"/>
+                <outlet property="sendNotesCheckbox" destination="P0h-YU-pAE" id="Ul9-BU-Xnc"/>
                 <outlet property="sequencerPlaybackControls" destination="104077" id="104211"/>
                 <outlet property="stepLengthPopup" destination="106529" id="107077"/>
                 <outlet property="stepQuantizationPopup" destination="101810" id="102047"/>
@@ -404,7 +406,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" id="106556">
-                                            <rect key="frame" x="0.0" y="0.0" width="149" height="172"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="145" height="19"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -568,7 +570,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="5Ny-0K-mk6" customClass="EatsNSTableViewClickPassThrough">
-                                            <rect key="frame" x="0.0" y="0.0" width="177" height="126"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="177" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="windowBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -740,6 +742,9 @@
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="sendNotesCheckbox:" target="-2" id="2vw-FN-yp3"/>
+                                </connections>
                             </button>
                             <textField verticalHuggingPriority="750" id="KzO-Yx-rzX">
                                 <rect key="frame" x="438" y="90" width="13" height="17"/>
@@ -775,6 +780,9 @@
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="modulationSmoothCheckbox:" target="-2" id="fXS-MJ-S7L"/>
+                                </connections>
                             </button>
                             <textField verticalHuggingPriority="750" id="106513">
                                 <rect key="frame" x="26" y="454" width="49" height="17"/>

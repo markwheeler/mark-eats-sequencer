@@ -69,9 +69,11 @@ typedef enum DocumentPageAnimationDirection {
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
 @property (nonatomic, weak) IBOutlet NSTableView           *rowPitchesTableView;
+@property (nonatomic, weak) IBOutlet NSButton              *sendNotesCheckbox;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *modulationDestinationAPopup;
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *modulationDestinationBPopup;
+@property (nonatomic, weak) IBOutlet NSButton              *modulationSmoothCheckbox;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *stepLengthPopup;
 @property (nonatomic, weak) IBOutlet NSPopUpButton         *swingPopup;
@@ -211,7 +213,10 @@ typedef enum DocumentPageAnimationDirection {
     // Sequencer page notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageNameDidChange:) name:kSequencerPageNameDidChangeNotification object:self.sequencer];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageSendNotesDidChange:) name:kSequencerPageSendNotesDidChangeNotification object:self.sequencer];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageModulationDestinationsDidChange:) name:kSequencerPageModulationDestinationsDidChangeNotification object:self.sequencer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageModulationSmoothDidChange:) name:kSequencerPageModulationSmoothDidChangeNotification object:self.sequencer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageStepLengthDidChange:) name:kSequencerPageStepLengthDidChangeNotification object:self.sequencer];
     
@@ -579,6 +584,14 @@ typedef enum DocumentPageAnimationDirection {
     });
 }
 
+- (void) pageSendNotesDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updateSendNotes];
+    });
+}
+
 - (void) pageModulationDestinationsDidChange:(NSNotification *)notification
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
@@ -586,6 +599,14 @@ typedef enum DocumentPageAnimationDirection {
             [self updateModulationAPopup];
             [self updateModulationBPopup];
         }
+    });
+}
+
+- (void) pageModulationSmoothDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updateModulationSmooth];
     });
 }
 
@@ -792,8 +813,10 @@ typedef enum DocumentPageAnimationDirection {
     [self updatePatternNotes];
     [self updateChannel];
     [self updatePitches];
+    [self updateSendNotes];
     [self updateModulationAPopup];
     [self updateModulationBPopup];
+    [self updateModulationSmooth];
     [self updatePlayMode];
     [self updateStepLengthPopup];
     [self updateSwingPopup];
@@ -956,6 +979,11 @@ typedef enum DocumentPageAnimationDirection {
     self.currentPagePitches = newArray;
 }
 
+- (void) updateSendNotes
+{
+    self.sendNotesCheckbox.state = [self.sequencer sendNotesForPage:self.sequencer.currentPageId];
+}
+
 - (void) updateModulationAPopup
 {
     [self.modulationDestinationAPopup selectItemAtIndex:[self.sequencer modulationDestinationIdForBus:0 forPage:self.sequencer.currentPageId]];
@@ -964,6 +992,11 @@ typedef enum DocumentPageAnimationDirection {
 - (void) updateModulationBPopup
 {
     [self.modulationDestinationBPopup selectItemAtIndex:[self.sequencer modulationDestinationIdForBus:1 forPage:self.sequencer.currentPageId]];
+}
+
+- (void) updateModulationSmooth
+{
+    self.modulationSmoothCheckbox.state = [self.sequencer modulationSmoothForPage:self.sequencer.currentPageId];
 }
 
 - (void) updatePlayMode
@@ -1254,6 +1287,11 @@ typedef enum DocumentPageAnimationDirection {
     }
 }
 
+- (IBAction)sendNotesCheckbox:(NSButton *)sender
+{
+    [self.sequencer setSendNotes:sender.state forPage:self.sequencer.currentPageId];
+}
+
 
 - (IBAction) modulationDestinationAPopup:(NSPopUpButton *)sender
 {
@@ -1263,6 +1301,11 @@ typedef enum DocumentPageAnimationDirection {
 - (IBAction) modulationDestinationBPopup:(NSPopUpButton *)sender
 {
     [self.sequencer setModulationDestinationId:(uint)[sender indexOfSelectedItem] forBus:1 forPage:self.sequencer.currentPageId];
+}
+
+- (IBAction)modulationSmoothCheckbox:(NSButton *)sender
+{
+    [self.sequencer setModulationSmooth:sender.state forPage:self.sequencer.currentPageId];
 }
 
 

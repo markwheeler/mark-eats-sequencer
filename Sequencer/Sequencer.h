@@ -109,8 +109,13 @@
 - (void) decrementLoopEndForAllPagesExcept:(uint)pageId;
 - (void) setLoopStart:(int)loopStart andLoopEnd:(int)loopEnd forAllPagesExcept:(uint)pageId;
 
+- (BOOL) sendNotesForPage:(uint)pageId;
+- (void) setSendNotes:(BOOL)sendNotes forPage:(uint)pageId;
+
 - (uint) modulationDestinationIdForBus:(uint)busId forPage:(uint)pageId;
 - (void) setModulationDestinationId:(uint)destinationId forBus:(uint)busId forPage:(uint)pageId;
+- (BOOL) modulationSmoothForPage:(uint)pageId;
+- (void) setModulationSmooth:(BOOL)modulationSmooth forPage:(uint)pageId;
 
 - (int) swingTypeForPage:(uint)pageId;
 - (void) setSwingType:(int)swingType forPage:(uint)pageId;

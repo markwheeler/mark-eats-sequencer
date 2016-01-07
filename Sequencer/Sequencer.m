@@ -77,7 +77,8 @@
         
         page.stepLength = 16;
         page.loopEnd = SEQUENCER_SIZE - 1;
-        
+        page.sendNotes = YES;
+        page.modulationSmooth = NO;
         page.swingType = 16;
         page.swingAmount = 50;
         page.velocityGroove = YES;
@@ -172,11 +173,19 @@
     if( !newSong ) {
         outError = [NSError errorWithDomain:kSequencerErrorDomain code:SequencerErrorCode_UnarchiveFailed userInfo:nil];
         
-    } else if( newSong.songVersion <= SEQUENCER_SONG_VERSION ) {
+    } else if( newSong.songVersion < SEQUENCER_SONG_VERSION ) {
+        
+        NSLog( @"Updating song file from version %i to %i", newSong.songVersion, SEQUENCER_SONG_VERSION );
         
         // Deal with data migration from older files
         
         // For files older than v1
+        
+        // Add default sendNotes and modulationSmooth states
+        for( SequencerPage *page in newSong.pages ) {
+            page.sendNotes = YES;
+            page.modulationSmooth = NO;
+        }
         
         // Add modulation destinations if we're opening an old file that doesn't have them
         for( int pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
@@ -215,11 +224,17 @@
             }
         }
         
+        newSong.songVersion = SEQUENCER_SONG_VERSION;
+        
         // Use it
         self.song = newSong;
         
+    } else if( newSong.songVersion == SEQUENCER_SONG_VERSION ) {
+        
+        self.song = newSong;
+        
     } else {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"It was created with a newer version of Mark Eats Sequencer." forKey:NSLocalizedFailureReasonErrorKey];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Song file was created with a newer version of Mark Eats Sequencer." forKey:NSLocalizedFailureReasonErrorKey];
         outError = [NSError errorWithDomain:kSequencerErrorDomain code:SequencerErrorCode_UnarchiveFailed userInfo:userInfo];
         
     }
@@ -799,6 +814,26 @@
 }
 
 
+- (BOOL) sendNotesForPage:(uint)pageId
+{
+    return [[self.song.pages objectAtIndex:pageId] sendNotes];
+}
+
+- (void) setSendNotes:(BOOL)sendNotes forPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    [self.undoManager beginUndoGrouping];
+    [[self.undoManager prepareWithInvocationTarget:self] setSendNotes:page.sendNotes forPage:pageId];
+    [self.undoManager setActionName:@"Send Notes Change"];
+    [self.undoManager endUndoGrouping];
+    
+    page.sendNotes = sendNotes;
+    
+    [self postNotification:kSequencerPageSendNotesDidChangeNotification forPage:pageId];
+}
+
+
 - (uint) modulationDestinationIdForBus:(uint)busId forPage:(uint)pageId
 {
     __block uint idToReturn = 0;
@@ -837,6 +872,25 @@
         }
     });
     
+}
+
+- (BOOL) modulationSmoothForPage:(uint)pageId
+{
+    return [[self.song.pages objectAtIndex:pageId] modulationSmooth];
+}
+
+- (void) setModulationSmooth:(BOOL)modulationSmooth forPage:(uint)pageId
+{
+    SequencerPage *page = [self.song.pages objectAtIndex:pageId];
+    
+    [self.undoManager beginUndoGrouping];
+    [[self.undoManager prepareWithInvocationTarget:self] setModulationSmooth:page.modulationSmooth forPage:pageId];
+    [self.undoManager setActionName:@"Modulation Smooth Change"];
+    [self.undoManager endUndoGrouping];
+    
+    page.modulationSmooth = modulationSmooth;
+    
+    [self postNotification:kSequencerPageModulationSmoothDidChangeNotification forPage:pageId];
 }
 
 
