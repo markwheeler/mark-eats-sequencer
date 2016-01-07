@@ -20,25 +20,25 @@
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"None", @"name", [NSNumber numberWithInt:0], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
                                        
                                        // Pitch Bend
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"Pitch Bend", @"name", [NSNumber numberWithInt:VVMIDIPitchWheelVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"Pitch bend", @"name", [NSNumber numberWithInt:VVMIDIPitchWheelVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
                                        
                                        // Channel Pressure
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"Channel Pressure", @"name", [NSNumber numberWithInt:VVMIDIChannelPressureVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"Channel pressure", @"name", [NSNumber numberWithInt:VVMIDIChannelPressureVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
                                        
                                        // CCs
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 0 (Bank Select)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 1 (Modulation)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:1], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 2 (Breath Controller)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:2], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 2 (Breath controller)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:2], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 3", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:3], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 4 (Foot Controller)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:4], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 4 (Foot controller)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:4], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 5 (Portamento Time)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:5], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 5 (Portamento time)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:5], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 6 (Data Entry)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:6], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 6 (Data entry)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:6], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 7 (Volume)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:7], @"controllerNumber", nil],
                                        
@@ -50,9 +50,9 @@
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 11 (Expression)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:11], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 12 (Effect Control 1)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:12], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 12 (Effect control 1)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:12], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 13 (Effect Control 2)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:13], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 13 (Effect control 2)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:13], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 14", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:14], @"controllerNumber", nil],
                                        
@@ -102,7 +102,7 @@
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 37", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:37], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 38 (Data Entry Fine)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:38], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 38 (Data entry fine)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:38], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 39", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:39], @"controllerNumber", nil],
                                        
@@ -154,17 +154,17 @@
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 63", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:63], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 64 (Hold Pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:64], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 64 (Hold pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:64], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 65 (Portamento On/Off)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:65], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 65 (Portamento on/off)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:65], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 66 (Sostenuto Pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:66], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 66 (Sostenuto pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:66], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 67 (Soft Pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:67], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 67 (Soft pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:67], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 68 (Legato Pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:68], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 68 (Legato pedal)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:68], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 69 (Hold Pedal 2)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:69], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 69 (Hold pedal 2)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:69], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 70", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:70], @"controllerNumber", nil],
                                        
@@ -218,9 +218,9 @@
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 95", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:95], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 96 (Data Entry Increment)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:96], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 96 (Data entry increment)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:96], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 97 (Data Entry Decrement)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:97], @"controllerNumber", nil],
+                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 97 (Data entry decrement)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:97], @"controllerNumber", nil],
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 98 (NRPN LSB)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:98], @"controllerNumber", nil],
                                        
