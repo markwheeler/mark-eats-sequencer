@@ -2137,6 +2137,21 @@
 }
 
 
+- (int) pageTickForPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    return pageState.pageTick;
+}
+
+- (void) setPageTick:(int)tick forPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    pageState.pageTick = tick;
+    
+    [self postNotification:kSequencerPageStateTickPositionDidChangeNotification forPage:pageId];
+}
+
+
 - (int) playModeForPage:(uint)pageId
 {
     SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];

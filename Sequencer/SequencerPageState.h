@@ -17,6 +17,8 @@
 @property NSNumber              *nextStep; // This is an NSNumber so we can set it to nil
 @property BOOL                  inLoop;
 
+@property int                   pageTick;
+
 @property int                   playMode;
 
 @end

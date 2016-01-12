@@ -31,10 +31,10 @@
     // Go through the sub views
     
     // DEBUG LOG
-    NSLog( @"!--------------------------- w %u h %u", width, height );
+//    NSLog( @"!--------------------------- w %u h %u", width, height );
     for( EatsGridSubView *view in views ) {
         // DEBUG LOG
-        NSLog( @"!View %@", view);
+//        NSLog( @"!View %@", view);
         if( view.visible ) {
             
             NSArray *viewArray = [view viewArray];
@@ -66,9 +66,9 @@
     }
     
     // DEBUG LOG TODO remove this debug code
-    NSUInteger noOfCols = [gridArray count];
+//    NSUInteger noOfCols = [gridArray count];
     NSUInteger noOfRows = [[gridArray objectAtIndex:0] count];
-    NSLog( @"!gridArray is %lux%lu", (unsigned long)noOfCols, (unsigned long)noOfRows );
+//    NSLog( @"!gridArray is %lux%lu", (unsigned long)noOfCols, (unsigned long)noOfRows );
     // The following checks that all the columns have the correct number of rows in them
     for( int i = 0; i < gridArray.count; i ++ ) {
         if( [[gridArray objectAtIndex:i] count] != noOfRows ) {

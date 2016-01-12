@@ -50,14 +50,14 @@
     // Make odd split longer
     if( positionInSwingCycle < swingCycle / 2 ) {
         
-        positionRelativeToZero = ( (swingCycleInNs * swingAmountFactor ) / ( swingCycle / 2 ) ) * positionInSwingCycle;
-        defaultPositionRelativeToZero = ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * positionInSwingCycle;
+        positionRelativeToZero = ( (swingCycleInNs * swingAmountFactor ) / ( swingCycle * 0.5 ) ) * positionInSwingCycle;
+        defaultPositionRelativeToZero = ( (swingCycleInNs * 0.5) / ( swingCycle * 0.5 ) ) * positionInSwingCycle;
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
         
     // Make even split shorter
     } else {
-        positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( (swingCycleInNs * ( 1.0 - swingAmountFactor )) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
-        defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle / 2 );
+        positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( (swingCycleInNs * ( 1.0 - swingAmountFactor )) / ( swingCycle * 0.5 ) ) * ( positionInSwingCycle - swingCycle / 2 );
+        defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle * 0.5 );
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
         
     }
