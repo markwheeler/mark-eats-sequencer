@@ -9,6 +9,8 @@
 
 #pragma mark - General
 
+#define NUMBER_OF_MIDI_CHANNELS 16
+
 extern int const kSequencerNumberOfPages;
 
 extern NSString *const kSequencerNotesDataPasteboardType;

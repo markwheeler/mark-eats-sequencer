@@ -64,7 +64,7 @@
     // Tilt output
     [self.tiltMIDIOutputChannelPopup removeAllItems];
     [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"None"]];
-    for( int i = 1; i <= 16; i ++ ) {
+    for( int i = 1; i <= NUMBER_OF_MIDI_CHANNELS; i ++ ) {
         [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"%i", i]];
     }
     if( self.sharedPreferences.tiltMIDIOutputChannel )
@@ -232,8 +232,8 @@
     // Move this to outline view controller?
     NSMutableArray *inputMapping = [NSMutableArray array];
     
-    NSMutableArray *channels = [NSMutableArray arrayWithCapacity:16];
-    for( int i = 1; i <= 16; i ++ ) {
+    NSMutableArray *channels = [NSMutableArray arrayWithCapacity:NUMBER_OF_MIDI_CHANNELS];
+    for( int i = 1; i <= NUMBER_OF_MIDI_CHANNELS; i ++ ) {
         [channels addObject:[NSNumber numberWithInt:i]];
     }
     
@@ -384,7 +384,7 @@
 
 - (IBAction)tiltMIDIOutputChannelPopup:(NSPopUpButton *)sender
 {
-    if( sender.indexOfSelectedItem > 0 && sender.indexOfSelectedItem <= 16 ) {
+    if( sender.indexOfSelectedItem > 0 && sender.indexOfSelectedItem <= NUMBER_OF_MIDI_CHANNELS ) {
         self.sharedPreferences.tiltMIDIOutputChannel = [NSNumber numberWithInteger:sender.indexOfSelectedItem - 1];
         
     } else {

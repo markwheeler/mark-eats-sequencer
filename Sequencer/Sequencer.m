@@ -538,7 +538,7 @@
 
 - (void) setChannel:(int)channel forPage:(uint)pageId
 {
-    if( channel >= 0 && channel < SEQUENCER_NUMBER_OF_MIDI_CHANNELS ) {
+    if( channel >= 0 && channel < NUMBER_OF_MIDI_CHANNELS ) {
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         

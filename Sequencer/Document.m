@@ -385,7 +385,7 @@ typedef enum DocumentPageAnimationDirection {
     
     // Setup channel popup
     [self.channelPopup removeAllItems];
-    for( int i = 0; i < SEQUENCER_NUMBER_OF_MIDI_CHANNELS; i ++ ) {
+    for( int i = 0; i < NUMBER_OF_MIDI_CHANNELS; i ++ ) {
         [self.channelPopup addItemWithTitle:[NSString stringWithFormat:@"%i", i + 1]];
     }
     

@@ -748,6 +748,7 @@
         
         float newVelocity = range * (sender.percentage / 100.0);
         newVelocity += oneStepOf127;
+        newVelocity = roundf( newVelocity );
         
         [self.sequencer setVelocity:newVelocity forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         
@@ -761,7 +762,7 @@
         
         float range = 127.0;
         
-        uint newValue = range * ( sender.percentage / 100.0 );
+        uint newValue = roundf( range * ( sender.percentage / 100.0 ) );
         
         [self.sequencer setModulationValue:newValue forBus:0 forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         
@@ -770,7 +771,7 @@
         
         float range = 127.0;
         
-        uint newValue = range * ( sender.percentage / 100.0 );
+        uint newValue = roundf( range * ( sender.percentage / 100.0 ) );
         
         [self.sequencer setModulationValue:newValue forBus:1 forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         

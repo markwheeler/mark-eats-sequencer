@@ -386,9 +386,6 @@ typedef enum EatsStepAdvance {
                 [self.sequencer setCurrentPatternId:[[self.sequencer nextPatternIdForPage:pageId] intValue] forPage:pageId];
                 [self.sequencer setNextPatternId:nil forPage:pageId];
             }
-            
-//            if( pageId == 0 )
-//                NSLog( @"0 currentStep: %u", [self.sequencer currentStepForPage:pageId] );
         
         }
         
@@ -397,8 +394,6 @@ typedef enum EatsStepAdvance {
             
             [self.sequencer advancePageTickWithTicksPerMeasure:_ticksPerMeasure forPage:pageId];
             
-//            if( pageId == 0 )
-//                NSLog( @"0 pageTick: %u", [self.sequencer pageTickForPage:pageId] );
         }
         
     }
@@ -413,98 +408,95 @@ typedef enum EatsStepAdvance {
 
 - (void) tickSendNotes:(uint64_t)ns forPage:(uint)pageId
 {
-    // Send all the notes
-    
-    EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
+    // Check if we're advancing
     EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
+    if( playMode == EatsSequencerPlayMode_Pause || ![self.sequencer sendNotesForPage:pageId] || [self needToAdvanceStep:pageId] == EatsStepAdvance_None )
+        return;
     
-    if( needsToAdvance != EatsStepAdvance_None && playMode != EatsSequencerPlayMode_Pause ) {
+    // Get the notes
+    NSSet *notes = [self.sequencer notesAtStep:[self.sequencer currentStepForPage:pageId] inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+    
+    if( !notes.count )
+        return;
+    
+    // Get stuff needed for all notes on this step
+    
+    int channel = [self.sequencer channelForPage:pageId];
+    int stepLength = [self.sequencer stepLengthForPage:pageId];
+    uint64_t nsSwing = [self calculateSwingForStep:[self.sequencer currentStepForPage:pageId] forPage:pageId];
+    
+    // Send notes that need to be sent
+    for( SequencerNote *note in notes ) {
         
-        int channel = [self.sequencer channelForPage:pageId];
-        int stepLength = [self.sequencer stepLengthForPage:pageId];
+        int pitch = [self.sequencer pitchAtRow:note.row forPage:pageId];
         
-        // Calculate swing for this step
-        uint64_t nsSwing = [self calculateSwingForStep:[self.sequencer currentStepForPage:pageId] forPage:pageId];
+        // Transpose
+        pitch += [self.sequencer transposeForPage:pageId];
+        if( pitch < SEQUENCER_MIDI_MIN )
+            pitch = SEQUENCER_MIDI_MIN;
+        if( pitch > SEQUENCER_MIDI_MAX )
+            pitch = SEQUENCER_MIDI_MAX;
         
-        // Get the notes
+        // Calculate velocity
         
-        NSSet *notes = [self.sequencer notesAtStep:[self.sequencer currentStepForPage:pageId] inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+        int velocity = note.velocity;
         
-        // Send notes that need to be sent and read modulation values
-        for( SequencerNote *note in notes ) {
+        // We only add swing and velocity groove when playing forward or reverse
+        if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
             
-            // Send note
-            if( [self.sequencer sendNotesForPage:pageId] ) {
-                
-                int pitch = [self.sequencer pitchAtRow:note.row forPage:pageId];
-                
-                // Transpose
-                pitch += [self.sequencer transposeForPage:pageId];
-                if( pitch < SEQUENCER_MIDI_MIN )
-                    pitch = SEQUENCER_MIDI_MIN;
-                if( pitch > SEQUENCER_MIDI_MAX )
-                    pitch = SEQUENCER_MIDI_MAX;
-                
-                // Calculate velocity
-                
-                int velocity = note.velocity;
-                
-                // We only add swing and velocity groove when playing forward or reverse
-                if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Reverse ) {
-                    
-                    // Velocity groove if enabled
-                    if( [self.sequencer velocityGrooveForPage:pageId] ) {
-                        velocity = [EatsVelocityUtils calculateVelocityForPosition:[self.sequencer currentStepForPage:pageId] * ( _minQuantization / stepLength )
-                                                                      baseVelocity:velocity
-                                                                              type:[self.sequencer swingTypeForPage:pageId]
-                                                                   minQuantization:_minQuantization];
-                    }
-                }
-                
-                // Send MIDI note
-                [self startMIDINote:pitch
-                          onChannel:channel
-                       withVelocity:velocity
-                             atTime:ns + nsSwing];
-                
-                // Set note length
-                
-                // This number in the end here is the _ticksPerMeasure steps that the note will be in length.
-                int length = roundf( (float)note.length * ( _ticksPerMeasure / (float)stepLength ) );
-                if( length < 1 )
-                    NSLog(@"WARNING: Note added to active notes was too short: %i", length);
-                
-                // Add to, or update, activeNotes so we know when to stop the note
-                
-                NSUInteger index = [_activeNotes indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-                    BOOL result = ( [[obj valueForKey:@"channel"] intValue] == channel && [[obj valueForKey:@"pitch"] intValue] == pitch );
-                    return result;
-                }];
-                
-                // If the note isn't already playing then make an entry for it
-                if( index == NSNotFound ) {
-                    [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
-                                             [NSNumber numberWithInt:channel], @"channel",
-                                             [NSNumber numberWithInt:velocity], @"velocity",
-                                             [NSNumber numberWithInt:length], @"lengthRemaining",
-                                             [NSNumber numberWithInt:pageId], @"fromPageId",
-                                             [NSNumber numberWithUnsignedLongLong:ns +nsSwing], @"startedAtNs",
-                                             nil]];
-                    
-                // If the note is playing then either update it's length, or leave it, depending on if this will make it longer or not
-                } else {
-                    
-                    NSMutableDictionary *note = [_activeNotes objectAtIndex:index];
-                    if( [[note valueForKey:@"lengthRemaining"] intValue] < length )
-                        [note setObject:[NSNumber numberWithInt:length] forKey:@"lengthRemaining"];
-                }
+            // Velocity groove if enabled
+            if( [self.sequencer velocityGrooveForPage:pageId] ) {
+                velocity = [EatsVelocityUtils calculateVelocityForPosition:[self.sequencer currentStepForPage:pageId] * ( _minQuantization / stepLength )
+                                                              baseVelocity:velocity
+                                                                      type:[self.sequencer swingTypeForPage:pageId]
+                                                           minQuantization:_minQuantization];
             }
+        }
+        
+        // Send MIDI note
+        [self startMIDINote:pitch
+                  onChannel:channel
+               withVelocity:velocity
+                     atTime:ns + nsSwing];
+        
+        // Set note length
+        
+        // This number in the end here is the _ticksPerMeasure steps that the note will be in length.
+        int length = roundf( (float)note.length * ( _ticksPerMeasure / (float)stepLength ) );
+        
+        // Add to, or update, activeNotes so we know when to stop the note
+        
+        NSUInteger index = [_activeNotes indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
+            BOOL result = ( [[obj valueForKey:@"channel"] intValue] == channel && [[obj valueForKey:@"pitch"] intValue] == pitch );
+            return result;
+        }];
+        
+        // If the note isn't already playing then make an entry for it
+        if( index == NSNotFound ) {
+            [_activeNotes addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:pitch], @"pitch",
+                                     [NSNumber numberWithInt:channel], @"channel",
+                                     [NSNumber numberWithInt:velocity], @"velocity",
+                                     [NSNumber numberWithInt:length], @"lengthRemaining",
+                                     [NSNumber numberWithInt:pageId], @"fromPageId",
+                                     [NSNumber numberWithUnsignedLongLong:ns +nsSwing], @"startedAtNs",
+                                     nil]];
+            
+        // If the note is playing then either update it's length, or leave it, depending on if this will make it longer or not
+        } else {
+            
+            NSMutableDictionary *note = [_activeNotes objectAtIndex:index];
+            if( [[note valueForKey:@"lengthRemaining"] intValue] < length )
+                [note setObject:[NSNumber numberWithInt:length] forKey:@"lengthRemaining"];
         }
     }
 }
 
 - (void) tickSendModulation:(uint64_t)ns forPage:(uint)pageId
 {
+    // No need to send anything if we're paused
+    EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
+    if( playMode == EatsSequencerPlayMode_Pause )
+        return;
     
     // Are any of the modulation busses active on this page?
     
@@ -522,16 +514,30 @@ typedef enum EatsStepAdvance {
     if( !modulationBusActiveOnThisPage )
         return;
     
-    
-    // If so we need to check some other stuff
-    
-    // TODO might be able to move some of these after later checks
+    // Are we playing a note this tick?
     
     EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
-    EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
+    BOOL playingANote = NO;
+    
+    NSUInteger numberOfNotesAtStep = [[self.sequencer notesAtStep:[self.sequencer currentStepForPage:pageId] inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] count];
+    
+    if( needsToAdvance != EatsStepAdvance_None && numberOfNotesAtStep )
+        playingANote = YES;
+    
+    // If we're not smoothing then return if a note isn't playing
+    if( ![self.sequencer modulationSmoothForPage:pageId] && !playingANote )
+        return;
+    
+    // Make sure we're not trying to smooth between too few notes
+    if( [self.sequencer modulationSmoothForPage:pageId] && !playingANote && [self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] < 2 )
+        return;
+    
+    // Looks like we need to do this
+    
     uint stepLength = [self.sequencer stepLengthForPage:pageId];
     int pageTick = [self.sequencer pageTickForPage:pageId];
     int pageTicksPerStep = _ticksPerMeasure / stepLength;
+    
     
     // Offset by almost a step when in reverse so that modulation lines up with the start of the note
     if( playMode == EatsSequencerPlayMode_Reverse ) {
@@ -542,31 +548,6 @@ typedef enum EatsStepAdvance {
     
     // Work out step based on pageTick to allow for reverse adjustment above
     int currentStep = floor( pageTick / pageTicksPerStep );
-    
-    // Are we playing a note this tick?
-    BOOL playingANote = NO;
-    
-    NSUInteger numberOfNotesAtStep = [[self.sequencer notesAtStep:[self.sequencer currentStepForPage:pageId] inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] count];
-    
-    if( needsToAdvance != EatsStepAdvance_None && numberOfNotesAtStep )
-        playingANote = YES;
-    
-    
-    // Check if we need to procede
-    
-    // No need to send anything if we're paused
-    if( playMode == EatsSequencerPlayMode_Pause )
-        return;
-    
-    // If we're not smoothing then return if a note isn't playing
-    if( ![self.sequencer modulationSmoothForPage:pageId] && !playingANote )
-        return;
-    
-    // Make sure we're not trying to smooth between too few notes
-    if( [self.sequencer modulationSmoothForPage:pageId] && !playingANote && [self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] < 2 )
-        return;
-    
-    // Looks like we need to!
     
     
     // Calculate swing for this step and next
@@ -643,6 +624,7 @@ typedef enum EatsStepAdvance {
         }
     }
     
+    // TODO remove this
 //    if( pageId == 0 )
 //        NSLog( @"currentStep: %i previousStepToCheck: %i nextStepToCheck: %i", currentStep, previousStepToCheck, nextStepToCheck );
     
@@ -653,7 +635,7 @@ typedef enum EatsStepAdvance {
         
     } else if( nextStepToCheck == previousStepToCheck ) {
         // Notes are at the same step, don't bother
-        NSLog( @"Same step %u %u", previousStepToCheck, nextStepToCheck );
+        NSLog( @"Same step %u %u", previousStepToCheck, nextStepToCheck ); // TODO remove this
         return;
     }
     
@@ -668,11 +650,8 @@ typedef enum EatsStepAdvance {
     
     uint pageTickOfCurrentStep = currentStep * pageTicksPerStep;
     
-//    NSLog( @"pageTick: %u pageTickOfCurrentStep: %u progressionBetweenValues: %f previousStepToCheckInTicks: %i nextStepToCheckInTicks: %i", pageTick, pageTickOfCurrentStep, progressionBetweenValues, previousStepToCheckInTicks, nextStepToCheckInTicks );
-    
-    
     float progressionBetweenSteps = ( pageTick - pageTickOfCurrentStep ) / (float)pageTicksPerStep;
-    if( progressionBetweenSteps > 1.0 ) {
+    if( progressionBetweenSteps > 1.0 ) { // TODO remove this
         NSLog( @"!!!!!! ------> pageTick: %u pageTickOfCurrentStep: %u progressionBetweenSteps: %f", pageTick, pageTickOfCurrentStep, progressionBetweenSteps );
         progressionBetweenSteps = 1.0;
     }
@@ -691,7 +670,11 @@ typedef enum EatsStepAdvance {
             uint tweenedModulationValueToSend = roundf( [previousModulationValues[b] intValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] intValue] * progressionBetweenValues );
             
             NSDictionary *modulationDestination = self.sequencer.modulationDestinationsArray[modulationDestinationId];
-            [self sendMIDIModulationValue:tweenedModulationValueToSend ofType:[[modulationDestination objectForKey:@"type"] unsignedIntValue] onChannel:[self.sequencer channelForPage:pageId] toControllerNumber:[[modulationDestination objectForKey:@"controllerNumber"] unsignedIntValue] atTime:ns + nsSwingForModulation];
+            [self sendMIDIModulationValue:tweenedModulationValueToSend
+                                   ofType:[[modulationDestination objectForKey:@"type"] unsignedIntValue]
+                                onChannel:[self.sequencer channelForPage:pageId]
+                       toControllerNumber:[[modulationDestination objectForKey:@"controllerNumber"] unsignedIntValue]
+                                   atTime:ns + nsSwingForModulation];
         }
     }
 }
@@ -699,7 +682,6 @@ typedef enum EatsStepAdvance {
 
 - (EatsStepAdvance) needToAdvanceStep:(uint)pageId
 {
-    
     // If the page has been scrubbed
     if( [self.sequencer nextStepForPage:pageId] && _currentTick % ( _ticksPerMeasure / [self.sequencer stepQuantization] ) == 0 ) {
         return EatsStepAdvance_Scrubbed;
@@ -711,7 +693,6 @@ typedef enum EatsStepAdvance {
     } else {
         return EatsStepAdvance_None;
     }
-    
 }
 
 - (uint64_t) calculateSwingForStep:(uint)step forPage:(uint)pageId
