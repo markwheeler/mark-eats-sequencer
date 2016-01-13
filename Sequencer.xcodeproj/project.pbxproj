@@ -648,6 +648,11 @@
 			attributes = {
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Mark Eats";
+				TargetAttributes = {
+					4D6115C716E431BD00140AF8 = {
+						DevelopmentTeam = 2BBEME2W4E;
+					};
+				};
 			};
 			buildConfigurationList = 4D6115C316E431BD00140AF8 /* Build configuration list for PBXProject "Sequencer" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -881,7 +886,8 @@
 		4D6115EC16E431BD00140AF8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mark Wheeler";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -906,7 +912,8 @@
 		4D6115ED16E431BD00140AF8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mark Wheeler";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

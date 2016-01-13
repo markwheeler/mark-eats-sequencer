@@ -263,7 +263,6 @@ typedef enum EatsStepAdvance {
     for( uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
         
         EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
-        int stepLength = [self.sequencer stepLengthForPage:pageId];
         int loopStart = [self.sequencer loopStartForPage:pageId];
         int loopEnd = [self.sequencer loopEndForPage:pageId];
         BOOL inLoop = [self.sequencer inLoopForPage:pageId];
@@ -349,12 +348,6 @@ typedef enum EatsStepAdvance {
             // Set the step
             [self.sequencer setCurrentStep:playNow forPage:pageId];
             
-            // Set the page tick 0 - _ticksPerMeasure (192) at 16ths
-            uint pageTick = playNow * ( _ticksPerMeasure / stepLength );
-            [self.sequencer setPageTick:pageTick forPage:pageId];
-            
-            NSLog( @"pageTick %u", pageTick );
-            
             // Are we in a loop
             if( loopStart <= loopEnd ) {
                 if( playNow >= loopStart && playNow <= loopEnd && loopEnd - loopStart != self.sharedPreferences.gridWidth - 1 )
@@ -394,35 +387,20 @@ typedef enum EatsStepAdvance {
                 [self.sequencer setNextPatternId:nil forPage:pageId];
             }
             
+//            if( pageId == 0 )
+//                NSLog( @"0 currentStep: %u", [self.sequencer currentStepForPage:pageId] );
         
-        } else if( playMode != EatsSequencerPlayMode_Pause && playMode != EatsSequencerPlayMode_Slice ) {
-            
-            // Set the page tick if it hasn't been initialized yet (it will be -1)
-            if( [self.sequencer pageTickForPage:pageId] < 0 ) {
-                uint pageTick = [self.sequencer currentStepForPage:pageId] * ( _ticksPerMeasure / stepLength );
-                [self.sequencer setPageTick:pageTick forPage:pageId];
-            }
-            
-            // Advance tickPosition if we didn't already set it on an advancing step
-            // Not nesecary in pause or slice modes
-            
-            uint pageTickMin = [self.sequencer loopStartForPage:pageId] * ( _ticksPerMeasure / stepLength );
-            uint pageTickMax = ( [self.sequencer loopEndForPage:pageId] + 1 ) * ( _ticksPerMeasure / stepLength );
-            
-            int pageTick = [self.sequencer pageTickForPage:pageId];
-            if( playMode == EatsSequencerPlayMode_Forward || playMode == EatsSequencerPlayMode_Random ) {
-                pageTick ++;
-                if( pageTick > pageTickMax )
-                    pageTick = pageTickMin;
-            } else if( playMode == EatsSequencerPlayMode_Reverse ) {
-                pageTick --;
-                if( pageTick < pageTickMin )
-                    pageTick = pageTickMax;
-                
-            }
-            
-            [self.sequencer setPageTick:pageTick forPage:pageId];
         }
+        
+        // Once the step has been set above, advance the pageTick which is used in calculated smoothed modulation
+        if( playMode != EatsSequencerPlayMode_Pause && playMode != EatsSequencerPlayMode_Slice ) {
+            
+            [self.sequencer advancePageTickWithTicksPerMeasure:_ticksPerMeasure forPage:pageId];
+            
+//            if( pageId == 0 )
+//                NSLog( @"0 pageTick: %u", [self.sequencer pageTickForPage:pageId] );
+        }
+        
     }
     
     
@@ -547,10 +525,23 @@ typedef enum EatsStepAdvance {
     
     // If so we need to check some other stuff
     
+    // TODO might be able to move some of these after later checks
+    
     EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
     EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
     uint stepLength = [self.sequencer stepLengthForPage:pageId];
     int pageTick = [self.sequencer pageTickForPage:pageId];
+    int pageTicksPerStep = _ticksPerMeasure / stepLength;
+    
+    // Offset by almost a step when in reverse so that modulation lines up with the start of the note
+    if( playMode == EatsSequencerPlayMode_Reverse ) {
+        pageTick -= pageTicksPerStep - 1;
+        if( pageTick < 0 )
+            pageTick += ( [self.sequencer loopEndForPage:pageId] + 1 ) * pageTicksPerStep;
+    }
+    
+    // Work out step based on pageTick to allow for reverse adjustment above
+    int currentStep = floor( pageTick / pageTicksPerStep );
     
     // Are we playing a note this tick?
     BOOL playingANote = NO;
@@ -580,7 +571,6 @@ typedef enum EatsStepAdvance {
     
     // Calculate swing for this step and next
     
-    int currentStep = [self.sequencer currentStepForPage:pageId];
     int nextStep = currentStep;
     
     if( playMode == EatsSequencerPlayMode_Forward ) {
@@ -653,6 +643,9 @@ typedef enum EatsStepAdvance {
         }
     }
     
+//    if( pageId == 0 )
+//        NSLog( @"currentStep: %i previousStepToCheck: %i nextStepToCheck: %i", currentStep, previousStepToCheck, nextStepToCheck );
+    
     // Work out where we are inbetween the two values
     if( nextStepToCheck < previousStepToCheck ) {
         
@@ -664,12 +657,8 @@ typedef enum EatsStepAdvance {
         return;
     }
     
-//    int playNowAdjusted = [self.sequencer currentStepForPage:pageId];
-//    if( playNowAdjusted < previousStepToCheck )
-//        playNowAdjusted += self.sharedPreferences.gridWidth;
-    
-    int nextStepToCheckInTicks = nextStepToCheck * ( _ticksPerMeasure / stepLength );
-    int previousStepToCheckInTicks = previousStepToCheck * ( _ticksPerMeasure / stepLength );
+    int nextStepToCheckInTicks = nextStepToCheck * pageTicksPerStep;
+    int previousStepToCheckInTicks = previousStepToCheck * pageTicksPerStep;
     
     int ticksBetweenModulationValues = nextStepToCheckInTicks - previousStepToCheckInTicks;
     float progressionBetweenValues = ( pageTick - previousStepToCheckInTicks ) / (float)ticksBetweenModulationValues;
@@ -677,10 +666,12 @@ typedef enum EatsStepAdvance {
     
     // Work out swing
     
-    uint pageTickOfCurrentStep = currentStep * ( _ticksPerMeasure / stepLength );
+    uint pageTickOfCurrentStep = currentStep * pageTicksPerStep;
     
-    int ticksInAStep = _ticksPerMeasure / stepLength;
-    float progressionBetweenSteps = ( pageTick - pageTickOfCurrentStep ) / (float)ticksInAStep;
+//    NSLog( @"pageTick: %u pageTickOfCurrentStep: %u progressionBetweenValues: %f previousStepToCheckInTicks: %i nextStepToCheckInTicks: %i", pageTick, pageTickOfCurrentStep, progressionBetweenValues, previousStepToCheckInTicks, nextStepToCheckInTicks );
+    
+    
+    float progressionBetweenSteps = ( pageTick - pageTickOfCurrentStep ) / (float)pageTicksPerStep;
     if( progressionBetweenSteps > 1.0 ) {
         NSLog( @"!!!!!! ------> pageTick: %u pageTickOfCurrentStep: %u progressionBetweenSteps: %f", pageTick, pageTickOfCurrentStep, progressionBetweenSteps );
         progressionBetweenSteps = 1.0;

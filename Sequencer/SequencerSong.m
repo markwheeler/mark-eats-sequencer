@@ -1,6 +1,6 @@
 //
 //  SequencerSong.m
-//  Alt Data Test
+//  Sequencer
 //
 //  Created by Mark Wheeler on 10/08/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.

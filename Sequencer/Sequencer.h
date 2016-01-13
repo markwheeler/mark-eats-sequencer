@@ -1,6 +1,6 @@
 //
 //  Sequencer.h
-//  Alt Data Test
+//  Sequencer
 //
 //  Created by Mark Wheeler on 12/08/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
@@ -235,7 +235,7 @@
 - (void) setInLoop:(BOOL)inLoop forPage:(uint)pageId;
 
 - (int) pageTickForPage:(uint)pageId;
-- (void) setPageTick:(int)tick forPage:(uint)pageId;
+- (void) advancePageTickWithTicksPerMeasure:(int)ticksPerMeasure forPage:(uint)pageId;
 
 - (int) playModeForPage:(uint)pageId;
 - (void) setPlayMode:(int)playMode forPage:(uint)pageId;

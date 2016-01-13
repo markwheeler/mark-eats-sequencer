@@ -1,6 +1,6 @@
 //
 //  Sequencer.m
-//  Alt Data Test
+//  Sequencer
 //
 //  Created by Mark Wheeler on 12/08/2013.
 //  Copyright (c) 2013 Mark Eats. All rights reserved.
@@ -126,6 +126,16 @@
     // Automation
     self.song.automation.changes = [NSMutableSet set];
     self.song.automation.loopLength = 4;
+    
+    // Temp test notes
+    
+//    [self addNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
+//    [self setModulationValue:0 forBus:0 forNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
+//    
+//    [self addNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
+//    [self setModulationValue:127 forBus:0 forNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
+    
+    // End test notes
     
     return self;
 }
@@ -2107,7 +2117,7 @@
 
 - (void) resetPlayPositionsForAllPlayingPages
 {
-    //Reset the play positions of all the active loops
+    // Reset the play positions of all the active loops
     int pageId = 0;
     for( SequencerPageState *pageState in self.state.pageStates ) {
         if( pageState.playMode == EatsSequencerPlayMode_Pause || pageState.playMode == EatsSequencerPlayMode_Forward ) {
@@ -2137,18 +2147,50 @@
 }
 
 
+- (void) advancePageTickWithTicksPerMeasure:(int)ticksPerMeasure forPage:(uint)pageId
+{
+    dispatch_sync( self.sequencerQueue, ^(void) {
+        
+        SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+        int stepLength = [self stepLengthForPage:pageId];
+        int pageTicksPerStep = ticksPerMeasure / stepLength;
+        int pageTickOfCurrentStep = pageState.currentStep * pageTicksPerStep;
+        
+        int pageTick = pageState.pageTick;
+        
+        // Init the page tick if it hasn't been yet (it will be -1)
+        if( pageTick < 0 )
+            pageTick = pageTickOfCurrentStep;
+        
+        // Advance pageTick (not nesecary in pause or slice modes)
+        
+        if( pageState.playMode == EatsSequencerPlayMode_Forward || pageState.playMode == EatsSequencerPlayMode_Random ) {
+            pageTick ++;
+            
+            // Does pageTick line up with the current step? If not, change it
+            int difference = pageTick - pageTickOfCurrentStep;
+            if( difference < 0 || difference >= pageTicksPerStep )
+                pageTick = pageTickOfCurrentStep;
+            
+        } else if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
+            pageTick --;
+            
+            int difference = pageTick - pageTickOfCurrentStep;
+            if( difference < 0 || difference >= pageTicksPerStep )
+                pageTick = ( pageState.currentStep + 1 ) * pageTicksPerStep - 1;
+            
+        }
+        
+        // Set it
+        pageState.pageTick = pageTick;
+        
+    });
+}
+
 - (int) pageTickForPage:(uint)pageId
 {
     SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
     return pageState.pageTick;
-}
-
-- (void) setPageTick:(int)tick forPage:(uint)pageId
-{
-    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
-    pageState.pageTick = tick;
-    
-    [self postNotification:kSequencerPageStateTickPositionDidChangeNotification forPage:pageId];
 }
 
 
