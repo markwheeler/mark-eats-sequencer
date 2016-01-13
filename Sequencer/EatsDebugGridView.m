@@ -284,8 +284,8 @@
             
             NSRect rectForStroke = NSMakeRect(rectForFill.origin.x + 0.5, rectForFill.origin.y + 0.5, rectForFill.size.width - 1, rectForFill.size.height - 1);
             NSBezierPath *roundedRectForStroke = [NSBezierPath bezierPathWithRoundedRect:rectForStroke xRadius:cornerRadius yRadius:cornerRadius];
-            [rowForStrokes
-             addObject:roundedRectForStroke];
+            [roundedRectForStroke setLineWidth:1.0];
+            [rowForStrokes addObject:roundedRectForStroke];
         }
     }
     
@@ -316,21 +316,21 @@
             
             if( x == self.currentStep ) {
                 if( active )
-                    [[viewArray objectAtIndex:x] insertObject:_playheadBrightness atIndex:y];
+                    [viewArray[x] insertObject:_playheadBrightness atIndex:y];
                 else
-                    [[viewArray objectAtIndex:x] insertObject:_playheadBrightnessInactive atIndex:y];
+                    [viewArray[x] insertObject:_playheadBrightnessInactive atIndex:y];
                 
             } else if( self.nextStep && x == self.nextStep.intValue ) {
                 if( active )
-                    [[viewArray objectAtIndex:x] insertObject:_nextStepBrightness atIndex:y];
+                    [viewArray[x] insertObject:_nextStepBrightness atIndex:y];
                 else
-                    [[viewArray objectAtIndex:x] insertObject:_nextStepBrightnessInactive atIndex:y];
+                    [viewArray[x] insertObject:_nextStepBrightnessInactive atIndex:y];
                 
             } else {
                 if( active )
-                    [[viewArray objectAtIndex:x] insertObject:_backgroundBrightness atIndex:y];
+                    [viewArray[x] insertObject:_backgroundBrightness atIndex:y];
                 else
-                    [[viewArray objectAtIndex:x] insertObject:_backgroundBrightnessInactive atIndex:y];
+                    [viewArray[x] insertObject:_backgroundBrightnessInactive atIndex:y];
             }
             
         }
@@ -371,11 +371,11 @@
             if( tailDraw < _gridWidth && note.row < _gridHeight ) {
                 float velocityTailBrightness = 0.1 * ( 1.0 - velocityPercentage );
                 NSNumber *lengthBrightnessWithVelocity = [NSNumber numberWithFloat:_lengthBrightness + velocityTailBrightness];
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > lengthBrightnessWithVelocity.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:lengthBrightnessWithVelocity];
+                if( [viewArray[tailDraw][note.row] floatValue] > lengthBrightnessWithVelocity.floatValue )
+                    [viewArray[tailDraw] replaceObjectAtIndex:note.row withObject:lengthBrightnessWithVelocity];
             } else {
-                if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:note.row] floatValue] > _lengthBrightnessInactive.floatValue )
-                    [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightnessInactive];
+                if( [viewArray[tailDraw][note.row] floatValue] > _lengthBrightnessInactive.floatValue )
+                    [viewArray[tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightnessInactive];
             }
             
             
@@ -386,50 +386,48 @@
             // Put the notes in
             float velocityNoteBrightness = 0.4 * ( 1.0 - velocityPercentage );
             NSNumber *noteBrightnessWithVelocity = [NSNumber numberWithFloat:_noteBrightness + velocityNoteBrightness];
-            [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:noteBrightnessWithVelocity];
+            [viewArray[note.step] replaceObjectAtIndex:note.row withObject:noteBrightnessWithVelocity];
         } else
             // Put the notes in
-            [[viewArray objectAtIndex:note.step] replaceObjectAtIndex:note.row withObject:_noteBrightnessInactive];
+            [viewArray[note.step] replaceObjectAtIndex:note.row withObject:_noteBrightnessInactive];
         
     }
     
     
     // Draw the viewArray
     
-    // Focus ring
     [NSGraphicsContext saveGraphicsState];
     
-    if( self.window.firstResponder == self ) {
-        NSSetFocusRingStyle(NSFocusRingBelow);
-    }
+    // Focus ring
     
-    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSInsetRect([self bounds], 4.0, 5.0)];
+    if( self.window.firstResponder == self )
+        NSSetFocusRingStyle( NSFocusRingBelow );
+    
+    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSInsetRect( [self bounds], 4.0, 5.0 )];
     [[NSColor windowBackgroundColor] set];
-    [path stroke];
     [path fill];
     
-    [NSGraphicsContext restoreGraphicsState];
-    
-    for( int r = 0; r < _rows; r++ ){
-        for( int c = 0; c < _columns; c++ ) {
+    for( int r = 0; r < _rows; r ++ ){
+        for( int c = 0; c < _columns; c ++ ) {
             
-            [NSGraphicsContext saveGraphicsState];
+            float brightness = [viewArray[c][r] floatValue];
             
             // Fill
-            NSBezierPath *roundedRectForFill = [[_bezierPathsForFills objectAtIndex:r] objectAtIndex:c];
-            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] alpha:1] set];
+            NSBezierPath *roundedRectForFill = _bezierPathsForFills[r][c];
+            [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
             [roundedRectForFill fill];
             
-            // Stroke
-            NSBezierPath *roundedRectForStroke = [[_bezierPathsForStrokes objectAtIndex:r] objectAtIndex:c];
-            [[NSColor colorWithCalibratedHue:0 saturation:0 brightness:[[[viewArray objectAtIndex:c] objectAtIndex:r] floatValue] - 0.1 alpha:1] set];
-            [roundedRectForStroke setLineWidth:1.0];
-            [roundedRectForStroke stroke];
+            brightness -= 0.1;
             
-            [NSGraphicsContext restoreGraphicsState];
+            // Stroke
+            NSBezierPath *roundedRectForStroke = _bezierPathsForStrokes[r][c];
+            [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
+            [roundedRectForStroke stroke];
             
         }
     }
+    
+    [NSGraphicsContext restoreGraphicsState];
 }
 
 @end
