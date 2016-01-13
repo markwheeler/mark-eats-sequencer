@@ -561,7 +561,7 @@ typedef enum EatsStepAdvance {
     } else if( playMode == EatsSequencerPlayMode_Reverse ) {
         nextStep --;
         if( nextStep < 0 )
-            nextStep = self.sharedPreferences.gridWidth;
+            nextStep = self.sharedPreferences.gridWidth - 1;
     }
     
     uint64_t nsSwing = [self calculateSwingForStep:currentStep forPage:pageId];
@@ -654,10 +654,12 @@ typedef enum EatsStepAdvance {
     if( progressionBetweenSteps > 1.0 ) { // TODO remove this
         NSLog( @"!!!!!! ------> pageTick: %u pageTickOfCurrentStep: %u progressionBetweenSteps: %f", pageTick, pageTickOfCurrentStep, progressionBetweenSteps );
         progressionBetweenSteps = 1.0;
+    } else if( progressionBetweenSteps < 0.0 ) {
+        NSLog( @"?????? ------> pageTick: %u pageTickOfCurrentStep: %u progressionBetweenSteps: %f", pageTick, pageTickOfCurrentStep, progressionBetweenSteps );
+        progressionBetweenSteps = 1.0;
     }
     
     uint64_t nsSwingForModulation = nsSwing * ( 1.0 - progressionBetweenSteps ) + nsSwingForNextStep * progressionBetweenSteps;
-    
     
     // Send the values
     
