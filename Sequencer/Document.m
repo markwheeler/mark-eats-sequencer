@@ -65,7 +65,7 @@ typedef enum DocumentPageAnimationDirection {
 
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPageSegmentedControl;
 
-@property (nonatomic, weak) IBOutlet NSTextField           *channelStaticTextField;
+@property (nonatomic, weak) IBOutlet NSPopUpButton         *channelPopup;
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *currentPatternSegmentedControl;
 @property (nonatomic, weak) IBOutlet NSSegmentedControl    *pagePlaybackControls;
 @property (nonatomic, weak) IBOutlet NSTableView           *rowPitchesTableView;
@@ -212,6 +212,8 @@ typedef enum DocumentPageAnimationDirection {
     
     // Sequencer page notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageNameDidChange:) name:kSequencerPageNameDidChangeNotification object:self.sequencer];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageChannelDidChange:) name:kSequencerPageChannelDidChangeNotification object:self.sequencer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageSendNotesDidChange:) name:kSequencerPageSendNotesDidChangeNotification object:self.sequencer];
     
@@ -380,6 +382,12 @@ typedef enum DocumentPageAnimationDirection {
     self.debugGridView.delegate = self;
     
     self.debugGridViewFloatingToolbar.alphaValue = 0.0;
+    
+    // Setup channel popup
+    [self.channelPopup removeAllItems];
+    for( int i = 0; i < SEQUENCER_NUMBER_OF_MIDI_CHANNELS; i ++ ) {
+        [self.channelPopup addItemWithTitle:[NSString stringWithFormat:@"%i", i + 1]];
+    }
     
     // Setup modulation popups
     [self.modulationDestinationAPopup removeAllItems];
@@ -581,6 +589,14 @@ typedef enum DocumentPageAnimationDirection {
 {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         [self updateNameForPage:[[notification.userInfo valueForKey:@"pageId"] unsignedIntValue]];
+    });
+}
+
+- (void) pageChannelDidChange:(NSNotification *)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if( [self.sequencer isNotificationFromCurrentPage:notification] )
+            [self updateChannel];
     });
 }
 
@@ -921,7 +937,7 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) updateChannel
 {
-    self.channelStaticTextField.stringValue = [NSString stringWithFormat:@"Channel %i", [self.sequencer channelForPage:self.sequencer.currentPageId] + 1];
+    [self.channelPopup selectItemAtIndex:[self.sequencer channelForPage:self.sequencer.currentPageId]];
 }
 
 - (void) updateCurrentPattern
@@ -1221,6 +1237,13 @@ typedef enum DocumentPageAnimationDirection {
 {
     [self.sequencer setNextOrCurrentPatternId:[NSNumber numberWithInteger:sender.selectedSegment] forPage:self.sequencer.currentPageId];
 }
+
+
+- (IBAction)channelPopup:(NSPopUpButton *)sender
+{
+    [self.sequencer setChannel:(int)sender.indexOfSelectedItem forPage:self.sequencer.currentPageId];
+}
+
 
 - (void) controlTextDidEndEditing:(NSNotification *)obj
 {

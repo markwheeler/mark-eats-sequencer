@@ -17,7 +17,7 @@
                 <outlet property="automationLoopLengthTextField" destination="8g4-8e-6xf" id="vpr-Ni-wsg"/>
                 <outlet property="bpmStepper" destination="101619" id="107482"/>
                 <outlet property="bpmTextField" destination="101620" id="107476"/>
-                <outlet property="channelStaticTextField" destination="106524" id="107483"/>
+                <outlet property="channelPopup" destination="4zk-fZ-cIJ" id="VW3-tg-mK5"/>
                 <outlet property="clockLateIndicator" destination="104808" id="104860"/>
                 <outlet property="currentPageSegmentedControl" destination="102811" id="103178"/>
                 <outlet property="currentPatternSegmentedControl" destination="106523" id="107075"/>
@@ -291,6 +291,33 @@
                         <rect key="frame" x="-3" y="0.0" width="830" height="579"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
+                            <textField verticalHuggingPriority="750" id="106524">
+                                <rect key="frame" x="438" y="428" width="85" height="17"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="MIDI Channel" id="106543">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <popUpButton verticalHuggingPriority="750" id="4zk-fZ-cIJ">
+                                <rect key="frame" x="532" y="422" width="63" height="26"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="16" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="kTs-Rb-3ef" id="XkK-64-onQ">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="Bjb-1Q-T1o">
+                                        <items>
+                                            <menuItem title="16" state="on" id="kTs-Rb-3ef"/>
+                                            <menuItem title="Item 2" id="rf6-Jo-MvW"/>
+                                            <menuItem title="Item 3" id="oYg-gm-WL7"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="channelPopup:" target="-2" id="Jtr-XV-deL"/>
+                                </connections>
+                            </popUpButton>
                             <textField verticalHuggingPriority="750" id="106527">
                                 <rect key="frame" x="625" y="390" width="91" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -515,15 +542,6 @@
                                     <action selector="velocityGrooveCheckbox:" target="-2" id="106577"/>
                                 </connections>
                             </button>
-                            <textField verticalHuggingPriority="750" id="106524">
-                                <rect key="frame" x="438" y="428" width="81" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Channel" id="106543">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <textField verticalHuggingPriority="750" id="106514">
                                 <rect key="frame" x="712" y="199" width="78" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>

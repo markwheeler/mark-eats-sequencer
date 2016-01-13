@@ -129,11 +129,11 @@
     
     // Temp test notes
     
-//    [self addNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
-//    [self setModulationValue:0 forBus:0 forNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
-//    
-//    [self addNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
-//    [self setModulationValue:127 forBus:0 forNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
+    [self addNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
+    [self setModulationValue:0 forBus:0 forNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
+    
+    [self addNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
+    [self setModulationValue:127 forBus:0 forNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
     
     // End test notes
     
@@ -538,7 +538,7 @@
 
 - (void) setChannel:(int)channel forPage:(uint)pageId
 {
-    if( channel >= SEQUENCER_MIDI_MIN && channel <= SEQUENCER_MIDI_MAX ) {
+    if( channel >= 0 && channel < SEQUENCER_NUMBER_OF_MIDI_CHANNELS ) {
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
