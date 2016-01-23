@@ -396,9 +396,8 @@
     
     // Draw the viewArray
     
+    // Focus ring and background
     [NSGraphicsContext saveGraphicsState];
-    
-    // Focus ring
     
     if( self.window.firstResponder == self )
         NSSetFocusRingStyle( NSFocusRingBelow );
@@ -406,6 +405,11 @@
     NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSInsetRect( [self bounds], 4.0, 5.0 )];
     [[NSColor windowBackgroundColor] set];
     [path fill];
+    
+    [NSGraphicsContext restoreGraphicsState];
+    
+    // Grid
+    [NSGraphicsContext saveGraphicsState];
     
     for( int r = 0; r < _rows; r ++ ){
         for( int c = 0; c < _columns; c ++ ) {

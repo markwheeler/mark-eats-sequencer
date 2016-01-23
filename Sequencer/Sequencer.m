@@ -127,58 +127,6 @@
     self.song.automation.changes = [NSMutableSet set];
     self.song.automation.loopLength = 4;
     
-    // Temp test notes
-    
-    [self addNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:0 atRow:4 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:1 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:1 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:2 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:2 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:3 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:3 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:4 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:4 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:5 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:5 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:6 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:6 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:7 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:7 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:8 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:8 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:9 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:9 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:10 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:10 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:11 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:11 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:12 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:12 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:13 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:13 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:14 atRow:0 inPattern:0 inPage:0];
-    [self setModulationValue:0 forBus:0 forNoteAtStep:14 atRow:0 inPattern:0 inPage:0];
-    
-    [self addNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
-    [self setModulationValue:127 forBus:0 forNoteAtStep:15 atRow:1 inPattern:0 inPage:0];
-    
-    // End test notes
-    
     return self;
 }
 
