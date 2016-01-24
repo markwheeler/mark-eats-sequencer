@@ -156,10 +156,9 @@ typedef enum EatsStepAdvance {
     
     [self tickMIDIClockPulse:ns];
     [self tickStopNotes:ns];
-    [self tickAdvanceAndAutomate];
+    [self tickAdvanceAndAutomate:ns];
     
     for( uint pageId = 0; pageId < kSequencerNumberOfPages; pageId ++ ) {
-        [self tickSendNotes:ns forPage:pageId];
         [self tickSendModulation:ns forPage:pageId];
     }
     
@@ -210,7 +209,7 @@ typedef enum EatsStepAdvance {
     [_activeNotes removeObjectsInArray:toRemove];
 }
 
-- (void) tickAdvanceAndAutomate
+- (void) tickAdvanceAndAutomate:(uint64_t)ns
 {
     // Keep track of what needs to advance
     NSMutableArray *stepHasBeenAutomated = [NSMutableArray arrayWithCapacity:kSequencerNumberOfPages];
@@ -270,10 +269,10 @@ typedef enum EatsStepAdvance {
         // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
         EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
         
+        int playNow = [self.sequencer currentStepForPage:pageId];
+        
         // If we need to advance and it's not paused
         if( needsToAdvance != EatsStepAdvance_None && playMode != EatsSequencerPlayMode_Pause ) {
-            
-            int playNow;
             
             // If the page has been scrubbed
             if( needsToAdvance == EatsStepAdvance_Scrubbed ) {
@@ -386,6 +385,9 @@ typedef enum EatsStepAdvance {
                 [self.sequencer setCurrentPatternId:[[self.sequencer nextPatternIdForPage:pageId] intValue] forPage:pageId];
                 [self.sequencer setNextPatternId:nil forPage:pageId];
             }
+            
+            // Send notes for playNow
+            [self tickSendNotes:ns atStep:playNow forPage:pageId];
         
         }
         
@@ -406,15 +408,16 @@ typedef enum EatsStepAdvance {
     
 }
 
-- (void) tickSendNotes:(uint64_t)ns forPage:(uint)pageId
+// Send notes is called from within the above
+- (void) tickSendNotes:(uint64_t)ns atStep:(uint)step forPage:(uint)pageId
 {
     // Check if we're advancing
     EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
-    if( playMode == EatsSequencerPlayMode_Pause || ![self.sequencer sendNotesForPage:pageId] || [self needToAdvanceStep:pageId] == EatsStepAdvance_None )
+    if( playMode == EatsSequencerPlayMode_Pause || ![self.sequencer sendNotesForPage:pageId] )
         return;
     
     // Get the notes
-    NSSet *notes = [self.sequencer notesAtStep:[self.sequencer currentStepForPage:pageId] inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+    NSSet *notes = [self.sequencer notesAtStep:step inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
     
     if( !notes.count )
         return;
@@ -423,7 +426,7 @@ typedef enum EatsStepAdvance {
     
     int channel = [self.sequencer channelForPage:pageId];
     int stepLength = [self.sequencer stepLengthForPage:pageId];
-    uint64_t nsSwing = [self calculateSwingForStep:[self.sequencer currentStepForPage:pageId] forPage:pageId];
+    uint64_t nsSwing = [self calculateSwingForStep:step forPage:pageId];
     
     // Send notes that need to be sent
     for( SequencerNote *note in notes ) {
@@ -446,7 +449,7 @@ typedef enum EatsStepAdvance {
             
             // Velocity groove if enabled
             if( [self.sequencer velocityGrooveForPage:pageId] ) {
-                velocity = [EatsVelocityUtils calculateVelocityForPosition:[self.sequencer currentStepForPage:pageId] * ( _minQuantization / stepLength )
+                velocity = [EatsVelocityUtils calculateVelocityForPosition:step * ( _minQuantization / stepLength )
                                                               baseVelocity:velocity
                                                                       type:[self.sequencer swingTypeForPage:pageId]
                                                            minQuantization:_minQuantization];
