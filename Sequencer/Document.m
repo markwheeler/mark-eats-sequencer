@@ -795,13 +795,19 @@ typedef enum DocumentPageAnimationDirection {
     // Debug view
     self.debugGridView.gridWidth = self.sharedPreferences.gridWidth;
     self.debugGridView.gridHeight = self.sharedPreferences.gridHeight;
+    self.debugGridView.gridSizeHasChanged = YES;
     self.debugGridView.needsDisplay = YES;
     
     // Pattern controls
     [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
     for( int i = 0; i < self.currentPatternSegmentedControl.segmentCount; i ++ ) {
         [self.currentPatternSegmentedControl setLabel:[NSString stringWithFormat:@"%i", i + 1] forSegment:i];
-//        [self.currentPatternSegmentedControl setWidth:23 forSegment:i];
+        
+        // Set the segment width (they're not all the same size!)
+        int segmentWidth = 22;
+        if( i > 3 && i < 11 )
+            segmentWidth ++;
+        [self.currentPatternSegmentedControl setWidth:segmentWidth forSegment:i];
     }
     
     // Pitch list

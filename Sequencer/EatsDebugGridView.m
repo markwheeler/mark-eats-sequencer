@@ -18,12 +18,15 @@
 @property (nonatomic) NSNumber              *nextStepBrightness;
 @property (nonatomic) NSNumber              *backgroundBrightness;
 
+@property (nonatomic) NSNumber              *emptyBrightness;
 @property (nonatomic) NSNumber              *noteBrightnessInactive;
 @property (nonatomic) NSNumber              *lengthBrightnessInactive;
 @property (nonatomic) NSNumber              *playheadBrightnessInactive;
 @property (nonatomic) NSNumber              *nextStepBrightnessInactive;
 @property (nonatomic) NSNumber              *backgroundBrightnessInactive;
 
+@property (nonatomic) NSImage               *backgroundGridImage;
+@property (nonatomic) NSBezierPath          *backgroundBezierPath;
 @property (nonatomic) NSArray               *bezierPathsForFills;
 @property (nonatomic) NSArray               *bezierPathsForStrokes;
 
@@ -53,6 +56,7 @@
         
         float stateModifier = 0.1;
         
+        self.emptyBrightness = [NSNumber numberWithInt:0];
         self.noteBrightnessInactive = [NSNumber numberWithFloat:self.noteBrightness + 0.5];
         self.lengthBrightnessInactive = [NSNumber numberWithFloat:self.lengthBrightness + stateModifier];
         self.playheadBrightnessInactive = [NSNumber numberWithFloat:self.playheadBrightness.floatValue + stateModifier];
@@ -60,6 +64,7 @@
         self.backgroundBrightnessInactive = [NSNumber numberWithFloat:self.backgroundBrightness.floatValue + stateModifier];
         
         [self generateBezierPaths];
+        [self generateBackgroundGridImage];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewDidResize:) name:NSViewFrameDidChangeNotification object:self];
     }
@@ -240,6 +245,7 @@
 - (void) viewDidResize:(NSNotification *)notification
 {
     [self generateBezierPaths];
+    [self generateBackgroundGridImage];
 }
 
 - (void) generateBezierPaths
@@ -289,8 +295,59 @@
         }
     }
     
+    _backgroundBezierPath = [NSBezierPath bezierPathWithRect:NSInsetRect( self.bounds, 4.0, 5.0 )];
     _bezierPathsForFills = pathsForFills;
     _bezierPathsForStrokes = pathsForStrokes;
+}
+
+- (void) generateBackgroundGridImage
+{
+    self.backgroundGridImage = [[NSImage alloc] initWithSize:self.bounds.size];
+    
+    NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
+    
+    // Generate the columns
+    for(uint x = 0; x < _columns; x++) {
+        [viewArray insertObject:[NSMutableArray arrayWithCapacity:_rows] atIndex:x];
+        // Generate the rows
+        for(uint y = 0; y < _rows; y++) {
+            
+            // If it's active
+            if( x < _gridWidth && y < _gridHeight )
+                [viewArray[x] insertObject:_backgroundBrightness atIndex:y];
+            else
+                [viewArray[x] insertObject:_backgroundBrightnessInactive atIndex:y];
+        }
+    }
+    
+    // Draw
+    [NSGraphicsContext saveGraphicsState];
+    
+    [self.backgroundGridImage lockFocus];
+    
+    for( int r = 0; r < _rows; r ++ ){
+        for( int c = 0; c < _columns; c ++ ) {
+
+            float brightness = [viewArray[c][r] floatValue];
+
+            // Fill
+            NSBezierPath *roundedRectForFill = _bezierPathsForFills[r][c];
+            [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
+            [roundedRectForFill fill];
+
+            brightness -= 0.1;
+
+            // Stroke
+            NSBezierPath *roundedRectForStroke = _bezierPathsForStrokes[r][c];
+            [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
+            [roundedRectForStroke stroke];
+
+        }
+    }
+    
+    [self.backgroundGridImage unlockFocus];
+    
+    [NSGraphicsContext restoreGraphicsState];
 }
 
 - (void) drawRect:(NSRect)dirtyRect
@@ -298,15 +355,21 @@
     if( !self.notes )
         return;
     
+    // Re-generate the background grid if need be
+    if( _gridSizeHasChanged ) {
+        [self generateBackgroundGridImage];
+        _gridSizeHasChanged = NO;
+    }
+    
     // Generate the columns with playhead and nextStep
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
     
     BOOL active;
     
-    for(uint x = 0; x < _columns; x++) {
+    for( uint x = 0; x < _columns; x ++ ) {
         [viewArray insertObject:[NSMutableArray arrayWithCapacity:_rows] atIndex:x];
         // Generate the rows
-        for(uint y = 0; y < _rows; y++) {
+        for( uint y = 0; y < _rows; y ++ ) {
             
             // Active / inactive
             if( x < _gridWidth && y < _gridHeight )
@@ -327,18 +390,15 @@
                     [viewArray[x] insertObject:_nextStepBrightnessInactive atIndex:y];
                 
             } else {
-                if( active )
-                    [viewArray[x] insertObject:_backgroundBrightness atIndex:y];
-                else
-                    [viewArray[x] insertObject:_backgroundBrightnessInactive atIndex:y];
+                [viewArray[x] insertObject:_emptyBrightness atIndex:y];
             }
             
         }
     }
-
+    
     // Put all the notes in the viewArray    
     
-    for(SequencerNote *note in self.notes) {
+    for( SequencerNote *note in self.notes ) {
         
         // Used for calculating brightness based on note velocity
         float velocityPercentage = (float)note.velocity / SEQUENCER_MIDI_MAX;
@@ -402,32 +462,35 @@
     if( self.window.firstResponder == self )
         NSSetFocusRingStyle( NSFocusRingBelow );
     
-    NSBezierPath *path = [NSBezierPath bezierPathWithRect:NSInsetRect( [self bounds], 4.0, 5.0 )];
     [[NSColor windowBackgroundColor] set];
-    [path fill];
+    [_backgroundBezierPath fill];
     
     [NSGraphicsContext restoreGraphicsState];
     
-    // Grid
+    // Background grid image
+    [self.backgroundGridImage drawInRect:self.bounds];
+    
+    // Playhead and notes
     [NSGraphicsContext saveGraphicsState];
     
     for( int r = 0; r < _rows; r ++ ){
         for( int c = 0; c < _columns; c ++ ) {
             
             float brightness = [viewArray[c][r] floatValue];
-            
-            // Fill
-            NSBezierPath *roundedRectForFill = _bezierPathsForFills[r][c];
-            [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
-            [roundedRectForFill fill];
-            
-            brightness -= 0.1;
-            
-            // Stroke
-            NSBezierPath *roundedRectForStroke = _bezierPathsForStrokes[r][c];
-            [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
-            [roundedRectForStroke stroke];
-            
+            if( brightness ) {
+                
+                // Fill
+                NSBezierPath *roundedRectForFill = _bezierPathsForFills[r][c];
+                [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
+                [roundedRectForFill fill];
+                
+                brightness -= 0.1;
+                
+                // Stroke
+                NSBezierPath *roundedRectForStroke = _bezierPathsForStrokes[r][c];
+                [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
+                [roundedRectForStroke stroke];
+            }
         }
     }
     

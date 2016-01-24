@@ -22,12 +22,13 @@
 
 @interface EatsDebugGridView : NSView
 
-@property (nonatomic) uint columns;
-@property (nonatomic) uint rows;
-@property (nonatomic) uint gutter;
+@property (nonatomic) uint                  columns;
+@property (nonatomic) uint                  rows;
+@property (nonatomic) uint                  gutter;
 
-@property (nonatomic) uint gridWidth;
-@property (nonatomic) uint gridHeight;
+@property (nonatomic) uint                  gridWidth;
+@property (nonatomic) uint                  gridHeight;
+@property (nonatomic) BOOL                  gridSizeHasChanged;
 
 @property (nonatomic) NSSet                 *notes; // Notes to draw
 @property (nonatomic) BOOL                  drawNotesForReverse; // Should be set if playback is running backwards and note trails should extend the other way
