@@ -252,29 +252,23 @@
         
         self.editNoteAnimationFrame = 0;
         
-        // Display sliders at bottom
+        // Collapse pattern from bottom
         if( note.row > ( self.height / 2 ) - 1 ) {
             self.patternView.foldFrom = EatsPatternViewFoldFrom_Bottom;
             
-            self.velocityView.y = self.height - 1;
-            self.lengthView.y = self.height;
-            self.modulationValueAView.y = self.height + 1;
-            self.modulationValueBView.y = self.height + 2;
-            
-            self.velocityView.visible = YES;
-            
-        // Display sliders at top
+        // Or from top
         } else {
             self.patternView.foldFrom = EatsPatternViewFoldFrom_Top;
-            self.patternView.y = 1;
-            
-            self.velocityView.y = -3;
-            self.lengthView.y = -2;
-            self.modulationValueAView.y = -1;
-            self.modulationValueBView.y = 0;
-            
-            self.modulationValueBView.visible = YES;
         }
+        
+        self.patternView.y = 1;
+        
+        self.velocityView.y = -3;
+        self.lengthView.y = -2;
+        self.modulationValueAView.y = -1;
+        self.modulationValueBView.y = 0;
+        
+        self.modulationValueBView.visible = YES;
         
         self.patternView.height = self.height - 1;
         self.patternView.activeEditNote = note;
@@ -322,25 +316,12 @@
         
         self.editNoteAnimationFrame = 0;
         
-        // To bottom
-        if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-            
-            self.velocityView.y ++;
-            self.lengthView.y ++;
-            self.modulationValueAView.y ++;
-            self.modulationValueBView.visible = NO;
-            
-        // To top
-        } else {
-            
-            self.patternView.y --;
-            
-            self.velocityView.visible = NO;
-            self.lengthView.y --;
-            self.modulationValueAView.y --;
-            self.modulationValueBView.y --;
-            
-        }
+        self.patternView.y --;
+        
+        self.velocityView.visible = NO;
+        self.lengthView.y --;
+        self.modulationValueAView.y --;
+        self.modulationValueBView.y --;
         
         self.patternView.height = self.height - 3;
         
@@ -405,40 +386,19 @@
             self.patternView.noteEditModeAnimationAmount = animationProgress;
             
             self.patternView.height --;
+            self.patternView.y ++;
             
-            // From bottom
-            if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-                
-                self.velocityView.y --;
-                self.lengthView.y --;
-                self.modulationValueAView.y --;
-                self.modulationValueBView.y --;
-                
-                if( self.lengthView.y < self.height )
-                    self.lengthView.visible = YES;
-                if( self.modulationValueAView.y < self.height )
-                    self.modulationValueAView.visible = YES;
-                if( self.modulationValueBView.y < self.height )
-                    self.modulationValueBView.visible = YES;
-                
-            // From top
-            } else {
-                
-                self.patternView.y ++;
-                
-                self.velocityView.y ++;
-                self.lengthView.y ++;
-                self.modulationValueAView.y ++;
-                self.modulationValueBView.y ++;
-                
-                if( self.velocityView.y >= 0 )
-                    self.velocityView.visible = YES;
-                if( self.lengthView.y >= 0 )
-                    self.lengthView.visible = YES;
-                if( self.modulationValueAView.y >= 0 )
-                    self.modulationValueAView.visible = YES;
-                
-            }
+            self.velocityView.y ++;
+            self.lengthView.y ++;
+            self.modulationValueAView.y ++;
+            self.modulationValueBView.y ++;
+            
+            if( self.velocityView.y >= 0 )
+                self.velocityView.visible = YES;
+            if( self.lengthView.y >= 0 )
+                self.lengthView.visible = YES;
+            if( self.modulationValueAView.y >= 0 )
+                self.modulationValueAView.visible = YES;
             
         } else { // Final frame
             
@@ -473,37 +433,18 @@
             self.patternView.noteEditModeAnimationAmount = animationProgress;
             
             self.patternView.height ++;
-        
-            // To bottom
-            if( self.patternView.foldFrom == EatsPatternViewFoldFrom_Bottom ) {
-                
-                self.velocityView.y ++;
-                self.lengthView.y ++;
-                self.modulationValueAView.y ++;
-                
-                if( self.velocityView.y >= self.height )
-                    self.velocityView.visible = NO;
-                if( self.lengthView.y >= self.height )
-                    self.lengthView.visible = NO;
-                if( self.modulationValueAView.y >= self.height )
-                    self.modulationValueAView.visible = NO;
-                
-            // To top
-            } else {
-                
-                self.patternView.y --;
-                
-                self.lengthView.y --;
-                self.modulationValueAView.y --;
-                self.modulationValueBView.y --;
-                
-                if( self.lengthView.y < 0 )
-                    self.lengthView.visible = NO;
-                if( self.modulationValueAView.y < 0 )
-                    self.modulationValueAView.visible = NO;
-                if( self.modulationValueBView.y < 0 )
-                    self.modulationValueBView.visible = NO;
-            }
+            self.patternView.y --;
+            
+            self.lengthView.y --;
+            self.modulationValueAView.y --;
+            self.modulationValueBView.y --;
+            
+            if( self.lengthView.y < 0 )
+                self.lengthView.visible = NO;
+            if( self.modulationValueAView.y < 0 )
+                self.modulationValueAView.visible = NO;
+            if( self.modulationValueBView.y < 0 )
+                self.modulationValueBView.visible = NO;
             
         } else { // Final frame
             

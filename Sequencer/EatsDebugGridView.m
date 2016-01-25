@@ -362,6 +362,7 @@
     }
     
     // Generate the columns with playhead and nextStep
+    
     NSMutableArray *viewArray = [NSMutableArray arrayWithCapacity:_columns];
     
     BOOL active;
@@ -396,12 +397,15 @@
         }
     }
     
-    // Put all the notes in the viewArray    
+    // Put all the note lengths in the viewArray
     
     for( SequencerNote *note in self.notes ) {
         
         // Used for calculating brightness based on note velocity
         float velocityPercentage = (float)note.velocity / SEQUENCER_MIDI_MAX;
+        
+        float velocityTailBrightness = 0.1 * ( 1.0 - velocityPercentage );
+        NSNumber *lengthBrightnessWithVelocity = [NSNumber numberWithFloat:_lengthBrightness + velocityTailBrightness];
         
         // Put the length tails in
         int tailDraw = note.step;
@@ -429,26 +433,32 @@
             
             // Active / inactive
             if( tailDraw < _gridWidth && note.row < _gridHeight ) {
-                float velocityTailBrightness = 0.1 * ( 1.0 - velocityPercentage );
-                NSNumber *lengthBrightnessWithVelocity = [NSNumber numberWithFloat:_lengthBrightness + velocityTailBrightness];
-                if( [viewArray[tailDraw][note.row] floatValue] > lengthBrightnessWithVelocity.floatValue )
+                if( [viewArray[tailDraw][note.row] floatValue] < lengthBrightnessWithVelocity.floatValue )
                     [viewArray[tailDraw] replaceObjectAtIndex:note.row withObject:lengthBrightnessWithVelocity];
             } else {
-                if( [viewArray[tailDraw][note.row] floatValue] > _lengthBrightnessInactive.floatValue )
+                if( [viewArray[tailDraw][note.row] floatValue] < _lengthBrightnessInactive.floatValue )
                     [viewArray[tailDraw] replaceObjectAtIndex:note.row withObject:_lengthBrightnessInactive];
             }
             
             
         }
+    }
+    
+    // And now the notes
+    
+    for( SequencerNote *note in self.notes ) {
+        
+        // Used for calculating brightness based on note velocity
+        float velocityPercentage = (float)note.velocity / SEQUENCER_MIDI_MAX;
         
         // Active / inactive
         if( note.step < _gridWidth && note.row < _gridHeight ) {
-            // Put the notes in
+            // Put the note in
             float velocityNoteBrightness = 0.4 * ( 1.0 - velocityPercentage );
             NSNumber *noteBrightnessWithVelocity = [NSNumber numberWithFloat:_noteBrightness + velocityNoteBrightness];
             [viewArray[note.step] replaceObjectAtIndex:note.row withObject:noteBrightnessWithVelocity];
         } else
-            // Put the notes in
+            // Put the note in
             [viewArray[note.step] replaceObjectAtIndex:note.row withObject:_noteBrightnessInactive];
         
     }
@@ -480,16 +490,14 @@
             if( brightness ) {
                 
                 // Fill
-                NSBezierPath *roundedRectForFill = _bezierPathsForFills[r][c];
                 [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
-                [roundedRectForFill fill];
+                [_bezierPathsForFills[r][c] fill];
                 
                 brightness -= 0.1;
                 
                 // Stroke
-                NSBezierPath *roundedRectForStroke = _bezierPathsForStrokes[r][c];
                 [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];
-                [roundedRectForStroke stroke];
+                [_bezierPathsForStrokes[r][c] stroke];
             }
         }
     }
