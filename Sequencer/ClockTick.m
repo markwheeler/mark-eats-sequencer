@@ -266,6 +266,8 @@ typedef enum EatsStepAdvance {
         int loopEnd = [self.sequencer loopEndForPage:pageId];
         BOOL inLoop = [self.sequencer inLoopForPage:pageId];
         
+        BOOL setPageTickThisTick = NO;
+        
         // This will return if the user is scrubbing or the page is ready to advance on it's own (or neither)
         EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
         
@@ -347,6 +349,10 @@ typedef enum EatsStepAdvance {
             // Set the step
             [self.sequencer setCurrentStep:playNow forPage:pageId];
             
+            // And make the page tick line up with it
+            [self.sequencer setPageTickToCurrentStep:_ticksPerMeasure forPage:pageId];
+            setPageTickThisTick = YES;
+            
             // Are we in a loop
             if( loopStart <= loopEnd ) {
                 if( playNow >= loopStart && playNow <= loopEnd && loopEnd - loopStart != self.sharedPreferences.gridWidth - 1 )
@@ -391,13 +397,17 @@ typedef enum EatsStepAdvance {
         
         }
         
-        // Once the step has been set above, advance the pageTick which is used in calculated smoothed modulation
+        // Advance the pageTick which is used in calculated smoothed modulation
         if( playMode != EatsSequencerPlayMode_Pause && playMode != EatsSequencerPlayMode_Slice ) {
             
-            [self.sequencer advancePageTickWithTicksPerMeasure:_ticksPerMeasure forPage:pageId];
+            if( !setPageTickThisTick && [self.sequencer pageTickForPage:pageId] )
+                [self.sequencer advancePageTickWithTicksPerMeasure:_ticksPerMeasure forPage:pageId];
             
+        } else {
+            
+            // Set pageTick to nil so we know not to update it
+            [self.sequencer setPageTickToNilForPage:pageId];
         }
-        
     }
     
     
@@ -538,7 +548,7 @@ typedef enum EatsStepAdvance {
     // Looks like we need to do this
     
     uint stepLength = [self.sequencer stepLengthForPage:pageId];
-    int pageTick = [self.sequencer pageTickForPage:pageId];
+    int pageTick = [[self.sequencer pageTickForPage:pageId] intValue];
     int pageTicksPerStep = _ticksPerMeasure / stepLength;
     
     
@@ -671,7 +681,7 @@ typedef enum EatsStepAdvance {
         uint modulationDestinationId = [self.sequencer modulationDestinationIdForBus:b forPage:pageId];
         
         if( modulationDestinationId ) {
-
+            
             float tweenedModulationValueToSend = [previousModulationValues[b] floatValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] floatValue] * progressionBetweenValues;
             
             NSDictionary *modulationDestination = self.sequencer.modulationDestinationsArray[modulationDestinationId];

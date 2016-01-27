@@ -12,7 +12,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, CurrentPatternId: %i, NextPatternId: %@, CurrentStep: %i, NextStep: %@, InLoop: %i, PageTick: %i, PlayMode: %i>", NSStringFromClass([self class]), self, self.currentPatternId, self.nextPatternId, self.currentStep, self.nextStep, self.inLoop, self.pageTick, self.playMode];
+    return [NSString stringWithFormat:@"<%@: %p, CurrentPatternId: %i, NextPatternId: %@, CurrentStep: %i, NextStep: %@, InLoop: %i, PageTick: %@, PlayMode: %i>", NSStringFromClass([self class]), self, self.currentPatternId, self.nextPatternId, self.currentStep, self.nextStep, self.inLoop, self.pageTick, self.playMode];
 }
 
 @end

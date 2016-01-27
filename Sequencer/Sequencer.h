@@ -235,8 +235,10 @@
 - (BOOL) inLoopForPage:(uint)pageId;
 - (void) setInLoop:(BOOL)inLoop forPage:(uint)pageId;
 
-- (int) pageTickForPage:(uint)pageId;
+- (NSNumber *) pageTickForPage:(uint)pageId;
+- (void) setPageTickToCurrentStep:(int)ticksPerMeasure forPage:(uint)pageId;
 - (void) advancePageTickWithTicksPerMeasure:(int)ticksPerMeasure forPage:(uint)pageId;
+- (void) setPageTickToNilForPage:(uint)pageId;
 
 - (int) playModeForPage:(uint)pageId;
 - (void) setPlayMode:(int)playMode forPage:(uint)pageId;

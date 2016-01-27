@@ -22,7 +22,7 @@
         SequencerPageState *pageState = [[SequencerPageState alloc] init];
         pageState.playMode = EatsSequencerPlayMode_Pause;
         pageState.inLoop = YES;
-        pageState.pageTick = -1;
+        pageState.pageTick = nil;
         [pages addObject:pageState];
     }
     self.pageStates = [NSArray arrayWithArray:pages];

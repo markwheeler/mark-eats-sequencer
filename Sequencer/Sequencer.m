@@ -2136,6 +2136,12 @@
 }
 
 
+- (NSNumber *) pageTickForPage:(uint)pageId
+{
+    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+    return pageState.pageTick;
+}
+
 - (void) advancePageTickWithTicksPerMeasure:(int)ticksPerMeasure forPage:(uint)pageId
 {
     dispatch_sync( self.sequencerQueue, ^(void) {
@@ -2145,11 +2151,15 @@
         int pageTicksPerStep = ticksPerMeasure / stepLength;
         int pageTickOfCurrentStep = pageState.currentStep * pageTicksPerStep;
         
-        int pageTick = pageState.pageTick;
+        int pageTick;
         
-        // Init the page tick if it hasn't been yet (it will be -1)
-        if( pageTick < 0 )
+        // Init the page tick if it hasn't been yet (it will be nil, this should actually never happen)
+        if( !pageState.pageTick ) {
             pageTick = pageTickOfCurrentStep;
+            
+        } else {
+           pageTick = pageState.pageTick.intValue;
+        }
         
         // Advance pageTick (not nesecary in pause or slice modes)
         
@@ -2171,15 +2181,43 @@
         }
         
         // Set it
-        pageState.pageTick = pageTick;
+        pageState.pageTick = [NSNumber numberWithInt:pageTick];
         
     });
 }
 
-- (int) pageTickForPage:(uint)pageId
+- (void) setPageTickToCurrentStep:(int)ticksPerMeasure forPage:(uint)pageId
 {
-    SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
-    return pageState.pageTick;
+    dispatch_sync( self.sequencerQueue, ^(void) {
+        
+        SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+        int stepLength = [self stepLengthForPage:pageId];
+        int pageTicksPerStep = ticksPerMeasure / stepLength;
+        int pageTickOfCurrentStep = pageState.currentStep * pageTicksPerStep;
+        
+        int pageTick = pageState.pageTick.intValue;
+        
+        if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
+            pageTick = ( pageState.currentStep + 1 ) * pageTicksPerStep - 1;
+            
+        } else {
+            pageTick = pageTickOfCurrentStep;
+        }
+        
+        // Set it
+        pageState.pageTick = [NSNumber numberWithInt:pageTick];
+        
+    });
+}
+
+- (void) setPageTickToNilForPage:(uint)pageId
+{
+    dispatch_sync( self.sequencerQueue, ^(void) {
+        
+        SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
+        pageState.pageTick = nil;
+        
+    });
 }
 
 
