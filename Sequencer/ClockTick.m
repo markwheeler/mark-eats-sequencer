@@ -575,11 +575,11 @@ typedef enum EatsStepAdvance {
     
     NSMutableArray *previousModulationValues = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
     for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ )
-        previousModulationValues[b] = [NSNumber numberWithInt:0];
+        previousModulationValues[b] = [NSNumber numberWithFloat:0.0];
     
     NSMutableArray *nextModulationValues = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
     for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ )
-        nextModulationValues[b] = [NSNumber numberWithInt:0];
+        nextModulationValues[b] = [NSNumber numberWithFloat:0.0];
     
     
     // Find the previous modulation value
@@ -598,9 +598,9 @@ typedef enum EatsStepAdvance {
     // Find the highest modulation value from those notes
     for( SequencerNote *note in notesToCheck ) {
         for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
-            uint modulationValue = [self.sequencer modulationValueForBus:b forNoteAtStep:note.step atRow:note.row inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
-            if( modulationValue > [previousModulationValues[b] intValue] )
-                previousModulationValues[b] = [NSNumber numberWithInt:modulationValue];
+            float modulationValue = [self.sequencer modulationValueForBus:b forNoteAtStep:note.step atRow:note.row inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+            if( modulationValue > [previousModulationValues[b] floatValue] )
+                previousModulationValues[b] = [NSNumber numberWithFloat:modulationValue];
         }
     }
     
@@ -621,9 +621,9 @@ typedef enum EatsStepAdvance {
     // Find the highest modulation value from those notes
     for( SequencerNote *note in notesToCheck ) {
         for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
-            uint modulationValue = [self.sequencer modulationValueForBus:b forNoteAtStep:note.step atRow:note.row inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
-            if( modulationValue > [nextModulationValues[b] intValue] )
-                nextModulationValues[b] = [NSNumber numberWithInt:modulationValue];
+            float modulationValue = [self.sequencer modulationValueForBus:b forNoteAtStep:note.step atRow:note.row inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId];
+            if( modulationValue > [nextModulationValues[b] floatValue] )
+                nextModulationValues[b] = [NSNumber numberWithFloat:modulationValue];
         }
     }
     
@@ -672,7 +672,7 @@ typedef enum EatsStepAdvance {
         
         if( modulationDestinationId ) {
 
-            uint tweenedModulationValueToSend = roundf( [previousModulationValues[b] intValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] intValue] * progressionBetweenValues );
+            float tweenedModulationValueToSend = [previousModulationValues[b] floatValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] floatValue] * progressionBetweenValues;
             
             NSDictionary *modulationDestination = self.sequencer.modulationDestinationsArray[modulationDestinationId];
             [self sendMIDIModulationValue:tweenedModulationValueToSend
@@ -767,7 +767,7 @@ typedef enum EatsStepAdvance {
                atTime:(uint64_t)ns
 {
     VVMIDIMessage *msg = nil;
-	//	Create a message
+    // Create a message
     msg = [VVMIDIMessage createFromVals:VVMIDINoteOffVal :c :n :v :-1 :ns];
     // Send it
 	if( msg != nil )
@@ -777,27 +777,35 @@ typedef enum EatsStepAdvance {
 - (void) sendMIDIClockPulseAtTime:(uint64_t)ns
 {
     VVMIDIMessage *msg = nil;
-	//	Create a message
+	// Create a message
 	msg = [VVMIDIMessage createWithType:VVMIDIClockVal channel:0 timestamp:ns];
     // Send it
 	if( msg != nil )
 		[_sharedCommunicationManager.midiManager sendMsg:msg];
 }
 
-- (void) sendMIDIModulationValue:(uint)value
+- (void) sendMIDIModulationValue:(float)value
                           ofType:(VVMIDIMsgType)type
                        onChannel:(uint)channel
               toControllerNumber:(uint)controllerNumber
                           atTime:(uint64_t)ns
 {
-    VVMIDIMessage *msg = nil;
     // Create a message
-    if( type == VVMIDIChannelPressureVal )
-        msg = [VVMIDIMessage createFromVals:type :channel :value :-1 :-1 :ns];
-    else if( type == VVMIDIPitchWheelVal )
-        msg = [VVMIDIMessage createFromVals:type :channel :value :value :-1 :ns];
-    else
-        msg = [VVMIDIMessage createFromVals:type :channel :controllerNumber :value :-1 :ns];
+    VVMIDIMessage *msg = nil;
+    
+    if( type == VVMIDIPitchWheelVal ) {
+        uint midiValue = roundf( SEQUENCER_MIDI_MAX_14_BIT * value ); // 0-16383 is the range of the 14bit number pitch bend accepts
+        uint leastSignificant = midiValue & 0x7F;
+        uint mostSignificant = ( midiValue >> 7 ) & 0x7F;
+        msg = [VVMIDIMessage createFromVals:type :channel :leastSignificant :mostSignificant :-1 :ns];
+    
+    } else if( type == VVMIDIChannelPressureVal ) {
+        msg = [VVMIDIMessage createFromVals:type :channel :roundf( SEQUENCER_MIDI_MAX * value ) :-1 :-1 :ns];
+    
+    } else {
+        msg = [VVMIDIMessage createFromVals:type :channel :controllerNumber :roundf( SEQUENCER_MIDI_MAX * value ) :-1 :ns];
+    }
+    
     // Send it
     if( msg != nil )
         [_sharedCommunicationManager.midiManager sendMsg:msg];

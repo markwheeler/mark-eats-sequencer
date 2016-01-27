@@ -979,10 +979,10 @@ typedef enum DocumentPageAnimationDirection {
             NSString *transposedNote;
             
             int transposedPitch = pitch + [self.sequencer transposeForPage:self.sequencer.currentPageId];
-            if( transposedPitch > 127 )
-                transposedPitch = 127;
-            else if( transposedPitch < 0 )
-                transposedPitch = 0;
+            if( transposedPitch > SEQUENCER_MIDI_MAX )
+                transposedPitch = SEQUENCER_MIDI_MAX;
+            else if( transposedPitch < SEQUENCER_MIDI_MIN )
+                transposedPitch = SEQUENCER_MIDI_MIN;
             
             if( transposedPitch > pitch )
                 transposedNote = [NSString stringWithFormat:@"↑"];

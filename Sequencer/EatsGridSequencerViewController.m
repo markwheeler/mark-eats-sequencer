@@ -488,8 +488,8 @@
 
 - (void) updateNoteVelocity
 {
-    float oneStepOf127 = 127.0  / self.velocityView.width;
-    float range = 127.0 - oneStepOf127;
+    float oneStepOf127 = (float)SEQUENCER_MIDI_MAX  / self.velocityView.width;
+    float range = SEQUENCER_MIDI_MAX - oneStepOf127;
     self.activeEditNote = [self.sequencer noteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     self.patternView.activeEditNote = self.activeEditNote;
     
@@ -503,23 +503,33 @@
 - (void) updateNoteModulationValues
 {
     
-    // A
-    float range = 127.0;
     self.activeEditNote = [self.sequencer noteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     self.patternView.activeEditNote = self.activeEditNote;
     
-    float percentageForVelocitySlider = 100.0 * ( ( [self.activeEditNote.modulationValues[0] intValue] ) / range );
-    if( percentageForVelocitySlider < 0 )
-        percentageForVelocitySlider = 0;
+    // We center half values on the step left of center on the grid
+    float midStepValue = ( self.modulationValueAView.width * 0.5 - 1 ) / ( self.modulationValueAView.width - 1 );
     
-    self.modulationValueAView.percentage = percentageForVelocitySlider;
-    
-    // B
-    percentageForVelocitySlider = 100.0 * ( ( [self.activeEditNote.modulationValues[1] intValue] ) / range );
-    if( percentageForVelocitySlider < 0 )
-        percentageForVelocitySlider = 0;
-    
-    self.modulationValueBView.percentage = percentageForVelocitySlider;
+    for( int i = 0; i < NUMBER_OF_MODULATION_BUSSES; i ++ ) {
+        
+        float newValue = [self.activeEditNote.modulationValues[i] floatValue];
+        
+        float sliderValue;
+        
+        if( newValue <= 0.5 ) {
+            float valueInHalf = newValue / 0.5;
+            sliderValue = midStepValue * valueInHalf;
+        } else {
+            float valueInHalf = ( newValue - 0.5 ) / 0.5;
+            sliderValue = midStepValue + ( 1.0 - midStepValue ) * valueInHalf;
+        }
+        
+        // Set
+        if( i == 0 )
+            self.modulationValueAView.percentage = sliderValue * 100.0;
+        else if( i == 1 )
+            self.modulationValueBView.percentage = sliderValue * 100.0;
+        
+    }
 }
 
 - (void) updatePageLeft
@@ -680,12 +690,12 @@
 // Both sliders
 - (void) eatsGridHorizontalSliderViewUpdated:(EatsGridHorizontalSliderView *)sender
 {
-
+    
     // Velocity
     if( sender == self.velocityView ) {
         
-        float oneStepOf127 = 127.0 / sender.width;
-        float range = 127.0 - oneStepOf127;
+        float oneStepOf127 = (float)SEQUENCER_MIDI_MAX / sender.width;
+        float range = SEQUENCER_MIDI_MAX - oneStepOf127;
         
         float newVelocity = range * (sender.percentage / 100.0);
         newVelocity += oneStepOf127;
@@ -697,24 +707,34 @@
     } else if( sender == self.lengthView ) {
         int newLength = roundf( ( sender.width - 1 ) * ( sender.percentage / 100.0 ) ) + 1;
         [self.sequencer setLength:newLength forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
-    
-    // Modulation Value A
-    } else if( sender == self.modulationValueAView ) {
         
-        float range = 127.0;
+    // Modulation
+    } else {
         
-        uint newValue = roundf( range * ( sender.percentage / 100.0 ) );
+        // We center on the step left of center on the grid
+        float midStepValue = ( sender.width * 0.5 - 1 ) / ( sender.width - 1 );
         
-        [self.sequencer setModulationValue:newValue forBus:0 forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        float newValue = sender.percentage / 100.0;
+        float adjustedValue;
         
-    // Modulation Value B
-    } else if( sender == self.modulationValueBView ) {
+        if( newValue <= midStepValue ) { // L
+            float valueInHalf = newValue / midStepValue;
+            adjustedValue = 0.5 * valueInHalf;
+            
+        } else { // R
+            float valueInHalf = ( newValue - midStepValue ) / ( 1.0 - midStepValue );
+            adjustedValue = 0.5 + 0.5 * valueInHalf;
+        }
         
-        float range = 127.0;
+        // Set the correct modulation bus
         
-        uint newValue = roundf( range * ( sender.percentage / 100.0 ) );
+        int modBus = 0;
+        if( sender == self.modulationValueAView )
+            modBus = 0;
+        else if( sender == self.modulationValueBView )
+            modBus = 1;
         
-        [self.sequencer setModulationValue:newValue forBus:1 forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
+        [self.sequencer setModulationValue:adjustedValue forBus:modBus forNoteAtStep:self.activeEditNote.step atRow:self.activeEditNote.row inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
         
     }
 }

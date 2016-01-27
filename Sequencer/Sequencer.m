@@ -87,7 +87,7 @@
         // Create the default modulation destinations
         NSMutableArray *modulationDestinationIds = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
         for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
-            [modulationDestinationIds addObject:[NSNumber numberWithUnsignedInt:0]];
+            [modulationDestinationIds addObject:[NSNumber numberWithFloat:0.0]];
         }
         
         page.modulationDestinationIds = [modulationDestinationIds copy];
@@ -194,7 +194,7 @@
                 
                 NSMutableArray *modulationDestinationIds = [NSMutableArray arrayWithCapacity:NUMBER_OF_MODULATION_BUSSES];
                 for( int b = 0; b < NUMBER_OF_MODULATION_BUSSES; b ++ ) {
-                    [modulationDestinationIds addObject:[NSNumber numberWithUnsignedInt:0]];
+                    [modulationDestinationIds addObject:[NSNumber numberWithFloat:0.0]];
                 }
                 
                 newPage.modulationDestinationIds = [modulationDestinationIds copy];
@@ -1739,9 +1739,9 @@
     [self setVelocity:[self velocityForNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] - 1 forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
 }
 
-- (uint) modulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+- (float) modulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    __block uint valueToReturn = 0;
+    __block float valueToReturn = 0.0;
     
     SequencerPage *page = [self.song.pages objectAtIndex:pageId];
     
@@ -1753,7 +1753,7 @@
             if( note.row == row && note.step == step ) {
                 
                 if( busId < note.modulationValues.count )
-                    valueToReturn = [note.modulationValues[busId] unsignedIntValue];
+                    valueToReturn = [note.modulationValues[busId] floatValue];
                 
                 return;
             }
@@ -1764,10 +1764,10 @@
     return valueToReturn;
 }
 
-- (void) setModulationValue:(uint)value forBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
+- (void) setModulationValue:(float)value forBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
     
-    if( value >= SEQUENCER_MIDI_MIN && value <= SEQUENCER_MIDI_MAX ) {
+    if( value >= 0.0 && value <= 1.0 ) {
         
         SequencerPage *page = [self.song.pages objectAtIndex:pageId];
         
@@ -1781,12 +1781,12 @@
                     if( busId < note.modulationValues.count ) {
                         
                         [self.undoManager beginUndoGrouping];
-                        [[self.undoManager prepareWithInvocationTarget:self] setModulationValue:[note.modulationValues[busId] unsignedIntValue] forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+                        [[self.undoManager prepareWithInvocationTarget:self] setModulationValue:[note.modulationValues[busId] floatValue] forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
                         [self.undoManager setActionName:@"Note Modulation Value Change"];
                         [self.undoManager endUndoGrouping];
                         
                         NSMutableArray *modulationValues = [note.modulationValues mutableCopy];
-                        modulationValues[busId] = [NSNumber numberWithUnsignedInt:value];
+                        modulationValues[busId] = [NSNumber numberWithFloat:value];
                         note.modulationValues = [modulationValues copy];
                         
                         [self postNotification:kSequencerNoteModulationValuesDidChangeNotification forNote:note inPattern:patternId inPage:pageId];
@@ -1803,12 +1803,12 @@
 
 - (void) incrementModulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    [self setModulationValue:[self modulationValueForBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] + 1 forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+    [self setModulationValue:[self modulationValueForBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] + 1.0 / SEQUENCER_MIDI_MAX forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
 }
 
 - (void) decrementModulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId
 {
-    [self setModulationValue:[self modulationValueForBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] - 1 forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
+    [self setModulationValue:[self modulationValueForBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId] - 1.0 / SEQUENCER_MIDI_MAX forBus:busId forNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
 }
 
 - (void) addOrRemoveNoteThatIsSelectableAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId

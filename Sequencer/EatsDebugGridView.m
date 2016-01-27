@@ -56,7 +56,7 @@
         
         float stateModifier = 0.1;
         
-        self.emptyBrightness = [NSNumber numberWithInt:0];
+        self.emptyBrightness = [NSNumber numberWithInt:-1];
         self.noteBrightnessInactive = [NSNumber numberWithFloat:self.noteBrightness + 0.5];
         self.lengthBrightnessInactive = [NSNumber numberWithFloat:self.lengthBrightness + stateModifier];
         self.playheadBrightnessInactive = [NSNumber numberWithFloat:self.playheadBrightness.floatValue + stateModifier];
@@ -487,7 +487,7 @@
         for( int c = 0; c < _columns; c ++ ) {
             
             float brightness = [viewArray[c][r] floatValue];
-            if( brightness ) {
+            if( brightness >= 0.0 ) {
                 
                 // Fill
                 [[NSColor colorWithCalibratedWhite:brightness alpha:1.0] set];

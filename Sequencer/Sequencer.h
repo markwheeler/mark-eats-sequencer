@@ -22,6 +22,7 @@
 #define SEQUENCER_SIZE 16
 #define SEQUENCER_MIDI_MIN 0
 #define SEQUENCER_MIDI_MAX 127
+#define SEQUENCER_MIDI_MAX_14_BIT 16383
 
 #define MIN_QUANTIZATION 64
 #define MAX_QUANTIZATION 1
@@ -189,8 +190,8 @@
 - (void) incrementVelocityForNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
 - (void) decrementVelocityForNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
 
-- (uint) modulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
-- (void) setModulationValue:(uint)value forBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
+- (float) modulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
+- (void) setModulationValue:(float)value forBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
 - (void) incrementModulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
 - (void) decrementModulationValueForBus:(uint)busId forNoteAtStep:(uint)step atRow:(uint)row inPattern:(uint)patternId inPage:(uint)pageId;
 
