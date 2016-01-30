@@ -160,6 +160,25 @@
 
 #pragma mark - GridView delegate methods
 
+- (void) updateGridWithNothing
+{
+    // Combine sub views to create the complete view
+    NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.sharedPreferences.gridWidth];
+    
+    NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
+    
+    // Generate the columns
+    for(int x = 0; x < self.sharedPreferences.gridWidth; x ++ ) {
+        [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.sharedPreferences.gridHeight] atIndex:x];
+        // Generate the rows
+        for(int y = 0; y < self.sharedPreferences.gridHeight; y ++ ) {
+            [(NSMutableArray *)[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
+        }
+    }
+    
+    [self updateGridWithArray:[gridArray copy]];
+}
+
 - (void) updateGridWithArray:(NSArray *)gridArray
 {
     // Only send msgs to the grid controller if we're the active document

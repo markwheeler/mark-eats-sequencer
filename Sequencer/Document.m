@@ -121,6 +121,8 @@ typedef enum DocumentPageAnimationDirection {
 
 - (id)init
 {
+//    NSLog( @"Document init" );
+    
     self = [super init];
     if (self) {
         // Add your subclass-specific initialization here.
@@ -161,7 +163,7 @@ typedef enum DocumentPageAnimationDirection {
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-//    NSLog(@"Document deallocated OK");
+//    NSLog( @"Document deallocated OK" );
 }
 
 - (NSString *) windowNibName
@@ -265,6 +267,15 @@ typedef enum DocumentPageAnimationDirection {
 
 - (void) windowWillClose:(NSNotification *)notification
 {
+    // Clear the grid view if we're active
+    if( self.gridNavigationController.isActive )
+        [self.gridNavigationController updateGridWithNothing];
+    
+    // Make us no longer active (this also seems to ensure dealloc is called on the NSDocument, though that can take a few seconds)
+    EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
+    if( documentController.lastActiveDocument == self )
+        [documentController setActiveDocument:nil];
+    
     [self.clock stopClock];
 }
 
