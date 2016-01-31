@@ -281,12 +281,11 @@ typedef enum EatsStepAdvance {
                 
                 if( ![[stepHasBeenAutomated objectAtIndex:pageId] boolValue] ) {
                     // Add automation
-                    NSDictionary *values = [NSDictionary dictionaryWithObject:[[self.sequencer nextStepForPage:pageId] copy] forKey:@"value"]; // Potential crash here because nextStepForPage is nil? Never has though!
+                    NSDictionary *values = [NSDictionary dictionaryWithObject:[[self.sequencer nextStepForPage:pageId] copy] forKey:@"value"];
                     [self.sequencer addAutomationChangeOfType:EatsSequencerAutomationType_SetNextStep withValues:values forPage:pageId];
                 }
                 
                 playNow = [[self.sequencer nextStepForPage:pageId] intValue];
-                [self.sequencer setNextStep:nil forPage:pageId];
                 
                 
             // Otherwise we need to calculate the next step
@@ -398,9 +397,9 @@ typedef enum EatsStepAdvance {
         }
         
         // Advance the pageTick which is used in calculated smoothed modulation
-        if( playMode != EatsSequencerPlayMode_Pause && playMode != EatsSequencerPlayMode_Slice ) {
+        if( playMode != EatsSequencerPlayMode_Pause ) {
             
-            if( !setPageTickThisTick && [self.sequencer pageTickForPage:pageId] )
+            if( !setPageTickThisTick && [self.sequencer pageTickForPage:pageId] != nil )
                 [self.sequencer advancePageTickWithTicksPerMeasure:_ticksPerMeasure forPage:pageId];
             
         } else {
@@ -511,6 +510,10 @@ typedef enum EatsStepAdvance {
     if( playMode == EatsSequencerPlayMode_Pause )
         return;
     
+    // And if we're not yet really going
+    if( [self.sequencer pageTickForPage:pageId] == nil )
+        return;
+    
     // Are any of the modulation busses active on this page?
     
     BOOL modulationBusActiveOnThisPage = NO;
@@ -537,9 +540,16 @@ typedef enum EatsStepAdvance {
     if( needsToAdvance != EatsStepAdvance_None && numberOfNotesAtStep )
         playingANote = YES;
     
-    // If we're not smoothing then return if a note isn't playing
-    if( ![self.sequencer modulationSmoothForPage:pageId] && !playingANote )
-        return;
+    if( playMode == EatsSequencerPlayMode_Slice ) {
+        // If we're not smoothing and the step hasn't changed then return
+        if( ![self.sequencer modulationSmoothForPage:pageId] && needsToAdvance == EatsStepAdvance_None )
+            return;
+        
+    } else {
+        // If we're not smoothing then return if a note isn't playing
+        if( ![self.sequencer modulationSmoothForPage:pageId] && !playingANote )
+            return;
+    }
     
     // Make sure we're not trying to smooth between too few notes
     if( [self.sequencer modulationSmoothForPage:pageId] && !playingANote && [self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] < 2 )
@@ -692,6 +702,10 @@ typedef enum EatsStepAdvance {
                                    atTime:ns + nsSwingForModulation];
         }
     }
+    
+    // Tidy up (this actually has nothing to do with modulation but has to be done here so needsToAdvance works correctly)
+    if( needsToAdvance == EatsStepAdvance_Scrubbed )
+        [self.sequencer setNextStep:nil forPage:pageId];
 }
 
 

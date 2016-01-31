@@ -2152,14 +2152,13 @@
         int pageTickOfCurrentStep = pageState.currentStep * pageTicksPerStep;
         
         int pageTick;
+        NSNumber *pageTickToSet;
         
         // Init the page tick if it hasn't been yet (it will be nil, this should actually never happen)
-        if( !pageState.pageTick ) {
+        if( !pageState.pageTick )
             pageTick = pageTickOfCurrentStep;
-            
-        } else {
+        else
            pageTick = pageState.pageTick.intValue;
-        }
         
         // Advance pageTick (not nesecary in pause or slice modes)
         
@@ -2170,6 +2169,7 @@
             int difference = pageTick - pageTickOfCurrentStep;
             if( difference < 0 || difference >= pageTicksPerStep )
                 pageTick = pageTickOfCurrentStep;
+            pageTickToSet = [NSNumber numberWithInt:pageTick];
             
         } else if( pageState.playMode == EatsSequencerPlayMode_Reverse ) {
             pageTick --;
@@ -2177,11 +2177,22 @@
             int difference = pageTick - pageTickOfCurrentStep;
             if( difference < 0 || difference >= pageTicksPerStep )
                 pageTick = ( pageState.currentStep + 1 ) * pageTicksPerStep - 1;
+            pageTickToSet = [NSNumber numberWithInt:pageTick];
             
+        } else if( pageState.playMode == EatsSequencerPlayMode_Slice ) {
+            pageTick ++;
+            int difference = pageTick - pageTickOfCurrentStep;
+            if( difference < 0 || difference >= pageTicksPerStep )
+                pageTickToSet = nil;
+            else
+                pageTickToSet = [NSNumber numberWithInt:pageTick];
+            
+        } else {
+            pageTickToSet = [NSNumber numberWithInt:pageTick];
         }
         
         // Set it
-        pageState.pageTick = [NSNumber numberWithInt:pageTick];
+        pageState.pageTick = pageTickToSet;
         
     });
 }
@@ -2213,7 +2224,6 @@
 - (void) setPageTickToNilForPage:(uint)pageId
 {
     dispatch_sync( self.sequencerQueue, ^(void) {
-        
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.pageTick = nil;
         
