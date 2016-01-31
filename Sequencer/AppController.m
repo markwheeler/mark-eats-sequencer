@@ -17,6 +17,13 @@ typedef enum EatsMonomeSensorType {
     EatsMonomeSensorType_New,
 } EatsMonomeSensorType;
 
+typedef enum EatsTiltDirection {
+    EatsTiltDirection_Left,
+    EatsTiltDirection_Right,
+    EatsTiltDirection_Up,
+    EatsTiltDirection_Down
+} EatsTiltDirection;
+
 @interface AppController()
 
 @property EatsCommunicationManager      *sharedCommunicationManager;
@@ -34,8 +41,8 @@ typedef enum EatsMonomeSensorType {
 
 @property NSMutableSet                  *gridTiltSensorCalibrationData;
 
-@property NSArray                       *lastTiltSent; // Ints
-@property NSArray                       *lastTiltSmoothed; // Floats
+@property NSArray                       *lastTiltMIDISent; // Ints
+@property NSArray                       *lastTiltValueSmoothed; // Floats
 
 @end
 
@@ -246,8 +253,8 @@ typedef enum EatsMonomeSensorType {
     self.gridTiltDeadZone = 0;
     self.gridTiltXIsInverted = NO;
     self.gridTiltYIsInverted = NO;
-    self.lastTiltSmoothed = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], nil];
-    self.lastTiltSent = [NSArray arrayWithObjects:[NSNumber numberWithInt:0], [NSNumber numberWithInt:0], [NSNumber numberWithInt:0], [NSNumber numberWithInt:0], nil];
+    self.lastTiltValueSmoothed = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], [NSNumber numberWithFloat:0], nil];
+    self.lastTiltMIDISent = [NSArray arrayWithObjects:[NSNumber numberWithInt:0], [NSNumber numberWithInt:0], [NSNumber numberWithInt:0], [NSNumber numberWithInt:0], nil];
     
     self.sharedPreferences.gridTiltSensorIsCalibrating = YES;
     
@@ -601,7 +608,7 @@ typedef enum EatsMonomeSensorType {
             // Convert the monome values into MIDI values based on calibrated min/max/center
             
             for( int i = 1; i < o.valueCount - 1; i ++ ) {
-                // We ignore the last value, z, because it's not that fun. z just seems to measure 'how upside down' the monome is
+                // We ignore the last value, z, because it's not that fun. z just seems to measure how 'upside down' the monome is
 
                 int tiltValue = [[self stripOSCValue:[NSString stringWithFormat:@"%@", [o.valueArray objectAtIndex:i]]] intValue];
                 int tiltCenter;
@@ -622,39 +629,92 @@ typedef enum EatsMonomeSensorType {
                     tiltValue = tiltMin;
                 
                 int distanceFromCenter;
-                int midiTiltValueA;
-                int midiTiltValueB;
+                float tiltValueA;
+                float tiltValueB;
                 
                 // We split the tilt across 4 MIDI CCs so that they all send 0 when the monome is flat
                 
                 // CC A
                 if( tiltValue <= tiltCenter - self.gridTiltDeadZone ) {
                     distanceFromCenter = tiltCenter - tiltValue - self.gridTiltDeadZone;
-                    midiTiltValueA = roundf( 127.0 * ( (float)distanceFromCenter / ( tiltCenter - self.gridTiltDeadZone - tiltMin ) ) );
-                    midiTiltValueB = 0;
+                    tiltValueA = (float)distanceFromCenter / ( tiltCenter - self.gridTiltDeadZone - tiltMin );
+                    tiltValueB = 0.0;
                 
                 // CC B
                 } else if( tiltValue >= tiltCenter + self.gridTiltDeadZone ) {
                     distanceFromCenter = tiltValue - tiltCenter - self.gridTiltDeadZone;
-                    midiTiltValueA = 0;
-                    midiTiltValueB = roundf( 127.0 * ( (float)distanceFromCenter / ( tiltMax - tiltCenter - self.gridTiltDeadZone ) ) );
+                    tiltValueA = 0.0;
+                    tiltValueB = (float)distanceFromCenter / ( tiltMax - tiltCenter - self.gridTiltDeadZone );
                 
                 // in the deadzone
                 } else {
-                    midiTiltValueA = 0;
-                    midiTiltValueB = 0;
+                    tiltValueA = 0.0;
+                    tiltValueB = 0.0;
                 }
                 
                 // Invert if need be
                 if( ( i == 1 && self.gridTiltXIsInverted ) || ( i == 2 && self.gridTiltYIsInverted ) ) {
-                    int tempMidiValue = midiTiltValueA;
-                    midiTiltValueA = midiTiltValueB;
-                    midiTiltValueB = tempMidiValue;
+                    float tempMidiValue = tiltValueA;
+                    tiltValueA = tiltValueB;
+                    tiltValueB = tempMidiValue;
                 }
                 
-                //NSLog(@"Tilt axis %i conversion: %i -> %i", i, tiltValue, midiTiltValue);
-                [self sendTiltFromCC:i * 2 - 2 withValue:midiTiltValueA];
-                [self sendTiltFromCC:i * 2 - 1 withValue:midiTiltValueB];
+                // Map the directions correctly to the order we store the destinations in preferences
+                EatsTiltDirection tiltDirectionIdA = 0;
+                EatsTiltDirection tiltDirectionIdB = 0;
+                
+                // Map to line up with grid rotation
+                if( self.sharedPreferences.gridRotation == 0 ) {
+                    if( i == 1 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Left;
+                        tiltDirectionIdB = EatsTiltDirection_Right;
+                    } else if( i == 2 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Down;
+                        tiltDirectionIdB = EatsTiltDirection_Up;
+                    }
+                } else if( self.sharedPreferences.gridRotation == 90 ) {
+                    if( i == 1 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Up;
+                        tiltDirectionIdB = EatsTiltDirection_Down;
+                    } else if( i == 2 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Left;
+                        tiltDirectionIdB = EatsTiltDirection_Right;
+                    }
+                } else if( self.sharedPreferences.gridRotation == 180 ) {
+                    if( i == 1 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Right;
+                        tiltDirectionIdB = EatsTiltDirection_Left;
+                    } else if( i == 2 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Up;
+                        tiltDirectionIdB = EatsTiltDirection_Down;
+                    }
+                } else if( self.sharedPreferences.gridRotation == 270 ) {
+                    if( i == 1 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Down;
+                        tiltDirectionIdB = EatsTiltDirection_Up;
+                    } else if( i == 2 ) {
+                        tiltDirectionIdA = EatsTiltDirection_Right;
+                        tiltDirectionIdB = EatsTiltDirection_Left;
+                    }
+                }
+                
+                uint tiltDestinationIdA = [self.sharedPreferences.tiltMIDIOutputDestinations[tiltDirectionIdA] intValue];
+                uint tiltDestinationIdB = [self.sharedPreferences.tiltMIDIOutputDestinations[tiltDirectionIdB] intValue];
+                
+                if( tiltDestinationIdA ) {
+                    NSDictionary *tiltDestinationA = self.sharedPreferences.modulationDestinationsArray[tiltDestinationIdA];
+                    [self sendMIDITiltValue:tiltValueA
+                                     ofType:[[tiltDestinationA objectForKey:@"type"] unsignedIntValue]
+                         toControllerNumber:[[tiltDestinationA objectForKey:@"controllerNumber"] unsignedIntValue]
+                     fromTiltDirection:tiltDirectionIdA];
+                }
+                if( tiltDestinationIdB ) {
+                    NSDictionary *tiltDestinationB = self.sharedPreferences.modulationDestinationsArray[tiltDestinationIdB];
+                    [self sendMIDITiltValue:tiltValueB
+                                     ofType:[[tiltDestinationB objectForKey:@"type"] unsignedIntValue]
+                         toControllerNumber:[[tiltDestinationB objectForKey:@"controllerNumber"] unsignedIntValue]
+                          fromTiltDirection:tiltDirectionIdB];
+                }
             }
         }
         
@@ -777,44 +837,88 @@ typedef enum EatsMonomeSensorType {
 
 }
 
-- (void) sendTiltFromCC:(int)cc withValue:(int)midiValue
+- (void) sendMIDITiltValue:(float)value
+                    ofType:(VVMIDIMsgType)type
+        toControllerNumber:(uint)controllerNumber
+         fromTiltDirection:(EatsTiltDirection)directionId
 {
     if( self.sharedPreferences.tiltMIDIOutputChannel ) {
         
-        // Smooth using a weighted average with the previous value (a simple low pass filter)
-        float last;
-        last = [[self.lastTiltSmoothed objectAtIndex:cc] floatValue];
+        // Are the same CCs mapped on both directions on this axis?
+        BOOL hasPairedMapping = NO;
+        int pairId;
+        if( directionId == EatsTiltDirection_Left || directionId == EatsTiltDirection_Up )
+            pairId = directionId + 1;
+        else
+            pairId = directionId - 1;
+            
+        if( [self.sharedPreferences.tiltMIDIOutputDestinations[directionId] intValue] == [self.sharedPreferences.tiltMIDIOutputDestinations[pairId] intValue] )
+            hasPairedMapping = YES;
         
-        float alpha = 0.5; // Weight: 1 = no smoothing, 0 = will never move from previous value
-        float smoothed = (alpha * midiValue) + ( (1.0 - alpha) * last );
-        
-        midiValue = roundf ( smoothed );
-        
-        // Check if we just sent the same value
-        if( midiValue != [[self.lastTiltSent objectAtIndex:cc] intValue] ) {
-        
-            VVMIDIMessage *msg = nil;
-            //	Create a message
-            msg = [VVMIDIMessage createFromVals:VVMIDIControlChangeVal
-                                               :self.sharedPreferences.tiltMIDIOutputChannel.intValue
-                                               :1 + cc // Goes out on CC 1-4
-                                               :midiValue
-                                               :-1
-                                               :0];
-            // Send it
-            if (msg != nil)
-                [_sharedCommunicationManager.midiManager sendMsg:msg];
+        // Center on grid flat for pitch bend or a paired mapping
+        if( type == VVMIDIPitchWheelVal || hasPairedMapping ) {
+            value *= 0.5;
+            if( directionId == EatsTiltDirection_Right || directionId == EatsTiltDirection_Up )
+                value += 0.5;
+            else
+                value = 0.5 - value;
         }
         
+        // Smooth using a weighted average with the previous value (a simple low pass filter)
+        float last = [self.lastTiltValueSmoothed[directionId] floatValue];
+        
+        float alpha = 0.5; // Weight: 1 = no smoothing, 0 = will never move from previous value
+        float smoothed = (alpha * value) + ( (1.0 - alpha) * last );
+        
+        
+            // Create a message
+            VVMIDIMessage *msg = nil;
+            uint midiValue;
+        
+            if( type == VVMIDIPitchWheelVal ) {
+                
+                midiValue = roundf( SEQUENCER_MIDI_MAX_14_BIT * smoothed ); // 0-16383 is the range of the 14bit number pitch bend accepts
+                
+                // Check if we just sent the same value
+                if( midiValue != [[self.lastTiltMIDISent objectAtIndex:directionId] intValue] ) {
+                    uint leastSignificant = midiValue & 0x7F;
+                    uint mostSignificant = ( midiValue >> 7 ) & 0x7F;
+                    msg = [VVMIDIMessage createFromVals:type :self.sharedPreferences.tiltMIDIOutputChannel.intValue :leastSignificant :mostSignificant :-1];
+                }
+                
+            } else if( type == VVMIDIChannelPressureVal ) {
+                
+                midiValue = roundf ( SEQUENCER_MIDI_MAX * smoothed );
+                
+                // Check if we just sent the same value
+                if( midiValue != [[self.lastTiltMIDISent objectAtIndex:directionId] intValue] ) {
+                    msg = [VVMIDIMessage createFromVals:type :self.sharedPreferences.tiltMIDIOutputChannel.intValue :roundf( SEQUENCER_MIDI_MAX * value ) :-1 :-1];
+                }
+                
+            } else {
+                
+                midiValue = roundf ( SEQUENCER_MIDI_MAX * smoothed );
+                
+                // Check if we just sent the same value
+                if( midiValue != [[self.lastTiltMIDISent objectAtIndex:directionId] intValue] ) {
+                    msg = [VVMIDIMessage createFromVals:type :self.sharedPreferences.tiltMIDIOutputChannel.intValue :controllerNumber :roundf( SEQUENCER_MIDI_MAX * value ) :-1];
+                }
+            }
+            
+            // Send it
+            if( msg != nil )
+                [_sharedCommunicationManager.midiManager sendMsg:msg];
+
+        
         // Save it
-        NSMutableArray *newLastTiltSent = [self.lastTiltSent mutableCopy];
-        NSMutableArray *newLastTiltSmoothed = [self.lastTiltSmoothed mutableCopy];
+        NSMutableArray *newLastTiltMIDISent = [self.lastTiltMIDISent mutableCopy];
+        NSMutableArray *newLastTiltValueSmoothed = [self.lastTiltValueSmoothed mutableCopy];
         
-        [newLastTiltSent replaceObjectAtIndex:cc withObject:[NSNumber numberWithInt:midiValue]];
-        [newLastTiltSmoothed replaceObjectAtIndex:cc withObject:[NSNumber numberWithFloat:smoothed]];
+        [newLastTiltMIDISent replaceObjectAtIndex:directionId withObject:[NSNumber numberWithUnsignedInt:midiValue]];
+        [newLastTiltValueSmoothed replaceObjectAtIndex:directionId withObject:[NSNumber numberWithFloat:smoothed]];
         
-        self.lastTiltSent = newLastTiltSent;
-        self.lastTiltSmoothed = newLastTiltSmoothed;
+        self.lastTiltMIDISent = [newLastTiltMIDISent copy];
+        self.lastTiltValueSmoothed = [newLastTiltValueSmoothed copy];
     }
 }
 

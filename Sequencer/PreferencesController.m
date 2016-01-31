@@ -28,6 +28,10 @@
 @property (nonatomic, weak) IBOutlet NSArrayController *midiDestinationsArrayController;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputChannelPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputCCUpPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputCCDownPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputCCLeftPopup;
+@property (nonatomic, weak) IBOutlet NSPopUpButton     *tiltMIDIOutputCCRightPopup;
 
 @property (nonatomic, weak) IBOutlet NSPopUpButton     *clockSourcePopup;
 
@@ -62,16 +66,17 @@
     [self updateMIDI];
     
     // Tilt output
-    [self.tiltMIDIOutputChannelPopup removeAllItems];
-    [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"None"]];
-    for( int i = 1; i <= NUMBER_OF_MIDI_CHANNELS; i ++ ) {
-        [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"%i", i]];
-    }
+    [self populateTiltOutputPopups];
     if( self.sharedPreferences.tiltMIDIOutputChannel )
         [self.tiltMIDIOutputChannelPopup selectItemAtIndex:self.sharedPreferences.tiltMIDIOutputChannel.integerValue + 1];
     else
         [self.tiltMIDIOutputChannelPopup selectItemAtIndex:0];
+    [self.tiltMIDIOutputCCLeftPopup selectItemAtIndex:[self.sharedPreferences.tiltMIDIOutputDestinations[0] intValue]];
+    [self.tiltMIDIOutputCCRightPopup selectItemAtIndex:[self.sharedPreferences.tiltMIDIOutputDestinations[1] intValue]];
+    [self.tiltMIDIOutputCCUpPopup selectItemAtIndex:[self.sharedPreferences.tiltMIDIOutputDestinations[2] intValue]];
+    [self.tiltMIDIOutputCCDownPopup selectItemAtIndex:[self.sharedPreferences.tiltMIDIOutputDestinations[3] intValue]];
     
+    // Input mapping
     [self populateInputMapping];
     
     
@@ -219,6 +224,28 @@
     // TODO: Lots more here
     
     return functionPaths;
+}
+
+- (void) populateTiltOutputPopups
+{
+    // Channel
+    [self.tiltMIDIOutputChannelPopup removeAllItems];
+    [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"None"]];
+    for( int i = 1; i <= NUMBER_OF_MIDI_CHANNELS; i ++ ) {
+        [self.tiltMIDIOutputChannelPopup addItemWithTitle:[NSString stringWithFormat:@"%i", i]];
+    }
+    
+    // CCs
+    [self.tiltMIDIOutputCCLeftPopup removeAllItems];
+    [self.tiltMIDIOutputCCRightPopup removeAllItems];
+    [self.tiltMIDIOutputCCUpPopup removeAllItems];
+    [self.tiltMIDIOutputCCDownPopup removeAllItems];
+    for( NSDictionary *modulationDestination in self.sharedPreferences.modulationDestinationsArray ) {
+        [self.tiltMIDIOutputCCLeftPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
+        [self.tiltMIDIOutputCCRightPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
+        [self.tiltMIDIOutputCCUpPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
+        [self.tiltMIDIOutputCCDownPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
+    }
 }
 
 - (void) populateInputMapping
@@ -389,6 +416,42 @@
         
     } else {
         self.sharedPreferences.tiltMIDIOutputChannel = nil;
+    }
+}
+
+- (IBAction)tiltMIDIOutputCCLeftPopup:(NSPopUpButton *)sender
+{
+    if( sender.indexOfSelectedItem < self.sharedPreferences.modulationDestinationsArray.count ) {
+        NSMutableArray *tiltMIDIOutputDestinations = [self.sharedPreferences.tiltMIDIOutputDestinations mutableCopy];
+        tiltMIDIOutputDestinations[0] = [NSNumber numberWithInteger:sender.indexOfSelectedItem];
+        self.sharedPreferences.tiltMIDIOutputDestinations = [tiltMIDIOutputDestinations copy];
+    }
+}
+
+- (IBAction)tiltMIDIOutputCCRightPopup:(NSPopUpButton *)sender
+{
+    if( sender.indexOfSelectedItem < self.sharedPreferences.modulationDestinationsArray.count ) {
+        NSMutableArray *tiltMIDIOutputDestinations = [self.sharedPreferences.tiltMIDIOutputDestinations mutableCopy];
+        tiltMIDIOutputDestinations[1] = [NSNumber numberWithInteger:sender.indexOfSelectedItem];
+        self.sharedPreferences.tiltMIDIOutputDestinations = [tiltMIDIOutputDestinations copy];
+    }
+}
+
+- (IBAction)tiltMIDIOutputCCUpPopup:(NSPopUpButton *)sender
+{
+    if( sender.indexOfSelectedItem < self.sharedPreferences.modulationDestinationsArray.count ) {
+        NSMutableArray *tiltMIDIOutputDestinations = [self.sharedPreferences.tiltMIDIOutputDestinations mutableCopy];
+        tiltMIDIOutputDestinations[2] = [NSNumber numberWithInteger:sender.indexOfSelectedItem];
+        self.sharedPreferences.tiltMIDIOutputDestinations = [tiltMIDIOutputDestinations copy];
+    }
+}
+
+- (IBAction)tiltMIDIOutputCCDownPopup:(NSPopUpButton *)sender
+{
+    if( sender.indexOfSelectedItem < self.sharedPreferences.modulationDestinationsArray.count ) {
+        NSMutableArray *tiltMIDIOutputDestinations = [self.sharedPreferences.tiltMIDIOutputDestinations mutableCopy];
+        tiltMIDIOutputDestinations[3] = [NSNumber numberWithInteger:sender.indexOfSelectedItem];
+        self.sharedPreferences.tiltMIDIOutputDestinations = [tiltMIDIOutputDestinations copy];
     }
 }
 

@@ -33,8 +33,6 @@
 
 @property NSUndoManager         *undoManager;
 
-@property NSArray               *modulationDestinationsArray;
-
 @property NSArray               *stepQuantizationArray;
 @property NSArray               *patternQuantizationArray;
 @property NSArray               *swingArray;

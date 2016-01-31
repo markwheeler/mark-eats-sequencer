@@ -28,7 +28,9 @@
 @property NSMutableArray    *inputMappings;
 
 @property NSMutableArray    *enabledMIDIOutputNames;
+
 @property NSNumber          *tiltMIDIOutputChannel;
+@property NSArray           *tiltMIDIOutputDestinations;
 
 @property NSString          *midiClockSourceName;
 @property BOOL              sendMIDIClock;
@@ -36,6 +38,8 @@
 @property BOOL              showNoteLengthOnGrid;
 @property BOOL              loopFromScrubArea;
 @property NSNumber          *defaultMIDINoteVelocity;
+
+@property NSArray           *modulationDestinationsArray;
 
 + (id) sharedPreferences;
 - (void) loadPreferences;

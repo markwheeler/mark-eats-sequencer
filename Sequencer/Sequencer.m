@@ -12,7 +12,6 @@
 #import "Preferences.h"
 #import "EatsQuantizationUtils.h"
 #import "EatsSwingUtils.h"
-#import "EatsModulationUtils.h"
 #import "WMPool+Utils.h"
 
 @interface Sequencer()
@@ -48,7 +47,6 @@
     self.song.automation = [[SequencerAutomation alloc] init];
     self.state = [[SequencerState alloc] init];
     
-    self.modulationDestinationsArray = [EatsModulationUtils modulationDestinationsArray];
     self.stepQuantizationArray = [EatsQuantizationUtils stepQuantizationArray];
     self.patternQuantizationArray = [EatsQuantizationUtils patternQuantizationArrayForGridWidth:self.sharedPreferences.gridWidth];
     self.swingArray = [EatsSwingUtils swingArray];
@@ -856,7 +854,7 @@
     
     dispatch_sync( self.sequencerQueue, ^(void) {
         
-        if( busId < page.modulationDestinationIds.count && destinationId < self.modulationDestinationsArray.count ) {
+        if( busId < page.modulationDestinationIds.count && destinationId < self.sharedPreferences.modulationDestinationsArray.count ) {
             
             [self.undoManager beginUndoGrouping];
             [[self.undoManager prepareWithInvocationTarget:self] setModulationDestinationId:[[page.modulationDestinationIds objectAtIndex:busId] unsignedIntValue] forBus:busId forPage:pageId];

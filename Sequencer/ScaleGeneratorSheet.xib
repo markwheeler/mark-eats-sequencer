@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6250"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ScaleGeneratorSheetController">
@@ -78,7 +78,7 @@ DQ
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="96">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="372" translatesAutoresizingMaskIntoConstraints="NO" id="96">
                         <rect key="frame" x="27" y="133" width="376" height="51"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Replace the current page's pitches with a generated scale. Scales start at the bottom of the grid and ascend." id="97">
                             <font key="font" metaFont="system"/>
@@ -97,7 +97,7 @@ DQ
                             <binding destination="-2" name="value" keyPath="self.tonicNoteName" id="451"/>
                         </connections>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="480">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="309" translatesAutoresizingMaskIntoConstraints="NO" id="480">
                         <rect key="frame" x="27" y="106" width="313" height="33"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Tonic note can be a MIDI note number or a short name (eg, E-1, Db-1, C#8 or G5) where C3 is middle C." id="482">
                             <font key="font" metaFont="smallSystem"/>

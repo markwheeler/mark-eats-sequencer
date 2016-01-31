@@ -7,6 +7,7 @@
 //
 
 #import "Preferences.h"
+#import "EatsModulationUtils.h"
 
 @implementation Preferences
 
@@ -28,15 +29,22 @@
     if (self) {
         self.gridWidth = 16;
         self.gridHeight = 16;
+        
+        self.modulationDestinationsArray = [EatsModulationUtils modulationDestinationsArray];
     }
     return self;
 }
 
 - (NSDictionary *) defaultPreferences
 {
+    NSMutableArray *tiltMIDIOutputDestinations = [NSMutableArray arrayWithCapacity:4];
+    for( int i = 0; i < 4; i ++ )
+        [tiltMIDIOutputDestinations addObject:[NSNumber numberWithInt:i + 4]];
+    
     return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"gridAutoConnect",
                                                       [NSNumber numberWithBool:YES], @"showNoteLengthOnGrid",
                                                       [NSNumber numberWithInteger:64], @"defaultMIDINoteVelocity",
+                                                      [tiltMIDIOutputDestinations copy], @"tiltMIDIOutputDestinations",
                                                       nil];
 }
 
@@ -65,7 +73,8 @@
         self.enabledMIDIOutputNames = [NSMutableArray arrayWithCapacity:16];
     
     self.tiltMIDIOutputChannel = [preferences objectForKey:@"tiltMIDIOutputChannel"];
-
+    self.tiltMIDIOutputDestinations = [preferences objectForKey:@"tiltMIDIOutputDestinations"];
+    
     self.showNoteLengthOnGrid = [preferences boolForKey:@"showNoteLengthOnGrid"];
     self.loopFromScrubArea = [preferences boolForKey:@"loopFromScrubArea"];
     self.defaultMIDINoteVelocity = [preferences objectForKey:@"defaultMIDINoteVelocity"];
@@ -99,6 +108,7 @@
     [preferences setObject:self.enabledMIDIOutputNames forKey:@"enabledMIDIOutputNames"];
     
     [preferences setObject:self.tiltMIDIOutputChannel forKey:@"tiltMIDIOutputChannel"];
+    [preferences setObject:self.tiltMIDIOutputDestinations forKey:@"tiltMIDIOutputDestinations"];
     
     [preferences setBool:self.showNoteLengthOnGrid forKey:@"showNoteLengthOnGrid"];
     [preferences setBool:self.loopFromScrubArea forKey:@"loopFromScrubArea"];

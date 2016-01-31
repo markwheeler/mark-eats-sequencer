@@ -17,6 +17,10 @@
                 <outlet property="midiDestinationsNameColumn" destination="185" id="630"/>
                 <outlet property="preferencesTabView" destination="18" id="615"/>
                 <outlet property="preferencesToolbar" destination="4" id="614"/>
+                <outlet property="tiltMIDIOutputCCDownPopup" destination="dR0-ZE-mgF" id="kFX-ZR-wrO"/>
+                <outlet property="tiltMIDIOutputCCLeftPopup" destination="6ks-PH-YmH" id="l6h-tk-Ced"/>
+                <outlet property="tiltMIDIOutputCCRightPopup" destination="mWS-3Z-9PK" id="OdH-Ts-h4L"/>
+                <outlet property="tiltMIDIOutputCCUpPopup" destination="nLJ-YM-7Iv" id="wmV-uh-Z6E"/>
                 <outlet property="tiltMIDIOutputChannelPopup" destination="Gma-Wg-k06" id="YRF-lD-zB9"/>
                 <outlet property="window" destination="1" id="3"/>
             </connections>
@@ -150,7 +154,7 @@
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" multipleSelection="NO" autosaveColumns="NO" headerView="b1s-SU-iiT" indentationPerLevel="16" outlineTableColumn="Agb-Wq-NN7" id="sfh-dq-dNc">
-                                                        <rect key="frame" x="0.0" y="0.0" width="538" height="172"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="538" height="19"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <size key="intercellSpacing" width="3" height="2"/>
                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -324,7 +328,7 @@
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" id="183">
-                                                        <rect key="frame" x="0.0" y="0.0" width="538" height="138"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="538" height="19"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <size key="intercellSpacing" width="3" height="2"/>
                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -394,15 +398,6 @@
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" id="SkA-es-C7E">
-                                            <rect key="frame" x="190" y="59" width="22" height="17"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Up" id="mHi-pR-Yrw">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
                                         <textField verticalHuggingPriority="750" id="1Ea-ap-hjb">
                                             <rect key="frame" x="28" y="59" width="54" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -412,93 +407,6 @@
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <popUpButton verticalHuggingPriority="750" id="nLJ-YM-7Iv">
-                                            <rect key="frame" x="227" y="53" width="141" height="26"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="EAg-v5-eHa" id="Ezc-SC-ioG">
-                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="menu"/>
-                                                <menu key="menu" id="qIX-kM-9XZ">
-                                                    <items>
-                                                        <menuItem title="None" state="on" id="EAg-v5-eHa"/>
-                                                        <menuItem title="Item 2" id="qZc-O7-l3R"/>
-                                                        <menuItem title="Item 3" id="rOk-oz-gcw"/>
-                                                    </items>
-                                                </menu>
-                                            </popUpButtonCell>
-                                        </popUpButton>
-                                        <textField verticalHuggingPriority="750" id="Sfk-sH-bx2">
-                                            <rect key="frame" x="387" y="59" width="39" height="17"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Down" id="l0l-Sq-hKf">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                        <popUpButton verticalHuggingPriority="750" id="dR0-ZE-mgF">
-                                            <rect key="frame" x="432" y="53" width="141" height="26"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="vXp-gG-fyg" id="Pux-x2-oc0">
-                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="menu"/>
-                                                <menu key="menu" id="NUh-Eh-GSB">
-                                                    <items>
-                                                        <menuItem title="None" state="on" id="vXp-gG-fyg"/>
-                                                        <menuItem title="Item 2" id="67C-jk-3h3"/>
-                                                        <menuItem title="Item 3" id="pTR-Cc-QTw"/>
-                                                    </items>
-                                                </menu>
-                                            </popUpButtonCell>
-                                        </popUpButton>
-                                        <textField verticalHuggingPriority="750" id="Szl-ke-6YC">
-                                            <rect key="frame" x="387" y="29" width="36" height="17"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Right" id="mbU-vJ-Eb2">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                        <popUpButton verticalHuggingPriority="750" id="mWS-3Z-9PK">
-                                            <rect key="frame" x="432" y="23" width="141" height="26"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="hZ4-rf-A54" id="RBp-VL-NI6">
-                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="menu"/>
-                                                <menu key="menu" id="aPI-6l-fUW">
-                                                    <items>
-                                                        <menuItem title="None" state="on" id="hZ4-rf-A54"/>
-                                                        <menuItem title="Item 2" id="wtC-3V-jGt"/>
-                                                        <menuItem title="Item 3" id="rGF-Tz-CiJ"/>
-                                                    </items>
-                                                </menu>
-                                            </popUpButtonCell>
-                                        </popUpButton>
-                                        <textField verticalHuggingPriority="750" id="4Jh-Ys-Udj">
-                                            <rect key="frame" x="190" y="29" width="28" height="17"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Left" id="pPX-31-xdi">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                        <popUpButton verticalHuggingPriority="750" id="6ks-PH-YmH">
-                                            <rect key="frame" x="227" y="23" width="141" height="26"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="vhd-eC-Fhj" id="vTH-Ws-afv">
-                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="menu"/>
-                                                <menu key="menu" id="jxC-uw-5Lm">
-                                                    <items>
-                                                        <menuItem title="None" state="on" id="vhd-eC-Fhj"/>
-                                                        <menuItem title="Item 2" id="0m8-u5-oS9"/>
-                                                        <menuItem title="Item 3" id="5ol-OD-AnX"/>
-                                                    </items>
-                                                </menu>
-                                            </popUpButtonCell>
-                                        </popUpButton>
                                         <popUpButton verticalHuggingPriority="750" id="Gma-Wg-k06">
                                             <rect key="frame" x="88" y="53" width="76" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -518,16 +426,164 @@
                                                 <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="dpo-sQ-lxb"/>
                                             </connections>
                                         </popUpButton>
+                                        <textField verticalHuggingPriority="750" id="SkA-es-C7E">
+                                            <rect key="frame" x="190" y="29" width="22" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Up" id="mHi-pR-Yrw">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <popUpButton verticalHuggingPriority="750" id="nLJ-YM-7Iv">
+                                            <rect key="frame" x="227" y="23" width="141" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="EAg-v5-eHa" id="Ezc-SC-ioG">
+                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="menu"/>
+                                                <menu key="menu" id="qIX-kM-9XZ">
+                                                    <items>
+                                                        <menuItem title="None" state="on" id="EAg-v5-eHa"/>
+                                                        <menuItem title="Item 2" id="qZc-O7-l3R"/>
+                                                        <menuItem title="Item 3" id="rOk-oz-gcw"/>
+                                                    </items>
+                                                </menu>
+                                            </popUpButtonCell>
+                                            <connections>
+                                                <action selector="tiltMIDIOutputCCUpPopup:" target="-2" id="X4f-2J-59c"/>
+                                                <binding destination="-2" name="enabled2" keyPath="self.sharedPreferences.tiltMIDIOutputChannel" previousBinding="D1K-zT-voH" id="gTL-2P-f5a">
+                                                    <dictionary key="options">
+                                                        <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                                        <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                                        <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                                        <integer key="NSNullPlaceholder" value="-1"/>
+                                                        <string key="NSValueTransformerName">NSIsNotNil</string>
+                                                    </dictionary>
+                                                </binding>
+                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="D1K-zT-voH"/>
+                                            </connections>
+                                        </popUpButton>
+                                        <textField verticalHuggingPriority="750" id="Sfk-sH-bx2">
+                                            <rect key="frame" x="387" y="29" width="39" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Down" id="l0l-Sq-hKf">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <popUpButton verticalHuggingPriority="750" id="dR0-ZE-mgF">
+                                            <rect key="frame" x="432" y="23" width="141" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="vXp-gG-fyg" id="Pux-x2-oc0">
+                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="menu"/>
+                                                <menu key="menu" id="NUh-Eh-GSB">
+                                                    <items>
+                                                        <menuItem title="None" state="on" id="vXp-gG-fyg"/>
+                                                        <menuItem title="Item 2" id="67C-jk-3h3"/>
+                                                        <menuItem title="Item 3" id="pTR-Cc-QTw"/>
+                                                    </items>
+                                                </menu>
+                                            </popUpButtonCell>
+                                            <connections>
+                                                <action selector="tiltMIDIOutputCCDownPopup:" target="-2" id="UiD-dk-fTl"/>
+                                                <binding destination="-2" name="enabled2" keyPath="self.sharedPreferences.tiltMIDIOutputChannel" previousBinding="GvO-Su-cae" id="hge-0b-CrH">
+                                                    <dictionary key="options">
+                                                        <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                                        <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                                        <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                                        <integer key="NSNullPlaceholder" value="-1"/>
+                                                        <string key="NSValueTransformerName">NSIsNotNil</string>
+                                                    </dictionary>
+                                                </binding>
+                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="GvO-Su-cae"/>
+                                            </connections>
+                                        </popUpButton>
+                                        <textField verticalHuggingPriority="750" id="4Jh-Ys-Udj">
+                                            <rect key="frame" x="190" y="59" width="28" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Left" id="pPX-31-xdi">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <popUpButton verticalHuggingPriority="750" id="6ks-PH-YmH">
+                                            <rect key="frame" x="227" y="53" width="141" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="vhd-eC-Fhj" id="vTH-Ws-afv">
+                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="menu"/>
+                                                <menu key="menu" id="jxC-uw-5Lm">
+                                                    <items>
+                                                        <menuItem title="None" state="on" id="vhd-eC-Fhj"/>
+                                                        <menuItem title="Item 2" id="0m8-u5-oS9"/>
+                                                        <menuItem title="Item 3" id="5ol-OD-AnX"/>
+                                                    </items>
+                                                </menu>
+                                            </popUpButtonCell>
+                                            <connections>
+                                                <action selector="tiltMIDIOutputCCLeftPopup:" target="-2" id="I7x-hQ-szL"/>
+                                                <binding destination="-2" name="enabled2" keyPath="self.sharedPreferences.tiltMIDIOutputChannel" previousBinding="eIX-ww-RTg" id="yqH-bZ-92L">
+                                                    <dictionary key="options">
+                                                        <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                                        <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                                        <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                                        <integer key="NSNullPlaceholder" value="-1"/>
+                                                        <string key="NSValueTransformerName">NSIsNotNil</string>
+                                                    </dictionary>
+                                                </binding>
+                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="eIX-ww-RTg"/>
+                                            </connections>
+                                        </popUpButton>
+                                        <textField verticalHuggingPriority="750" id="Szl-ke-6YC">
+                                            <rect key="frame" x="387" y="59" width="36" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Right" id="mbU-vJ-Eb2">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <popUpButton verticalHuggingPriority="750" id="mWS-3Z-9PK">
+                                            <rect key="frame" x="432" y="53" width="141" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="hZ4-rf-A54" id="RBp-VL-NI6">
+                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="menu"/>
+                                                <menu key="menu" id="aPI-6l-fUW">
+                                                    <items>
+                                                        <menuItem title="None" state="on" id="hZ4-rf-A54"/>
+                                                        <menuItem title="Item 2" id="wtC-3V-jGt"/>
+                                                        <menuItem title="Item 3" id="rGF-Tz-CiJ"/>
+                                                    </items>
+                                                </menu>
+                                            </popUpButtonCell>
+                                            <connections>
+                                                <action selector="tiltMIDIOutputCCRightPopup:" target="-2" id="mt2-Yj-yMw"/>
+                                                <binding destination="-2" name="enabled2" keyPath="self.sharedPreferences.tiltMIDIOutputChannel" previousBinding="n0d-VD-Er7" id="vJi-nG-zHP">
+                                                    <dictionary key="options">
+                                                        <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                                        <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                                        <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                                        <integer key="NSNullPlaceholder" value="-1"/>
+                                                        <string key="NSValueTransformerName">NSIsNotNil</string>
+                                                    </dictionary>
+                                                </binding>
+                                                <binding destination="-2" name="enabled" keyPath="self.sharedPreferences.gridType" id="n0d-VD-Er7"/>
+                                            </connections>
+                                        </popUpButton>
                                     </subviews>
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="Sync" identifier="3" id="86">
                                 <view key="view" id="87">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="320"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="315"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <popUpButton verticalHuggingPriority="750" id="89">
-                                            <rect key="frame" x="181" y="184" width="239" height="26"/>
+                                            <rect key="frame" x="181" y="179" width="239" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="push" title="Internal" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="98" id="94">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -545,7 +601,7 @@
                                             </connections>
                                         </popUpButton>
                                         <textField verticalHuggingPriority="750" id="90">
-                                            <rect key="frame" x="181" y="223" width="243" height="17"/>
+                                            <rect key="frame" x="181" y="218" width="243" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Clock source" id="91">
                                                 <font key="font" metaFont="system"/>
@@ -554,7 +610,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <button id="FDq-Ec-e5x">
-                                            <rect key="frame" x="181" y="149" width="141" height="24"/>
+                                            <rect key="frame" x="181" y="144" width="141" height="24"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Send MIDI Clock" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Gc5-LK-8HY">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>

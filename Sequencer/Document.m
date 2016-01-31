@@ -30,20 +30,20 @@ typedef enum DocumentPageAnimationDirection {
     DocumentPageAnimationDirection_Right
 } DocumentPageAnimationDirection;
 
-@property EatsClock                     *clock;
-@property ClockTick                     *clockTick;
-@property EatsGridNavigationController  *gridNavigationController;
-@property ScaleGeneratorSheetController *scaleGeneratorSheetController;
+@property EatsClock                                        *clock;
+@property ClockTick                                        *clockTick;
+@property EatsGridNavigationController                     *gridNavigationController;
+@property ScaleGeneratorSheetController                    *scaleGeneratorSheetController;
 
-@property (nonatomic) NSAlert                       *notesOutsideGridAlert;
-@property (nonatomic) NSAlert                       *clearPatternAlert;
-@property (nonatomic) BOOL                          checkedForThingsOutsideGrid;
-@property (nonatomic) NSNumber                      *indexOflastSelectedScaleMode;
-@property (nonatomic) NSString                      *lastTonicNoteName;
-@property (nonatomic) NSPoint                       pageViewFrameOrigin;
-@property (nonatomic) NSPoint                       debugGridViewFloatingToolbarFrameOrigin;
+@property (nonatomic) NSAlert                              *notesOutsideGridAlert;
+@property (nonatomic) NSAlert                              *clearPatternAlert;
+@property (nonatomic) BOOL                                 checkedForThingsOutsideGrid;
+@property (nonatomic) NSNumber                             *indexOflastSelectedScaleMode;
+@property (nonatomic) NSString                             *lastTonicNoteName;
+@property (nonatomic) NSPoint                              pageViewFrameOrigin;
+@property (nonatomic) NSPoint                              debugGridViewFloatingToolbarFrameOrigin;
 
-@property (nonatomic, assign) IBOutlet NSWindow *documentWindow;
+@property (nonatomic, assign) IBOutlet NSWindow            *documentWindow;
 
 @property (nonatomic, weak) IBOutlet KeyboardInputView     *pageView;
 
@@ -403,7 +403,7 @@ typedef enum DocumentPageAnimationDirection {
     // Setup modulation popups
     [self.modulationDestinationAPopup removeAllItems];
     [self.modulationDestinationBPopup removeAllItems];
-    for( NSDictionary *modulationDestination in self.sequencer.modulationDestinationsArray ) {
+    for( NSDictionary *modulationDestination in self.sharedPreferences.modulationDestinationsArray ) {
         [self.modulationDestinationAPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
         [self.modulationDestinationBPopup addItemWithTitle:[modulationDestination valueForKey:@"name"]];
     }

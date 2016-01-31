@@ -536,7 +536,7 @@ typedef enum EatsStepAdvance {
         return;
     
     // Are there any notes in the current pattern?
-    if( [self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] < 1 )
+    if( ![self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] )
         return;
     
     // Are we playing a note this tick?
@@ -688,7 +688,7 @@ typedef enum EatsStepAdvance {
             
             float tweenedModulationValueToSend = [previousModulationValues[b] floatValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] floatValue] * progressionBetweenValues;
             
-            NSDictionary *modulationDestination = self.sequencer.modulationDestinationsArray[modulationDestinationId];
+            NSDictionary *modulationDestination = self.sharedPreferences.modulationDestinationsArray[modulationDestinationId];
             [self sendMIDIModulationValue:tweenedModulationValueToSend
                                    ofType:[[modulationDestination objectForKey:@"type"] unsignedIntValue]
                                 onChannel:[self.sequencer channelForPage:pageId]
