@@ -1534,9 +1534,13 @@ typedef enum DocumentPageAnimationDirection {
     uint keyCode = keyEvent.keyCode;
     NSEventModifierFlags modifierFlags = keyEvent.modifierFlags;
     
+    BOOL hasModifiers = false;
+    if( ( modifierFlags & NSDeviceIndependentModifierFlagsMask ) > 0 )
+        hasModifiers = true;
+    
     // Sequencer playback
     // Space (without any modifier)
-    if( keyCode == 49 && modifierFlags == 256 )
+    if( keyCode == 49 && !hasModifiers )
        [self toggleSequencerPlayback];
     
     // BPM
@@ -1705,7 +1709,7 @@ typedef enum DocumentPageAnimationDirection {
     
     // Automation
     // a (without any modifier)
-    } else if( keyCode == 0 && modifierFlags == 256 ) {
+    } else if( keyCode == 0 && !hasModifiers ) {
         
         if( self.sequencer.automationMode == EatsSequencerAutomationMode_Inactive || self.sequencer.automationMode == EatsSequencerAutomationMode_Recording )
             [self.sequencer setAutomationMode:EatsSequencerAutomationMode_Playing];
@@ -1722,7 +1726,7 @@ typedef enum DocumentPageAnimationDirection {
         
     // Play mode
     // p (without any modifier)
-    } else if( keyCode == 35 && modifierFlags == 256 ) {
+    } else if( keyCode == 35 && !hasModifiers ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Pause] forKey:@"value"];
@@ -1749,7 +1753,7 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Reverse forPage:self.sequencer.currentPageId];
         
     // ? (without any modifier)
-    } else if( keyCode == 44 && modifierFlags == 256 ) {
+    } else if( keyCode == 44 && !hasModifiers ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Random] forKey:@"value"];
@@ -1758,7 +1762,7 @@ typedef enum DocumentPageAnimationDirection {
         [self.sequencer setPlayMode:EatsSequencerPlayMode_Random forPage:self.sequencer.currentPageId];
         
     // s (without any modifier)
-    } else if( keyCode == 1 && modifierFlags == 256 ) {
+    } else if( keyCode == 1 && !hasModifiers ) {
         
         // Add automation
         NSDictionary *values = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:EatsSequencerPlayMode_Slice] forKey:@"value"];
@@ -1776,7 +1780,7 @@ typedef enum DocumentPageAnimationDirection {
     
     // Debug info
     // d (without any modifier)
-    else if( keyCode == 2 && modifierFlags == 256 )
+    else if( keyCode == 2 && !hasModifiers )
         [self logDebugInfo];
     
     

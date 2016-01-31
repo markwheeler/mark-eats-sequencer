@@ -46,8 +46,12 @@
         uint keyCode = keyEvent.keyCode;
         NSEventModifierFlags modifierFlags = keyEvent.modifierFlags;
         
+        BOOL hasModifiers = false;
+        if( ( modifierFlags & NSDeviceIndependentModifierFlagsMask ) > 0 )
+            hasModifiers = true;
+        
         // Here we have to check if it's something we're going to respond to. If not, pass it up. This list duplicates what's in the delegate responder.
-        if( ( keyCode == 49 && modifierFlags == 256 )
+        if( ( keyCode == 49 && !hasModifiers )
            || keyCode == 27
            || keyCode == 24
            || keyCode == 122
@@ -70,16 +74,16 @@
            || keyCode == 28
            || keyCode == 25
            || keyCode == 29
-           || ( keyCode == 0 && modifierFlags == 256 )
+           || ( keyCode == 0 && !hasModifiers )
            || ( keyCode == 0 && modifierFlags & NSShiftKeyMask )
-           || ( keyCode == 35 && modifierFlags == 256 )
+           || ( keyCode == 35 && !hasModifiers )
            || keyCode == 47
            || keyCode == 43
-           || ( keyCode == 44 && modifierFlags == 256 )
-           || ( keyCode == 1 && modifierFlags == 256 )
+           || ( keyCode == 44 && !hasModifiers )
+           || ( keyCode == 1 && !hasModifiers )
            || keyCode == 33
            || keyCode == 30
-           || ( keyCode == 2 && modifierFlags == 256 ) ) {
+           || ( keyCode == 2 && !hasModifiers ) ) {
             
             // Send it to delegate
             if( [_delegate respondsToSelector:@selector(keyDownFromKeyboardInputView:)] )
