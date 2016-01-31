@@ -147,9 +147,6 @@ typedef enum EatsStepAdvance {
 - (void) clockTick:(uint64_t)ns
 {
     // This function only works when both MIN_QUANTIZATION and MIDI_CLOCK_PPQN can cleanly divide into the clock ticks
-    // Could re-work it in future to allow other time signatures
-    
-    // Could also potentially re-work to only fire on MIN_QUANTIZATION? Schedule more than 1 clock pulse if need be
     
     //NSLog(@"Tick: %lu Time: %@", (unsigned long)_currentTick, ns);
     //if( [NSThread isMainThread] ) NSLog(@"%s is running on main thread", __func__);
@@ -505,6 +502,14 @@ typedef enum EatsStepAdvance {
 
 - (void) tickSendModulation:(uint64_t)ns forPage:(uint)pageId
 {
+    EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
+    
+    // Tidy up next step (this actually has nothing to do with modulation but has to be done here so needsToAdvance works correctly)
+    if( needsToAdvance == EatsStepAdvance_Scrubbed )
+        [self.sequencer setNextStep:nil forPage:pageId];
+    
+    // Do some checks to see if we need to actually send modulation...
+    
     // No need to send anything if we're paused
     EatsSequencerPlayMode playMode = [self.sequencer playModeForPage:pageId];
     if( playMode == EatsSequencerPlayMode_Pause )
@@ -530,9 +535,12 @@ typedef enum EatsStepAdvance {
     if( !modulationBusActiveOnThisPage )
         return;
     
+    // Are there any notes in the current pattern?
+    if( [self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] < 1 )
+        return;
+    
     // Are we playing a note this tick?
     
-    EatsStepAdvance needsToAdvance = [self needToAdvanceStep:pageId];
     BOOL playingANote = NO;
     
     NSUInteger numberOfNotesAtStep = [[self.sequencer notesAtStep:[self.sequencer currentStepForPage:pageId] inPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] count];
@@ -551,11 +559,7 @@ typedef enum EatsStepAdvance {
             return;
     }
     
-    // Make sure we're not trying to smooth between too few notes
-    if( [self.sequencer modulationSmoothForPage:pageId] && !playingANote && [self.sequencer numberOfNotesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] < 2 )
-        return;
-    
-    // Looks like we need to do this
+    // Looks like we need to do this!
     
     uint stepLength = [self.sequencer stepLengthForPage:pageId];
     int pageTick = [[self.sequencer pageTickForPage:pageId] intValue];
@@ -647,41 +651,31 @@ typedef enum EatsStepAdvance {
         }
     }
     
-    // TODO remove this
-//    if( pageId == 0 )
-//        NSLog( @"currentStep: %i previousStepToCheck: %i nextStepToCheck: %i", currentStep, previousStepToCheck, nextStepToCheck );
-    
-    // Work out where we are inbetween the two values
-    if( nextStepToCheck < previousStepToCheck ) {
-        
-        nextStepToCheck += self.sharedPreferences.gridWidth;
-        
-    } else if( nextStepToCheck == previousStepToCheck ) {
-        // Notes are at the same step, don't bother
-        NSLog( @"Same step %u %u", previousStepToCheck, nextStepToCheck ); // TODO remove this
-        return;
-    }
-    
     int nextStepToCheckInTicks = nextStepToCheck * pageTicksPerStep;
     int previousStepToCheckInTicks = previousStepToCheck * pageTicksPerStep;
     
-    int ticksBetweenModulationValues = nextStepToCheckInTicks - previousStepToCheckInTicks;
-    float progressionBetweenValues = ( pageTick - previousStepToCheckInTicks ) / (float)ticksBetweenModulationValues;
+    // Work out where we are inbetween the two values
+    if( nextStepToCheckInTicks < previousStepToCheckInTicks ) {
+        if( pageTick < previousStepToCheckInTicks )
+            previousStepToCheckInTicks -= self.sharedPreferences.gridWidth * pageTicksPerStep;
+        else
+            nextStepToCheckInTicks += self.sharedPreferences.gridWidth * pageTicksPerStep;
+    }
     
+    int ticksBetweenModulationValues = nextStepToCheckInTicks - previousStepToCheckInTicks;
+    
+    float progressionBetweenValues = 0.0;
+    if( nextStepToCheck != previousStepToCheck )
+        progressionBetweenValues = ( pageTick - previousStepToCheckInTicks ) / (float)ticksBetweenModulationValues;
+    
+    // Debug check
+    if( progressionBetweenValues < 0.0 || progressionBetweenValues > 1.0) // TODO remove this
+        NSLog( @"WARNING: progressionBetweenValues is invalid: %f, pageTick: %u, pattern notes: %@", progressionBetweenValues, pageTick, [self.sequencer notesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] );
     
     // Work out swing
     
     uint pageTickOfCurrentStep = currentStep * pageTicksPerStep;
-    
     float progressionBetweenSteps = ( pageTick - pageTickOfCurrentStep ) / (float)pageTicksPerStep;
-    if( progressionBetweenSteps > 1.0 ) { // TODO remove this
-        NSLog( @"!!!!!! ------> pageTick: %u pageTickOfCurrentStep: %u progressionBetweenSteps: %f", pageTick, pageTickOfCurrentStep, progressionBetweenSteps );
-        progressionBetweenSteps = 1.0;
-    } else if( progressionBetweenSteps < 0.0 ) {
-        NSLog( @"?????? ------> pageTick: %u pageTickOfCurrentStep: %u progressionBetweenSteps: %f", pageTick, pageTickOfCurrentStep, progressionBetweenSteps );
-        progressionBetweenSteps = 1.0;
-    }
-    
     uint64_t nsSwingForModulation = nsSwing * ( 1.0 - progressionBetweenSteps ) + nsSwingForNextStep * progressionBetweenSteps;
     
     // Send the values
@@ -702,10 +696,6 @@ typedef enum EatsStepAdvance {
                                    atTime:ns + nsSwingForModulation];
         }
     }
-    
-    // Tidy up (this actually has nothing to do with modulation but has to be done here so needsToAdvance works correctly)
-    if( needsToAdvance == EatsStepAdvance_Scrubbed )
-        [self.sequencer setNextStep:nil forPage:pageId];
 }
 
 
@@ -874,8 +864,6 @@ typedef enum EatsStepAdvance {
                                                                                qnPerMeasure:_qnPerMeasure
                                                                             minQuantization:_minQuantization
                                                                                  stepLength:stepLength];
-            
-            //NSLog(@"Length adjustment for position %u in ms %f", position, nsLengthAdjustment / 1000000.0);
         }
         
         // Stop it
