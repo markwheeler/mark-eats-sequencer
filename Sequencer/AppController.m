@@ -39,6 +39,8 @@ typedef enum EatsTiltDirection {
 @property BOOL                          gridTiltXIsInverted;
 @property BOOL                          gridTiltYIsInverted;
 
+@property BOOL                          askingUserForGridSize;
+
 @property NSMutableSet                  *gridTiltSensorCalibrationData;
 
 @property NSArray                       *lastTiltMIDISent; // Ints
@@ -207,9 +209,8 @@ typedef enum EatsTiltDirection {
 
 - (void) gridControllerSetWidth:(uint)w height:(uint)h
 {
-    // Set the prefs, making sure the width is divisible by 8
-    self.sharedPreferences.gridWidth = w - (w % 8);
-    self.sharedPreferences.gridHeight = h - (h % 8);
+    self.sharedPreferences.gridWidth = w;
+    self.sharedPreferences.gridHeight = h;
     
     // Fixed grid size for testing
 //    self.sharedPreferences.gridWidth = 8;
@@ -524,6 +525,9 @@ typedef enum EatsTiltDirection {
     
     } else if( [o.address isEqualTo:@"/sys/size"] ) {
         
+        if( self.askingUserForGridSize )
+            return;
+        
         NSMutableArray *sizeValues = [[NSMutableArray alloc] initWithCapacity:2];
         for ( NSString *s in  o.valueArray ) {
             [sizeValues addObject:[self stripOSCValue:[NSString stringWithFormat:@"%@", s]]];
@@ -532,10 +536,50 @@ typedef enum EatsTiltDirection {
         int width = [sizeValues[0] intValue];
         int height = [sizeValues[1] intValue];
         
-        if( width <= 0 || width > 16 || height <= 0 || height > 16 ) {
-            NSLog(@"WARNING: Monome returned size: %ix%i using 8x8 instead", width, height);
-            width = 8;
-            height = 8;
+        // Did we get an invalid size?
+        if( width <= 0 || width % 8 || width > 16 || height <= 0 || height % 8 || height > 16 ) {
+            
+            NSLog(@"WARNING: Monome returned size: %ix%i", width, height);
+            
+            self.askingUserForGridSize = YES;
+            
+            // Bring up an alert to get the user to set the grid size manually
+            NSPopUpButton *gridSizePopupButton = [[NSPopUpButton alloc] initWithFrame:NSMakeRect( 0, 0, 180, 26 )];
+            [gridSizePopupButton removeAllItems];
+            [gridSizePopupButton addItemWithTitle:@"8x8 (64)"];
+            [gridSizePopupButton addItemWithTitle:@"16x8 (128 horizontal)"];
+            [gridSizePopupButton addItemWithTitle:@"8x16 (128 vertical)"];
+            [gridSizePopupButton addItemWithTitle:@"16x16 (256)"];
+            
+            NSAlert *askGridSizeAlert = [NSAlert alertWithMessageText:@"What size is your grid?"
+                                                    defaultButton:@"OK"
+                                                  alternateButton:nil
+                                                      otherButton:nil
+                                        informativeTextWithFormat:@"Sequencer could not detect the grid size automatically. Sometimes this problem is fixed by disconnecting and reconnecting the USB cable."];
+            
+            [askGridSizeAlert setAccessoryView:gridSizePopupButton];
+            
+            NSInteger result = [askGridSizeAlert runModal];
+            
+            if (result == NSOKButton) {
+                if( gridSizePopupButton.indexOfSelectedItem == 1 ) {
+                    width = 16;
+                    height = 8;
+                } else if( gridSizePopupButton.indexOfSelectedItem == 2 ) {
+                    width = 8;
+                    height = 16;
+                } else if( gridSizePopupButton.indexOfSelectedItem == 3 ) {
+                    width = 16;
+                    height = 16;
+                } else {
+                    width = 8;
+                    height = 8;
+                }
+            }
+            
+            self.askingUserForGridSize = NO;
+            
+            NSLog(@"User selected size: %ix%i", width, height);
         }
         
         [self gridControllerSetWidth:width height:height];
