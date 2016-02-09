@@ -737,7 +737,7 @@ typedef enum EatsStepAdvance {
             if( playMode == EatsSequencerPlayMode_Reverse )
                 minQuantPositionOfStep = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - minQuantPositionOfStep;
             
-            NSLog(@"step: %u mQPoS: %i ", step, minQuantPositionOfStep );
+//            NSLog(@"step: %u mQPoS: %i ", step, minQuantPositionOfStep );
             // TODO need to think about this, feels like the step we're looking up is not the one we want to when we're going in reverse?!
             // Are we compensating for being in reverse twice, once in the other function and once here?
             
