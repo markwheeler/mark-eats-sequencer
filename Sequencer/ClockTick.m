@@ -725,20 +725,24 @@ typedef enum EatsStepAdvance {
         
         int stepLength = [self.sequencer stepLengthForPage:pageId];
         
-        // Position of step in the loop 0 - minQuantization (unless loop is shorter)
-        int minQuantPositionOfCurrentStep = step * ( _minQuantization / stepLength );
-        
-        // Reverse position if we're playing in reverse
-        if( playMode == EatsSequencerPlayMode_Reverse ) {
-            int sixtyFourthsPerStep = _minQuantization / stepLength;
-            minQuantPositionOfCurrentStep = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - minQuantPositionOfCurrentStep;
-        }
-        
         // Don't apply swing to the time sigs that don't fit into the loop
         if( _minQuantization % stepLength == 0 ) {
+        
+            int sixtyFourthsPerStep = _minQuantization / stepLength;
+            
+            // Position of step in the loop 0 - minQuantization (unless loop is shorter)
+            int minQuantPositionOfStep = step * sixtyFourthsPerStep;
+            
+            // Reverse position if we're playing in reverse
+            if( playMode == EatsSequencerPlayMode_Reverse )
+                minQuantPositionOfStep = ( self.sharedPreferences.gridWidth * sixtyFourthsPerStep ) - sixtyFourthsPerStep - minQuantPositionOfStep;
+            
+            NSLog(@"step: %u mQPoS: %i ", step, minQuantPositionOfStep );
+            // TODO need to think about this, feels like the step we're looking up is not the one we want to when we're going in reverse?!
+            // Are we compensating for being in reverse twice, once in the other function and once here?
             
             // Calculate the swing based on note position etc
-            nsSwing = [EatsSwingUtils calculateSwingNsForPosition:minQuantPositionOfCurrentStep
+            nsSwing = [EatsSwingUtils calculateSwingNsForPosition:minQuantPositionOfStep
                                                              type:[self.sequencer swingTypeForPage:pageId]
                                                            amount:[self.sequencer swingAmountForPage:pageId]
                                                               bpm:_bpm
