@@ -562,38 +562,78 @@ typedef enum EatsStepAdvance {
     // Looks like we need to do this!
     
     uint stepLength = [self.sequencer stepLengthForPage:pageId];
-    int pageTick = [[self.sequencer pageTickForPage:pageId] intValue];
+    
+    
+    // Calculate the swing
+    
+    int pageTickForSwing = [[self.sequencer pageTickForPage:pageId] intValue];
     int pageTicksPerStep = _ticksPerMeasure / stepLength;
     
-    
-    // Offset by almost a step when in reverse so that modulation lines up with the start of the note
-    if( playMode == EatsSequencerPlayMode_Reverse ) {
-        pageTick -= pageTicksPerStep - 1;
-        if( pageTick < 0 )
-            pageTick += ( [self.sequencer loopEndForPage:pageId] + 1 ) * pageTicksPerStep;
-    }
+    // TODO remove
+    NSLog(@"--------");
+    NSLog(@"real pageTickForSwing: %i step: %i", pageTickForSwing, [self.sequencer currentStepForPage:pageId] );
     
     // Work out step based on pageTick to allow for reverse adjustment above
-    int currentStep = floor( pageTick / pageTicksPerStep );
-    
+    int currentStepForSwing = floor( pageTickForSwing / pageTicksPerStep );
     
     // Calculate swing for this step and next
     
-    int nextStep = currentStep;
+    int nextStepForSwing = currentStepForSwing;
     
     if( playMode == EatsSequencerPlayMode_Forward ) {
-        nextStep ++;
-        if( nextStep >= self.sharedPreferences.gridWidth )
-            nextStep = 0;
+        nextStepForSwing ++;
+        if( nextStepForSwing >= self.sharedPreferences.gridWidth )
+            nextStepForSwing = 0;
     } else if( playMode == EatsSequencerPlayMode_Reverse ) {
-        nextStep --;
-        if( nextStep < 0 )
-            nextStep = self.sharedPreferences.gridWidth - 1;
+        nextStepForSwing --;
+        if( nextStepForSwing < 0 )
+            nextStepForSwing = self.sharedPreferences.gridWidth - 1;
     }
     
-    uint64_t nsSwing = [self calculateSwingForStep:currentStep forPage:pageId];
-    uint64_t nsSwingForNextStep = [self calculateSwingForStep:nextStep forPage:pageId];
+    uint64_t nsSwing = [self calculateSwingForStep:currentStepForSwing forPage:pageId];
+    uint64_t nsSwingForNextStep = [self calculateSwingForStep:nextStepForSwing forPage:pageId];
     
+    // Work out how far we are through the step
+    
+    uint pageTickOfCurrentStep = currentStepForSwing * pageTicksPerStep;
+    float progressionBetweenSteps;
+    
+    if( playMode == EatsSequencerPlayMode_Reverse ) {
+        // Adjust to look at the end of the notes for reverse mode
+        pageTickOfCurrentStep += pageTicksPerStep - 1;
+        progressionBetweenSteps = ( pageTickOfCurrentStep - pageTickForSwing ) / (float)pageTicksPerStep;
+        
+    } else {
+        progressionBetweenSteps = ( pageTickForSwing - pageTickOfCurrentStep ) / (float)pageTicksPerStep;
+    }
+    
+    // TODO remove
+    NSLog(@"pageTickForSwing: %i pageTickOfCurrentStep: %i progression: %f", pageTickForSwing, pageTickOfCurrentStep, progressionBetweenSteps );
+    uint64_t nsSwingForModulation = nsSwing * ( 1.0 - progressionBetweenSteps ) + nsSwingForNextStep * progressionBetweenSteps;
+    
+    
+    // Find the modulation values
+    
+    // Offset the modulation values by almost a step when in reverse so that modulation lines up with the start of the note
+    
+    int pageTickForVals = pageTickForSwing;
+    int currentStepForVals;
+    
+    if( playMode == EatsSequencerPlayMode_Reverse ) {
+        
+        pageTickForVals -= pageTicksPerStep - 1;
+        if( pageTickForVals < 0 )
+            pageTickForVals += self.sharedPreferences.gridWidth * pageTicksPerStep;
+        
+        // Re-calculate currentStep
+        currentStepForVals = floor( pageTickForVals / pageTicksPerStep );
+        
+    } else {
+        currentStepForVals = currentStepForSwing;
+    }
+    
+    // TODO remove
+    NSLog(@"adjusted pageTick: %i step: %i", pageTickForVals, currentStepForVals );
     
     // Setup arrays for finding the previous and next modulation values
     
@@ -609,7 +649,7 @@ typedef enum EatsStepAdvance {
     // Find the previous modulation value
     
     NSSet *notesToCheck;
-    int previousStepToCheck = currentStep + 1;
+    int previousStepToCheck = currentStepForVals + 1;
     
     // Find the last step to have notes
     while( notesToCheck.count == 0 ) {
@@ -632,7 +672,7 @@ typedef enum EatsStepAdvance {
     // Find the next modulation value
     
     notesToCheck = nil;
-    int nextStepToCheck = currentStep;
+    int nextStepToCheck = currentStepForVals;
     
     // Find the last step to have notes
     while( notesToCheck.count == 0 ) {
@@ -656,7 +696,7 @@ typedef enum EatsStepAdvance {
     
     // Work out where we are inbetween the two values
     if( nextStepToCheckInTicks < previousStepToCheckInTicks ) {
-        if( pageTick < previousStepToCheckInTicks )
+        if( pageTickForVals < previousStepToCheckInTicks )
             previousStepToCheckInTicks -= self.sharedPreferences.gridWidth * pageTicksPerStep;
         else
             nextStepToCheckInTicks += self.sharedPreferences.gridWidth * pageTicksPerStep;
@@ -666,17 +706,12 @@ typedef enum EatsStepAdvance {
     
     float progressionBetweenValues = 0.0;
     if( nextStepToCheck != previousStepToCheck )
-        progressionBetweenValues = ( pageTick - previousStepToCheckInTicks ) / (float)ticksBetweenModulationValues;
+        progressionBetweenValues = ( pageTickForVals - previousStepToCheckInTicks ) / (float)ticksBetweenModulationValues;
     
     // Debug check
     if( progressionBetweenValues < 0.0 || progressionBetweenValues > 1.0) // TODO remove this
-        NSLog( @"WARNING: progressionBetweenValues is invalid: %f, pageTick: %u, pattern notes: %@", progressionBetweenValues, pageTick, [self.sequencer notesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] );
+        NSLog( @"WARNING: progressionBetweenValues is invalid: %f, pageTickForVals: %u, pattern notes: %@", progressionBetweenValues, pageTickForVals, [self.sequencer notesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] );
     
-    // Work out swing
-    
-    uint pageTickOfCurrentStep = currentStep * pageTicksPerStep;
-    float progressionBetweenSteps = ( pageTick - pageTickOfCurrentStep ) / (float)pageTicksPerStep;
-    uint64_t nsSwingForModulation = nsSwing * ( 1.0 - progressionBetweenSteps ) + nsSwingForNextStep * progressionBetweenSteps;
     
     // Send the values
     
@@ -688,6 +723,10 @@ typedef enum EatsStepAdvance {
             
             float tweenedModulationValueToSend = [previousModulationValues[b] floatValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] floatValue] * progressionBetweenValues;
             
+            // TODO remove
+            if( tweenedModulationValueToSend == 1.0 )
+                NSLog(@"PEAK pageTick: %i step: %i", pageTickForVals, currentStepForVals );
+                
             NSDictionary *modulationDestination = self.sharedPreferences.modulationDestinationsArray[modulationDestinationId];
             [self sendMIDIModulationValue:tweenedModulationValueToSend
                                    ofType:[[modulationDestination objectForKey:@"type"] unsignedIntValue]
