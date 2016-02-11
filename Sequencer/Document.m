@@ -807,7 +807,7 @@ typedef enum DocumentPageAnimationDirection {
     self.debugGridView.gridWidth = self.sharedPreferences.gridWidth;
     self.debugGridView.gridHeight = self.sharedPreferences.gridHeight;
     self.debugGridView.gridSizeHasChanged = YES;
-    self.debugGridView.needsDisplay = YES;
+    [self.debugGridView updateGridImage];
     
     // Pattern controls
     [self.currentPatternSegmentedControl setSegmentCount:self.sharedPreferences.gridWidth];
@@ -972,7 +972,8 @@ typedef enum DocumentPageAnimationDirection {
         self.debugGridView.drawNotesForReverse = NO;
     self.debugGridView.currentStep = [self.sequencer currentStepForPage:self.sequencer.currentPageId];
     self.debugGridView.nextStep = [self.sequencer nextStepForPage:self.sequencer.currentPageId];
-    self.debugGridView.needsDisplay = YES;
+    
+    [self.debugGridView updateGridImage];
 }
 
 - (void) updatePitches

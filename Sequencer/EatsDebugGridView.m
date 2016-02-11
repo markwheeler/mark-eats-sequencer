@@ -12,6 +12,8 @@
 
 @interface EatsDebugGridView ()
 
+@property (nonatomic) BOOL                  gridHasChanged;
+
 @property (nonatomic) float                 noteBrightness;
 @property (nonatomic) float                 lengthBrightness;
 @property (nonatomic) NSNumber              *playheadBrightness;
@@ -26,6 +28,7 @@
 @property (nonatomic) NSNumber              *backgroundBrightnessInactive;
 
 @property (nonatomic) NSImage               *backgroundGridImage;
+@property (nonatomic) NSImage               *completeGridImage;
 @property (nonatomic) NSBezierPath          *backgroundBezierPath;
 @property (nonatomic) NSArray               *bezierPathsForFills;
 @property (nonatomic) NSArray               *bezierPathsForStrokes;
@@ -38,6 +41,8 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        
+        self.gridHasChanged = NO;
         
         self.columns = 16;
         self.rows = 16;
@@ -350,7 +355,7 @@
     [NSGraphicsContext restoreGraphicsState];
 }
 
-- (void) drawRect:(NSRect)dirtyRect
+- (void) generateCompleteGridImage
 {
     if( !self.notes )
         return;
@@ -360,6 +365,8 @@
         [self generateBackgroundGridImage];
         _gridSizeHasChanged = NO;
     }
+    
+    self.completeGridImage = [[NSImage alloc] initWithSize:self.bounds.size];
     
     // Generate the columns with playhead and nextStep
     
@@ -464,25 +471,16 @@
     }
     
     
-    // Draw the viewArray
+    // Draw
     
-    // Focus ring and background
     [NSGraphicsContext saveGraphicsState];
     
-    if( self.window.firstResponder == self )
-        NSSetFocusRingStyle( NSFocusRingBelow );
-    
-    [[NSColor windowBackgroundColor] set];
-    [_backgroundBezierPath fill];
-    
-    [NSGraphicsContext restoreGraphicsState];
+    [self.completeGridImage lockFocus];
     
     // Background grid image
     [self.backgroundGridImage drawInRect:self.bounds];
     
     // Playhead and notes
-    [NSGraphicsContext saveGraphicsState];
-    
     for( int r = 0; r < _rows; r ++ ){
         for( int c = 0; c < _columns; c ++ ) {
             
@@ -502,7 +500,41 @@
         }
     }
     
+    [self.completeGridImage unlockFocus];
+    
     [NSGraphicsContext restoreGraphicsState];
+    
+    _gridHasChanged = NO;
+}
+
+- (void) updateGridImage
+{
+    _gridHasChanged = YES;
+    self.needsDisplay = YES;
+}
+
+- (void) drawRect:(NSRect)dirtyRect
+{
+    // Update cached image if need be
+    if( _gridHasChanged )
+        [self generateCompleteGridImage];
+    
+    // Focus ring and background
+    [NSGraphicsContext saveGraphicsState];
+    
+    if( self.window.firstResponder == self )
+        NSSetFocusRingStyle( NSFocusRingBelow );
+    
+    [[NSColor windowBackgroundColor] set];
+    [_backgroundBezierPath fill];
+    
+    [NSGraphicsContext restoreGraphicsState];
+    
+    // Complete grid image
+    [NSGraphicsContext saveGraphicsState];
+    [self.completeGridImage drawInRect:self.bounds];
+    [NSGraphicsContext restoreGraphicsState];
+
 }
 
 @end

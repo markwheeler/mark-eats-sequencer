@@ -22,6 +22,8 @@
 
 @interface EatsDebugGridView : NSView
 
+- (void) updateGridImage;
+
 @property (nonatomic) uint                  columns;
 @property (nonatomic) uint                  rows;
 @property (nonatomic) uint                  gutter;
