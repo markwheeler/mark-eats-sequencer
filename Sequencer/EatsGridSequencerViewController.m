@@ -768,6 +768,9 @@
     // Release
     } else if( sender.mode == EatsPatternViewMode_Edit && self.lastDownWasInEditMode ) {
         
+        // TODO comment out of release
+        NSLog(@"SequencerViewController.eatsGridPatternViewPressAt:%u,%u (release)", x, y );
+        
         [self.sequencer addOrRemoveNoteThatIsSelectableAtStep:x atRow:self.height - 1 - y inPattern:[self.sequencer currentPatternIdForPage:self.sequencer.currentPageId] inPage:self.sequencer.currentPageId];
     }
 }

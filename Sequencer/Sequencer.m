@@ -1825,6 +1825,9 @@
 
 - (void) addNoteAtStep:(uint)step atRow:(uint)row withLength:(uint)length withVelocity:(uint)velocity inPattern:(uint)patternId inPage:(uint)pageId
 {
+    // TODO comment out of release
+    NSLog(@"addNoteAtStep:%u atRow:%u", step, row );
+    
     [self.undoManager beginUndoGrouping];
     [[self.undoManager prepareWithInvocationTarget:self] removeNoteAtStep:step atRow:row inPattern:patternId inPage:pageId];
     [self.undoManager setActionName:@"Pattern Change"];
