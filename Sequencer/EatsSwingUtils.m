@@ -39,16 +39,17 @@
     uint positionInSwingCycle = position % swingCycle;
     
     // Start working in NS
-    uint64_t barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
-    uint64_t swingCycleInNs = barInNs / ( minQuantization / swingCycle );
+    float barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
+    float swingCycleInNs = barInNs / ( minQuantization / swingCycle );
     int64_t swingInNs = 0;
-    uint64_t positionRelativeToZero;
-    uint64_t defaultPositionRelativeToZero;
+    
+    float positionRelativeToZero;
+    float defaultPositionRelativeToZero;
     
     float swingAmountFactor = swingAmount * 0.01;
     
     // Make odd split longer
-    if( positionInSwingCycle < swingCycle / 2 ) {
+    if( positionInSwingCycle < swingCycle * 0.5 ) {
         
         positionRelativeToZero = ( (swingCycleInNs * swingAmountFactor ) / ( swingCycle * 0.5 ) ) * positionInSwingCycle;
         defaultPositionRelativeToZero = ( (swingCycleInNs * 0.5) / ( swingCycle * 0.5 ) ) * positionInSwingCycle;
@@ -56,8 +57,8 @@
         
     // Make even split shorter
     } else {
-        positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( (swingCycleInNs * ( 1.0 - swingAmountFactor )) / ( swingCycle * 0.5 ) ) * ( positionInSwingCycle - swingCycle / 2 );
-        defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( (swingCycleInNs * 0.5) / ( swingCycle / 2 ) ) * ( positionInSwingCycle - swingCycle * 0.5 );
+        positionRelativeToZero = swingCycleInNs * swingAmountFactor + ( ( swingCycleInNs * ( 1.0 - swingAmountFactor ) ) / ( swingCycle * 0.5 ) ) * ( positionInSwingCycle - swingCycle * 0.5 );
+        defaultPositionRelativeToZero = swingCycleInNs * 0.5 + ( ( swingCycleInNs * 0.5 ) / ( swingCycle * 0.5 ) ) * ( positionInSwingCycle - swingCycle * 0.5 );
         swingInNs = positionRelativeToZero - defaultPositionRelativeToZero;
         
     }
@@ -73,14 +74,14 @@
     // Position must be 0 - minQuantization - 1
     
     // Number of 64ths in each cycle
-    uint swingCycle = minQuantization / ( swingType / 2 );
+    uint swingCycle = minQuantization / ( swingType * 0.5 );
     
     // This gives us the positioning of the note in 64ths
     uint positionInSwingCycle = position % swingCycle;
     
     // Start working in NS
-    uint64_t barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
-    uint64_t stepLengthInNs = barInNs / stepLength;
+    float barInNs =  1000000000 * ( 60.0 / ( bpm / qnPerMeasure ) );
+    float stepLengthInNs = barInNs / stepLength;
     int64_t additionalLengthNs = 0;
     
     float swingAmountFactor = ( swingAmount - 50 ) / 50.0;
@@ -89,7 +90,7 @@
     additionalLengthNs = ( stepLengthInNs * swingAmountFactor );
     
     // Make odd split longer
-    if( positionInSwingCycle < swingCycle / 2 ) {
+    if( positionInSwingCycle < swingCycle * 0.5 ) {
         
         return additionalLengthNs;
         
