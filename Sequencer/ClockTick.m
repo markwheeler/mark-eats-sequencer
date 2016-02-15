@@ -569,10 +569,6 @@ typedef enum EatsStepAdvance {
     int pageTickForSwing = [[self.sequencer pageTickForPage:pageId] intValue];
     int pageTicksPerStep = _ticksPerMeasure / stepLength;
     
-    // TODO remove
-    NSLog(@"--------");
-    NSLog(@"real pageTickForSwing: %i step: %i", pageTickForSwing, [self.sequencer currentStepForPage:pageId] );
-    
     // Work out step based on pageTick to allow for reverse adjustment above
     int currentStepForSwing = floor( pageTickForSwing / pageTicksPerStep );
     
@@ -607,8 +603,6 @@ typedef enum EatsStepAdvance {
         progressionBetweenSteps = ( pageTickForSwing - pageTickOfCurrentStep ) / (float)pageTicksPerStep;
     }
     
-    // TODO remove
-    NSLog(@"pageTickForSwing: %i pageTickOfCurrentStep: %i progression: %f", pageTickForSwing, pageTickOfCurrentStep, progressionBetweenSteps );
     uint64_t nsSwingForModulation = nsSwing * ( 1.0 - progressionBetweenSteps ) + nsSwingForNextStep * progressionBetweenSteps;
     
     
@@ -631,9 +625,6 @@ typedef enum EatsStepAdvance {
     } else {
         currentStepForVals = currentStepForSwing;
     }
-    
-    // TODO remove
-    NSLog(@"adjusted pageTick: %i step: %i", pageTickForVals, currentStepForVals );
     
     // Setup arrays for finding the previous and next modulation values
     
@@ -708,10 +699,6 @@ typedef enum EatsStepAdvance {
     if( nextStepToCheck != previousStepToCheck )
         progressionBetweenValues = ( pageTickForVals - previousStepToCheckInTicks ) / (float)ticksBetweenModulationValues;
     
-    // Debug check
-    if( progressionBetweenValues < 0.0 || progressionBetweenValues > 1.0) // TODO remove this
-        NSLog( @"WARNING: progressionBetweenValues is invalid: %f, pageTickForVals: %u, pattern notes: %@", progressionBetweenValues, pageTickForVals, [self.sequencer notesForPattern:[self.sequencer currentPatternIdForPage:pageId] inPage:pageId] );
-    
     
     // Send the values
     
@@ -723,10 +710,6 @@ typedef enum EatsStepAdvance {
             
             float tweenedModulationValueToSend = [previousModulationValues[b] floatValue] * ( 1.0 - progressionBetweenValues ) + [nextModulationValues[b] floatValue] * progressionBetweenValues;
             
-            // TODO remove
-            if( tweenedModulationValueToSend == 1.0 )
-                NSLog(@"PEAK pageTick: %i step: %i", pageTickForVals, currentStepForVals );
-                
             NSDictionary *modulationDestination = self.sharedPreferences.modulationDestinationsArray[modulationDestinationId];
             [self sendMIDIModulationValue:tweenedModulationValueToSend
                                    ofType:[[modulationDestination objectForKey:@"type"] unsignedIntValue]
