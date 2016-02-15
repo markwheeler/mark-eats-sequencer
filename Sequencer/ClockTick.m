@@ -549,8 +549,8 @@ typedef enum EatsStepAdvance {
         playingANote = YES;
     
     if( playMode == EatsSequencerPlayMode_Slice ) {
-        // If we're not smoothing and the step hasn't changed then return
-        if( ![self.sequencer modulationSmoothForPage:pageId] && needsToAdvance == EatsStepAdvance_None )
+        // If we're not smoothing and the step hasn't changed or it's an empty step then return
+        if( ![self.sequencer modulationSmoothForPage:pageId] && ( needsToAdvance == EatsStepAdvance_None || !playingANote ) )
             return;
         
     } else {
