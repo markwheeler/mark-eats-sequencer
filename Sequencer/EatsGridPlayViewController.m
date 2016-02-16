@@ -393,9 +393,10 @@
                                                          selector:@selector(animateIn:)
                                                          userInfo:nil
                                                           repeats:NO];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.inOutAnimationTimer setTolerance:self.inOutAnimationTimer.timeInterval * ANIMATION_TIMER_TOLERANCE];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:self.inOutAnimationTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:self.inOutAnimationTimer forMode: NSEventTrackingRunLoopMode];
         
@@ -411,9 +412,10 @@
                                                          selector:@selector(animateOut:)
                                                          userInfo:nil
                                                           repeats:NO];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.inOutAnimationTimer setTolerance:self.inOutAnimationTimer.timeInterval * ANIMATION_TIMER_TOLERANCE];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:self.inOutAnimationTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:self.inOutAnimationTimer forMode: NSEventTrackingRunLoopMode];
     });
@@ -539,10 +541,10 @@
                                                              selector:@selector(pageLeft:)
                                                              userInfo:nil
                                                               repeats:NO];
-    
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+    [self.pageAnimationTimer setTolerance:self.pageAnimationTimer.timeInterval * ANIMATION_TIMER_TOLERANCE];
     
     // Make sure we fire even when the UI is tracking mouse down stuff
+    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
     [runloop addTimer:self.pageAnimationTimer forMode: NSRunLoopCommonModes];
     [runloop addTimer:self.pageAnimationTimer forMode: NSEventTrackingRunLoopMode];
 }
@@ -556,10 +558,10 @@
                                                             selector:@selector(pageRight:)
                                                             userInfo:nil
                                                              repeats:NO];
-    
-    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+    [self.pageAnimationTimer setTolerance:self.pageAnimationTimer.timeInterval * ANIMATION_TIMER_TOLERANCE];
     
     // Make sure we fire even when the UI is tracking mouse down stuff
+    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
     [runloop addTimer:self.pageAnimationTimer forMode: NSRunLoopCommonModes];
     [runloop addTimer:self.pageAnimationTimer forMode: NSEventTrackingRunLoopMode];
 }
@@ -603,9 +605,10 @@
                                                                   selector:@selector(boxOverlayFadeIncrement:)
                                                                   userInfo:nil
                                                                    repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.boxOverlayFadeTimer setTolerance:self.boxOverlayFadeTimer.timeInterval * ANIMATION_TIMER_TOLERANCE];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:self.boxOverlayFadeTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:self.boxOverlayFadeTimer forMode: NSEventTrackingRunLoopMode];
     });
@@ -640,9 +643,10 @@
                                                          selector:@selector(decrementBPMRepeat:)
                                                          userInfo:nil
                                                           repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.bpmRepeatTimer setTolerance:self.bpmRepeatTimer.timeInterval * 0.1]; // 10%
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
         
@@ -659,9 +663,10 @@
                                                          selector:@selector(incrementBPMRepeat:)
                                                          userInfo:nil
                                                           repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.bpmRepeatTimer setTolerance:self.bpmRepeatTimer.timeInterval * 0.1]; // 10%
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
         
@@ -1402,9 +1407,10 @@
                                                                          selector:@selector(decrementBPMRepeat:)
                                                                          userInfo:nil
                                                                           repeats:YES];
-                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                        [self.bpmRepeatTimer setTolerance:self.bpmRepeatTimer.timeInterval * 0.1]; // 10%
                         
                         // Make sure we fire even when the UI is tracking mouse down stuff
+                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                         [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
                         [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
                         
@@ -1439,9 +1445,10 @@
                                                                          selector:@selector(incrementBPMRepeat:)
                                                                          userInfo:nil
                                                                           repeats:YES];
-                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                        [self.bpmRepeatTimer setTolerance:self.bpmRepeatTimer.timeInterval * 0.1]; // 10%
                         
                         // Make sure we fire even when the UI is tracking mouse down stuff
+                        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                         [runloop addTimer:self.bpmRepeatTimer forMode: NSRunLoopCommonModes];
                         [runloop addTimer:self.bpmRepeatTimer forMode: NSEventTrackingRunLoopMode];
                         
@@ -1472,9 +1479,10 @@
 //                                                                 selector:@selector(clearIncrement:)
 //                                                                 userInfo:nil
 //                                                                  repeats:YES];
-//                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+//                    [self.self.clearTimer setTolerance:self.self.clearTimer.timeInterval * 0.1]; // 10%
 //                    
 //                    // Make sure we fire even when the UI is tracking mouse down stuff
+//                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
 //                    [runloop addTimer:self.clearTimer forMode: NSRunLoopCommonModes];
 //                    [runloop addTimer:self.clearTimer forMode: NSEventTrackingRunLoopMode];
 //                    
@@ -1503,9 +1511,10 @@
                                                                          selector:@selector(automationLongPressTimeout:)
                                                                          userInfo:nil
                                                                           repeats:NO];
-                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                    [self.automationLongPressTimer setTolerance:self.automationLongPressTimer.timeInterval * 0.1]; // 10%
                     
                     // Make sure we fire even when the UI is tracking mouse down stuff
+                    NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                     [runloop addTimer:self.automationLongPressTimer forMode: NSRunLoopCommonModes];
                     [runloop addTimer:self.automationLongPressTimer forMode: NSEventTrackingRunLoopMode];
                 });
@@ -1580,9 +1589,10 @@
                                                                        selector:@selector(automationLongerPressTimeout:)
                                                                        userInfo:nil
                                                                         repeats:NO];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.automationLongPressTimer setTolerance:self.automationLongPressTimer.timeInterval * 0.1]; // 10%
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:self.automationLongPressTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:self.automationLongPressTimer forMode: NSEventTrackingRunLoopMode];
     });

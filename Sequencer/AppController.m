@@ -182,6 +182,7 @@ typedef enum EatsTiltDirection {
                                                          selector:@selector(gridControllerConnectionTimeout:)
                                                          userInfo:nil
                                                           repeats:NO];
+        [self.gridControllerConnectionTimer setTolerance:0.5]; // High tolerance, not critical here
         
         [EatsMonome connectToMonomeAtPort:self.sharedCommunicationManager.oscOutPort
                                  fromPort:self.sharedCommunicationManager.oscInPort
@@ -247,6 +248,7 @@ typedef enum EatsTiltDirection {
                                                                          selector:@selector(gridControllerCalibrationTimeout:)
                                                                          userInfo:nil
                                                                           repeats:NO];
+    [self.gridControllerCalibrationTimer setTolerance:0.5]; // High tolerance, not critical here
     
     // Reset all the calibration settings
     self.gridTiltSensorCalibrationData = [NSMutableSet set];

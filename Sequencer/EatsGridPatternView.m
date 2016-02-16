@@ -382,9 +382,10 @@
                                                                  selector:@selector(longPressTimeout:)
                                                                  userInfo:nil
                                                                   repeats:NO];
-                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+                [self.longPressTimer setTolerance:self.longPressTimer.timeInterval * 0.1]; // 10%
                 
                 // Make sure we fire even when the UI is tracking mouse down stuff
+                NSRunLoop *runloop = [NSRunLoop currentRunLoop];
                 [runloop addTimer:self.longPressTimer forMode: NSRunLoopCommonModes];
                 [runloop addTimer:self.longPressTimer forMode: NSEventTrackingRunLoopMode];
             });

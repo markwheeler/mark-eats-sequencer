@@ -11,6 +11,8 @@
 
 #define NUMBER_OF_MIDI_CHANNELS 16
 
+#define ANIMATION_TIMER_TOLERANCE 0.1
+
 extern int const kSequencerNumberOfPages;
 
 extern NSString *const kSequencerNotesDataPasteboardType;

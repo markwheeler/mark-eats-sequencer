@@ -40,23 +40,26 @@
         self.oscInputPortLabel = @"Mark Eats Sequencer input";
         self.oscOutputPortLabel = @"Mark Eats Sequencer output";
         self.oscPrefix = @"markeatsseq";
-
+        
         // Create the OSC ports
         uint retries = 0;
-        while (self.oscInPort == nil && retries < 50) {
+        while( self.oscInPort == nil && retries < 50 ) {
             self.oscInPort = [self.oscManager createNewInputForPort:12234 + retries withLabel:self.oscInputPortLabel];
             retries++;
         }
-        if (self.oscInPort)
-            NSLog(@"OSC in port: %hu", self.oscInPort.port);
-        else
-            NSLog(@"Error creating OSC in port");
+        if( self.oscInPort ) {
+            NSLog( @"OSC in port: %hu", self.oscInPort.port );
+            [self.oscInPort setInterval:1.0 / 100.0]; // Default is 100hz. This is how often we check for new OSC input.
+        } else {
+            NSLog( @"Error creating OSC in port" );
+        }
+        
         retries = 0;
-        while (self.oscOutPort == nil && retries < 50) {
+        while( self.oscOutPort == nil && retries < 50 ) {
             self.oscOutPort = [self.oscManager createNewOutputToAddress:@"local" atPort:12234 + retries withLabel:self.oscOutputPortLabel];
             retries++;
         }
-        if (self.oscOutPort)
+        if( self.oscOutPort )
             NSLog(@"OSC out port: %hu", self.oscOutPort.port);
         else
             NSLog(@"Error creating OSC out port");

@@ -78,9 +78,10 @@
                                                          selector:@selector(updateAnimation:)
                                                          userInfo:nil
                                                           repeats:YES];
-        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [self.animationTimer setTolerance:self.animationTimer.timeInterval * ANIMATION_TIMER_TOLERANCE];
         
         // Make sure we fire even when the UI is tracking mouse down stuff
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
         [runloop addTimer:_animationTimer forMode: NSRunLoopCommonModes];
         [runloop addTimer:_animationTimer forMode: NSEventTrackingRunLoopMode];
     });
