@@ -160,23 +160,12 @@
 
 #pragma mark - GridView delegate methods
 
-- (void) updateGridWithNothing
+- (void) clearGridController
 {
-    // Combine sub views to create the complete view
-    NSMutableArray *gridArray = [NSMutableArray arrayWithCapacity:self.sharedPreferences.gridWidth];
+    if( !self.isActive ) return;
     
-    NSNumber *zero = [NSNumber numberWithUnsignedInt:0];
-    
-    // Generate the columns
-    for(int x = 0; x < self.sharedPreferences.gridWidth; x ++ ) {
-        [gridArray insertObject:[NSMutableArray arrayWithCapacity:self.sharedPreferences.gridHeight] atIndex:x];
-        // Generate the rows
-        for(int y = 0; y < self.sharedPreferences.gridHeight; y ++ ) {
-            [(NSMutableArray *)[gridArray objectAtIndex:x] insertObject:zero atIndex:y];
-        }
-    }
-    
-    [self updateGridWithArray:[gridArray copy]];
+    if( self.sharedPreferences.gridType != EatsGridType_None && [self.deviceInterface respondsToSelector:@selector( clearGridController )] )
+        [self.deviceInterface performSelector:@selector( clearGridController )];
 }
 
 - (void) updateGridWithArray:(NSArray *)gridArray

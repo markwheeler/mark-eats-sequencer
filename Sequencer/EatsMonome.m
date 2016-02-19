@@ -224,8 +224,10 @@
         level = l;
     } else {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/set", self.oscPrefix];
-        if(l > BRIGHTNESS_CUTOFF) level = 1;
-        else level = 0;
+        if(l > BRIGHTNESS_CUTOFF)
+            level = 1;
+        else
+            level = 0;
     }
     
     // Create and send the OSC message
@@ -247,8 +249,10 @@
         level = l;
     } else {
         oscAddress = [NSString stringWithFormat:@"/%@/grid/led/all", self.oscPrefix];
-        if(l > BRIGHTNESS_CUTOFF) level = 1;
-        else level = 0;
+        if(l > BRIGHTNESS_CUTOFF)
+            level = 1;
+        else
+            level = 0;
     }
     
     // Create and send the OSC message

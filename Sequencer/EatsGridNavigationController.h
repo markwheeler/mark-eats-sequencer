@@ -21,7 +21,7 @@ typedef enum EatsGridViewType{
 @protocol EatsGridViewDelegateProtocol
 @property BOOL                      isActive;
 @property Sequencer                 *sequencer;
-- (void) updateGridWithNothing;
+- (void) clearGridController;
 - (void) updateGridWithArray:(NSArray *)gridArray;
 - (void) showView:(NSNumber *)gridView;
 @end

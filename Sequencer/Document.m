@@ -268,8 +268,7 @@ typedef enum DocumentPageAnimationDirection {
 - (void) windowWillClose:(NSNotification *)notification
 {
     // Clear the grid view if we're active
-    if( self.gridNavigationController.isActive )
-        [self.gridNavigationController updateGridWithNothing];
+    [self.gridNavigationController clearGridController];
     
     // Make us no longer active (this also seems to ensure dealloc is called on the NSDocument, though that can take a few seconds)
     EatsDocumentController *documentController = [EatsDocumentController sharedDocumentController];
