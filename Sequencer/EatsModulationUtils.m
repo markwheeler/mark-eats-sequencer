@@ -26,7 +26,8 @@
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"Channel pressure", @"name", [NSNumber numberWithInt:VVMIDIChannelPressureVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
                                        
                                        // CCs
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 0 (Bank Select)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:0], @"controllerNumber", nil],
+                                       
+                                       // Skip CC 0 (Bank Select MSB)
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 1 (Modulation)", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:1], @"controllerNumber", nil],
                                        
@@ -90,7 +91,7 @@
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 31", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:31], @"controllerNumber", nil],
                                        
-                                       [NSDictionary dictionaryWithObjectsAndKeys:@"CC 32", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:32], @"controllerNumber", nil],
+                                       // Skip CC 32 (Bank Select LSB)
                                        
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"CC 33", @"name", [NSNumber numberWithInt:VVMIDIControlChangeVal], @"type", [NSNumber numberWithInt:33], @"controllerNumber", nil],
                                        
