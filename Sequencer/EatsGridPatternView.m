@@ -168,9 +168,9 @@
             // DEBUG LOG
             // TODO remove debug code
             if( [viewArray count] <= note.step )
-                NSLog( @"View array is %lu but note step is %u", (unsigned long)[viewArray count], note.step );
+                NSLog( @"WARNING: View array is %lu but note step is %u", (unsigned long)[viewArray count], note.step );
             if( [[viewArray objectAtIndex:note.step] count] <= row )
-                NSLog( @"View array's column is %lu but note (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:note.step] count], row );
+                NSLog( @"WARNING: View array's column is %lu but note (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:note.step] count], row );
             
             
             
@@ -219,9 +219,9 @@
                     // DEBUG LOG
                     // TODO remove debug code
                     if( [viewArray count] <= tailDraw )
-                        NSLog( @"View array is %lu but tailDraw is %u", (unsigned long)[viewArray count], tailDraw );
+                        NSLog( @"WARNING: View array is %lu but tailDraw is %u", (unsigned long)[viewArray count], tailDraw );
                     if( [[viewArray objectAtIndex:tailDraw] count] <= row )
-                        NSLog( @"View array's column is %lu but tailDraw (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:tailDraw] count], row );
+                        NSLog( @"WARNING: View array's column is %lu but tailDraw (folded) row is %u", (unsigned long)[[viewArray objectAtIndex:tailDraw] count], row );
                     
                     if( [[[viewArray objectAtIndex:tailDraw] objectAtIndex:row] intValue] < noteLengthBrightnessWithVelocityAndFade.intValue )
                         [[viewArray objectAtIndex:tailDraw] replaceObjectAtIndex:row withObject:noteLengthBrightnessWithVelocityAndFade];
@@ -253,9 +253,9 @@
             // DEBUG LOG
             // TODO remove debug code
             if( [viewArray count] <= keyX )
-                NSLog( @"View array is %lu but keyX is %u", (unsigned long)[viewArray count], keyX );
+                NSLog( @"WARNING: View array is %lu but keyX is %u", (unsigned long)[viewArray count], keyX );
             if( [[viewArray objectAtIndex:keyX] count] <= keyY )
-                NSLog( @"View array's column is %lu but keyY is %u", (unsigned long)[[viewArray objectAtIndex:keyX] count], keyY );
+                NSLog( @"WARNING: View array's column is %lu but keyY is %u", (unsigned long)[[viewArray objectAtIndex:keyX] count], keyY );
             
             
             [[viewArray objectAtIndex:keyX] replaceObjectAtIndex:keyY withObject:pressBrightnessResult];
@@ -269,7 +269,7 @@
     NSUInteger noOfCols = [viewArray count];
     NSUInteger noOfRows = [[viewArray objectAtIndex:0] count];
     if( noOfCols != self.width || noOfRows != self.height )
-        NSLog(@"Pattern viewArray is wrong size %u %u %@", self.width, self.height, viewArray );
+        NSLog( @"WARNING: Pattern viewArray is wrong size %u %u %@", self.width, self.height, viewArray );
     
     // DEBUG LOG
     // The following checks that all the columns have the correct number of rows in them
@@ -417,7 +417,7 @@
                                 nil];
         
         // TODO comment out of release
-        NSLog(@"GridPatternView.eatsGridPatternViewPressAt:%u,%u,%i", x, y, down );
+        NSLog( @"GridPatternView.eatsGridPatternViewPressAt:%u,%u,%i", x, y, down );
         
         dispatch_async( dispatch_get_main_queue(), ^(void) {
             if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])

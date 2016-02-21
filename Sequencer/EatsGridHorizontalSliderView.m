@@ -40,14 +40,14 @@
     NSUInteger noOfCols = [viewArray count];
     NSUInteger noOfRows = [[viewArray objectAtIndex:0] count];
     if( noOfCols != self.width || noOfRows != self.height )
-        NSLog(@"Slider viewArray is wrong size %u %u %@", self.width, self.height, viewArray );
+        NSLog( @"WARNING: Slider viewArray is wrong size %u %u %@", self.width, self.height, viewArray );
     
     // DEBUG LOG
     // The following checks that all the columns have the correct number of rows in them
     for( int i = 0; i < viewArray.count; i ++ ) {
         if( [[viewArray objectAtIndex:i] count] != noOfRows ) {
-            NSLog( @"Slider viewArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[viewArray objectAtIndex:i] count] );
-            NSLog(@"DUMP OF viewArray %@", viewArray );
+            NSLog( @"WARNING: Slider viewArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[viewArray objectAtIndex:i] count] );
+            NSLog( @"DUMP OF viewArray %@", viewArray );
         }
     }
 

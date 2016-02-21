@@ -59,21 +59,19 @@
                 
             // DEBUG LOG If the view array is empty, what went wrong?
             } else {
-                NSLog( @"Empty view array from: %@", view );
+                NSLog( @"WARNING: Empty view array from: %@", view );
                 NSLog( @"Break!" );
             }
         }
     }
     
     // DEBUG LOG TODO remove this debug code
-//    NSUInteger noOfCols = [gridArray count];
     NSUInteger noOfRows = [[gridArray objectAtIndex:0] count];
-//    NSLog( @"!gridArray is %lux%lu", (unsigned long)noOfCols, (unsigned long)noOfRows );
     // The following checks that all the columns have the correct number of rows in them
     for( int i = 0; i < gridArray.count; i ++ ) {
         if( [[gridArray objectAtIndex:i] count] != noOfRows ) {
-            NSLog( @"gridArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[gridArray objectAtIndex:i] count] );
-            NSLog(@"DUMP OF gridArray %@", gridArray );
+            NSLog( @"WARNING: gridArray rows are not equal! Should be %lu but col %i is %lu", (unsigned long)noOfRows, i, (unsigned long)[[gridArray objectAtIndex:i] count] );
+            NSLog( @"DUMP OF gridArray %@", gridArray );
         }
     }
     

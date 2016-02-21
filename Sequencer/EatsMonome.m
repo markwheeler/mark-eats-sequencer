@@ -173,14 +173,14 @@
             for( int y = 8 * j; y < 8 * (j + 1); y ++ ) {
                 for( uint x = 8 * i; x < 8 * (i + 1); x ++ ) {
                     
-                    // DEBUG LOG
-                    if( [gridArray count] <= x ) { // TODO remove this debug code
-                        NSLog( @"gridArray count is %lu, trying to access %u", (unsigned long)[gridArray count], x );
-                        NSLog(@"DUMP OF gridArray %@", gridArray );
+                    // TODO remove this debug code
+                    if( [gridArray count] <= x ) {
+                        NSLog( @"WARNING: gridArray count is %lu, trying to access %u", (unsigned long)[gridArray count], x );
+                        NSLog( @"DUMP OF gridArray %@", gridArray );
                     }
                     if( [[gridArray objectAtIndex:x] count] <= y ) {
-                        NSLog( @"gridArray col %i count is %lu, tring to access %i", x, (unsigned long)[[gridArray objectAtIndex:x] count], y );
-                        NSLog(@"DUMP OF gridArray %@", gridArray );
+                        NSLog( @"WARNING: gridArray col %i count is %lu, tring to access %i", x, (unsigned long)[[gridArray objectAtIndex:x] count], y );
+                        NSLog( @"DUMP OF gridArray %@", gridArray );
                     }
                     
                     [levelsArray addObject:[[gridArray objectAtIndex:x] objectAtIndex:y]];
