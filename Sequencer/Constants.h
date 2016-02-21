@@ -9,6 +9,8 @@
 
 #pragma mark - General
 
+#define DEBUG_BUILD false // Will include various debug logs if set to true
+
 #define NUMBER_OF_MIDI_CHANNELS 16
 
 #define ANIMATION_TIMER_TOLERANCE 0.1

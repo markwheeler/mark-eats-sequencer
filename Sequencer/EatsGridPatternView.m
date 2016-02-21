@@ -416,8 +416,9 @@
                                 [NSNumber numberWithBool:down], @"down",
                                 nil];
         
-        // TODO comment out of release
+#if DEBUG_BUILD
         NSLog( @"GridPatternView.eatsGridPatternViewPressAt:%u,%u,%i", x, y, down );
+#endif
         
         dispatch_async( dispatch_get_main_queue(), ^(void) {
             if([self.delegate respondsToSelector:@selector(eatsGridPatternViewPressAt: sender:)])
