@@ -208,6 +208,7 @@
 - (void) setCurrentPatternId:(int)patternId forPage:(uint)pageId;
 
 - (NSNumber *) nextPatternIdForPage:(uint)pageId;
+- (void) setNextPatternIdWithoutAutomation:(NSNumber *)patternId forPage:(uint)pageId;
 - (void) setNextPatternId:(NSNumber *)patternId forPage:(uint)pageId;
 
 - (void) setNextOrCurrentPatternId:(NSNumber *)patternId forPage:(uint)pageId; // These three methods are for when a user switches pattern (they take into acount patternQuantization)
@@ -218,6 +219,7 @@
 - (void) setCurrentStep:(int)step forPage:(uint)pageId;
 
 - (NSNumber *) nextStepForPage:(uint)pageId;
+- (void) setNextStepWithoutAutomation:(NSNumber *)step forPage:(uint)pageId;
 - (void) setNextStep:(NSNumber *)step forPage:(uint)pageId;
 - (void) setNextStepForAllPages:(NSNumber *)step;
 - (void) setNextStep:(NSNumber *)step forAllPagesExcept:(uint)pageId;

@@ -1968,14 +1968,27 @@
     return [pageState.nextPatternId copy];
 }
 
-- (void) setNextPatternId:(NSNumber *)patternId forPage:(uint)pageId
+- (void) setNextPatternIdWithoutAutomation:(NSNumber *)patternId forPage:(uint)pageId
 {
     if( patternId.intValue >= 0 && patternId.intValue < self.sharedPreferences.gridWidth ) {
+        
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
         pageState.nextPatternId = patternId;
     }
     
     [self postNotification:kSequencerPageStateNextPatternIdDidChangeNotification forPage:pageId];
+}
+
+- (void) setNextPatternId:(NSNumber *)patternId forPage:(uint)pageId
+{
+    if( patternId != nil && patternId.intValue >= 0 && patternId.intValue < self.sharedPreferences.gridWidth ) {
+        
+        // Add automation
+        NSDictionary *values = [NSDictionary dictionaryWithObject:patternId forKey:@"value"];
+        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetNextPatternId withValues:values forPage:pageId];
+    }
+    
+    [self setNextPatternIdWithoutAutomation:patternId forPage:pageId];
 }
 
 - (void) setNextOrCurrentPatternId:(NSNumber *)patternId forPage:(uint)pageId
@@ -2028,7 +2041,7 @@
     return [pageState.nextStep copy];
 }
 
-- (void) setNextStep:(NSNumber *)step forPage:(uint)pageId
+- (void) setNextStepWithoutAutomation:(NSNumber *)step forPage:(uint)pageId
 {
     if( step.intValue >= 0 && step.intValue < self.sharedPreferences.gridWidth ) {
         SequencerPageState *pageState = [self.state.pageStates objectAtIndex:pageId];
@@ -2036,6 +2049,17 @@
     }
     
     [self postNotification:kSequencerPageStateNextStepDidChangeNotification forPage:pageId];
+}
+
+- (void) setNextStep:(NSNumber *)step forPage:(uint)pageId
+{
+    // Add automation
+    if( step != nil && step.intValue >= 0 && step.intValue < self.sharedPreferences.gridWidth ) {
+        NSDictionary *values = [NSDictionary dictionaryWithObject:step forKey:@"value"];
+        [self addAutomationChangeOfType:EatsSequencerAutomationType_SetNextStep withValues:values forPage:pageId];
+    }
+    
+    [self setNextStepWithoutAutomation:step forPage:pageId];
 }
 
 - (void) setNextStepForAllPages:(NSNumber *)step
