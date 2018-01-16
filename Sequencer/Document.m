@@ -815,7 +815,7 @@ typedef enum DocumentPageAnimationDirection {
         
         // Set the segment width (they're not all the same size!)
         int segmentWidth = 22;
-        if( i > 3 && i < 11 )
+        if( i > 6 )
             segmentWidth ++;
         [self.currentPatternSegmentedControl setWidth:segmentWidth forSegment:i];
     }
